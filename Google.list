@@ -617,3 +617,8 @@ IP-ASN,19527,no-resolve
 IP-ASN,36040,no-resolve
 IP-ASN,396982,no-resolve
 IP-ASN,43515,no-resolve
+DOMAIN-SUFFIX,angular.dev
+DOMAIN-SUFFIX,angular.io
+DOMAIN-SUFFIX,angularjs.org
+DOMAIN-SUFFIX,googlezip.net
+DOMAIN-SUFFIX,google-ohttp-relay-safebrowsing.fastly-edge.com

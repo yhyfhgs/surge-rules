@@ -65,7 +65,6 @@ DOMAIN,servers-staging.fivem.net
 DOMAIN,servers.fivem.net
 DOMAIN,software-static.download.prss.microsoft.com
 DOMAIN,status.fivem.net
-DOMAIN,steampipe-partner.secure2.footprint.net
 DOMAIN,storage.fivem.net
 DOMAIN,trial.dlsite.com
 DOMAIN,upos-hz-mirrorakam.akamaized.net
@@ -167,9 +166,6 @@ DOMAIN-SUFFIX,analytics.welcomesoftware.com
 DOMAIN-SUFFIX,ancestrycdn.com
 DOMAIN-SUFFIX,anchor.digitalocean.com
 DOMAIN-SUFFIX,androidfilehost.com
-DOMAIN-SUFFIX,angular.dev
-DOMAIN-SUFFIX,angular.io
-DOMAIN-SUFFIX,angularjs.org
 DOMAIN-SUFFIX,anorien.csc.warwick.ac.uk
 DOMAIN-SUFFIX,anpoimages.com
 DOMAIN-SUFFIX,anpustream.com
@@ -613,7 +609,6 @@ DOMAIN-SUFFIX,blacklist.tampermonkey.net
 DOMAIN-SUFFIX,blade-public-static.blade-group.com
 DOMAIN-SUFFIX,bleepstatic.com
 DOMAIN-SUFFIX,blink-script.com
-DOMAIN-SUFFIX,blizzard.gcdn.cloudn.co.kr
 DOMAIN-SUFFIX,blob.core.windows.net
 DOMAIN-SUFFIX,blob.jortage.com
 DOMAIN-SUFFIX,blob.sololearn.com
@@ -2047,7 +2042,6 @@ DOMAIN-SUFFIX,envato-static.com
 DOMAIN-SUFFIX,envatousercontent.com
 DOMAIN-SUFFIX,eomd1.fembeqq.xyz
 DOMAIN-SUFFIX,ep1.pinkbike.org
-DOMAIN-SUFFIX,epicgamescdn.com
 DOMAIN-SUFFIX,epimg.net
 DOMAIN-SUFFIX,erocdn.co
 DOMAIN-SUFFIX,eroimg.net
@@ -2515,7 +2509,6 @@ DOMAIN-SUFFIX,gog-cdn-fastly.gog.com
 DOMAIN-SUFFIX,gog-statics.com
 DOMAIN-SUFFIX,gohugo.io
 DOMAIN-SUFFIX,gold-usergeneratedcontent.net
-DOMAIN-SUFFIX,google-ohttp-relay-safebrowsing.fastly-edge.com
 DOMAIN-SUFFIX,gopkg.in
 DOMAIN-SUFFIX,gotest.tools
 DOMAIN-SUFFIX,gpl.savoirfairelinux.net
@@ -4231,8 +4224,6 @@ DOMAIN-SUFFIX,oss.moe.cat
 DOMAIN-SUFFIX,oss.ypt.com
 DOMAIN-SUFFIX,ossmirror.mycloud.services
 DOMAIN-SUFFIX,ossplanet.org
-DOMAIN-SUFFIX,ota-cache1.googlezip.net
-DOMAIN-SUFFIX,ota.googlezip.net
 DOMAIN-SUFFIX,otstatic.com
 DOMAIN-SUFFIX,ovo.wxw.moe
 DOMAIN-SUFFIX,p-cdnstatic.svc.litv.tv
@@ -5577,8 +5568,6 @@ DOMAIN-SUFFIX,status.ui.com
 DOMAIN-SUFFIX,statuspage.io
 DOMAIN-SUFFIX,stbff.newfold.com
 DOMAIN-SUFFIX,stc.utdstc.com
-DOMAIN-SUFFIX,steamdeck-images.steamos.cloud
-DOMAIN-SUFFIX,steamdeck-packages.steamos.cloud
 DOMAIN-SUFFIX,steemitimages.com
 DOMAIN-SUFFIX,sthlstatic.com
 DOMAIN-SUFFIX,stimg.sooplive.com
@@ -6252,7 +6241,6 @@ DOMAIN-KEYWORD,assets.trustpilot.net
 DOMAIN-KEYWORD,cdn.adultempire.com
 DOMAIN-KEYWORD,cdn.trustpilot.net
 DOMAIN-KEYWORD,dsn.algolia.net
-DOMAIN-KEYWORD,epicgames-download
 DOMAIN-KEYWORD,images.trustpilot.com
 DOMAIN-KEYWORD,images.trustpilot.net
 DOMAIN-KEYWORD,scripts.trustpilot.com
@@ -6330,4 +6318,3 @@ DOMAIN-WILDCARD,video?-thumbnail?.fc2.com
 DOMAIN-WILDCARD,video?-thumbnail?.liaoningmovie.net
 DOMAIN-WILDCARD,vip-videoprem*-thumbnail?.fc2.com
 
-AND,((DOMAIN-KEYWORD,cdn),(DOMAIN-KEYWORD,-epicgames-))

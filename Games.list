@@ -71,3 +71,9 @@ DOMAIN-SUFFIX,xboxlive.com
 DOMAIN-KEYWORD,steambroadcast
 DOMAIN-KEYWORD,steamstore
 DOMAIN-KEYWORD,steamuserimages
+DOMAIN,steampipe-partner.secure2.footprint.net
+DOMAIN-SUFFIX,steamos.cloud
+DOMAIN-SUFFIX,blizzard.gcdn.cloudn.co.kr
+DOMAIN-SUFFIX,epicgamescdn.com
+DOMAIN-KEYWORD,epicgames-download
+AND,((DOMAIN-KEYWORD,cdn),(DOMAIN-KEYWORD,-epicgames-))
