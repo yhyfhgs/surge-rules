@@ -1,0 +1,34 @@
+# GameDownloadCN — 国服游戏下载 CDN (必须直连)
+# 规范化排序：规则类型分区，区内字母序
+
+DOMAIN,dl.steam.ksyna.com
+DOMAIN,st.dl.pinyuncloud.com
+DOMAIN,steampipe.steamcontent.tnkjmec.com
+DOMAIN,xz.pphimalayanrt.com
+
+DOMAIN-SUFFIX,blzddist1-b.akamaihd.net
+DOMAIN-SUFFIX,blzddist2-b.akamaihd.net
+DOMAIN-SUFFIX,blzddist3-b.akamaihd.net
+DOMAIN-SUFFIX,cm.steampowered.com
+DOMAIN-SUFFIX,csgo.wmscdn.cn
+DOMAIN-SUFFIX,csgo.wmsj.cn
+DOMAIN-SUFFIX,dist.blizzard.com.edgesuite.net
+DOMAIN-SUFFIX,dl.steam.clngaa.com
+DOMAIN-SUFFIX,dota2.wmscdn.cn
+DOMAIN-SUFFIX,dota2.wmsj.cn
+DOMAIN-SUFFIX,download.blizzard.com
+DOMAIN-SUFFIX,origin-a.akamaihd.net
+DOMAIN-SUFFIX,st.dl.bscstorage.net
+DOMAIN-SUFFIX,st.dl.eccdnx.com
+DOMAIN-SUFFIX,steambroadcast.com
+DOMAIN-SUFFIX,steamchina.com
+DOMAIN-SUFFIX,steamcontent.com
+DOMAIN-SUFFIX,steamcontent.net
+DOMAIN-SUFFIX,steampipe.akamaized.net
+DOMAIN-SUFFIX,steampowered.com.8686c.com
+DOMAIN-SUFFIX,steamserver.net
+DOMAIN-SUFFIX,steamstatic.com.8686c.com
+DOMAIN-SUFFIX,steamusercontent-a.akamaihd.net
+DOMAIN-SUFFIX,steamusercontent.com
+DOMAIN-SUFFIX,wmsjsteam.com
+DOMAIN-SUFFIX,xz.wcsdl.chinacache.net
