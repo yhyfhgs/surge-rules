@@ -3,7 +3,6 @@
 
 DOMAIN,anthropic-com.ghost.io
 DOMAIN,api.github.com
-DOMAIN,api.minimax.io
 DOMAIN,api.msn.com
 DOMAIN,aws-language-servers.us-east-1.amazonaws.com
 DOMAIN,aws-toolkit-language-servers.amazonaws.com
@@ -28,7 +27,6 @@ DOMAIN,qianfan.baidubce.com
 DOMAIN,self.events.data.microsoft.com
 DOMAIN,static.cloudflareinsights.com
 
-DOMAIN-SUFFIX,01.ai
 DOMAIN-SUFFIX,ai.cloudflare.com
 DOMAIN-SUFFIX,ai.com
 DOMAIN-SUFFIX,ai.studio
@@ -103,12 +101,6 @@ DOMAIN-SUFFIX,console.aws.a2z.com
 DOMAIN-SUFFIX,continue.dev
 DOMAIN-SUFFIX,copilot.microsoft.com
 DOMAIN-SUFFIX,copy.ai
-DOMAIN-SUFFIX,coze.com
-DOMAIN-SUFFIX,cozeapp.net
-DOMAIN-SUFFIX,cozebuild.com
-DOMAIN-SUFFIX,cozecdn.com
-DOMAIN-SUFFIX,cozedeploy.com
-DOMAIN-SUFFIX,cozesdk.com
 DOMAIN-SUFFIX,crewai.com
 DOMAIN-SUFFIX,crixet.com
 DOMAIN-SUFFIX,cursor-cdn.com
@@ -123,7 +115,6 @@ DOMAIN-SUFFIX,designer.microsoft.com
 DOMAIN-SUFFIX,devin.ai
 DOMAIN-SUFFIX,diabrowser.com
 DOMAIN-SUFFIX,diabrowser.engineering
-DOMAIN-SUFFIX,dify.ai
 DOMAIN-SUFFIX,doudou.com
 DOMAIN-SUFFIX,dreamstudio.ai
 DOMAIN-SUFFIX,duck.ai
@@ -149,7 +140,6 @@ DOMAIN-SUFFIX,flux.ai
 DOMAIN-SUFFIX,g.ai
 DOMAIN-SUFFIX,gamma.app
 DOMAIN-SUFFIX,gateway.icloud.com
-DOMAIN-SUFFIX,genspark.ai
 DOMAIN-SUFFIX,githubcopilot.com
 DOMAIN-SUFFIX,glean.com
 DOMAIN-SUFFIX,grammarly.com
@@ -158,7 +148,6 @@ DOMAIN-SUFFIX,grazie.ai
 DOMAIN-SUFFIX,grazie.aws.intellij.net
 DOMAIN-SUFFIX,groq.com
 DOMAIN-SUFFIX,h2o.ai
-DOMAIN-SUFFIX,hailuoai.com
 DOMAIN-SUFFIX,haiper.ai
 DOMAIN-SUFFIX,harpa.ai
 DOMAIN-SUFFIX,hedra.com
@@ -182,11 +171,7 @@ DOMAIN-SUFFIX,jetbrains.ai
 DOMAIN-SUFFIX,julius.ai
 DOMAIN-SUFFIX,kilo.ai
 DOMAIN-SUFFIX,kilo.codes
-DOMAIN-SUFFIX,kimi.ai
-DOMAIN-SUFFIX,kimi.com
 DOMAIN-SUFFIX,kiro.dev
-DOMAIN-SUFFIX,klingai.com
-DOMAIN-SUFFIX,klingai.org
 DOMAIN-SUFFIX,krea.ai
 DOMAIN-SUFFIX,lambdalabs.com
 DOMAIN-SUFFIX,langchain.com
@@ -228,9 +213,7 @@ DOMAIN-SUFFIX,modelcontextprotocol.com
 DOMAIN-SUFFIX,modelcontextprotocol.io
 DOMAIN-SUFFIX,modelcontextprotocol.net
 DOMAIN-SUFFIX,modelcontextprotocol.org
-DOMAIN-SUFFIX,modelscope.com
 DOMAIN-SUFFIX,monica.im
-DOMAIN-SUFFIX,moonshot.ai
 DOMAIN-SUFFIX,muthos.com
 DOMAIN-SUFFIX,nebius.ai
 DOMAIN-SUFFIX,novita.ai
@@ -262,8 +245,6 @@ DOMAIN-SUFFIX,q.us-east-1.amazonaws.com
 DOMAIN-SUFFIX,qdrant.tech
 DOMAIN-SUFFIX,qoder.com
 DOMAIN-SUFFIX,quillbot.com
-DOMAIN-SUFFIX,qwen.ai
-DOMAIN-SUFFIX,qwenlm.ai
 DOMAIN-SUFFIX,raycast.com
 DOMAIN-SUFFIX,recraft.ai
 DOMAIN-SUFFIX,repl.co
@@ -287,7 +268,6 @@ DOMAIN-SUFFIX,segment.io
 DOMAIN-SUFFIX,servd-anthropic-website.b-cdn.net
 DOMAIN-SUFFIX,sf16-short-sg.bytedapm.com
 DOMAIN-SUFFIX,sider.ai
-DOMAIN-SUFFIX,siliconflow.com
 DOMAIN-SUFFIX,sillylittleguy.org
 DOMAIN-SUFFIX,sora.com
 DOMAIN-SUFFIX,sourcegraph.com
@@ -295,7 +275,6 @@ DOMAIN-SUFFIX,sso.amazonaws.com
 DOMAIN-SUFFIX,stability.ai
 DOMAIN-SUFFIX,starling.zijieapi.com
 DOMAIN-SUFFIX,statsigapi.net
-DOMAIN-SUFFIX,stepfun.ai
 DOMAIN-SUFFIX,stripe.com
 DOMAIN-SUFFIX,suno.ai
 DOMAIN-SUFFIX,suno.com
@@ -325,13 +304,11 @@ DOMAIN-SUFFIX,windsurf.build
 DOMAIN-SUFFIX,windsurf.com
 DOMAIN-SUFFIX,writesonic.com
 DOMAIN-SUFFIX,xiaoaiassist.com
-DOMAIN-SUFFIX,xiaomimimo.com
 DOMAIN-SUFFIX,xingyeai.com
 DOMAIN-SUFFIX,you.com
 DOMAIN-SUFFIX,youmind.ai
 DOMAIN-SUFFIX,youmind.com
 DOMAIN-SUFFIX,youmind.site
-DOMAIN-SUFFIX,z.ai
 DOMAIN-SUFFIX,zed.dev
 DOMAIN-SUFFIX,zilliz.com
 

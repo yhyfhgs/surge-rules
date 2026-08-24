@@ -908,3 +908,26 @@ USER-AGENT,TeslaMap
 
 IP-CIDR,140.205.1.0/24,no-resolve
 IP-CIDR,162.14.0.0/18,no-resolve
+DOMAIN-SUFFIX,01.ai
+DOMAIN-SUFFIX,coze.com
+DOMAIN-SUFFIX,cozeapp.net
+DOMAIN-SUFFIX,cozebuild.com
+DOMAIN-SUFFIX,cozecdn.com
+DOMAIN-SUFFIX,cozedeploy.com
+DOMAIN-SUFFIX,cozesdk.com
+DOMAIN-SUFFIX,dify.ai
+DOMAIN-SUFFIX,genspark.ai
+DOMAIN-SUFFIX,hailuoai.com
+DOMAIN-SUFFIX,kimi.ai
+DOMAIN-SUFFIX,kimi.com
+DOMAIN-SUFFIX,klingai.com
+DOMAIN-SUFFIX,klingai.org
+DOMAIN-SUFFIX,minimax.io
+DOMAIN-SUFFIX,modelscope.com
+DOMAIN-SUFFIX,moonshot.ai
+DOMAIN-SUFFIX,qwen.ai
+DOMAIN-SUFFIX,qwenlm.ai
+DOMAIN-SUFFIX,siliconflow.com
+DOMAIN-SUFFIX,stepfun.ai
+DOMAIN-SUFFIX,xiaomimimo.com
+DOMAIN-SUFFIX,z.ai
