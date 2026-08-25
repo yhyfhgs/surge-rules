@@ -1,4 +1,4 @@
-# PrivateLAN — 内网域名/rDNS/路由器面板
+# PrivateLAN — 内网域名/rDNS/路由器面板；2026-08-25 并入 blackmatrix7:Lan
 # 规范化排序：规则类型分区，区内字母序
 
 DOMAIN-SUFFIX,1.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.ip6.arpa
@@ -94,6 +94,7 @@ DOMAIN-SUFFIX,97.100.in-addr.arpa
 DOMAIN-SUFFIX,98.100.in-addr.arpa
 DOMAIN-SUFFIX,99.100.in-addr.arpa
 DOMAIN-SUFFIX,a.e.f.ip6.arpa
+DOMAIN-SUFFIX,acl4.ssr
 DOMAIN-SUFFIX,asusrouter.com
 DOMAIN-SUFFIX,b.e.f.ip6.arpa
 DOMAIN-SUFFIX,d.f.ip6.arpa
@@ -128,15 +129,25 @@ DOMAIN-SUFFIX,test
 DOMAIN-SUFFIX,tplinkwifi.net
 DOMAIN-SUFFIX,tplogin.cn
 DOMAIN-SUFFIX,ts.net
+DOMAIN-SUFFIX,wifi.cmcc
 DOMAIN-SUFFIX,zte.home
 
+IP-CIDR,0.0.0.0/8,no-resolve
 IP-CIDR,10.0.0.0/8,no-resolve
 IP-CIDR,100.64.0.0/10,no-resolve
 IP-CIDR,127.0.0.0/8,no-resolve
 IP-CIDR,169.254.0.0/16,no-resolve
 IP-CIDR,172.16.0.0/12,no-resolve
+IP-CIDR,192.0.0.0/24,no-resolve
+IP-CIDR,192.0.2.0/24,no-resolve
+IP-CIDR,192.88.99.0/24,no-resolve
 IP-CIDR,192.168.0.0/16,no-resolve
+IP-CIDR,198.18.0.0/15,no-resolve
+IP-CIDR,198.51.100.0/24,no-resolve
+IP-CIDR,203.0.113.0/24,no-resolve
+IP-CIDR,224.0.0.0/3,no-resolve
 
-IP-CIDR6,::1/128,no-resolve
+IP-CIDR6,::/127,no-resolve
 IP-CIDR6,fc00::/7,no-resolve
 IP-CIDR6,fe80::/10,no-resolve
+IP-CIDR6,ff00::/8,no-resolve

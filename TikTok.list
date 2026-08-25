@@ -1,4 +1,4 @@
-# TikTok — TikTok 国际版 (字节国内域归 Domestic)
+# TikTok — TikTok 国际版 (字节国内域归 Domestic)；2026-08-25 并入 blackmatrix7:TikTok
 # 规范化排序：规则类型分区，区内字母序
 
 DOMAIN,api.snapkit.com
@@ -6,6 +6,7 @@ DOMAIN,cocacola.co.jp
 DOMAIN,courses.snapsolve.com
 DOMAIN,lf16-campaign.ttlstatic.com
 DOMAIN,lf16-csp.oecstatic.com
+DOMAIN,lf16-effectcdn.byteeffecttos-g.com
 DOMAIN,lf16-pkgcdn.pitaya-clientai.com
 DOMAIN,lf16-scmcdn.oecstatic.com
 DOMAIN,lf19-csp.oecstatic.com
@@ -30,6 +31,7 @@ DOMAIN-SUFFIX,byteicdn.com
 DOMAIN-SUFFIX,byteigtm.com
 DOMAIN-SUFFIX,byteintl.com
 DOMAIN-SUFFIX,byteintl.net
+DOMAIN-SUFFIX,byteintlapi.com
 DOMAIN-SUFFIX,byteoversea.net
 DOMAIN-SUFFIX,bytetcdn.com
 DOMAIN-SUFFIX,capcut.com
@@ -69,6 +71,7 @@ DOMAIN-SUFFIX,ttdns2.com
 DOMAIN-SUFFIX,ttlivecdn.com
 DOMAIN-SUFFIX,ttoversea.net
 DOMAIN-SUFFIX,ttoverseaus.net
+DOMAIN-SUFFIX,ttwebview.com
 DOMAIN-SUFFIX,ttwstatic.com
 DOMAIN-SUFFIX,tzvbfs.com
 
@@ -79,6 +82,8 @@ DOMAIN-KEYWORD,tiktokcdn.com.
 DOMAIN-KEYWORD,tiktokv.com.
 DOMAIN-KEYWORD,ttcdn-tos.
 DOMAIN-KEYWORD,ttlivecdn.com.
+
+PROCESS-NAME,com.zhiliaoapp.musically
 
 IP-ASN,11983,no-resolve
 IP-ASN,138699,no-resolve

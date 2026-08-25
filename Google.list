@@ -1,4 +1,4 @@
-# Google — Google 全家桶 (含 .google/.goog gTLD、Gemini/Antigravity/DeepMind；不含 YouTube)
+# Google — Google 全家桶 (含 .google/.goog gTLD、Gemini/Antigravity/DeepMind；不含 YouTube)；2026-08-25 并入 blackmatrix7:Google
 # 规范化排序：规则类型分区，区内字母序
 
 DOMAIN-SUFFIX,0emm.com
@@ -11,11 +11,16 @@ DOMAIN-SUFFIX,466453.com
 DOMAIN-SUFFIX,abc.xyz
 DOMAIN-SUFFIX,adgoogle.net
 DOMAIN-SUFFIX,admeld.com
+DOMAIN-SUFFIX,admob-cn.com
+DOMAIN-SUFFIX,admob.com
 DOMAIN-SUFFIX,adsense.com
 DOMAIN-SUFFIX,adsensecustomsearchads.com
 DOMAIN-SUFFIX,adsenseformobileapps.com
 DOMAIN-SUFFIX,advertisercommunity.com
 DOMAIN-SUFFIX,advertiserscommunity.com
+DOMAIN-SUFFIX,adwords-community.com
+DOMAIN-SUFFIX,adwords.com
+DOMAIN-SUFFIX,adwordsexpress.com
 DOMAIN-SUFFIX,amp.dev
 DOMAIN-SUFFIX,ampproject.com
 DOMAIN-SUFFIX,ampproject.net
@@ -23,11 +28,15 @@ DOMAIN-SUFFIX,ampproject.org
 DOMAIN-SUFFIX,android.com
 DOMAIN-SUFFIX,androidify.com
 DOMAIN-SUFFIX,androidtv.com
+DOMAIN-SUFFIX,angular.dev
+DOMAIN-SUFFIX,angular.io
 DOMAIN-SUFFIX,angulardart.org
+DOMAIN-SUFFIX,angularjs.org
 DOMAIN-SUFFIX,api.ai
 DOMAIN-SUFFIX,apigee.com
 DOMAIN-SUFFIX,app-analytics-services.com
 DOMAIN-SUFFIX,app-measurement-cn.com
+DOMAIN-SUFFIX,app-measurement.com
 DOMAIN-SUFFIX,app-measurement.net
 DOMAIN-SUFFIX,appbridge.ca
 DOMAIN-SUFFIX,appbridge.io
@@ -112,6 +121,8 @@ DOMAIN-SUFFIX,digisfera.com
 DOMAIN-SUFFIX,digitalassetlinks.org
 DOMAIN-SUFFIX,digitalattackmap.com
 DOMAIN-SUFFIX,doubleclick-cn.net
+DOMAIN-SUFFIX,doubleclick.com
+DOMAIN-SUFFIX,doubleclick.net
 DOMAIN-SUFFIX,episodic.com
 DOMAIN-SUFFIX,fastlane.ci
 DOMAIN-SUFFIX,fastlane.tools
@@ -166,6 +177,7 @@ DOMAIN-SUFFIX,googl.com
 DOMAIN-SUFFIX,google
 DOMAIN-SUFFIX,google-analytics-cn.com
 DOMAIN-SUFFIX,google-analytics.com
+DOMAIN-SUFFIX,google-ohttp-relay-safebrowsing.fastly-edge.com
 DOMAIN-SUFFIX,google-syndication.com
 DOMAIN-SUFFIX,google.ad
 DOMAIN-SUFFIX,google.ae
@@ -411,6 +423,7 @@ DOMAIN-SUFFIX,googletraveladservices.com
 DOMAIN-SUFFIX,googleusercontent.com
 DOMAIN-SUFFIX,googlevads-cn.com
 DOMAIN-SUFFIX,googleventures.com
+DOMAIN-SUFFIX,googlezip.net
 DOMAIN-SUFFIX,googlr.com
 DOMAIN-SUFFIX,goolge.com
 DOMAIN-SUFFIX,gooogle.com
@@ -591,8 +604,12 @@ DOMAIN-KEYWORD,generativelanguage
 DOMAIN-KEYWORD,gmail
 DOMAIN-KEYWORD,recaptcha
 
-PROCESS-NAME,antigravity
+USER-AGENT,%E4%BA%91%E7%AB%AF%E7%A1%AC%E7%9B%98*
+USER-AGENT,*com.google.Drive*
+USER-AGENT,Google.Drive*
+
 PROCESS-NAME,Antigravity
+PROCESS-NAME,antigravity
 PROCESS-NAME,Antigravity.exe
 PROCESS-NAME,BackupandSync
 PROCESS-NAME,com.android.vending
@@ -600,14 +617,10 @@ PROCESS-NAME,com.google.android.gms
 PROCESS-NAME,com.google.android.gsf
 PROCESS-NAME,com.google.android.play.games
 
-USER-AGENT,%E4%BA%91%E7%AB%AF%E7%A1%AC%E7%9B%98*
-USER-AGENT,*com.google.Drive*
-USER-AGENT,Google.Drive*
-
-IP-CIDR,173.194.0.0/16,no-resolve
-IP-CIDR,74.125.0.0/16,no-resolve
 IP-CIDR,8.8.4.4/32,no-resolve
 IP-CIDR,8.8.8.8/32,no-resolve
+IP-CIDR,74.125.0.0/16,no-resolve
+IP-CIDR,173.194.0.0/16,no-resolve
 
 IP-CIDR6,2001:4860:4860::8844/128,no-resolve
 IP-CIDR6,2001:4860:4860::8888/128,no-resolve
@@ -615,10 +628,5 @@ IP-CIDR6,2001:4860:4860::8888/128,no-resolve
 IP-ASN,15169,no-resolve
 IP-ASN,19527,no-resolve
 IP-ASN,36040,no-resolve
-IP-ASN,396982,no-resolve
 IP-ASN,43515,no-resolve
-DOMAIN-SUFFIX,angular.dev
-DOMAIN-SUFFIX,angular.io
-DOMAIN-SUFFIX,angularjs.org
-DOMAIN-SUFFIX,googlezip.net
-DOMAIN-SUFFIX,google-ohttp-relay-safebrowsing.fastly-edge.com
+IP-ASN,396982,no-resolve

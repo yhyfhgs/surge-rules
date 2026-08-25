@@ -1,4 +1,4 @@
-# Twitter — X/Twitter 生态 (含 xAI: Grok/x.ai)
+# Twitter — X/Twitter 生态 (含 xAI: Grok/x.ai)；2026-08-25 并入 blackmatrix7:Twitter
 # 规范化排序：规则类型分区，区内字母序
 
 DOMAIN-SUFFIX,cms-twdigitalassets.com
@@ -23,15 +23,14 @@ DOMAIN-SUFFIX,x.com
 
 DOMAIN-KEYWORD,twitter
 
+IP-CIDR,69.195.160.0/19,no-resolve
 IP-CIDR,104.244.40.0/21,no-resolve
-IP-CIDR,104.244.42.0/21,no-resolve
 IP-CIDR,192.133.76.0/22,no-resolve
 IP-CIDR,199.16.156.0/22,no-resolve
 IP-CIDR,199.59.148.0/22,no-resolve
 IP-CIDR,199.96.56.0/21,no-resolve
 IP-CIDR,202.160.128.0/22,no-resolve
 IP-CIDR,209.237.192.0/19,no-resolve
-IP-CIDR,69.195.160.0/19,no-resolve
 
 IP-ASN,13414,no-resolve
 IP-ASN,35995,no-resolve

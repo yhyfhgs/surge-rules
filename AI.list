@@ -1,4 +1,4 @@
-# AI — 独立 AI 服务商 (OpenAI/Anthropic/Perplexity/Ollama 等) + Apple Intelligence + Copilot；大厂自有 AI 归各生态列表
+# AI — 独立 AI 服务商 (OpenAI/Anthropic/Perplexity/Ollama 等) + Apple Intelligence + Copilot；大厂自有 AI 归各生态列表；2026-08-25 并入 blackmatrix7:OpenAI+Claude+Gemini+Copilot
 # 规范化排序：规则类型分区，区内字母序
 
 DOMAIN,anthropic-com.ghost.io
@@ -23,9 +23,11 @@ DOMAIN,location.microsoft.com
 DOMAIN,odc.officeapps.live.com
 DOMAIN,ppl-ai-file-upload.s3.amazonaws.com
 DOMAIN,q-developer-integration.us-east-1.api.aws
-DOMAIN,qianfan.baidubce.com
+DOMAIN,r.bing.com
 DOMAIN,self.events.data.microsoft.com
+DOMAIN,services.bingapis.com
 DOMAIN,static.cloudflareinsights.com
+DOMAIN,www.bing.com
 
 DOMAIN-SUFFIX,ai.cloudflare.com
 DOMAIN-SUFFIX,ai.com
@@ -315,34 +317,35 @@ DOMAIN-SUFFIX,zilliz.com
 DOMAIN-KEYWORD,chatgpt-async-webps-prod
 DOMAIN-KEYWORD,datadog
 DOMAIN-KEYWORD,openai
+DOMAIN-KEYWORD,openaicom-api
 DOMAIN-KEYWORD,sentry
 DOMAIN-KEYWORD,sift
 
-PROCESS-NAME,augment
 PROCESS-NAME,Augment
+PROCESS-NAME,augment
 PROCESS-NAME,Augment.exe
-PROCESS-NAME,chatgpt
 PROCESS-NAME,ChatGPT
+PROCESS-NAME,chatgpt
 PROCESS-NAME,ChatGPT.exe
-PROCESS-NAME,claude
 PROCESS-NAME,Claude
+PROCESS-NAME,claude
 PROCESS-NAME,Claude.exe
 PROCESS-NAME,claude.exe
 PROCESS-NAME,Codex
 PROCESS-NAME,codex
 PROCESS-NAME,Codex.exe
 PROCESS-NAME,cowork-svc.exe
-PROCESS-NAME,cursor
 PROCESS-NAME,Cursor
+PROCESS-NAME,cursor
 PROCESS-NAME,Cursor.exe
 PROCESS-NAME,Windsurf
 PROCESS-NAME,windsurf
 PROCESS-NAME,Windsurf.exe
 
-IP-CIDR,160.79.104.0/21,no-resolve
-IP-CIDR,199.47.142.0/23,no-resolve
 IP-CIDR,24.199.123.28/32,no-resolve
 IP-CIDR,64.23.132.171/32,no-resolve
+IP-CIDR,160.79.104.0/21,no-resolve
+IP-CIDR,199.47.142.0/23,no-resolve
 
 IP-CIDR6,2604:f20::/32,no-resolve
 IP-CIDR6,2607:6bc0::/32,no-resolve
