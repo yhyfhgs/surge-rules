@@ -1,6 +1,6 @@
 # Europe — 欧洲区域服务
 # 规范化排序：规则类型分区，区内字母序
-# 2026-08-25 维护：GEOIP 行移交 conf 8.5 区(防遮蔽 Apple/GFW 的 IP 规则)，本表只保留域名规则
+# 2026-08-25 维护：GEOIP 兜底保留本表，随表整体置于 Apple/微软/GFW 之后(防遮蔽其 IP 规则)
 
 DOMAIN-SUFFIX,1und1.de
 DOMAIN-SUFFIX,abnamro.nl
@@ -71,3 +71,8 @@ DOMAIN-SUFFIX,zdf-cdn.de
 DOMAIN-SUFFIX,zdf.de
 DOMAIN-SUFFIX,zeit.de
 DOMAIN-SUFFIX,ziggo.nl
+
+GEOIP,CH,no-resolve
+GEOIP,DE,no-resolve
+GEOIP,FR,no-resolve
+GEOIP,NL,no-resolve

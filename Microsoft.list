@@ -1,0 +1,30 @@
+# Microsoft — 微软海外服务与 AI（Copilot/Bing/MSN/国际登录面）；仿 Google/Twitter 模式独立成表，走 Google-X-Meta 组
+# 规范化排序：规则类型分区，区内字母序
+# 2026-08-25 创建：自 AI.list 拆出（微软自有 AI 归微软生态）；GitHub 生态留 AI.list（开发工具链一致性）；国内 CDN/下载直连域仍归 MicrosoftCN.list
+
+DOMAIN,api.msn.com
+DOMAIN,copilot.cloud.microsoft
+DOMAIN,copilotprodattachments.blob.core.windows.net
+DOMAIN,gateway.bingviz.microsoft.net
+DOMAIN,gateway.bingviz.microsoftapp.net
+DOMAIN,location.microsoft.com
+DOMAIN,login.live.com
+DOMAIN,login.microsoftonline.com
+DOMAIN,odc.officeapps.live.com
+DOMAIN,r.bing.com
+DOMAIN,self.events.data.microsoft.com
+DOMAIN,services.bingapis.com
+DOMAIN,substrate.office.com
+DOMAIN,www.bing.com
+
+DOMAIN-SUFFIX,api.microsoftapp.net
+DOMAIN-SUFFIX,assets.msn.com
+DOMAIN-SUFFIX,bing-shopping.microsoft-falcon.io
+DOMAIN-SUFFIX,copilot.microsoft.com
+DOMAIN-SUFFIX,designer.microsoft.com
+DOMAIN-SUFFIX,edgeservices.bing.com
+DOMAIN-SUFFIX,in.appcenter.ms
+DOMAIN-SUFFIX,msauth.net
+DOMAIN-SUFFIX,msftauth.net
+DOMAIN-SUFFIX,sydney.bing.com
+DOMAIN-SUFFIX,th.bing.com

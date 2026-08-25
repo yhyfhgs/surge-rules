@@ -1,6 +1,6 @@
 # Japan — 日本区域服务
 # 规范化排序：规则类型分区，区内字母序
-# 2026-08-25 维护：接收 pximg.net(与 pixiv.net 同组)；IP-ASN/GEOIP 行移交 conf 8.5 区
+# 2026-08-25 维护：接收 pximg.net(与 pixiv.net 同组)；GEOIP/IP-ASN 兜底保留本表，随表整体置于 Apple/微软/GFW 之后(防遮蔽其 IP 规则)
 
 DOMAIN-SUFFIX,ahamo.com
 DOMAIN-SUFFIX,amazon.co.jp
@@ -33,6 +33,9 @@ DOMAIN-SUFFIX,jcom.co.jp
 DOMAIN-SUFFIX,jp-bank.japanpost.jp
 DOMAIN-SUFFIX,kadokawa.co.jp
 DOMAIN-SUFFIX,kddi.com
+DOMAIN-SUFFIX,line-apps.com
+DOMAIN-SUFFIX,line-scdn.net
+DOMAIN-SUFFIX,line.me
 DOMAIN-SUFFIX,linemo.jp
 DOMAIN-SUFFIX,melonbooks.co.jp
 DOMAIN-SUFFIX,mercari.com
@@ -40,7 +43,6 @@ DOMAIN-SUFFIX,mercari.jp
 DOMAIN-SUFFIX,mizuhobank.co.jp
 DOMAIN-SUFFIX,moneykit.net
 DOMAIN-SUFFIX,mufg.jp
-DOMAIN-SUFFIX,music.line.me
 DOMAIN-SUFFIX,nimg.jp
 DOMAIN-SUFFIX,nxtv.jp
 DOMAIN-SUFFIX,paravi.jp
@@ -78,3 +80,10 @@ DOMAIN-SUFFIX,videopass.jp
 DOMAIN-SUFFIX,wowow.co.jp
 DOMAIN-SUFFIX,yahoo.co.jp
 DOMAIN-SUFFIX,yodobashi.com
+
+IP-ASN,17511,no-resolve
+IP-ASN,2497,no-resolve
+IP-ASN,2514,no-resolve
+IP-ASN,2516,no-resolve
+IP-ASN,4713,no-resolve
+GEOIP,JP,no-resolve

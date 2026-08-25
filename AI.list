@@ -1,9 +1,8 @@
 # AI — 独立 AI 服务商 (OpenAI/Anthropic/Perplexity/Ollama 等) + Apple Intelligence + Copilot；大厂自有 AI 归各生态列表；2026-08-25 并入 blackmatrix7:OpenAI+Claude+Gemini+Copilot
 # 规范化排序：规则类型分区，区内字母序
-# 2026-08-25 维护：sentry/datadog/sift/openai 关键词收窄为精确后缀；stripe/auth0→ProxyGFW，identrust/ppio/xingyeai/xiaoaiassist→Domestic，字节海外域→TikTok，ai.studio/g.ai→Google；删 Private Relay 8 域与 DigitalOcean/Vultr 全网段 ASN；纳入微软国际登录面(login.live/microsoftonline/msauth/msftauth/substrate/copilot.cloud)与 GitHub 全生态；并入国内厂商国际站(coze.com/qwen.ai/z.ai/kimi.ai 等 13 域)
+# 2026-08-25 维护：sentry/datadog/sift/openai 关键词收窄为精确后缀；stripe/auth0→ProxyGFW，identrust/ppio/xingyeai/xiaoaiassist→Domestic，字节海外域→TikTok，ai.studio/g.ai→Google；删 Private Relay 8 域与 DigitalOcean/Vultr 全网段 ASN；GitHub 全生态归本表；微软海外面(Copilot/Bing/登录)已拆至 Microsoft.list(Google-X-Meta 组)；并入国内厂商国际站(coze.com/qwen.ai/z.ai/kimi.ai 等 13 域)
 
 DOMAIN,anthropic-com.ghost.io
-DOMAIN,api.msn.com
 DOMAIN,aws-language-servers.us-east-1.amazonaws.com
 DOMAIN,aws-toolkit-language-servers.amazonaws.com
 DOMAIN,cdn.usefathom.com
@@ -11,25 +10,12 @@ DOMAIN,client-telemetry.us-east-1.amazonaws.com
 DOMAIN,codewhisperer.us-east-1.amazonaws.com
 DOMAIN,cognito-identity.us-east-1.amazonaws.com
 DOMAIN,copilot-workspace.githubnext.com
-DOMAIN,copilot.cloud.microsoft
-DOMAIN,copilotprodattachments.blob.core.windows.net
 DOMAIN,cp4.cloudflare.com
-DOMAIN,gateway.bingviz.microsoft.net
-DOMAIN,gateway.bingviz.microsoftapp.net
 DOMAIN,idetoolkits-hostedfiles.amazonaws.com
 DOMAIN,idetoolkits.amazonwebservices.com
-DOMAIN,location.microsoft.com
-DOMAIN,login.live.com
-DOMAIN,login.microsoftonline.com
-DOMAIN,odc.officeapps.live.com
 DOMAIN,ppl-ai-file-upload.s3.amazonaws.com
 DOMAIN,q-developer-integration.us-east-1.api.aws
-DOMAIN,r.bing.com
-DOMAIN,self.events.data.microsoft.com
-DOMAIN,services.bingapis.com
 DOMAIN,static.cloudflareinsights.com
-DOMAIN,substrate.office.com
-DOMAIN,www.bing.com
 
 DOMAIN-SUFFIX,ai.cloudflare.com
 DOMAIN-SUFFIX,ai.com
@@ -42,16 +28,13 @@ DOMAIN-SUFFIX,anthropic.team
 DOMAIN-SUFFIX,antspace.dev
 DOMAIN-SUFFIX,anyscale.com
 DOMAIN-SUFFIX,anysphere.co
-DOMAIN-SUFFIX,api.microsoftapp.net
 DOMAIN-SUFFIX,api.statsig.com
-DOMAIN-SUFFIX,assets.msn.com
 DOMAIN-SUFFIX,augmentcode.com
 DOMAIN-SUFFIX,aws.dev
 DOMAIN-SUFFIX,awsapps.com
 DOMAIN-SUFFIX,awsstatic.com
 DOMAIN-SUFFIX,baseten.co
 DOMAIN-SUFFIX,bfl.ai
-DOMAIN-SUFFIX,bing-shopping.microsoft-falcon.io
 DOMAIN-SUFFIX,blackforestlabs.ai
 DOMAIN-SUFFIX,bolt.new
 DOMAIN-SUFFIX,cartesia.ai
@@ -95,7 +78,6 @@ DOMAIN-SUFFIX,comfyregistry.org
 DOMAIN-SUFFIX,commandcode.ai
 DOMAIN-SUFFIX,console.aws.a2z.com
 DOMAIN-SUFFIX,continue.dev
-DOMAIN-SUFFIX,copilot.microsoft.com
 DOMAIN-SUFFIX,copy.ai
 DOMAIN-SUFFIX,coze.com
 DOMAIN-SUFFIX,crewai.com
@@ -109,7 +91,6 @@ DOMAIN-SUFFIX,deepinfra.com
 DOMAIN-SUFFIX,deepl.com
 DOMAIN-SUFFIX,deepl.net
 DOMAIN-SUFFIX,descript.com
-DOMAIN-SUFFIX,designer.microsoft.com
 DOMAIN-SUFFIX,devin.ai
 DOMAIN-SUFFIX,diabrowser.com
 DOMAIN-SUFFIX,diabrowser.engineering
@@ -117,7 +98,6 @@ DOMAIN-SUFFIX,dify.ai
 DOMAIN-SUFFIX,doudou.com
 DOMAIN-SUFFIX,dreamstudio.ai
 DOMAIN-SUFFIX,duck.ai
-DOMAIN-SUFFIX,edgeservices.bing.com
 DOMAIN-SUFFIX,eigent.ai
 DOMAIN-SUFFIX,elevenlabs.com
 DOMAIN-SUFFIX,elevenlabs.io
@@ -161,7 +141,6 @@ DOMAIN-SUFFIX,hf.space
 DOMAIN-SUFFIX,huggingface.co
 DOMAIN-SUFFIX,hyperbolic.xyz
 DOMAIN-SUFFIX,ideogram.ai
-DOMAIN-SUFFIX,in.appcenter.ms
 DOMAIN-SUFFIX,inflection.ai
 DOMAIN-SUFFIX,intercom.io
 DOMAIN-SUFFIX,intercomcdn.com
@@ -215,8 +194,6 @@ DOMAIN-SUFFIX,modelcontextprotocol.org
 DOMAIN-SUFFIX,modelscope.com
 DOMAIN-SUFFIX,monica.im
 DOMAIN-SUFFIX,moonshot.ai
-DOMAIN-SUFFIX,msauth.net
-DOMAIN-SUFFIX,msftauth.net
 DOMAIN-SUFFIX,muthos.com
 DOMAIN-SUFFIX,nebius.ai
 DOMAIN-SUFFIX,novita.ai
@@ -284,11 +261,9 @@ DOMAIN-SUFFIX,statsigapi.net
 DOMAIN-SUFFIX,stepfun.ai
 DOMAIN-SUFFIX,suno.ai
 DOMAIN-SUFFIX,suno.com
-DOMAIN-SUFFIX,sydney.bing.com
 DOMAIN-SUFFIX,synthesia.io
 DOMAIN-SUFFIX,tabnine.com
 DOMAIN-SUFFIX,tcwqqdy.guru
-DOMAIN-SUFFIX,th.bing.com
 DOMAIN-SUFFIX,todesktop.com
 DOMAIN-SUFFIX,together.ai
 DOMAIN-SUFFIX,together.xyz
