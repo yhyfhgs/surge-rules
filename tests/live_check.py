@@ -102,7 +102,7 @@ EXIT_PROBES = [
         "parser": "cf_trace",
     },
     {
-        "group": "Google-X-Meta",
+        "group": "Google-X-Meta-MS",
         # x.com 已迁到 Cloudflare, /cdn-cgi/trace 可用; 命中 Twitter.list: DOMAIN-SUFFIX,x.com
         # (旧的 domains.google.com/checkip 已 301 到 domains.google, 不再回显 IP, 勿用)
         "urls": ["https://x.com/cdn-cgi/trace"],
@@ -1315,7 +1315,7 @@ def cmd_exit_map(api, proxy, log, result, expected_map):
     if not expected_map:
         log("  说明: 未找到 expected_asn.json, 本节只报告不断言。")
         log("        如需断言, 在 tests/ 下创建 expected_asn.json, 形如:")
-        log('        {"AI": ["64500"], "Google-X-Meta": ["64501"], "社交媒体": ["64502"]}')
+        log('        {"AI": ["64500"], "Google-X-Meta-MS": ["64501"], "社交媒体": ["64502"]}')
     log("  说明: 出口链路是 snell 级联(家宽节点用 underlying-proxy 经落地机房中转),")
     log("        真正面向互联网的是家宽节点自身的 server 地址, 所以「推导出口 IP」取的就是它;")
     log("        实测与推导一致 = 链路正常; 不一致 = 链路降级/被中转商改写, 需要人工看一眼。")

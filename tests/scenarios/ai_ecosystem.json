@@ -1,7 +1,7 @@
 [
   {
     "name": "google_gemini_full_chain",
-    "desc": "Gemini 网页版全链：登录 Google 账号 → 对话 → 加载头像/静态资源。依据 00-context「大厂自有 AI 归各自生态」，全链应在 Google-X-Meta 组",
+    "desc": "Gemini 网页版全链：登录 Google 账号 → 对话 → 加载头像/静态资源。依据 00-context「大厂自有 AI 归各自生态」，全链应在 Google-X-Meta-MS 组",
     "requests": [
       {
         "host": "gemini.google.com"
@@ -30,7 +30,7 @@
     ],
     "assert": {
       "same_policy": true,
-      "policy": "Google-X-Meta",
+      "policy": "Google-X-Meta-MS",
       "no_dns_leak": true
     }
   },
@@ -58,7 +58,7 @@
     ],
     "assert": {
       "same_policy": true,
-      "policy": "Google-X-Meta",
+      "policy": "Google-X-Meta-MS",
       "no_dns_leak": true
     }
   },
@@ -85,7 +85,7 @@
     ],
     "assert": {
       "same_policy": true,
-      "policy": "Google-X-Meta",
+      "policy": "Google-X-Meta-MS",
       "no_dns_leak": true
     }
   },
@@ -109,7 +109,7 @@
     ],
     "assert": {
       "same_policy": true,
-      "policy": "Google-X-Meta",
+      "policy": "Google-X-Meta-MS",
       "no_dns_leak": true
     }
   },
@@ -139,13 +139,13 @@
     ],
     "assert": {
       "same_policy": true,
-      "policy": "Google-X-Meta",
+      "policy": "Google-X-Meta-MS",
       "no_dns_leak": true
     }
   },
   {
     "name": "xai_grok_x_embedded_and_standalone",
-    "desc": "Grok：x.com 内嵌入口 + grok.com 独立站 + 媒体 CDN。依据 00-context，xAI 归 Twitter.list → Google-X-Meta 组",
+    "desc": "Grok：x.com 内嵌入口 + grok.com 独立站 + 媒体 CDN。依据 00-context，xAI 归 Twitter.list → Google-X-Meta-MS 组",
     "requests": [
       {
         "host": "grok.com"
@@ -173,7 +173,7 @@
     ],
     "assert": {
       "same_policy": true,
-      "policy": "Google-X-Meta",
+      "policy": "Google-X-Meta-MS",
       "no_dns_leak": true
     }
   },
@@ -213,10 +213,10 @@
     ],
     "assert": {
       "same_policy": true,
-      "policy": "Google-X-Meta",
+      "policy": "Google-X-Meta-MS",
       "no_dns_leak": true
     },
-    "note": "2026-08-25 架构调整：微软海外面自 AI.list 拆出为 Microsoft.list，随 Google/Twitter/Meta 走 Google-X-Meta 组（大厂自有 AI 归各自生态）；GitHub 生态仍在 AI 组。"
+    "note": "2026-08-25 架构调整：微软海外面自 AI.list 拆出为 Microsoft.list，随 Google/Twitter/Meta 走 Google-X-Meta-MS 组（大厂自有 AI 归各自生态）；GitHub 生态仍在 AI 组。"
   },
   {
     "name": "apple_intelligence_pcc",

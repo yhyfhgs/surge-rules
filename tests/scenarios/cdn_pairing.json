@@ -18,7 +18,7 @@
       {"host": "fonts.gstatic.com", "note": "字体文件"},
       {"host": "ajax.googleapis.com", "note": "Hosted Libraries"}
     ],
-    "assert": {"same_policy": true, "policy": "Google-X-Meta", "no_dns_leak": true}
+    "assert": {"same_policy": true, "policy": "Google-X-Meta-MS", "no_dns_leak": true}
   },
   {
     "name": "gravatar_avatars",

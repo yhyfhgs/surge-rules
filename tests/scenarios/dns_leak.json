@@ -31,7 +31,7 @@
       {"host": "www.facebook.com"},
       {"host": "www.instagram.com"}
     ],
-    "assert": {"same_policy": true, "policy": "Google-X-Meta", "no_dns_leak": true}
+    "assert": {"same_policy": true, "policy": "Google-X-Meta-MS", "no_dns_leak": true}
   },
   {
     "name": "dnsleak_misc_proxy_domains",

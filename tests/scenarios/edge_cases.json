@@ -147,12 +147,12 @@
       "no_dns_leak": true,
       "per_request": [
         {"ip": "1.1.1.1", "policy": "Final"},
-        {"ip": "8.8.8.8", "policy": "Google-X-Meta"},
-        {"ip": "8.8.4.4", "policy": "Google-X-Meta"},
+        {"ip": "8.8.8.8", "policy": "Google-X-Meta-MS"},
+        {"ip": "8.8.4.4", "policy": "Google-X-Meta-MS"},
         {"ip": "223.5.5.5", "policy": "DIRECT"},
         {"ip": "119.29.29.29", "policy": "DIRECT"},
         {"ip": "114.114.114.114", "policy": "DIRECT"},
-        {"ip": "104.244.42.1", "policy": "Google-X-Meta"},
+        {"ip": "104.244.42.1", "policy": "Google-X-Meta-MS"},
         {"ip": "149.154.167.51", "policy": "Telegram"},
         {"ip": "160.79.104.10", "policy": "AI"},
         {"ip": "192.168.1.1", "policy": "DIRECT"},
@@ -197,7 +197,7 @@
       {"host": "example.com", "process": "Codex"},
       {"host": "example.com", "process": "Augment"},
       {"host": "example.com", "note": "无进程 → 落 FINAL"},
-      {"host": "example.com", "process": "Antigravity", "note": "Google.list 的 PROCESS-NAME → Google-X-Meta"}
+      {"host": "example.com", "process": "Antigravity", "note": "Google.list 的 PROCESS-NAME → Google-X-Meta-MS"}
     ],
     "assert": {
       "same_policy": false,
@@ -205,7 +205,7 @@
       "no_dns_leak": true,
       "per_request": [
         {"host": "example.com", "policy": "Final", "note": "无 process 的同名请求：per_request 按完整查询元组精确匹配，不会误伤上面带 process 的条目"},
-        {"host": "example.com", "process": "Antigravity", "policy": "Google-X-Meta"}
+        {"host": "example.com", "process": "Antigravity", "policy": "Google-X-Meta-MS"}
       ]
     }
   }

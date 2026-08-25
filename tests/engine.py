@@ -1065,8 +1065,8 @@ def run_selftest(verbose=True):
                   re_engine.resolve_exit("Final"), ("🇺🇸美国家宽A", "US-HOME-A"))
             check("R04 AI 组递归到 ISP-A 家宽",
                   re_engine.resolve_exit("AI"), ("🇺🇸美国家宽A", "US-HOME-A"))
-            check("R05 Google-X-Meta 组递归到 WAVE 家宽",
-                  re_engine.resolve_exit("Google-X-Meta"),
+            check("R05 Google-X-Meta-MS 组递归到 WAVE 家宽",
+                  re_engine.resolve_exit("Google-X-Meta-MS"),
                   ("🇺🇸美国家宽B", "US-HOME-B"))
             check("R06 社交媒体组递归到美国落地",
                   re_engine.resolve_exit("社交媒体"), ("🇺🇸美国落地", "US-DC"))
@@ -1074,8 +1074,8 @@ def run_selftest(verbose=True):
                   re_engine.match(host="chatgpt.com")["policy"], "AI")
             check("R08 www.youtube.com → 流媒体组（先于 Google）",
                   re_engine.match(host="www.youtube.com")["policy"], "流媒体")
-            check("R09 x.com → Google-X-Meta 组",
-                  re_engine.match(host="x.com")["policy"], "Google-X-Meta")
+            check("R09 x.com → Google-X-Meta-MS 组",
+                  re_engine.match(host="x.com")["policy"], "Google-X-Meta-MS")
             check("R10 t.me → Telegram 组",
                   re_engine.match(host="t.me")["policy"], "Telegram")
             check("R11 www.taobao.com → DIRECT",
