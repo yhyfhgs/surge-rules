@@ -1,18 +1,14 @@
 # Streaming — 国际流媒体聚合 (Netflix/Disney/HBO/Spotify/AppleMedia 等)；2026-08-25 并入 blackmatrix7:GlobalMedia+Netflix+Disney+HBO+PrimeVideo+Hulu+Spotify+Bahamut+AbemaTV+BBC+AppleTV+AppleMusic+AppleMedia+AppleNews
 # 规范化排序：规则类型分区，区内字母序
+# 2026-08-25 维护：接收 bstar(B 站国际版)域；cache.video.iqiyi.com/apm-misaka.biliapi.net 交还国内直连、itunes.apple.com 交还 AppleCN、copilot.cloud.microsoft 交 AI；删 4 条 2 字符进程名与 6 条失效域
 
 DOMAIN,4gtvfreepcvod-cds.cdn.hinet.net
-DOMAIN,akmcdnoversea-tw.inter.ptqy.gitv.tv
 DOMAIN,ana.video.friday.tw
 DOMAIN,api.okzy.tv
-DOMAIN,apm-misaka.biliapi.net
 DOMAIN,athome.fandango.com
 DOMAIN,bahamut.akamaized.net
 DOMAIN,bbc.mp-pxcdn.com
 DOMAIN,bcbolt446c5271-a.akamaihd.net
-DOMAIN,cache.video.iqiyi.com
-DOMAIN,chuangcachecdnoversea-tw.inter.ptqy.gitv.tv
-DOMAIN,cs428.wpc.edgecastcdn.net
 DOMAIN,d151l6v8er5bdm.cloudfront.net
 DOMAIN,d184dfn36gombl.cloudfront.net
 DOMAIN,d1k2us671qcoau.cloudfront.net
@@ -27,7 +23,6 @@ DOMAIN,d3196yreox78o9.cloudfront.net
 DOMAIN,d349g9zuie06uo.cloudfront.net
 DOMAIN,d3c7rimkq79yfu.cloudfront.net
 DOMAIN,dashasiafox.akamaized.net
-DOMAIN,dashasiafox.akamaized.netflix
 DOMAIN,daznfeeds.com.edgekey.net
 DOMAIN,dca-lm-livedazn.secure.footprint.net
 DOMAIN,dfp6rglgjqszk.cloudfront.net
@@ -36,10 +31,8 @@ DOMAIN,e13252.dscg.akamaiedge.net
 DOMAIN,edge.cwtv-vod-ext.top.comcast.net
 DOMAIN,gamer-cds.cdn.hinet.net
 DOMAIN,gamer2-cds.cdn.hinet.net
-DOMAIN,h-dazn.online-metrix.net
 DOMAIN,h-netflix.online-metrix.net
 DOMAIN,hamifans.emome.net
-DOMAIN,hulu.com.c.footprint.net
 DOMAIN,hulu.map.fastly.net
 DOMAIN,itvpnpmobile-a.akamaihd.net
 DOMAIN,ktpx.amazon.com
@@ -166,6 +159,7 @@ DOMAIN-SUFFIX,biliintl.com
 DOMAIN-SUFFIX,blobstore.apple.com
 DOMAIN-SUFFIX,bravotv.com
 DOMAIN-SUFFIX,braze.com
+DOMAIN-SUFFIX,bstarstatic.com
 DOMAIN-SUFFIX,bucketeer.jp
 DOMAIN-SUFFIX,c4assets.com
 DOMAIN-SUFFIX,cabletv.com.hk
@@ -205,7 +199,6 @@ DOMAIN-SUFFIX,cobuzz.fr
 DOMAIN-SUFFIX,control.kochava.com
 DOMAIN-SUFFIX,conviva.com
 DOMAIN-SUFFIX,cookielaw.org
-DOMAIN-SUFFIX,copilot.cloud.microsoft
 DOMAIN-SUFFIX,coronavirusnow.com
 DOMAIN-SUFFIX,crunchyroll.com
 DOMAIN-SUFFIX,cstatic.net
@@ -684,7 +677,6 @@ DOMAIN-SUFFIX,iphoto.wang
 DOMAIN-SUFFIX,iq.com
 DOMAIN-SUFFIX,italkbb.com
 DOMAIN-SUFFIX,italkbbtv.com
-DOMAIN-SUFFIX,itunes.apple.com
 DOMAIN-SUFFIX,itv.com
 DOMAIN-SUFFIX,joeswall.com
 DOMAIN-SUFFIX,joinmaidez.com
@@ -839,6 +831,7 @@ DOMAIN-SUFFIX,originalhulu.com
 DOMAIN-SUFFIX,orlandohurricane.com
 DOMAIN-SUFFIX,overcast.fm
 DOMAIN-SUFFIX,oxygen.com
+DOMAIN-SUFFIX,p-bstarstatic.akamaized.net
 DOMAIN-SUFFIX,p-cdn.us
 DOMAIN-SUFFIX,pandora.com
 DOMAIN-SUFFIX,pandora.tv
@@ -850,6 +843,7 @@ DOMAIN-SUFFIX,pbs.org
 DOMAIN-SUFFIX,peacocktv.com
 DOMAIN-SUFFIX,persagg.com
 DOMAIN-SUFFIX,phprcdn.com
+DOMAIN-SUFFIX,pic-bstarstatic.akamaized.net
 DOMAIN-SUFFIX,players.brightcove.net
 DOMAIN-SUFFIX,playmation.com
 DOMAIN-SUFFIX,pluto.tv
@@ -984,6 +978,8 @@ DOMAIN-SUFFIX,twitchsvc.net
 DOMAIN-SUFFIX,tynt.com
 DOMAIN-SUFFIX,universalkids.com
 DOMAIN-SUFFIX,uplynk.com
+DOMAIN-SUFFIX,upos-sz-mirroralibstar1.bilivideo.com
+DOMAIN-SUFFIX,upos-sz-mirrorcosbstar1.bilivideo.com
 DOMAIN-SUFFIX,urduvoa.com
 DOMAIN-SUFFIX,us-west-2.amazonaws.com
 DOMAIN-SUFFIX,usanetwork.com
@@ -1183,10 +1179,6 @@ PROCESS-NAME,com.twgood.android
 PROCESS-NAME,com.viu.pad
 PROCESS-NAME,com.viu.phone
 PROCESS-NAME,com.vuclip.viu
-PROCESS-NAME,Music
-PROCESS-NAME,music
-PROCESS-NAME,TV
-PROCESS-NAME,tv
 PROCESS-NAME,tv.twitch.android.app
 
 IP-CIDR,1.37.35.6/32,no-resolve

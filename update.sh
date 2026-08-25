@@ -3,6 +3,11 @@
 # 用法: ./update.sh "提交说明"
 set -e
 cd "$(dirname "$0")"
+
+echo "[pre-flight] 规则静态审计 + 全场景断言…"
+python3 tests/audit.py --check all --fail-on P1 || { echo "审计未过，中止发布"; exit 1; }
+python3 tests/runsuite.py || { echo "场景断言未过，中止发布"; exit 1; }
+
 git add -A
 git diff --cached --quiet || git commit -m "${1:-update rules}"
 git push origin main

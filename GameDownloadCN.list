@@ -1,33 +1,56 @@
 # GameDownloadCN — 国服游戏下载 CDN (必须直连)；2026-08-25 并入 blackmatrix7:GameDownloadCN+SteamCN
 # 规范化排序：规则类型分区，区内字母序
+# 2026-08-25 维护：接收 Games.list 的暴雪国服(9)/国服品牌域(20)/Steam 亚太 CDN(4)；删 2 条与 MicrosoftCN 重复条目
 
-DOMAIN,assets1.xboxlive.cn
-DOMAIN,assets2.xboxlive.cn
-DOMAIN,dl.delivery.mp.microsoft.com
 DOMAIN,dl.steam.ksyna.com
 DOMAIN,epicgames-download1-1251447533.file.myqcloud.com
 DOMAIN,st.dl.pinyuncloud.com
 DOMAIN,steampipe.steamcontent.tnkjmec.com
-DOMAIN,tlu.dl.delivery.mp.microsoft.com
 DOMAIN,trts.baishancdnx.cn
 DOMAIN,uplaypc-s-ubisoft.cdn.ubionline.com.cn
 DOMAIN,xz.pphimalayanrt.com
 
+DOMAIN-SUFFIX,battlenet.com.cn
+DOMAIN-SUFFIX,blizzard.cn
+DOMAIN-SUFFIX,blizzardgames.cn
+DOMAIN-SUFFIX,blz.nosdn.127.net
 DOMAIN-SUFFIX,blzddist1-b.akamaihd.net
 DOMAIN-SUFFIX,blzddist2-b.akamaihd.net
 DOMAIN-SUFFIX,blzddist3-b.akamaihd.net
+DOMAIN-SUFFIX,bnet.163.com
 DOMAIN-SUFFIX,cm.steampowered.com
 DOMAIN-SUFFIX,csgo.wmscdn.cn
 DOMAIN-SUFFIX,csgo.wmsj.cn
+DOMAIN-SUFFIX,di.res.netease.com
+DOMAIN-SUFFIX,diablo3.nosdn.127.net
 DOMAIN-SUFFIX,dist.blizzard.com.edgesuite.net
 DOMAIN-SUFFIX,dl.steam.clngaa.com
 DOMAIN-SUFFIX,dota2.wmscdn.cn
 DOMAIN-SUFFIX,dota2.wmsj.cn
 DOMAIN-SUFFIX,download.blizzard.com
+DOMAIN-SUFFIX,dungeonkeeper.cn
+DOMAIN-SUFFIX,dungeonkeeper.com.cn
+DOMAIN-SUFFIX,hearthstone.nosdn.127.net
+DOMAIN-SUFFIX,heroes.nos.netease.com
+DOMAIN-SUFFIX,leagueoflegends.cn
+DOMAIN-SUFFIX,legendofzelda.cn
+DOMAIN-SUFFIX,legendofzelda.com.cn
+DOMAIN-SUFFIX,lpl.com.cn
+DOMAIN-SUFFIX,mariokart.cn
+DOMAIN-SUFFIX,mariokart.com.cn
+DOMAIN-SUFFIX,miitomo.com.cn
+DOMAIN-SUFFIX,nintendolabo.cn
+DOMAIN-SUFFIX,nintendoswitch.cn
+DOMAIN-SUFFIX,nintendoswitch.com.cn
 DOMAIN-SUFFIX,origin-a.akamaihd.net
-DOMAIN-SUFFIX,pdl.wow.battlenet.com.cn
+DOMAIN-SUFFIX,overwatch.nosdn.127.net
+DOMAIN-SUFFIX,sc2.nosdn.127.net
 DOMAIN-SUFFIX,st.dl.bscstorage.net
 DOMAIN-SUFFIX,st.dl.eccdnx.com
+DOMAIN-SUFFIX,steam.apac.qtlglb.com
+DOMAIN-SUFFIX,steam.eca.qtlglb.com
+DOMAIN-SUFFIX,steam.naeu.qtlglb.com
+DOMAIN-SUFFIX,steam.ru.qtlglb.com
 DOMAIN-SUFFIX,steambroadcast.com
 DOMAIN-SUFFIX,steamchina.com
 DOMAIN-SUFFIX,steamcontent.com
@@ -38,5 +61,11 @@ DOMAIN-SUFFIX,steamserver.net
 DOMAIN-SUFFIX,steamstatic.com.8686c.com
 DOMAIN-SUFFIX,steamusercontent-a.akamaihd.net
 DOMAIN-SUFFIX,steamusercontent.com
+DOMAIN-SUFFIX,supermariobros.com.cn
+DOMAIN-SUFFIX,supersmashbros.cn
+DOMAIN-SUFFIX,supersmashbros.com.cn
 DOMAIN-SUFFIX,wmsjsteam.com
+DOMAIN-SUFFIX,wow.nosdn.127.net
+DOMAIN-SUFFIX,xboxlive.cn
+DOMAIN-SUFFIX,xn--mts47c3w9b1qr.cn
 DOMAIN-SUFFIX,xz.wcsdl.chinacache.net

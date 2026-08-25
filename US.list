@@ -1,5 +1,6 @@
 # US — 美国区域服务
 # 规范化排序：规则类型分区，区内字母序
+# 2026-08-25 维护：GEOIP 行移交 conf 8.5 区，本表只保留域名规则
 
 DOMAIN-SUFFIX,americanexpress.com
 DOMAIN-SUFFIX,att.com
@@ -55,5 +56,3 @@ DOMAIN-SUFFIX,verizonwireless.com
 DOMAIN-SUFFIX,visible.com
 DOMAIN-SUFFIX,walmart.com
 DOMAIN-SUFFIX,wellsfargo.com
-
-GEOIP,US,no-resolve

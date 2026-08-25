@@ -1,11 +1,11 @@
 # YouTube — YouTube/YouTube Music 全量 (先于 Google 匹配)；2026-08-25 并入 blackmatrix7:YouTube
 # 规范化排序：规则类型分区，区内字母序
+# 2026-08-25 维护：gvt2.com 移交 Google.list(Google 更新/遥测域，非 YouTube)
 
 DOMAIN,yt3.ggpht.com
 DOMAIN,yt4.ggpht.com
 
 DOMAIN-SUFFIX,googlevideo.com
-DOMAIN-SUFFIX,gvt2.com
 DOMAIN-SUFFIX,video.google.com
 DOMAIN-SUFFIX,youtu.be
 DOMAIN-SUFFIX,yt.be

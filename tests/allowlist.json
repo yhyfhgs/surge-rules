@@ -1,0 +1,210 @@
+{
+  "version": 1,
+  "_readme": [
+    "audit.py 的审计豁免表：登记「刻意设计」，使 audit.py 可作为长期回归门禁。",
+    "匹配键：check（字符串或数组，缺省=全部）、file、rule —— 即 spec 要求的 (check_id, file, rule) 三元组。",
+    "可选缩小豁免面的键：by（遮蔽/胜出方规则串）、by_file（遮蔽/胜出方所在 list）。",
+    "preventive=true 表示防回归豁免：当前配置本就不该命中，未命中时不计入「未使用豁免」告警。",
+    "file / rule / by / by_file 均支持 fnmatch 通配（* ?）。每条必须写 reason。",
+    "基线：2026-08-25 对当前配置运行 audit.py 的结果 —— A1=0, A4=0，本表以防回归条目为主。",
+    "2026-08-25 F1 维护批次追加：机器层(ChinaDomain/ChinaIP)不可手改导致的重复、",
+    "以及 fix_spec FIX-B/D7 裁决为「刻意保留」的条目（见下方 F1 分组）。"
+  ],
+
+  "exemptions": [
+    {
+      "check": ["A2", "A3", "A4"],
+      "file": "*",
+      "rule": "PROCESS-NAME,*",
+      "preventive": true,
+      "reason": "PROCESS-NAME 大小写变体（Claude / claude / Claude.exe）是跨平台覆盖，禁止去重。audit.py 的 (type,value) 签名对 PROCESS-NAME 已做大小写敏感处理，本条为防回归的双保险；若未来改成大小写不敏感比较，此豁免可阻止误报。"
+    },
+
+    {
+      "check": ["A2", "A3", "A4"],
+      "file": "ProxyGFW.list",
+      "rule": "DOMAIN-SUFFIX,amazonaws.com",
+      "preventive": true,
+      "reason": "ProxyGFW.list 的 amazonaws.com 是 AWS 兜底（Final 组），刻意放在最宽一层；不视为与生态 list 的重复/遮蔽。见 00-context.md「既有刻意设计」。"
+    },
+    {
+      "check": ["A3", "A4"],
+      "file": "*",
+      "rule": "DOMAIN*,*amazonaws*",
+      "by": "DOMAIN-SUFFIX,amazonaws.com",
+      "preventive": true,
+      "reason": "具体 AWS/S3 子域在 AI.list / Games.list / Streaming.list / DownloadCDN.list 分层，均排在 ProxyGFW.list 之前，是刻意分层而非遮蔽。"
+    },
+
+    {
+      "check": "A5",
+      "file": "Reject.list",
+      "rule": "*",
+      "reason": "Reject.list 在 Surge.conf 中被注释停用但文件保留（随时可恢复拦截层），刻意不被引用。见 00-context.md。"
+    },
+
+    {
+      "check": ["A2", "A3", "A4"],
+      "file": "Google.list",
+      "by_file": "YouTube.list",
+      "preventive": true,
+      "reason": "YouTube 全量归流媒体组、刻意先于 Google.list 匹配（与 Google 组分离是刻意的）。Google.list 中与 YouTube 相关的条目被前位遮蔽属预期。"
+    },
+    {
+      "check": ["A2", "A4"],
+      "file": "AI.list",
+      "by_file": "Google.list",
+      "preventive": true,
+      "reason": "大厂自有 AI 归各自生态：Gemini / AI Studio / NotebookLM 等由 Google.list 承接，Google.list 在 conf 中先于 AI.list 是刻意编排。"
+    },
+    {
+      "check": ["A2", "A4"],
+      "file": "AI.list",
+      "by_file": "Twitter.list",
+      "preventive": true,
+      "reason": "Grok / x.ai 归 Twitter.list（X 生态），Twitter.list 先于 AI.list 是刻意编排。"
+    },
+    {
+      "check": ["A2", "A4"],
+      "file": "AI.list",
+      "by_file": "Meta.list",
+      "preventive": true,
+      "reason": "Meta AI / llama.com 归 Meta.list，Meta.list 先于 AI.list 是刻意编排。"
+    },
+
+    {
+      "check": ["A3", "A4"],
+      "file": "*",
+      "by": "DOMAIN-KEYWORD,google",
+      "preventive": true,
+      "reason": "上游合并排除表项：DOMAIN-KEYWORD,google 已被刻意排除，不应出现在任何 list 中。此条用于在它被误合并进来时，避免它引发的海量遮蔽告警淹没报告——出现即应先删关键词本身。"
+    },
+    {
+      "check": ["A3", "A4"],
+      "file": "*",
+      "by": "DOMAIN-SUFFIX,akadns.net",
+      "preventive": true,
+      "reason": "上游合并排除表项：akadns.net（Akamai 通用调度域）已被刻意排除，不应出现在任何 list 中。"
+    },
+    {
+      "check": ["A3", "A4"],
+      "file": "*",
+      "by": "DOMAIN-KEYWORD,facebook",
+      "preventive": true,
+      "reason": "上游合并排除表项：facebook 关键词已被刻意排除（Meta.list 用精确后缀覆盖）。"
+    },
+    {
+      "check": ["A3", "A4"],
+      "file": "*",
+      "by": "DOMAIN-KEYWORD,porn",
+      "preventive": true,
+      "reason": "上游合并排除表项：porn 等成人内容关键词已被刻意排除。"
+    },
+    {
+      "check": ["A3", "A4"],
+      "file": "*",
+      "by": "DOMAIN-SUFFIX,ms",
+      "preventive": true,
+      "reason": "上游合并排除表项：ms 作为 ccTLD（蒙特塞拉特）被误当作微软缩写的规则已被刻意排除。"
+    },
+    {
+      "check": ["A2", "A3", "A4"],
+      "file": "*",
+      "rule": "DOMAIN-SUFFIX,ms",
+      "preventive": true,
+      "reason": "同上：DOMAIN-SUFFIX,ms 若出现即为误合并，应删除而非豁免；本条只是防止它污染遮蔽统计。"
+    },
+
+    {
+      "check": "A2",
+      "file": "ChinaDomain.list",
+      "by_file": "AI.list",
+      "reason": "F1/FIX-C：ChinaDomain.list 是机器生成层，约定零手改。skywork.ai、lingyiwanwu.com 等国内厂商的境外托管站点只能在 AI.list 中前置覆盖（AI.list 在 conf 中先于 ChinaDomain），机器层留下的同名条目必然成为死条目，属预期。"
+    },
+    {
+      "check": "A2",
+      "file": "ChinaIP.list",
+      "by_file": "PKU.list",
+      "reason": "F1：PKU.list(162.105.0.0/16、202.127.16.0/20) 与 ChinaIP.list 重叠，二者同为 DIRECT，无功能影响。ChinaIP.list 是机器生成层，约定零手改，故长期豁免。"
+    },
+
+    {
+      "check": ["A2", "A3", "A4"],
+      "file": "*",
+      "rule": "DOMAIN-SUFFIX,gateway.icloud.com",
+      "preventive": true,
+      "reason": "F1/FIX-B 裁决：gateway.icloud.com（Apple Intelligence / PCC 网关）刻意留在 AI 组，代价是与 Siri 直连(guzzoni/smoot.apple.com→AppleCN DIRECT)不同组。场景 apple_intelligence_pcc 已按现状固化为 same_policy:false。"
+    },
+    {
+      "check": ["A2", "A3", "A4"],
+      "file": "*",
+      "rule": "DOMAIN-SUFFIX,challenges.cloudflare.com",
+      "preventive": true,
+      "reason": "F1/FIX-B 裁决：Cloudflare Turnstile 刻意留在 AI 组 —— 它是 ChatGPT/Claude 登录链的一环，与 AI 同出口反而降低验证码率。其他站点的 Turnstile 一并被带走是已知代价。"
+    },
+    {
+      "check": ["A2", "A3", "A4"],
+      "file": "AI.list",
+      "rule": "DOMAIN-SUFFIX,intercom*",
+      "preventive": true,
+      "reason": "F1/FIX-B 裁决：intercom.io / intercomcdn.com 刻意留在 AI 组（AI 产品内嵌客服组件）。与 auth0/launchdarkly/algolia 不同——后三者已按裁决移出 AI.list。"
+    },
+    {
+      "check": ["A2", "A3", "A4"],
+      "file": "AI.list",
+      "rule": "DOMAIN-SUFFIX,sentry*",
+      "preventive": true,
+      "reason": "F1/FIX-B 裁决：sentry.io / sentry-cdn.com 刻意留在 AI 组（AI 应用自带遥测）；过宽的 DOMAIN-KEYWORD,sentry 已删除，误伤面（sentryone.com / sifted.eu / 任意站点自建 sentry.* 子域）已消除。"
+    },
+    {
+      "check": ["A2", "A4"],
+      "file": "SocialOthers.list",
+      "by_file": "AI.list",
+      "preventive": true,
+      "reason": "F1：Midjourney 走 AI 组而其社区/交付面在 Discord（SocialOthers→社交媒体组），二者刻意分属两组；AI.list 先于 SocialOthers.list 是既有编排。"
+    },
+
+    {
+      "check": ["A3", "A4"],
+      "file": "DownloadCDN.list",
+      "rule": "DOMAIN*,*mirror*",
+      "preventive": true,
+      "reason": "F1/FIX-D7 保留类：OS/软件发行镜像站（xtom / ibiblio / 各高校镜像 / kakao / yandex 等）刻意留在下载组走机房出口，不随主站回落 Final。"
+    },
+    {
+      "check": ["A3", "A4"],
+      "file": "DownloadCDN.list",
+      "rule": "DOMAIN*,*repo*",
+      "preventive": true,
+      "reason": "F1/FIX-D7 保留类：包 registry / 制品仓库（maven / anaconda / npm registry / cocoapods 等）刻意留在下载组。"
+    },
+    {
+      "check": ["A3", "A4"],
+      "file": "DownloadCDN.list",
+      "rule": "DOMAIN*,*update*",
+      "preventive": true,
+      "reason": "F1/FIX-D7 保留类：客户端更新通道（Brave / Signal / Mozilla / Parallels / greasyfork 等）刻意留在下载组，与主站不同组是接受的代价。"
+    },
+    {
+      "check": ["A3", "A4"],
+      "file": "DownloadCDN.list",
+      "rule": "DOMAIN-SUFFIX,*onenote.com",
+      "preventive": true,
+      "reason": "F1/FIX-D7 未裁决：contentsync/hierarchyapi.onenote.com 与 d.docs.live.net 属 OneDrive/OneNote 数据面。W4-015 建议整体改归 MicrosoftCN(DIRECT)，本轮 fix_spec 未裁决，保留原状待用户决策。"
+    },
+    {
+      "check": ["A3", "A4"],
+      "file": "DownloadCDN.list",
+      "rule": "DOMAIN-SUFFIX,d.docs.live.net",
+      "preventive": true,
+      "reason": "同上：OneDrive 数据面，本轮未裁决，保留原状。"
+    },
+    {
+      "check": ["A3", "A4"],
+      "file": "DownloadCDN.list",
+      "rule": "DOMAIN-SUFFIX,*azureedge.net",
+      "preventive": true,
+      "reason": "F1/FIX-D7 未裁决：azureedge.net 是共享 CDN，子域归属逐条判定不可靠，17 条整块保留原状。"
+    }
+  ]
+}

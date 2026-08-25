@@ -1,0 +1,85 @@
+[
+  {
+    "name": "dnsleak_ai_group_domains",
+    "desc": "DNS 泄漏专项 · 第 1 组（AI 组代理域 10 个）：断言匹配路径上不存在缺 no-resolve 的 IP 类规则。一旦某条 IP 规则丢了 no-resolve，这些域名就会先被国内 DNS(223.5.5.5/119.29.29.29)解析，等于把访问 AI 服务的意图暴露给国内递归",
+    "requests": [
+      {"host": "chatgpt.com"},
+      {"host": "api.openai.com"},
+      {"host": "claude.ai"},
+      {"host": "api.anthropic.com"},
+      {"host": "www.perplexity.ai"},
+      {"host": "chat.mistral.ai"},
+      {"host": "huggingface.co"},
+      {"host": "api.groq.com"},
+      {"host": "cursor.com"},
+      {"host": "poe.com"}
+    ],
+    "assert": {"same_policy": true, "policy": "AI", "no_dns_leak": true}
+  },
+  {
+    "name": "dnsleak_ecosystem_group_domains",
+    "desc": "DNS 泄漏专项 · 第 2 组（Google/X/Meta 生态代理域 10 个）",
+    "requests": [
+      {"host": "www.google.com"},
+      {"host": "accounts.google.com"},
+      {"host": "gemini.google.com"},
+      {"host": "fonts.gstatic.com"},
+      {"host": "lh3.googleusercontent.com"},
+      {"host": "x.com"},
+      {"host": "pbs.twimg.com"},
+      {"host": "grok.com"},
+      {"host": "www.facebook.com"},
+      {"host": "www.instagram.com"}
+    ],
+    "assert": {"same_policy": true, "policy": "Google-X-Meta", "no_dns_leak": true}
+  },
+  {
+    "name": "dnsleak_misc_proxy_domains",
+    "desc": "DNS 泄漏专项 · 第 3 组（其余各代理组代理域 10 个：流媒体/社交/Telegram/游戏/下载/Final）",
+    "requests": [
+      {"host": "www.youtube.com"},
+      {"host": "www.netflix.com"},
+      {"host": "open.spotify.com"},
+      {"host": "www.reddit.com"},
+      {"host": "discord.com"},
+      {"host": "web.telegram.org"},
+      {"host": "store.steampowered.com"},
+      {"host": "cdn.jsdelivr.net"},
+      {"host": "github.com"},
+      {"host": "en.wikipedia.org"}
+    ],
+    "assert": {
+      "same_policy": false,
+      "no_dns_leak": true,
+      "per_request": [
+        {"host": "www.youtube.com", "policy": "流媒体"},
+        {"host": "www.netflix.com", "policy": "流媒体"},
+        {"host": "open.spotify.com", "policy": "流媒体"},
+        {"host": "www.reddit.com", "policy": "社交媒体"},
+        {"host": "discord.com", "policy": "社交媒体"},
+        {"host": "web.telegram.org", "policy": "Telegram"},
+        {"host": "store.steampowered.com", "policy": "游戏"},
+        {"host": "cdn.jsdelivr.net", "policy": "下载"},
+        {"host": "github.com", "policy": "AI", "reason": "2026-08-25 F1：GitHub 全生态统一到 AI 组（FIX-B）。"},
+        {"host": "en.wikipedia.org", "policy": "Final"}
+      ]
+    }
+  },
+  {
+    "name": "direct_domains_local_dns_allowed",
+    "desc": "对照组：国内直连域名允许（且应当）由本地国内 DNS 解析。本场景刻意不断言 no_dns_leak，只断言命中 DIRECT——这些域名在 live_check 的 --dns-leak 里应当出现在本地 DNS 记录中",
+    "requests": [
+      {"host": "www.baidu.com"},
+      {"host": "www.taobao.com"},
+      {"host": "mp.weixin.qq.com"},
+      {"host": "www.bilibili.com"},
+      {"host": "www.douyin.com"},
+      {"host": "music.163.com"},
+      {"host": "www.jd.com"},
+      {"host": "www.zhihu.com"},
+      {"host": "www.gov.cn"},
+      {"host": "www.pku.edu.cn"}
+    ],
+    "assert": {"same_policy": true, "policy": "DIRECT"}
+  }
+]

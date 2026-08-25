@@ -1,5 +1,6 @@
 # Google — Google 全家桶 (含 .google/.goog gTLD、Gemini/Antigravity/DeepMind；不含 YouTube)；2026-08-25 并入 blackmatrix7:Google
 # 规范化排序：规则类型分区，区内字母序
+# 2026-08-25 维护：接收 ai.studio/g.ai(自 AI.list)与 gvt2.com(自 YouTube.list)
 
 DOMAIN-SUFFIX,0emm.com
 DOMAIN-SUFFIX,1e100.net
@@ -21,6 +22,7 @@ DOMAIN-SUFFIX,advertiserscommunity.com
 DOMAIN-SUFFIX,adwords-community.com
 DOMAIN-SUFFIX,adwords.com
 DOMAIN-SUFFIX,adwordsexpress.com
+DOMAIN-SUFFIX,ai.studio
 DOMAIN-SUFFIX,amp.dev
 DOMAIN-SUFFIX,ampproject.com
 DOMAIN-SUFFIX,ampproject.net
@@ -138,6 +140,7 @@ DOMAIN-SUFFIX,foofle.com
 DOMAIN-SUFFIX,froogle.com
 DOMAIN-SUFFIX,fuchsia.dev
 DOMAIN-SUFFIX,g-tun.com
+DOMAIN-SUFFIX,g.ai
 DOMAIN-SUFFIX,g.co
 DOMAIN-SUFFIX,g.dev
 DOMAIN-SUFFIX,g.page
@@ -437,6 +440,7 @@ DOMAIN-SUFFIX,gvt0.com
 DOMAIN-SUFFIX,gvt1-cn.com
 DOMAIN-SUFFIX,gvt1.com
 DOMAIN-SUFFIX,gvt2-cn.com
+DOMAIN-SUFFIX,gvt2.com
 DOMAIN-SUFFIX,gvt3.com
 DOMAIN-SUFFIX,gvt5.com
 DOMAIN-SUFFIX,gvt6.com

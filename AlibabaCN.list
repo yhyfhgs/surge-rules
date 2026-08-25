@@ -1,5 +1,6 @@
 # AlibabaCN — 阿里系直连（blackmatrix7:Alibaba+AliPay；2026-08-25 建）
 # 规范化排序：规则类型分区，区内字母序
+# 2026-08-25 维护：qwen.ai(国际站) 移出至 AI.list，国内通义域不动
 
 DOMAIN-SUFFIX,10029.com
 DOMAIN-SUFFIX,1688.com
@@ -980,7 +981,6 @@ DOMAIN-SUFFIX,qqwewew.com
 DOMAIN-SUFFIX,quark.cn
 DOMAIN-SUFFIX,qutao.com
 DOMAIN-SUFFIX,qutianshanav.com
-DOMAIN-SUFFIX,qwen.ai
 DOMAIN-SUFFIX,qwqfzl.com
 DOMAIN-SUFFIX,rdcnzz.com
 DOMAIN-SUFFIX,rergdfh.com

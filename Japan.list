@@ -1,5 +1,6 @@
 # Japan — 日本区域服务
 # 规范化排序：规则类型分区，区内字母序
+# 2026-08-25 维护：接收 pximg.net(与 pixiv.net 同组)；IP-ASN/GEOIP 行移交 conf 8.5 区
 
 DOMAIN-SUFFIX,ahamo.com
 DOMAIN-SUFFIX,amazon.co.jp
@@ -49,6 +50,7 @@ DOMAIN-SUFFIX,paypay.ne.jp
 DOMAIN-SUFFIX,pixiv.net
 DOMAIN-SUFFIX,povo.jp
 DOMAIN-SUFFIX,priconne-redive.jp
+DOMAIN-SUFFIX,pximg.net
 DOMAIN-SUFFIX,radiko.jp
 DOMAIN-SUFFIX,radiko.net
 DOMAIN-SUFFIX,rakuten-bank.co.jp
@@ -76,11 +78,3 @@ DOMAIN-SUFFIX,videopass.jp
 DOMAIN-SUFFIX,wowow.co.jp
 DOMAIN-SUFFIX,yahoo.co.jp
 DOMAIN-SUFFIX,yodobashi.com
-
-IP-ASN,17511,no-resolve
-IP-ASN,2497,no-resolve
-IP-ASN,2514,no-resolve
-IP-ASN,2516,no-resolve
-IP-ASN,4713,no-resolve
-
-GEOIP,JP,no-resolve

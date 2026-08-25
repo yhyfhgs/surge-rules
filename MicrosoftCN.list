@@ -1,5 +1,6 @@
 # MicrosoftCN — 微软 CDN/OneDrive (直连)
 # 规范化排序：规则类型分区，区内字母序
+# 2026-08-25 维护：删 3 条同表覆盖冗余条目(A3)与 1 条已被 AI.list 抢跑的 msftauth.net
 
 DOMAIN,res-1.cdn.office.net
 DOMAIN,res-2.cdn.office.net
@@ -39,11 +40,9 @@ DOMAIN-SUFFIX,mpnbenefitsrtluat.download.prss.microsoft.com
 DOMAIN-SUFFIX,msdn.download.prss.microsoft.com
 DOMAIN-SUFFIX,msdprod-ad.download.prss.microsoft.com
 DOMAIN-SUFFIX,msedge.net
-DOMAIN-SUFFIX,msftauth.net
 DOMAIN-SUFFIX,msn.com
 DOMAIN-SUFFIX,msproduct.download.prss.microsoft.com
 DOMAIN-SUFFIX,myvs.download.prss.microsoft.com
-DOMAIN-SUFFIX,ntp.msn.com
 DOMAIN-SUFFIX,oemsoc.download.prss.microsoft.com
 DOMAIN-SUFFIX,oemsocuat.download.prss.microsoft.com
 DOMAIN-SUFFIX,office.com
@@ -53,14 +52,12 @@ DOMAIN-SUFFIX,officemkt.download.prss.microsoft.com
 DOMAIN-SUFFIX,officemktuat.download.prss.microsoft.com
 DOMAIN-SUFFIX,oneclient.sfx.ms
 DOMAIN-SUFFIX,osrelease.download.prss.microsoft.com
-DOMAIN-SUFFIX,res.office365.com
 DOMAIN-SUFFIX,rsm.download.prss.microsoft.com
 DOMAIN-SUFFIX,sdx.microsoft.com
 DOMAIN-SUFFIX,sharepoint.com
 DOMAIN-SUFFIX,sharepointonline.com
 DOMAIN-SUFFIX,software.download.prss.microsoft.com
 DOMAIN-SUFFIX,spoprod-a.akamaihd.net
-DOMAIN-SUFFIX,static2.sharepointonline.com
 DOMAIN-SUFFIX,storecorefulfillment.download.prss.microsoft.com
 DOMAIN-SUFFIX,storeedge.microsoft.com
 DOMAIN-SUFFIX,surface.download.prss.microsoft.com

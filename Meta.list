@@ -1,5 +1,6 @@
 # Meta — Meta 生态 (含 Meta AI/Llama)；2026-08-25 并入 blackmatrix7:Facebook+Instagram+Whatsapp+Threads
 # 规范化排序：规则类型分区，区内字母序
+# 2026-08-25 维护：接收 threads.com(与 threads.net 同组)
 
 DOMAIN-SUFFIX,aboutfacebook.com
 DOMAIN-SUFFIX,accessfacebookfromschool.com
@@ -485,6 +486,7 @@ DOMAIN-SUFFIX,terragraph.com
 DOMAIN-SUFFIX,thefacebook.com
 DOMAIN-SUFFIX,thefacebook.net
 DOMAIN-SUFFIX,thefind.com
+DOMAIN-SUFFIX,threads.com
 DOMAIN-SUFFIX,threads.net
 DOMAIN-SUFFIX,toplayerserver.com
 DOMAIN-SUFFIX,viewpointsfromfacebook.com

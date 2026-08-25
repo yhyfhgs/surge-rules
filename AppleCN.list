@@ -1,5 +1,6 @@
 # AppleCN — Apple 服务与 CDN (直连；Apple 流媒体归 Streaming)；2026-08-25 并入 blackmatrix7:Apple
 # 规范化排序：规则类型分区，区内字母序
+# 2026-08-25 维护：删 7 条被同表 apple.com/cdn-apple.com/icloud.com 后缀覆盖的冗余条目(A3)
 
 DOMAIN,apple-events.akamaized.net
 DOMAIN,appleworldwidedeveloper.hb-api.omtrdc.net
@@ -914,8 +915,6 @@ DOMAIN-SUFFIX,emagic.de
 DOMAIN-SUFFIX,esbeatsbydrebuy.com
 DOMAIN-SUFFIX,etheadphones.com
 DOMAIN-SUFFIX,euroipad.com
-DOMAIN-SUFFIX,events-delivery.apple.com
-DOMAIN-SUFFIX,events-live.apple.com
 DOMAIN-SUFFIX,eworld.com
 DOMAIN-SUFFIX,faceid99.com
 DOMAIN-SUFFIX,faceid99.net
@@ -1381,7 +1380,6 @@ DOMAIN-SUFFIX,outletbeatsshop.com
 DOMAIN-SUFFIX,overapple.com
 DOMAIN-SUFFIX,pascherbeatsmonster.com
 DOMAIN-SUFFIX,paulsimon-music.com
-DOMAIN-SUFFIX,pba.apple.com
 DOMAIN-SUFFIX,perfectkickz.net
 DOMAIN-SUFFIX,personeelsland.com
 DOMAIN-SUFFIX,picknicekicks.net
@@ -1420,7 +1418,6 @@ DOMAIN-SUFFIX,salecheaphandbags.com
 DOMAIN-SUFFIX,samebags.com
 DOMAIN-SUFFIX,sanvaras.com
 DOMAIN-SUFFIX,scnshop.cc
-DOMAIN-SUFFIX,sequoia.cdn-apple.com
 DOMAIN-SUFFIX,services-apple.net
 DOMAIN-SUFFIX,servicetalk.io
 DOMAIN-SUFFIX,shazam.com
@@ -1444,8 +1441,6 @@ DOMAIN-SUFFIX,soso7778.com
 DOMAIN-SUFFIX,specialtyheadphones.com
 DOMAIN-SUFFIX,spektral.cc
 DOMAIN-SUFFIX,spiritclubs.com
-DOMAIN-SUFFIX,static.ess.apple.com
-DOMAIN-SUFFIX,statici.icloud.com
 DOMAIN-SUFFIX,straightouttasomewhere.com
 DOMAIN-SUFFIX,studiobeatsbydrdre.com
 DOMAIN-SUFFIX,sulwerphoto.com
@@ -1467,7 +1462,6 @@ DOMAIN-SUFFIX,thebeatsbydre.net
 DOMAIN-SUFFIX,thebeatsheadphonesale.com
 DOMAIN-SUFFIX,theuab.net
 DOMAIN-SUFFIX,thinkdifferent.us
-DOMAIN-SUFFIX,time.apple.com
 DOMAIN-SUFFIX,topbeatsbydrdreoutlet.com
 DOMAIN-SUFFIX,topbeatsdealer.com
 DOMAIN-SUFFIX,topbeatsforsale.com

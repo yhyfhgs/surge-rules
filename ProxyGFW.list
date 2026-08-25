@@ -1,11 +1,10 @@
 # ProxyGFW — GFW 被墙域名兜底；2026-08-25 并入 blackmatrix7:Proxy
 # 规范化排序：规则类型分区，区内字母序
+# 2026-08-25 维护：接收 stripe.com/stripe.network/auth0.com；docker.com/npmjs.com 移交 DownloadCDN、login.microsoftonline.com 移交 AI、社交伴生域移交 SocialOthers/Meta；删 1 条失效域
 
 DOMAIN,api.waqi.info
-DOMAIN,aqi.aqicn.org
 DOMAIN,assets-priconne-redive-us.akamaized.net
 DOMAIN,cloud.oracle.com
-DOMAIN,login.microsoftonline.com
 
 DOMAIN-SUFFIX,000webhost.com
 DOMAIN-SUFFIX,030buy.com
@@ -453,6 +452,7 @@ DOMAIN-SUFFIX,atnext.com
 DOMAIN-SUFFIX,atom.io
 DOMAIN-SUFFIX,audacy.com
 DOMAIN-SUFFIX,audionow.com
+DOMAIN-SUFFIX,auth0.com
 DOMAIN-SUFFIX,av-e-body.com
 DOMAIN-SUFFIX,av.com
 DOMAIN-SUFFIX,av.movie
@@ -757,7 +757,6 @@ DOMAIN-SUFFIX,brockbbs.com
 DOMAIN-SUFFIX,brookings.edu
 DOMAIN-SUFFIX,brucewang.net
 DOMAIN-SUFFIX,brutaltgp.com
-DOMAIN-SUFFIX,bsky.network
 DOMAIN-SUFFIX,bt2mag.com
 DOMAIN-SUFFIX,bt4g.org
 DOMAIN-SUFFIX,bt4gprx.com
@@ -1365,7 +1364,6 @@ DOMAIN-SUFFIX,dipity.com
 DOMAIN-SUFFIX,directcreative.com
 DOMAIN-SUFFIX,discoins.com
 DOMAIN-SUFFIX,discord.co
-DOMAIN-SUFFIX,discord.media
 DOMAIN-SUFFIX,discordstatus.com
 DOMAIN-SUFFIX,discuss.com.hk
 DOMAIN-SUFFIX,discuss4u.com
@@ -1401,7 +1399,6 @@ DOMAIN-SUFFIX,dnsrd.com
 DOMAIN-SUFFIX,dnssec.net
 DOMAIN-SUFFIX,dnvod.tv
 DOMAIN-SUFFIX,doc.new
-DOMAIN-SUFFIX,docker.com
 DOMAIN-SUFFIX,dockerhub.com
 DOMAIN-SUFFIX,dockerstatus.com
 DOMAIN-SUFFIX,docs.cfw.lbyczf.com
@@ -1816,7 +1813,6 @@ DOMAIN-SUFFIX,findmespot.com
 DOMAIN-SUFFIX,fingerdaily.com
 DOMAIN-SUFFIX,finler.net
 DOMAIN-SUFFIX,firearmsworld.net
-DOMAIN-SUFFIX,firefox.com
 DOMAIN-SUFFIX,fireofliberty.info
 DOMAIN-SUFFIX,fireofliberty.org
 DOMAIN-SUFFIX,firetweet.io
@@ -3811,7 +3807,6 @@ DOMAIN-SUFFIX,nowtorrents.com
 DOMAIN-SUFFIX,noxinfluencer.com
 DOMAIN-SUFFIX,noypf.com
 DOMAIN-SUFFIX,npm.community
-DOMAIN-SUFFIX,npmjs.com
 DOMAIN-SUFFIX,npmjs.org
 DOMAIN-SUFFIX,npnt.me
 DOMAIN-SUFFIX,nps.gov
@@ -4966,6 +4961,8 @@ DOMAIN-SUFFIX,streamingthe.net
 DOMAIN-SUFFIX,streema.com
 DOMAIN-SUFFIX,streetvoice.com
 DOMAIN-SUFFIX,strikingly.com
+DOMAIN-SUFFIX,stripe.com
+DOMAIN-SUFFIX,stripe.network
 DOMAIN-SUFFIX,strongvpn.com
 DOMAIN-SUFFIX,strongwindpress.com
 DOMAIN-SUFFIX,student.tw
@@ -5216,7 +5213,6 @@ DOMAIN-SUFFIX,thlib.org
 DOMAIN-SUFFIX,thomasbernhard.org
 DOMAIN-SUFFIX,thongdreams.com
 DOMAIN-SUFFIX,threadreaderapp.com
-DOMAIN-SUFFIX,threads.com
 DOMAIN-SUFFIX,threatchaos.com
 DOMAIN-SUFFIX,throughnightsfire.com
 DOMAIN-SUFFIX,thu.monster
@@ -5589,7 +5585,6 @@ DOMAIN-SUFFIX,twtkr.com
 DOMAIN-SUFFIX,twtrland.com
 DOMAIN-SUFFIX,twurl.nl
 DOMAIN-SUFFIX,twyac.org
-DOMAIN-SUFFIX,txmblr.com
 DOMAIN-SUFFIX,txxx.com
 DOMAIN-SUFFIX,tycool.com
 DOMAIN-SUFFIX,typcn.com

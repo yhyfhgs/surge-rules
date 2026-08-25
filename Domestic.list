@@ -1,13 +1,11 @@
 # Domestic — 国内服务直连 (含国内 AI/字节系/券商)
 # 规范化排序：规则类型分区，区内字母序
+# 2026-08-25 维护：接收 identrust/ppio/xingyeai/xiaoaiassist 与 NTP/captive 探测域(pool.ntp.org/time.windows.com/msftconnecttest.com/detectportal.firefox.com)、bootcdn.net；移出 11 个国内厂商国际站至 AI.list；删 8 条死条目/失效域
 
-DOMAIN,app.viayoo.com
-DOMAIN,assets1.xboxlive.cn
-DOMAIN,assets2.xboxlive.cn
 DOMAIN,cn.download.nvidia.com
 DOMAIN,config.ubnt.com
+DOMAIN,detectportal.firefox.com
 DOMAIN,dl.ubnt.com
-DOMAIN,dot.pub
 DOMAIN,gstore.val.manlaxy.com
 DOMAIN,i.dell.com
 DOMAIN,kms.03k.org
@@ -15,11 +13,9 @@ DOMAIN,lv.queniujq.cn
 DOMAIN,media.cdn.queniuqe.com
 DOMAIN,ocsp.globalsign.com
 DOMAIN,ocsp2.globalsign.com
-DOMAIN,res.viayoo.com
-DOMAIN,viayoo.com
+DOMAIN,time.windows.com
 DOMAIN,www.intel.cn
 DOMAIN,www.layuicdn.com
-DOMAIN,www.viayoo.com
 
 DOMAIN-SUFFIX,01.ai
 DOMAIN-SUFFIX,10010.com
@@ -109,8 +105,8 @@ DOMAIN-SUFFIX,bh3.com
 DOMAIN-SUFFIX,bigmodel.cn
 DOMAIN-SUFFIX,blzstatic.cn
 DOMAIN-SUFFIX,boc.cn
+DOMAIN-SUFFIX,bootcdn.net
 DOMAIN-SUFFIX,bosszhipin.com
-DOMAIN-SUFFIX,bulicdn2.com
 DOMAIN-SUFFIX,byteacctimg.com
 DOMAIN-SUFFIX,c-ctrip.com
 DOMAIN-SUFFIX,c-t.work
@@ -160,7 +156,6 @@ DOMAIN-SUFFIX,coolapkmarket.net
 DOMAIN-SUFFIX,cowcs.com
 DOMAIN-SUFFIX,cowtransfer.com
 DOMAIN-SUFFIX,coze.cn
-DOMAIN-SUFFIX,coze.com
 DOMAIN-SUFFIX,cozeapp.net
 DOMAIN-SUFFIX,cozebaas.cn
 DOMAIN-SUFFIX,cozebuild.com
@@ -195,7 +190,6 @@ DOMAIN-SUFFIX,didialift.com
 DOMAIN-SUFFIX,didichuxing.com
 DOMAIN-SUFFIX,didiglobal.com
 DOMAIN-SUFFIX,didistatic.com
-DOMAIN-SUFFIX,dify.ai
 DOMAIN-SUFFIX,digicert.cn
 DOMAIN-SUFFIX,dizzylab.net
 DOMAIN-SUFFIX,dl.bscstorage.net
@@ -240,7 +234,6 @@ DOMAIN-SUFFIX,gamersky.com
 DOMAIN-SUFFIX,gaokao.cn
 DOMAIN-SUFFIX,geetest.com
 DOMAIN-SUFFIX,geilicdn.com
-DOMAIN-SUFFIX,genspark.ai
 DOMAIN-SUFFIX,geovisearth.com
 DOMAIN-SUFFIX,ggpht.cn
 DOMAIN-SUFFIX,gitcode.com
@@ -295,6 +288,7 @@ DOMAIN-SUFFIX,ibuscloud.com
 DOMAIN-SUFFIX,iciba.com
 DOMAIN-SUFFIX,id6.com
 DOMAIN-SUFFIX,id6.me
+DOMAIN-SUFFIX,identrust.com
 DOMAIN-SUFFIX,ifeng.com
 DOMAIN-SUFFIX,ifengimg.com
 DOMAIN-SUFFIX,infoq.cn
@@ -321,11 +315,9 @@ DOMAIN-SUFFIX,kdocs.cn
 DOMAIN-SUFFIX,kdslife.com
 DOMAIN-SUFFIX,keepcdn.com
 DOMAIN-SUFFIX,kfcapp.cn
-DOMAIN-SUFFIX,kimi.ai
 DOMAIN-SUFFIX,kimi.com
 DOMAIN-SUFFIX,kingsoft-office-service.com
 DOMAIN-SUFFIX,kkmh.com
-DOMAIN-SUFFIX,klingai.com
 DOMAIN-SUFFIX,klingai.org
 DOMAIN-SUFFIX,klook.com
 DOMAIN-SUFFIX,ks-cdn.com
@@ -380,7 +372,6 @@ DOMAIN-SUFFIX,migucloud.com
 DOMAIN-SUFFIX,mihayo.com
 DOMAIN-SUFFIX,mihoyo.com
 DOMAIN-SUFFIX,mijia.tech
-DOMAIN-SUFFIX,minimax.io
 DOMAIN-SUFFIX,minimaxi.com
 DOMAIN-SUFFIX,miot-spec.org
 DOMAIN-SUFFIX,mipay.com
@@ -389,11 +380,10 @@ DOMAIN-SUFFIX,miyoushe.com
 DOMAIN-SUFFIX,mobike.com
 DOMAIN-SUFFIX,mobileservice.cn
 DOMAIN-SUFFIX,modelscope.cn
-DOMAIN-SUFFIX,modelscope.com
 DOMAIN-SUFFIX,mojicdn.com
-DOMAIN-SUFFIX,moonshot.ai
 DOMAIN-SUFFIX,moonshot.cn
 DOMAIN-SUFFIX,mrw.so
+DOMAIN-SUFFIX,msftconnecttest.com
 DOMAIN-SUFFIX,mtyun.com
 DOMAIN-SUFFIX,mubu.com
 DOMAIN-SUFFIX,musemuse.cn
@@ -444,7 +434,9 @@ DOMAIN-SUFFIX,pinduoduo.com
 DOMAIN-SUFFIX,pinduoduo.net
 DOMAIN-SUFFIX,pingan.com
 DOMAIN-SUFFIX,pingwest.com
+DOMAIN-SUFFIX,pool.ntp.org
 DOMAIN-SUFFIX,ppio.cn
+DOMAIN-SUFFIX,ppio.com
 DOMAIN-SUFFIX,pplive.com
 DOMAIN-SUFFIX,ppximg.com
 DOMAIN-SUFFIX,ppxstatic.com
@@ -518,7 +510,6 @@ DOMAIN-SUFFIX,sspai.com
 DOMAIN-SUFFIX,staticdn.net
 DOMAIN-SUFFIX,steam.clngaa.com
 DOMAIN-SUFFIX,steam.ksyna.com
-DOMAIN-SUFFIX,stepfun.ai
 DOMAIN-SUFFIX,stepfun.com
 DOMAIN-SUFFIX,suning.cn
 DOMAIN-SUFFIX,suning.com
@@ -573,6 +564,7 @@ DOMAIN-SUFFIX,wscn.net
 DOMAIN-SUFFIX,x3322.net
 DOMAIN-SUFFIX,xhscdn.com
 DOMAIN-SUFFIX,xiachufang.com
+DOMAIN-SUFFIX,xiaoaiassist.com
 DOMAIN-SUFFIX,xiaoaisound.com
 DOMAIN-SUFFIX,xiaohongshu.com
 DOMAIN-SUFFIX,xiaomi.cn
@@ -586,6 +578,7 @@ DOMAIN-SUFFIX,xiaote.net
 DOMAIN-SUFFIX,xiaoxiaapi.com
 DOMAIN-SUFFIX,ximalaya.com
 DOMAIN-SUFFIX,xincai.com
+DOMAIN-SUFFIX,xingyeai.com
 DOMAIN-SUFFIX,xinhuanet.com
 DOMAIN-SUFFIX,xiniu.com
 DOMAIN-SUFFIX,xmcdn.com
@@ -608,7 +601,6 @@ DOMAIN-SUFFIX,yupoo.com
 DOMAIN-SUFFIX,yuque.com
 DOMAIN-SUFFIX,yy.com
 DOMAIN-SUFFIX,yzcdn.cn
-DOMAIN-SUFFIX,z.ai
 DOMAIN-SUFFIX,zdic.net
 DOMAIN-SUFFIX,zdmimg.com
 DOMAIN-SUFFIX,zhangzs.com

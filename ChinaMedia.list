@@ -1,5 +1,6 @@
 # ChinaMedia — 国内流媒体/视频/直播/音乐直连（blackmatrix7:ChinaMedia+BiliBili+iQIYI+Youku+TencentVideo+NetEaseMusic+KugouKuwo+Douyu+HuYa+KuaiShou；2026-08-25 建）
 # 规范化排序：规则类型分区，区内字母序
+# 2026-08-25 维护：bstar(B 站国际版) 域移交 Streaming.list；删 8 条同表覆盖冗余条目(A3)
 
 DOMAIN,00713915daab0be43def5c338c02c80b.dlied1.cdntips.net
 DOMAIN,0gr4uqmtt8y41hcjsgrzdrc31.ourdvsss.com
@@ -52,10 +53,8 @@ DOMAIN,3geauymtsgrzdnqbofa5dy.ourdvsss.com
 DOMAIN,3geauymtsgrzdrcbzfahue.ourdvsss.com
 DOMAIN,3geauymtsgrzdrcbzfahuk.ourdvsss.com
 DOMAIN,4go41hcjtgazdoctqge4o.ourdvsss.com
-DOMAIN,acg.tv
 DOMAIN,apd-pcdnvodstat.teg.tencent-cloud.net
 DOMAIN,aqqmusic.tc.qq.com
-DOMAIN,b23.tv
 DOMAIN,dldir1.qq.com
 DOMAIN,iacc.qq.com
 DOMAIN,ins-eeww7kom.ias.tencent-cloud.net
@@ -257,8 +256,6 @@ DOMAIN-SUFFIX,bili23.cn
 DOMAIN-SUFFIX,bili33.cn
 DOMAIN-SUFFIX,biliapi.com
 DOMAIN-SUFFIX,biliapi.net
-DOMAIN-SUFFIX,bilibili.cn
-DOMAIN-SUFFIX,bilibili.com
 DOMAIN-SUFFIX,bilicdn1.com
 DOMAIN-SUFFIX,bilicdn2.com
 DOMAIN-SUFFIX,bilicdn3.com
@@ -448,8 +445,6 @@ DOMAIN-SUFFIX,ipanda.cn
 DOMAIN-SUFFIX,ipanda.com
 DOMAIN-SUFFIX,ipanda.net
 DOMAIN-SUFFIX,ipqcrhf.com
-DOMAIN-SUFFIX,iqiyi.com
-DOMAIN-SUFFIX,iqiyipic.com
 DOMAIN-SUFFIX,itakutf.com
 DOMAIN-SUFFIX,itc.cn
 DOMAIN-SUFFIX,ivaoqph.com
@@ -666,7 +661,6 @@ DOMAIN-SUFFIX,oygteapq.com
 DOMAIN-SUFFIX,oywtv.com
 DOMAIN-SUFFIX,ozmvpbhc.com
 DOMAIN-SUFFIX,ozouckzr.com
-DOMAIN-SUFFIX,p-bstarstatic.akamaized.net
 DOMAIN-SUFFIX,p0kc9ym05p.com
 DOMAIN-SUFFIX,p24p75149p.com
 DOMAIN-SUFFIX,p33t5y8b97.com
@@ -704,8 +698,6 @@ DOMAIN-SUFFIX,qg3oed7882.com
 DOMAIN-SUFFIX,qgswvza.com
 DOMAIN-SUFFIX,qianqian.com
 DOMAIN-SUFFIX,qixayrvo.com
-DOMAIN-SUFFIX,qiyi.com
-DOMAIN-SUFFIX,qiyipic.com
 DOMAIN-SUFFIX,qpmwg68cre9pci.com
 DOMAIN-SUFFIX,qq3xkm64kavh.com
 DOMAIN-SUFFIX,qqcrvpv.com
@@ -824,8 +816,6 @@ DOMAIN-SUFFIX,umpxkvtt.com
 DOMAIN-SUFFIX,uoevtxmx.com
 DOMAIN-SUFFIX,uomrcipa.com
 DOMAIN-SUFFIX,upeaoktc.com
-DOMAIN-SUFFIX,upos-bstar-mirrorakam.akamaized.net
-DOMAIN-SUFFIX,upos-bstar1-mirrorakam.akamaized.net
 DOMAIN-SUFFIX,upos-hz-mirrorakam.akamaized.net
 DOMAIN-SUFFIX,uposdash-302-bilivideo.yfcdn.net
 DOMAIN-SUFFIX,urmuyhz.com

@@ -1,0 +1,235 @@
+[
+  {
+    "name": "openai_chatgpt_web",
+    "desc": "网页版 ChatGPT：登录 → 对话 → 上传图片（主站+鉴权+API+静态 CDN+用户文件+风控）",
+    "requests": [
+      {"host": "chatgpt.com"},
+      {"host": "ab.chatgpt.com", "note": "A/B 实验分流端点"},
+      {"host": "openai.com", "note": "官网跳转入口"},
+      {"host": "auth.openai.com", "note": "登录鉴权"},
+      {"host": "api.openai.com"},
+      {"host": "cdn.oaistatic.com", "note": "前端静态资源"},
+      {"host": "files.oaiusercontent.com", "note": "上传/下载的用户文件"},
+      {"host": "tcr9i.chat.openai.com", "note": "Arkose 风控"},
+      {"host": "client-api.arkoselabs.com", "note": "Arkose 验证码后端"}
+    ],
+    "assert": {"same_policy": true, "policy": "AI", "no_dns_leak": true}
+  },
+  {
+    "name": "openai_desktop_app",
+    "desc": "macOS/Windows ChatGPT 桌面应用（PROCESS-NAME 覆盖 + 常规域名）",
+    "requests": [
+      {"host": "chatgpt.com", "process": "ChatGPT"},
+      {"host": "api.openai.com", "process": "ChatGPT"},
+      {"host": "cdn.oaistatic.com", "process": "ChatGPT"},
+      {"host": "example.com", "process": "ChatGPT", "note": "RFC2606 保留域，验证 PROCESS-NAME 兜底命中 AI 而非 FINAL"},
+      {"host": "example.com", "process": "chatgpt", "note": "小写变体（跨平台覆盖，00-context 声明刻意保留）"},
+      {"host": "example.com", "process": "ChatGPT.exe", "note": "Windows 变体"}
+    ],
+    "assert": {"same_policy": true, "policy": "AI", "no_dns_leak": true}
+  },
+  {
+    "name": "openai_sora_video",
+    "desc": "Sora 视频生成：站点 + 生成任务 + 视频分发",
+    "requests": [
+      {"host": "sora.com"},
+      {"host": "sora.chatgpt.com"},
+      {"host": "videos.openai.com", "note": "生成结果视频分发"},
+      {"host": "api.openai.com"},
+      {"host": "files.oaiusercontent.com"}
+    ],
+    "assert": {"same_policy": true, "policy": "AI", "no_dns_leak": true}
+  },
+  {
+    "name": "anthropic_claude_web",
+    "desc": "网页版 Claude：登录 → 对话 → 上传附件 → Artifact 预览",
+    "requests": [
+      {"host": "claude.ai"},
+      {"host": "claude.com"},
+      {"host": "api.anthropic.com"},
+      {"host": "console.anthropic.com"},
+      {"host": "statsig.anthropic.com", "note": "特性开关/实验"},
+      {"host": "claudeusercontent.com", "note": "Artifact 沙箱内容域"},
+      {"host": "claude.site", "note": "已发布 Artifact 的公开访问域"},
+      {"host": "cdn.usefathom.com", "note": "官网分析脚本"}
+    ],
+    "assert": {"same_policy": true, "policy": "AI", "no_dns_leak": true}
+  },
+  {
+    "name": "anthropic_claude_code_cli",
+    "desc": "Claude Code CLI：模型调用 + 特性开关 + 崩溃上报（PROCESS-NAME 大小写变体）",
+    "requests": [
+      {"host": "api.anthropic.com", "process": "claude"},
+      {"host": "statsig.anthropic.com", "process": "claude"},
+      {"host": "console.anthropic.com", "process": "claude"},
+      {"host": "example.com", "process": "Claude", "note": "验证首字母大写变体"},
+      {"host": "example.com", "process": "claude.exe", "note": "Windows 小写变体"}
+    ],
+    "assert": {"same_policy": true, "policy": "AI", "no_dns_leak": true}
+  },
+  {
+    "name": "anthropic_api_developer",
+    "desc": "开发者直连 Anthropic API：文档 → 控制台 → 计费 → 状态页",
+    "requests": [
+      {"host": "docs.anthropic.com"},
+      {"host": "console.anthropic.com"},
+      {"host": "api.anthropic.com"},
+      {"host": "status.anthropic.com"},
+      {"host": "anthropic.com"}
+    ],
+    "assert": {"same_policy": true, "policy": "AI", "no_dns_leak": true}
+  },
+  {
+    "name": "perplexity_search",
+    "desc": "Perplexity 搜索：主站 + 检索 API + 图片 CDN + 文件上传",
+    "requests": [
+      {"host": "www.perplexity.ai"},
+      {"host": "perplexity.ai"},
+      {"host": "api.perplexity.ai"},
+      {"host": "pplx-res.cloudinary.com", "note": "结果图片 CDN"},
+      {"host": "ppl-ai-file-upload.s3.amazonaws.com", "note": "文件上传桶"}
+    ],
+    "assert": {"same_policy": true, "policy": "AI", "no_dns_leak": true}
+  },
+  {
+    "name": "mistral_le_chat",
+    "desc": "Mistral Le Chat + 平台控制台",
+    "requests": [
+      {"host": "chat.mistral.ai"},
+      {"host": "mistral.ai"},
+      {"host": "api.mistral.ai"},
+      {"host": "console.mistral.ai"},
+      {"host": "docs.mistral.ai"}
+    ],
+    "assert": {"same_policy": true, "policy": "AI", "no_dns_leak": true}
+  },
+  {
+    "name": "poe_multimodel_chat",
+    "desc": "Poe 多模型聊天：主站 + 媒体 CDN",
+    "requests": [
+      {"host": "poe.com"},
+      {"host": "www.poe.com"},
+      {"host": "poecdn.net"},
+      {"host": "qph.cf2.poecdn.net", "note": "图片/附件 CDN"}
+    ],
+    "assert": {"same_policy": true, "policy": "AI", "no_dns_leak": true}
+  },
+  {
+    "name": "cursor_ide_session",
+    "desc": "Cursor 编辑器：登录 → 补全/Composer → 自动更新（含 PROCESS-NAME）",
+    "requests": [
+      {"host": "cursor.com"},
+      {"host": "www.cursor.com"},
+      {"host": "api2.cursor.sh", "note": "推理/补全后端"},
+      {"host": "cursorapi.com"},
+      {"host": "cursor-cdn.com", "note": "更新包 CDN"},
+      {"host": "downloads.cursor.com"},
+      {"host": "example.com", "process": "Cursor"}
+    ],
+    "assert": {"same_policy": true, "policy": "AI", "no_dns_leak": true}
+  },
+  {
+    "name": "windsurf_ide_session",
+    "desc": "Windsurf / Codeium：主站 + 推理服务 + 遥测（含 PROCESS-NAME）",
+    "requests": [
+      {"host": "windsurf.com"},
+      {"host": "codeium.com"},
+      {"host": "server.codeium.com", "note": "补全推理服务"},
+      {"host": "codeiumdata.com"},
+      {"host": "example.com", "process": "Windsurf"}
+    ],
+    "assert": {"same_policy": true, "policy": "AI", "no_dns_leak": true}
+  },
+  {
+    "name": "github_copilot_oauth_chain",
+    "desc": "GitHub Copilot：从 github.com 发起 OAuth → api.github.com 换 token → Copilot 补全 → 遥测上报。理想上整条链应同一策略组同一出口 IP（GitHub OAuth 对 IP 漂移敏感）",
+    "requests": [
+      {"host": "github.com", "note": "OAuth 授权页"},
+      {"host": "api.github.com", "note": "AI.list 里有 DOMAIN,api.github.com"},
+      {"host": "api.githubcopilot.com"},
+      {"host": "copilot-proxy.githubusercontent.com"},
+      {"host": "copilot-telemetry.githubusercontent.com"}
+    ],
+    "assert": {"same_policy": true, "policy": "AI", "no_dns_leak": true},
+    "note": "2026-08-25 F1 已修复：github.com/githubusercontent.com/githubassets.com/ghcr.io 统一并入 AI.list，DownloadCDN 中对应条目已删除。"
+  },
+  {
+    "name": "midjourney_web_and_discord",
+    "desc": "Midjourney：官网/Web 编辑器出图 + Discord 内 /imagine 交互。跨组是既有设计（Discord 属社交媒体组），此处显式固化两组归属以防漂移",
+    "requests": [
+      {"host": "www.midjourney.com"},
+      {"host": "midjourney.com"},
+      {"host": "cdn.midjourney.com"},
+      {"host": "midjourney.cdn.b-cdn.net", "note": "Bunny CDN 出图分发"},
+      {"host": "discord.com", "note": "Discord 侧交互"},
+      {"host": "gateway.discord.gg", "note": "Discord WebSocket 网关"},
+      {"host": "cdn.discordapp.com"},
+      {"host": "media.discordapp.net"}
+    ],
+    "assert": {
+      "same_policy": false,
+      "policy": "AI",
+      "no_dns_leak": true,
+      "per_request": [
+        {"host": "discord.com", "policy": "社交媒体"},
+        {"host": "gateway.discord.gg", "policy": "社交媒体"},
+        {"host": "cdn.discordapp.com", "policy": "社交媒体"},
+        {"host": "media.discordapp.net", "policy": "社交媒体"}
+      ]
+    }
+  },
+  {
+    "name": "huggingface_hub",
+    "desc": "HuggingFace：模型页浏览 → 大文件 LFS 下载 → Spaces 运行",
+    "requests": [
+      {"host": "huggingface.co"},
+      {"host": "cdn-lfs.huggingface.co", "note": "LFS 权重下载"},
+      {"host": "cdn-lfs-us-1.hf.co"},
+      {"host": "hf.co"},
+      {"host": "hf.space", "note": "Spaces 运行域"}
+    ],
+    "assert": {"same_policy": true, "policy": "AI", "no_dns_leak": true}
+  },
+  {
+    "name": "ai_audio_elevenlabs_suno",
+    "desc": "AI 音频：ElevenLabs 语音合成 + Suno 音乐生成（生成任务与音频 CDN 应同出口，否则分片下载易被打断）",
+    "requests": [
+      {"host": "elevenlabs.io"},
+      {"host": "api.elevenlabs.io"},
+      {"host": "elevenlabs.com"},
+      {"host": "suno.com"},
+      {"host": "suno.ai"},
+      {"host": "studio-api.suno.ai"},
+      {"host": "cdn1.suno.ai", "note": "生成音频 CDN"}
+    ],
+    "assert": {"same_policy": true, "policy": "AI", "no_dns_leak": true}
+  },
+  {
+    "name": "llm_inference_platforms",
+    "desc": "推理聚合/托管平台：Groq 控制台 + OpenRouter / Together / Replicate / Fireworks / DeepInfra / Cohere",
+    "requests": [
+      {"host": "groq.com"},
+      {"host": "console.groq.com"},
+      {"host": "api.groq.com"},
+      {"host": "openrouter.ai"},
+      {"host": "api.together.xyz"},
+      {"host": "together.ai"},
+      {"host": "replicate.com"},
+      {"host": "replicate.delivery", "note": "模型输出文件分发"},
+      {"host": "api.fireworks.ai"},
+      {"host": "deepinfra.com"},
+      {"host": "api.cohere.com"}
+    ],
+    "assert": {"same_policy": true, "policy": "AI", "no_dns_leak": true}
+  },
+  {
+    "name": "ollama_model_pull",
+    "desc": "Ollama 本地模型拉取：官网 + registry 拉层。理想上 registry 与官网同组同出口（分层下载中途换出口会 416/断流）",
+    "requests": [
+      {"host": "ollama.com"},
+      {"host": "registry.ollama.ai", "note": "模型 blob registry"}
+    ],
+    "assert": {"same_policy": true, "policy": "AI", "no_dns_leak": true},
+    "note": "2026-08-25 F1 已修复：AI.list 补入 DOMAIN-SUFFIX,ollama.ai。"
+  }
+]
