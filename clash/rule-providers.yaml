@@ -1,0 +1,269 @@
+# AUTO-GENERATED — Clash Verge Rev 规则集配置（由 surge2clash.py 生成，勿手工编辑）
+# 用法：在 Clash Verge Rev 中对订阅配置使用「Merge」扩展，粘贴本文件的
+# rule-providers 段；再参照文末注释的 rules 序列接入你自己的策略组。
+# 各 provider 与 Surge 同名 .list 一一对应，优先级语义见仓库 README。
+
+rule-providers:
+  AI:
+    type: http
+    behavior: classical
+    format: text
+    url: https://cdn.jsdelivr.net/gh/yhyfhgs/surge-rules@main/clash/AI.list
+    path: ./rule-sets/surge-rules/AI.list
+    interval: 86400
+  AlibabaCN:
+    type: http
+    behavior: classical
+    format: text
+    url: https://cdn.jsdelivr.net/gh/yhyfhgs/surge-rules@main/clash/AlibabaCN.list
+    path: ./rule-sets/surge-rules/AlibabaCN.list
+    interval: 86400
+  AppleCN:
+    type: http
+    behavior: classical
+    format: text
+    url: https://cdn.jsdelivr.net/gh/yhyfhgs/surge-rules@main/clash/AppleCN.list
+    path: ./rule-sets/surge-rules/AppleCN.list
+    interval: 86400
+  BaiduCN:
+    type: http
+    behavior: classical
+    format: text
+    url: https://cdn.jsdelivr.net/gh/yhyfhgs/surge-rules@main/clash/BaiduCN.list
+    path: ./rule-sets/surge-rules/BaiduCN.list
+    interval: 86400
+  ByteDanceCN:
+    type: http
+    behavior: classical
+    format: text
+    url: https://cdn.jsdelivr.net/gh/yhyfhgs/surge-rules@main/clash/ByteDanceCN.list
+    path: ./rule-sets/surge-rules/ByteDanceCN.list
+    interval: 86400
+  ChinaDomain:
+    type: http
+    behavior: classical
+    format: text
+    url: https://cdn.jsdelivr.net/gh/yhyfhgs/surge-rules@main/clash/ChinaDomain.list
+    path: ./rule-sets/surge-rules/ChinaDomain.list
+    interval: 86400
+  ChinaIP:
+    type: http
+    behavior: classical
+    format: text
+    url: https://cdn.jsdelivr.net/gh/yhyfhgs/surge-rules@main/clash/ChinaIP.list
+    path: ./rule-sets/surge-rules/ChinaIP.list
+    interval: 86400
+  ChinaMedia:
+    type: http
+    behavior: classical
+    format: text
+    url: https://cdn.jsdelivr.net/gh/yhyfhgs/surge-rules@main/clash/ChinaMedia.list
+    path: ./rule-sets/surge-rules/ChinaMedia.list
+    interval: 86400
+  Domestic:
+    type: http
+    behavior: classical
+    format: text
+    url: https://cdn.jsdelivr.net/gh/yhyfhgs/surge-rules@main/clash/Domestic.list
+    path: ./rule-sets/surge-rules/Domestic.list
+    interval: 86400
+  DownloadCDN:
+    type: http
+    behavior: classical
+    format: text
+    url: https://cdn.jsdelivr.net/gh/yhyfhgs/surge-rules@main/clash/DownloadCDN.list
+    path: ./rule-sets/surge-rules/DownloadCDN.list
+    interval: 86400
+  Europe:
+    type: http
+    behavior: classical
+    format: text
+    url: https://cdn.jsdelivr.net/gh/yhyfhgs/surge-rules@main/clash/Europe.list
+    path: ./rule-sets/surge-rules/Europe.list
+    interval: 86400
+  GameDownloadCN:
+    type: http
+    behavior: classical
+    format: text
+    url: https://cdn.jsdelivr.net/gh/yhyfhgs/surge-rules@main/clash/GameDownloadCN.list
+    path: ./rule-sets/surge-rules/GameDownloadCN.list
+    interval: 86400
+  Games:
+    type: http
+    behavior: classical
+    format: text
+    url: https://cdn.jsdelivr.net/gh/yhyfhgs/surge-rules@main/clash/Games.list
+    path: ./rule-sets/surge-rules/Games.list
+    interval: 86400
+  Google:
+    type: http
+    behavior: classical
+    format: text
+    url: https://cdn.jsdelivr.net/gh/yhyfhgs/surge-rules@main/clash/Google.list
+    path: ./rule-sets/surge-rules/Google.list
+    interval: 86400
+  Japan:
+    type: http
+    behavior: classical
+    format: text
+    url: https://cdn.jsdelivr.net/gh/yhyfhgs/surge-rules@main/clash/Japan.list
+    path: ./rule-sets/surge-rules/Japan.list
+    interval: 86400
+  Meta:
+    type: http
+    behavior: classical
+    format: text
+    url: https://cdn.jsdelivr.net/gh/yhyfhgs/surge-rules@main/clash/Meta.list
+    path: ./rule-sets/surge-rules/Meta.list
+    interval: 86400
+  Microsoft:
+    type: http
+    behavior: classical
+    format: text
+    url: https://cdn.jsdelivr.net/gh/yhyfhgs/surge-rules@main/clash/Microsoft.list
+    path: ./rule-sets/surge-rules/Microsoft.list
+    interval: 86400
+  MicrosoftCN:
+    type: http
+    behavior: classical
+    format: text
+    url: https://cdn.jsdelivr.net/gh/yhyfhgs/surge-rules@main/clash/MicrosoftCN.list
+    path: ./rule-sets/surge-rules/MicrosoftCN.list
+    interval: 86400
+  NetEaseCN:
+    type: http
+    behavior: classical
+    format: text
+    url: https://cdn.jsdelivr.net/gh/yhyfhgs/surge-rules@main/clash/NetEaseCN.list
+    path: ./rule-sets/surge-rules/NetEaseCN.list
+    interval: 86400
+  PKU:
+    type: http
+    behavior: classical
+    format: text
+    url: https://cdn.jsdelivr.net/gh/yhyfhgs/surge-rules@main/clash/PKU.list
+    path: ./rule-sets/surge-rules/PKU.list
+    interval: 86400
+  PrivateLAN:
+    type: http
+    behavior: classical
+    format: text
+    url: https://cdn.jsdelivr.net/gh/yhyfhgs/surge-rules@main/clash/PrivateLAN.list
+    path: ./rule-sets/surge-rules/PrivateLAN.list
+    interval: 86400
+  ProxyGFW:
+    type: http
+    behavior: classical
+    format: text
+    url: https://cdn.jsdelivr.net/gh/yhyfhgs/surge-rules@main/clash/ProxyGFW.list
+    path: ./rule-sets/surge-rules/ProxyGFW.list
+    interval: 86400
+  Reject:
+    type: http
+    behavior: classical
+    format: text
+    url: https://cdn.jsdelivr.net/gh/yhyfhgs/surge-rules@main/clash/Reject.list
+    path: ./rule-sets/surge-rules/Reject.list
+    interval: 86400
+  SocialOthers:
+    type: http
+    behavior: classical
+    format: text
+    url: https://cdn.jsdelivr.net/gh/yhyfhgs/surge-rules@main/clash/SocialOthers.list
+    path: ./rule-sets/surge-rules/SocialOthers.list
+    interval: 86400
+  Streaming:
+    type: http
+    behavior: classical
+    format: text
+    url: https://cdn.jsdelivr.net/gh/yhyfhgs/surge-rules@main/clash/Streaming.list
+    path: ./rule-sets/surge-rules/Streaming.list
+    interval: 86400
+  Telegram:
+    type: http
+    behavior: classical
+    format: text
+    url: https://cdn.jsdelivr.net/gh/yhyfhgs/surge-rules@main/clash/Telegram.list
+    path: ./rule-sets/surge-rules/Telegram.list
+    interval: 86400
+  TencentCN:
+    type: http
+    behavior: classical
+    format: text
+    url: https://cdn.jsdelivr.net/gh/yhyfhgs/surge-rules@main/clash/TencentCN.list
+    path: ./rule-sets/surge-rules/TencentCN.list
+    interval: 86400
+  TikTok:
+    type: http
+    behavior: classical
+    format: text
+    url: https://cdn.jsdelivr.net/gh/yhyfhgs/surge-rules@main/clash/TikTok.list
+    path: ./rule-sets/surge-rules/TikTok.list
+    interval: 86400
+  Twitter:
+    type: http
+    behavior: classical
+    format: text
+    url: https://cdn.jsdelivr.net/gh/yhyfhgs/surge-rules@main/clash/Twitter.list
+    path: ./rule-sets/surge-rules/Twitter.list
+    interval: 86400
+  UK:
+    type: http
+    behavior: classical
+    format: text
+    url: https://cdn.jsdelivr.net/gh/yhyfhgs/surge-rules@main/clash/UK.list
+    path: ./rule-sets/surge-rules/UK.list
+    interval: 86400
+  US:
+    type: http
+    behavior: classical
+    format: text
+    url: https://cdn.jsdelivr.net/gh/yhyfhgs/surge-rules@main/clash/US.list
+    path: ./rule-sets/surge-rules/US.list
+    interval: 86400
+  YouTube:
+    type: http
+    behavior: classical
+    format: text
+    url: https://cdn.jsdelivr.net/gh/yhyfhgs/surge-rules@main/clash/YouTube.list
+    path: ./rule-sets/surge-rules/YouTube.list
+    interval: 86400
+
+# ─── rules 参考序列（按 Surge.conf 优先级；取消注释并替换为你的策略组名）───
+# Surge 内置 SYSTEM/LAN 集在 Clash 端的等价前置规则：
+#  - GEOIP,lan,DIRECT,no-resolve
+# rules:
+#  - RULE-SET,Reject,REJECT   # Surge.conf 已停用，Clash 端按需启用（须置于放行规则之前）
+#  - RULE-SET,PrivateLAN,DIRECT
+#  - RULE-SET,PKU,DIRECT
+#  - RULE-SET,GameDownloadCN,DIRECT
+#  - RULE-SET,YouTube,流媒体
+#  - RULE-SET,Google,Google-X-Meta-MS
+#  - RULE-SET,Twitter,Google-X-Meta-MS
+#  - RULE-SET,Meta,Google-X-Meta-MS
+#  - RULE-SET,Microsoft,Google-X-Meta-MS
+#  - RULE-SET,AI,AI
+#  - RULE-SET,TikTok,社交媒体
+#  - RULE-SET,SocialOthers,社交媒体
+#  - RULE-SET,Telegram,Telegram
+#  - RULE-SET,Streaming,流媒体
+#  - RULE-SET,Games,游戏
+#  - RULE-SET,DownloadCDN,下载
+#  - RULE-SET,AppleCN,DIRECT
+#  - RULE-SET,MicrosoftCN,DIRECT
+#  - RULE-SET,ProxyGFW,Final
+#  - RULE-SET,Japan,🇯🇵日本节点
+#  - RULE-SET,UK,🇬🇧英国节点
+#  - RULE-SET,Europe,🇪🇺欧洲节点
+#  - RULE-SET,US,🇺🇸美国节点
+#  - RULE-SET,Domestic,DIRECT
+#  - RULE-SET,ChinaMedia,DIRECT
+#  - RULE-SET,TencentCN,DIRECT
+#  - RULE-SET,AlibabaCN,DIRECT
+#  - RULE-SET,ByteDanceCN,DIRECT
+#  - RULE-SET,BaiduCN,DIRECT
+#  - RULE-SET,NetEaseCN,DIRECT
+#  - RULE-SET,ChinaDomain,DIRECT
+#  - RULE-SET,ChinaIP,DIRECT,no-resolve
+#  - GEOIP,CN,DIRECT,no-resolve
+#  - MATCH,Final

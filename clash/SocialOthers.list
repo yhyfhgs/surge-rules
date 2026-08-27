@@ -1,0 +1,27 @@
+# AUTO-GENERATED — Clash(Mihomo) classical 规则，由 ../SocialOthers.list 派生
+# 勿手工编辑；修改 Surge 源后运行 python3 surge2clash.py 重新生成
+
+# SocialOthers — 其他社交 (Discord/Bluesky/Reddit 等)
+# 规范化排序：规则类型分区，区内字母序
+# 2026-08-25 维护：补齐 redditstatic.com/discord.media/dis.gd/bsky.network/txmblr.com 五个配对域
+
+DOMAIN-SUFFIX,bsky.app
+DOMAIN-SUFFIX,bsky.network
+DOMAIN-SUFFIX,bsky.social
+DOMAIN-SUFFIX,dis.gd
+DOMAIN-SUFFIX,discord.com
+DOMAIN-SUFFIX,discord.gg
+DOMAIN-SUFFIX,discord.media
+DOMAIN-SUFFIX,discordapp.com
+DOMAIN-SUFFIX,discordapp.net
+DOMAIN-SUFFIX,licdn.com
+DOMAIN-SUFFIX,linkedin.com
+DOMAIN-SUFFIX,mastodon.social
+DOMAIN-SUFFIX,pinimg.com
+DOMAIN-SUFFIX,pinterest.com
+DOMAIN-SUFFIX,redd.it
+DOMAIN-SUFFIX,reddit.com
+DOMAIN-SUFFIX,redditmedia.com
+DOMAIN-SUFFIX,redditstatic.com
+DOMAIN-SUFFIX,tumblr.com
+DOMAIN-SUFFIX,txmblr.com

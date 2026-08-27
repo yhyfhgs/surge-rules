@@ -2,7 +2,12 @@
 
 个人维护的 Surge 分流规则集（本地化自 skk.moe / Repcz / Loyalsoldier / blackmatrix7 等来源，经全局唯一化去重与冲突消解）。
 
-通过 jsDelivr 引用：`https://cdn.jsdelivr.net/gh/yhyfhgs/surge-rules@main/<名称>.list`
+- Surge 引用：`https://cdn.jsdelivr.net/gh/yhyfhgs/surge-rules@main/<名称>.list`
+- Clash (Verge Rev / Mihomo) 引用：`https://cdn.jsdelivr.net/gh/yhyfhgs/surge-rules@main/clash/<名称>.list`（`behavior: classical`、`format: text`）
+
+## Clash 版本（clash/ 目录）
+
+`clash/` 下是由 Surge 源自动派生的 Clash(Mihomo) classical 规则集，文件名一一对应，随每次发布同步再生（`surge2clash.py`，勿手工编辑）。差异处理：`DOMAIN-WILDCARD` 等价转写为 `DOMAIN-REGEX`；`USER-AGENT`/`URL-REGEX` 为 Surge 专有能力，已剔除并在各文件头标注数量。[clash/rule-providers.yaml](clash/rule-providers.yaml) 提供全部 rule-providers 定义与按优先级排列的 rules 参考序列，可在 Clash Verge Rev 的「Merge」扩展中直接取用。
 
 | 列表 | 用途 | 建议策略 |
 |---|---|---|

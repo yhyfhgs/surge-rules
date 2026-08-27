@@ -1,0 +1,45 @@
+# AUTO-GENERATED — Clash(Mihomo) classical 规则，由 ../UK.list 派生
+# 勿手工编辑；修改 Surge 源后运行 python3 surge2clash.py 重新生成
+
+# UK — 英国区域服务
+# 规范化排序：规则类型分区，区内字母序
+# 2026-08-25 维护：GEOIP/IP-ASN 兜底保留本表，随表整体置于 Apple/微软/GFW 之后（防遮蔽其 IP 规则）
+
+DOMAIN-SUFFIX,ac.uk
+DOMAIN-SUFFIX,barclays.co.uk
+DOMAIN-SUFFIX,bbc.com
+DOMAIN-SUFFIX,bbcmedia.co.uk
+DOMAIN-SUFFIX,bfi.org.uk
+DOMAIN-SUFFIX,dailymail.co.uk
+DOMAIN-SUFFIX,ee.co.uk
+DOMAIN-SUFFIX,giffgaff.com
+DOMAIN-SUFFIX,gov.uk
+DOMAIN-SUFFIX,halifax.co.uk
+DOMAIN-SUFFIX,hsbc.co.uk
+DOMAIN-SUFFIX,independent.co.uk
+DOMAIN-SUFFIX,itvpnp.net
+DOMAIN-SUFFIX,lebara.co.uk
+DOMAIN-SUFFIX,lloydsbank.com
+DOMAIN-SUFFIX,lycamobile.co.uk
+DOMAIN-SUFFIX,monzo.com
+DOMAIN-SUFFIX,nationwide.co.uk
+DOMAIN-SUFFIX,natwest.com
+DOMAIN-SUFFIX,nhs.uk
+DOMAIN-SUFFIX,nowtv.com
+DOMAIN-SUFFIX,o2.co.uk
+DOMAIN-SUFFIX,santander.co.uk
+DOMAIN-SUFFIX,sky.com
+DOMAIN-SUFFIX,skygo.co.uk
+DOMAIN-SUFFIX,smartymobile.co.uk
+DOMAIN-SUFFIX,starlingbank.com
+DOMAIN-SUFFIX,telegraph.co.uk
+DOMAIN-SUFFIX,theguardian.com
+DOMAIN-SUFFIX,three.co.uk
+DOMAIN-SUFFIX,uktv.co.uk
+DOMAIN-SUFFIX,uktvplay.co.uk
+DOMAIN-SUFFIX,virginmedia.com
+DOMAIN-SUFFIX,virginmediatvanywhere.com
+DOMAIN-SUFFIX,vodafone.co.uk
+DOMAIN-SUFFIX,voxi.co.uk
+
+GEOIP,GB,no-resolve

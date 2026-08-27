@@ -1,0 +1,24 @@
+# AUTO-GENERATED — Clash(Mihomo) classical 规则，由 ../YouTube.list 派生
+# 勿手工编辑；修改 Surge 源后运行 python3 surge2clash.py 重新生成
+# 已剔除 Clash 不支持的规则: USER-AGENT x 7
+
+# YouTube — YouTube/YouTube Music 全量 (先于 Google 匹配)；2026-08-25 并入 blackmatrix7:YouTube
+# 规范化排序：规则类型分区，区内字母序
+# 2026-08-25 维护：gvt2.com 移交 Google.list(Google 更新/遥测域，非 YouTube)
+
+DOMAIN,yt3.ggpht.com
+DOMAIN,yt4.ggpht.com
+
+DOMAIN-SUFFIX,googlevideo.com
+DOMAIN-SUFFIX,video.google.com
+DOMAIN-SUFFIX,youtu.be
+DOMAIN-SUFFIX,yt.be
+DOMAIN-SUFFIX,ytimg.com
+
+DOMAIN-KEYWORD,youtube
+
+
+IP-CIDR,172.110.32.0/21,no-resolve
+IP-CIDR,216.73.80.0/20,no-resolve
+
+IP-CIDR6,2620:120:e000::/40,no-resolve
