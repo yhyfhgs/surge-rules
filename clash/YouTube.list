@@ -1,5 +1,5 @@
-# AUTO-GENERATED — Clash(Mihomo) classical 规则，由 ../YouTube.list 派生
-# 勿手工编辑；修改 Surge 源后运行 python3 surge2clash.py 重新生成
+# AUTO-GENERATED — Clash(Mihomo) classical 规则，由 ../lists/YouTube.list 派生
+# 勿手工编辑；修改 Surge 源后运行 python3 tools/surge2clash.py 重新生成
 # 已剔除 Clash 不支持的规则: USER-AGENT x 7
 
 # YouTube — YouTube/YouTube Music 全量 (先于 Google 匹配)；2026-08-25 并入 blackmatrix7:YouTube

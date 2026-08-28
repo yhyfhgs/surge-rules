@@ -2,8 +2,12 @@
 # -*- coding: utf-8 -*-
 """surge2clash.py — 从 Surge .list 派生 Clash(Mihomo) classical 规则集。
 
-单一编辑源原则：只编辑根目录的 Surge .list；clash/ 整个目录为派生产物，
+单一编辑源原则：只编辑 lists/ 下的 Surge .list；clash/ 整个目录为派生产物，
 由本脚本全量重建（update.sh 发布前自动执行），勿手工编辑。
+
+本脚本位于仓库的 tools/ 下，读写路径全部相对脚本自身位置推导：
+  输入 <仓库根>/lists/*.list  →  输出 <仓库根>/clash/
+在仓库根执行 `python3 tools/surge2clash.py` 即可，无需 cd。
 
 转换规则：
   原样透传   DOMAIN / DOMAIN-SUFFIX / DOMAIN-KEYWORD / IP-CIDR / IP-CIDR6
@@ -22,8 +26,10 @@ import os
 import re
 import sys
 
-RULES_DIR = os.path.dirname(os.path.abspath(__file__))
-OUT_DIR = os.path.join(RULES_DIR, "clash")
+# 脚本在 <仓库根>/tools/ 下，上跳一级即仓库根；不写死绝对路径，便于整仓迁移。
+REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+RULES_DIR = os.path.join(REPO_ROOT, "lists")
+OUT_DIR = os.path.join(REPO_ROOT, "clash")
 CDN_BASE = "https://cdn.jsdelivr.net/gh/yhyfhgs/surge-rules@main/clash"
 
 PASSTHROUGH = {
@@ -113,8 +119,8 @@ def convert_file(name):
 
 def write_list(name, body, kept, dropped):
     header = [
-        "# AUTO-GENERATED — Clash(Mihomo) classical 规则，由 ../%s 派生" % name,
-        "# 勿手工编辑；修改 Surge 源后运行 python3 surge2clash.py 重新生成",
+        "# AUTO-GENERATED — Clash(Mihomo) classical 规则，由 ../lists/%s 派生" % name,
+        "# 勿手工编辑；修改 Surge 源后运行 python3 tools/surge2clash.py 重新生成",
     ]
     if dropped:
         detail = ", ".join("%s x %d" % (k, v) for k, v in sorted(dropped.items()))
@@ -127,7 +133,7 @@ def write_list(name, body, kept, dropped):
 
 def write_providers(names):
     lines = [
-        "# AUTO-GENERATED — Clash Verge Rev 规则集配置（由 surge2clash.py 生成，勿手工编辑）",
+        "# AUTO-GENERATED — Clash Verge Rev 规则集配置（由 tools/surge2clash.py 生成，勿手工编辑）",
         "# 用法：在 Clash Verge Rev 中对订阅配置使用「Merge」扩展，粘贴本文件的",
         "# rule-providers 段；再参照文末注释的 rules 序列接入你自己的策略组。",
         "# 各 provider 与 Surge 同名 .list 一一对应，优先级语义见仓库 README。",

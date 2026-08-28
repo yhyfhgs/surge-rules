@@ -1,5 +1,5 @@
-# AUTO-GENERATED — Clash(Mihomo) classical 规则，由 ../AI.list 派生
-# 勿手工编辑；修改 Surge 源后运行 python3 surge2clash.py 重新生成
+# AUTO-GENERATED — Clash(Mihomo) classical 规则，由 ../lists/AI.list 派生
+# 勿手工编辑；修改 Surge 源后运行 python3 tools/surge2clash.py 重新生成
 
 # AI — 独立 AI 服务商 (OpenAI/Anthropic/Perplexity/Ollama 等) + Apple Intelligence + Copilot；大厂自有 AI 归各生态列表；2026-08-25 并入 blackmatrix7:OpenAI+Claude+Gemini+Copilot
 # 规范化排序：规则类型分区，区内字母序

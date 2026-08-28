@@ -513,11 +513,11 @@ class Auditor(object):
         for base, ref, line in self.e.missing_lists:
             n += 1
             self._add("A5", "P0", "stale", base, "RULE-SET,%s" % ref,
-                      "Surge.conf:%d 引用了 %s，但本地 rules/ 目录中不存在该文件。"
+                      "Surge.conf:%d 引用了 %s，但本地 lists/ 目录中不存在该文件。"
                       % (line, base),
                       "该 RULE-SET 在本地/CDN 缺失时 Surge 会跳过整段规则，"
                       "这一层分流直接失效，流量落到后面的兜底规则。",
-                      "补齐 rules/%s，或从 Surge.conf 删除该 RULE-SET 行。" % base)
+                      "补齐 lists/%s，或从 Surge.conf 删除该 RULE-SET 行。" % base)
 
         existing = sorted(f for f in os.listdir(self.e.rules_dir)
                           if f.endswith(".list"))
@@ -528,7 +528,7 @@ class Auditor(object):
                     if f in commented else "（conf 中完全没有引用行）")
             n += 1
             self._add("A5", "P3", "stale", f, "-",
-                      "rules/%s 存在于仓库但未被 Surge.conf 的任何 RULE-SET 引用%s。"
+                      "lists/%s 存在于仓库但未被 Surge.conf 的任何 RULE-SET 引用%s。"
                       % (f, note),
                       "文件仍随 git/CDN 分发但对分流无任何作用；长期不更新会与上游脱节，"
                       "误以为生效会导致排障方向错误。",
@@ -940,7 +940,7 @@ def main(argv=None):
     ap = argparse.ArgumentParser(
         prog="audit.py", description="Surge 规则体系静态审计器（A1–A6）")
     ap.add_argument("--conf", help="Surge.conf 路径（默认自动定位）")
-    ap.add_argument("--rules", help="rules/ 目录（默认 conf 同级 rules/）")
+    ap.add_argument("--rules", help=".list 所在目录（默认 conf 同级 rules/lists/）")
     ap.add_argument("--allowlist", default=DEFAULT_ALLOWLIST,
                     help="豁免表路径（默认同目录 allowlist.json）")
     ap.add_argument("--check", default="all",

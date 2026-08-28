@@ -1,5 +1,5 @@
-# AUTO-GENERATED — Clash(Mihomo) classical 规则，由 ../ChinaIP.list 派生
-# 勿手工编辑；修改 Surge 源后运行 python3 surge2clash.py 重新生成
+# AUTO-GENERATED — Clash(Mihomo) classical 规则，由 ../lists/ChinaIP.list 派生
+# 勿手工编辑；修改 Surge 源后运行 python3 tools/surge2clash.py 重新生成
 
 # ChinaIP — 中国大陆 IP 段 (全量 no-resolve)
 # 规范化排序：规则类型分区，区内字母序

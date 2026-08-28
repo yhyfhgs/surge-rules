@@ -1,5 +1,5 @@
-# AUTO-GENERATED — Clash(Mihomo) classical 规则，由 ../PrivateLAN.list 派生
-# 勿手工编辑；修改 Surge 源后运行 python3 surge2clash.py 重新生成
+# AUTO-GENERATED — Clash(Mihomo) classical 规则，由 ../lists/PrivateLAN.list 派生
+# 勿手工编辑；修改 Surge 源后运行 python3 tools/surge2clash.py 重新生成
 
 # PrivateLAN — 内网域名/rDNS/路由器面板；2026-08-25 并入 blackmatrix7:Lan
 # 规范化排序：规则类型分区，区内字母序

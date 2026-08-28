@@ -4,7 +4,7 @@
 engine.py — Surge 规则语义引擎（分流测试套件 L0 层）
 
 职责：
-  1. 只读解析 Surge.conf（[Proxy] / [Proxy Group] / [Rule]）与 rules/*.list；
+  1. 只读解析 Surge.conf（[Proxy] / [Proxy Group] / [Rule]）与 rules/lists/*.list；
   2. 把 RULE-SET 内联展开成一张「按 conf 顺序」的全局规则表（rule_index 即优先级）；
   3. 离线模拟一次请求的分流判定，返回 spec/testkit.md 约定的 JSON 结构；
   4. 供 audit.py / runsuite.py 以模块方式复用（`import engine`）。
@@ -277,7 +277,10 @@ class Engine(object):
     def __init__(self, conf_path, rules_dir=None):
         self.conf_path = os.path.abspath(conf_path)
         base = os.path.dirname(self.conf_path)
-        self.rules_dir = os.path.abspath(rules_dir or os.path.join(base, "rules"))
+        # 默认布局：<conf 同级>/rules/ 是规则仓库根，32 个 .list 收纳在其 lists/ 下。
+        # 显式传入 rules_dir 时原样使用（自检的 tempdir fixture 走这一支）。
+        self.rules_dir = os.path.abspath(
+            rules_dir or os.path.join(base, "rules", "lists"))
         self.warnings = []
         self.proxies = {}          # 物理代理名 -> 原始定义
         self.groups = {}           # 策略组名 -> {"type":..., "members":[...]}
@@ -1143,7 +1146,7 @@ def main(argv=None):
     # 公共选项：子命令前后都可写（engine.py --json match X / engine.py match X --json）
     common = argparse.ArgumentParser(add_help=False)
     common.add_argument("--conf", help="Surge.conf 路径（默认自动定位）")
-    common.add_argument("--rules", help="rules/ 目录（默认 conf 同级 rules/）")
+    common.add_argument("--rules", help=".list 所在目录（默认 conf 同级 rules/lists/）")
     common.add_argument("--json", action="store_true", help="JSON 输出")
 
     ap = argparse.ArgumentParser(

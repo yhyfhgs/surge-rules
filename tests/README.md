@@ -34,7 +34,7 @@ Surge HTTP API，见下方[开启 Surge HTTP API](#开启-surge-http-api)。
 
 ```
 rules/tests/
-├── engine.py            L0 规则语义引擎（解析 conf + 31 个 list，离线模拟匹配）
+├── engine.py            L0 规则语义引擎（解析 conf + 32 个 list（其中 Reject 在 conf 中注释停用，实际内联 31 个），离线模拟匹配）
 ├── audit.py             L1 静态审计器（A1–A6 六项检查）
 ├── runsuite.py          L2 场景断言运行器
 ├── live_check.py        L3 在线实测（Surge HTTP API + 真实请求）
@@ -69,7 +69,8 @@ tests/live_report.md
 ## L0 `engine.py` —— 规则语义引擎
 
 离线复刻 Surge 的匹配语义：读 `Surge.conf` 的 `[Rule]`，把每条 `RULE-SET` 的远程 URL
-按文件名映射回本地 `rules/*.list` 内联展开，然后按顺序做首次命中匹配。
+按文件名映射回本地 `rules/lists/*.list` 内联展开，然后按顺序做首次命中匹配。
+（默认规则目录 = `Surge.conf` 同级的 `rules/lists/`；用 `--rules` 可指到别处。）
 
 ```bash
 python3 engine.py match chatgpt.com                  # 人读输出

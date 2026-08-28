@@ -1,4 +1,4 @@
-# AUTO-GENERATED — Clash Verge Rev 规则集配置（由 surge2clash.py 生成，勿手工编辑）
+# AUTO-GENERATED — Clash Verge Rev 规则集配置（由 tools/surge2clash.py 生成，勿手工编辑）
 # 用法：在 Clash Verge Rev 中对订阅配置使用「Merge」扩展，粘贴本文件的
 # rule-providers 段；再参照文末注释的 rules 序列接入你自己的策略组。
 # 各 provider 与 Surge 同名 .list 一一对应，优先级语义见仓库 README。

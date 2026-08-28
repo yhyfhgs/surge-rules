@@ -9,13 +9,13 @@ python3 tests/audit.py --check all --fail-on P1 || { echo "审计未过，中止
 python3 tests/runsuite.py || { echo "场景断言未过，中止发布"; exit 1; }
 
 echo "[pre-flight] 重新生成 Clash 派生规则集 (clash/)…"
-python3 surge2clash.py || { echo "Clash 转换失败，中止发布"; exit 1; }
+python3 tools/surge2clash.py || { echo "Clash 转换失败，中止发布"; exit 1; }
 
 git add -A
 git diff --cached --quiet || git commit -m "${1:-update rules}"
 git push origin main
 echo "已推送: $(git rev-parse --short HEAD)"
-files="$(ls *.list clash/*.list) clash/rule-providers.yaml"
+files="$(ls lists/*.list clash/*.list) clash/rule-providers.yaml"
 fail=0
 for f in $files; do
   curl -sS --max-time 30 "https://purge.jsdelivr.net/gh/yhyfhgs/surge-rules@main/$f" >/dev/null || fail=$((fail+1))

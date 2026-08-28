@@ -1,5 +1,5 @@
-# AUTO-GENERATED — Clash(Mihomo) classical 规则，由 ../ChinaMedia.list 派生
-# 勿手工编辑；修改 Surge 源后运行 python3 surge2clash.py 重新生成
+# AUTO-GENERATED — Clash(Mihomo) classical 规则，由 ../lists/ChinaMedia.list 派生
+# 勿手工编辑；修改 Surge 源后运行 python3 tools/surge2clash.py 重新生成
 # 已剔除 Clash 不支持的规则: USER-AGENT x 35
 
 # ChinaMedia — 国内流媒体/视频/直播/音乐直连（blackmatrix7:ChinaMedia+BiliBili+iQIYI+Youku+TencentVideo+NetEaseMusic+KugouKuwo+Douyu+HuYa+KuaiShou；2026-08-25 建）

@@ -1,5 +1,5 @@
-# AUTO-GENERATED — Clash(Mihomo) classical 规则，由 ../ChinaDomain.list 派生
-# 勿手工编辑；修改 Surge 源后运行 python3 surge2clash.py 重新生成
+# AUTO-GENERATED — Clash(Mihomo) classical 规则，由 ../lists/ChinaDomain.list 派生
+# 勿手工编辑；修改 Surge 源后运行 python3 tools/surge2clash.py 重新生成
 # 已剔除 Clash 不支持的规则: USER-AGENT x 24
 
 # ChinaDomain — 大陆域名直连兜底大表（blackmatrix7 ChinaMaxNoIP，机器管理层；手工条目请加 Domestic）

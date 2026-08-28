@@ -1,5 +1,5 @@
-# AUTO-GENERATED — Clash(Mihomo) classical 规则，由 ../Microsoft.list 派生
-# 勿手工编辑；修改 Surge 源后运行 python3 surge2clash.py 重新生成
+# AUTO-GENERATED — Clash(Mihomo) classical 规则，由 ../lists/Microsoft.list 派生
+# 勿手工编辑；修改 Surge 源后运行 python3 tools/surge2clash.py 重新生成
 
 # Microsoft — 微软海外服务与 AI（Copilot/Bing/MSN/国际登录面）；仿 Google/Twitter 模式独立成表，走 Google-X-Meta 组
 # 规范化排序：规则类型分区，区内字母序

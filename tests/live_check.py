@@ -1072,11 +1072,10 @@ def parse_proxy_servers(profile_text):
     从配置文本的 [Proxy] 段取 {节点名: 服务器地址}。
 
     为什么有用: 本配置是 snell 级联(家宽节点用 underlying-proxy 指向落地机房中转),
-    真正面向互联网的那一跳就是**该节点自己的 server 地址**。实测已验证:
-      🇺🇸REDACTED-ISP-A-ISP-A-*  → <REDACTED-IP>   与 chatgpt.com/cdn-cgi/trace 回显一致
-      🇺🇸REDACTED-ISP-B-WAVE-* → <REDACTED-IP> 与 x.com/cdn-cgi/trace 回显一致
-      🇯🇵REDACTED-ISP-C-ISP-C-*    → <REDACTED-IP> 与 pixiv/api.fast.com 回显一致
+    真正面向互联网的那一跳就是**该节点自己的 server 地址**。已用多组节点对照
+    chatgpt.com / x.com 的 cdn-cgi/trace 与 api.fast.com 回显实测核对一致。
     所以对没有 IP 回显端点的策略组, 可以用「配置推导」补上出口 IP。
+    (勿在本文件写入任何真实节点地址/名称举例 —— tests/ 随公开仓库发布。)
     注意这里只读服务器地址, 绝不读取/打印 psk 等敏感字段。
     """
     servers = {}
