@@ -356,9 +356,9 @@ python3 live_check.py --scenario --hosts chatgpt.com,claude.ai,api.anthropic.com
 程序已经区分开了。
 
 **2. 在线策略显示的是节点名而不是组名**
-`/v1/requests/recent` 里的 `policyName` 通常是链路末端的物理节点（如 `🇺🇸REDACTED-ISP-A-ISP-A-DC-X-LAX`），
+`/v1/requests/recent` 里的 `policyName` 通常是链路末端的物理节点（如 `🇺🇸<ISP>-<机房>-LAX`），
 不是 `AI`。程序会从 notes 里还原完整链路，还原不出来时退一步比 `exit_class`。
-表里写成 `AI→🇺🇸REDACTED-ISP-A-ISP-A-DC-X-LAX` 就是还原成功了。
+表里写成 `AI→🇺🇸<末端节点名>` 就是还原成功了。
 
 **3. `UNREACHABLE` / `NOT_FOUND` 不等于分流错了**
 `UNREACHABLE` 是 TCP/TLS 没打通：站点被墙、证书问题、拒绝 HEAD、CDN 挡爬虫都算。

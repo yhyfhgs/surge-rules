@@ -64,17 +64,25 @@ EXIT_CLASS_EXACT = {
     "REJECT": "REJECT",
 }
 
-# 物理节点名(如 🇺🇸REDACTED-ISP-A-ISP-A-DC-X-LAX)的启发式归类。
+# 物理节点名(如 🇺🇸<ISP>-<机房>-LAX)的启发式归类。
 # 在线拿到的 policyName 往往是链路末端的物理节点而不是策略组名, 用关键字回推 exit_class。
 # 注意: 这是启发式, 输出中会标 "~" 前缀提示。
+# 只放公开 ISP 通名; 私有节点/线路标识的补充映射放 tests/live_check_local.json
+# (已 gitignore, 勿入库 —— tests/ 随公开仓库发布), 格式:
+#   {"exit_class_keywords": [["<节点名关键字>", "<exit_class>"], ...]}
 EXIT_CLASS_KEYWORDS = [
     ("ISP-A", "US-HOME-A"),
     ("KW-A","US-HOME-A"),
     ("ISP-B", "US-HOME-B"),
-    ("REDACTED-ISP-B", "US-HOME-B"),
     ("ISP-C", "JP-HOME"),
-    ("REDACTED-ISP-C", "JP-HOME"),
 ]
+try:
+    with open(os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                           "live_check_local.json"), encoding="utf-8") as _f:
+        EXIT_CLASS_KEYWORDS += [tuple(x) for x in
+                                json.load(_f).get("exit_class_keywords", [])]
+except (OSError, ValueError):
+    pass
 EXIT_CLASS_FLAGS = [
     ("🇺🇸", "US-DC"),
     ("🇯🇵", "JP-DC"),
@@ -610,7 +618,7 @@ def parse_policy_chain(req):
     Surge 不同版本字段名不一致, 这里全部做兜底:
       * policyName / policy         → 通常是末端物理节点名
       * rule / ruleName             → 命中的规则(如 "RULE-SET(AI.list)")
-      * notes[]                     → 可能含 "Policy: AI(🇺🇸美国家宽A → 🇺🇸REDACTED-ISP-A-...)"
+      * notes[]                     → 可能含 "Policy: AI(🇺🇸美国家宽A → 🇺🇸<末端节点>)"
     """
     policy = ""
     for k in ("policyName", "policy", "policy_name"):
