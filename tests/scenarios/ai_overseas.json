@@ -142,16 +142,26 @@
   },
   {
     "name": "github_copilot_oauth_chain",
-    "desc": "GitHub Copilot：从 github.com 发起 OAuth → api.github.com 换 token → Copilot 补全 → 遥测上报。理想上整条链应同一策略组同一出口 IP（GitHub OAuth 对 IP 漂移敏感）",
+    "desc": "GitHub Copilot：从 github.com 发起 OAuth → api.github.com 换 token → Copilot 补全 → 遥测上报。2026-08-29 起本链刻意跨两组：GitHub 平台面归微软生态组，Copilot 推理面归 AI 组",
     "requests": [
       {"host": "github.com", "note": "OAuth 授权页"},
-      {"host": "api.github.com", "note": "AI.list 里有 DOMAIN,api.github.com"},
-      {"host": "api.githubcopilot.com"},
+      {"host": "api.github.com", "note": "token 交换"},
+      {"host": "api.githubcopilot.com", "note": "Copilot 推理端点"},
       {"host": "copilot-proxy.githubusercontent.com"},
       {"host": "copilot-telemetry.githubusercontent.com"}
     ],
-    "assert": {"same_policy": true, "policy": "AI", "no_dns_leak": true},
-    "note": "2026-08-25 F1 已修复：github.com/githubusercontent.com/githubassets.com/ghcr.io 统一并入 AI.list，DownloadCDN 中对应条目已删除。"
+    "assert": {
+      "same_policy": false,
+      "no_dns_leak": true,
+      "per_request": [
+        {"host": "github.com", "policy": "Google-X-Meta-MS", "reason": "2026-08-29 用户裁决：GitHub 平台域归 Microsoft.list（微软生态）。"},
+        {"host": "api.github.com", "policy": "Google-X-Meta-MS", "reason": "同上，由 DOMAIN-SUFFIX,github.com 覆盖。"},
+        {"host": "api.githubcopilot.com", "policy": "AI", "reason": "刻意：githubcopilot.com 承载纯 AI 推理流量，留 AI.list 以便与其他 AI 服务共用出口。"},
+        {"host": "copilot-proxy.githubusercontent.com", "policy": "Google-X-Meta-MS", "reason": "githubusercontent.com 属平台静态面，随 Microsoft.list。"},
+        {"host": "copilot-telemetry.githubusercontent.com", "policy": "Google-X-Meta-MS", "reason": "同上。"}
+      ]
+    },
+    "note": "2026-08-29 裁决变更：撤销 2026-08-25 的 FIX-B（GitHub 全生态归 AI），改为生态归属优先。OAuth token 为 bearer 且不绑定 IP，跨组不影响功能；若仍希望整链同出口，把 DOMAIN-SUFFIX,githubcopilot.com 与 githubnext.com 一并移入 Microsoft.list 即可。"
   },
   {
     "name": "midjourney_web_and_discord",

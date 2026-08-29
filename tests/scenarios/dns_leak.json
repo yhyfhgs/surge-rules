@@ -60,7 +60,7 @@
         {"host": "web.telegram.org", "policy": "Telegram"},
         {"host": "store.steampowered.com", "policy": "游戏"},
         {"host": "cdn.jsdelivr.net", "policy": "下载"},
-        {"host": "github.com", "policy": "AI", "reason": "2026-08-25 F1：GitHub 全生态统一到 AI 组（FIX-B）。"},
+        {"host": "github.com", "policy": "Google-X-Meta-MS", "reason": "2026-08-29 用户裁决：GitHub 平台域归 Microsoft.list（微软生态），撤销 2026-08-25 的 FIX-B。"},
         {"host": "en.wikipedia.org", "policy": "Final"}
       ]
     }

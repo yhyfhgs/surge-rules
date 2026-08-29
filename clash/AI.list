@@ -3,35 +3,44 @@
 
 # AI — 独立 AI 服务商 (OpenAI/Anthropic/Perplexity/Ollama 等) + Apple Intelligence + Copilot；大厂自有 AI 归各生态列表；2026-08-25 并入 blackmatrix7:OpenAI+Claude+Gemini+Copilot
 # 规范化排序：规则类型分区，区内字母序
-# 2026-08-25 维护：sentry/datadog/sift/openai 关键词收窄为精确后缀；stripe/auth0→ProxyGFW，identrust/ppio/xingyeai/xiaoaiassist→Domestic，字节海外域→TikTok，ai.studio/g.ai→Google；删 Private Relay 8 域与 DigitalOcean/Vultr 全网段 ASN；GitHub 全生态归本表；微软海外面(Copilot/Bing/登录)已拆至 Microsoft.list(Google-X-Meta 组)；并入国内厂商国际站(coze.com/qwen.ai/z.ai/kimi.ai 等 13 域)
+# 2026-08-25 维护：sentry/datadog/sift/openai 关键词收窄为精确后缀；stripe/auth0→ProxyGFW，identrust/ppio/xingyeai/xiaoaiassist→Domestic，字节海外域→TikTok，ai.studio/g.ai→Google；删 Private Relay 8 域与 DigitalOcean/Vultr 全网段 ASN；GitHub 全生态归本表；微软海外面(Copilot/Bing/登录)已拆至 Microsoft.list(Google-X-Meta 组)；并入国内厂商国际站(coze.com/qwen.ai/z.ai/kimi.ai 等 13 域)；2026-08-29 维护：补 OpenAI 上游精确域 6 与 GitHub 生态 7 域、近一年 AI 新服务 26 域；PROCESS-NAME 依 lsof 实测补 Claude Helper/Codex (Service)/CodexBar/codex.exe；删 DigitalOcean 两个 /32(RDAP 非 AI 厂商)，补 Anthropic 153.61.0.0/16+216.73.216.0/22 与 ASN 400243/401551/401864(ARIN 核实)；xAI/grok 已在 Twitter.list、deepseek/kimi.com 在 Domestic.list，均不重复收录；2026-08-29 迁移(用户裁决，生态归属优先)：GitHub 平台域 10 条→Microsoft.list、gateway.icloud.com→AppleCN.list(直连；Apple Intelligence 将不可用，需恢复则移回本表)，githubcopilot/githubnext 为纯 AI 推理面留本表；删错误归属 10 域(flux.ai/lcicat/lcicollections/muthos/observeit/anthropic.com.cn/miaibox/doudou/chatbotclaude/claudemcpclient，RDAP+archive.org 证据)；Claude Helper*/Codex (* 通配化覆盖 Electron helper 全变体
 
 DOMAIN,anthropic-com.ghost.io
 DOMAIN,aws-language-servers.us-east-1.amazonaws.com
 DOMAIN,aws-toolkit-language-servers.amazonaws.com
 DOMAIN,cdn.usefathom.com
+DOMAIN,chat.openai.com.cdn.cloudflare.net
 DOMAIN,client-telemetry.us-east-1.amazonaws.com
 DOMAIN,codewhisperer.us-east-1.amazonaws.com
 DOMAIN,cognito-identity.us-east-1.amazonaws.com
-DOMAIN,copilot-workspace.githubnext.com
 DOMAIN,cp4.cloudflare.com
 DOMAIN,idetoolkits-hostedfiles.amazonaws.com
 DOMAIN,idetoolkits.amazonwebservices.com
+DOMAIN,oaisidekickupdates.blob.core.windows.net
+DOMAIN,openai-api.arkoselabs.com
+DOMAIN,openaiapi-site.azureedge.net
+DOMAIN,openaicom.imgix.net
+DOMAIN,openaicomproductionae4b.blob.core.windows.net
 DOMAIN,ppl-ai-file-upload.s3.amazonaws.com
+DOMAIN,production-openaicom-storage.azureedge.net
 DOMAIN,q-developer-integration.us-east-1.api.aws
 DOMAIN,static.cloudflareinsights.com
 
+DOMAIN-SUFFIX,abacus.ai
+DOMAIN-SUFFIX,agent-plugins.org
 DOMAIN-SUFFIX,ai.cloudflare.com
 DOMAIN-SUFFIX,ai.com
+DOMAIN-SUFFIX,allhands.dev
 DOMAIN-SUFFIX,ampcode.com
 DOMAIN-SUFFIX,ampworkers.com
 DOMAIN-SUFFIX,anthropic.com
 DOMAIN-SUFFIX,anthropic.com.cdn.cloudflare.net
-DOMAIN-SUFFIX,anthropic.com.cn
 DOMAIN-SUFFIX,anthropic.team
 DOMAIN-SUFFIX,antspace.dev
 DOMAIN-SUFFIX,anyscale.com
 DOMAIN-SUFFIX,anysphere.co
 DOMAIN-SUFFIX,api.statsig.com
+DOMAIN-SUFFIX,assemblyai.com
 DOMAIN-SUFFIX,augmentcode.com
 DOMAIN-SUFFIX,aws.dev
 DOMAIN-SUFFIX,awsapps.com
@@ -40,6 +49,7 @@ DOMAIN-SUFFIX,baseten.co
 DOMAIN-SUFFIX,bfl.ai
 DOMAIN-SUFFIX,blackforestlabs.ai
 DOMAIN-SUFFIX,bolt.new
+DOMAIN-SUFFIX,browserbase.com
 DOMAIN-SUFFIX,cartesia.ai
 DOMAIN-SUFFIX,cdn.growthbook.io
 DOMAIN-SUFFIX,cerebras.ai
@@ -47,7 +57,6 @@ DOMAIN-SUFFIX,challenges.cloudflare.com
 DOMAIN-SUFFIX,character.ai
 DOMAIN-SUFFIX,characterai.io
 DOMAIN-SUFFIX,chat.com
-DOMAIN-SUFFIX,chatbotclaude.com
 DOMAIN-SUFFIX,chatgpt.com
 DOMAIN-SUFFIX,chatgpt.site
 DOMAIN-SUFFIX,chutes.ai
@@ -61,7 +70,6 @@ DOMAIN-SUFFIX,claude.app
 DOMAIN-SUFFIX,claude.com
 DOMAIN-SUFFIX,claude.new
 DOMAIN-SUFFIX,claude.site
-DOMAIN-SUFFIX,claudemcpclient.com
 DOMAIN-SUFFIX,claudemcpcontent.com
 DOMAIN-SUFFIX,claudepages.dev
 DOMAIN-SUFFIX,claudestudio.com
@@ -69,6 +77,7 @@ DOMAIN-SUFFIX,claudeusercontent.com
 DOMAIN-SUFFIX,client-api.arkoselabs.com
 DOMAIN-SUFFIX,cline.bot
 DOMAIN-SUFFIX,clipdrop.co
+DOMAIN-SUFFIX,codebuff.com
 DOMAIN-SUFFIX,codeium.com
 DOMAIN-SUFFIX,codeiumdata.com
 DOMAIN-SUFFIX,coderabbit.ai
@@ -90,6 +99,7 @@ DOMAIN-SUFFIX,cursor.com
 DOMAIN-SUFFIX,cursor.sh
 DOMAIN-SUFFIX,cursorapi.com
 DOMAIN-SUFFIX,datadoghq.com
+DOMAIN-SUFFIX,deepgram.com
 DOMAIN-SUFFIX,deepinfra.com
 DOMAIN-SUFFIX,deepl.com
 DOMAIN-SUFFIX,deepl.net
@@ -98,13 +108,14 @@ DOMAIN-SUFFIX,devin.ai
 DOMAIN-SUFFIX,diabrowser.com
 DOMAIN-SUFFIX,diabrowser.engineering
 DOMAIN-SUFFIX,dify.ai
-DOMAIN-SUFFIX,doudou.com
 DOMAIN-SUFFIX,dreamstudio.ai
 DOMAIN-SUFFIX,duck.ai
+DOMAIN-SUFFIX,e2b.dev
 DOMAIN-SUFFIX,eigent.ai
 DOMAIN-SUFFIX,elevenlabs.com
 DOMAIN-SUFFIX,elevenlabs.io
 DOMAIN-SUFFIX,elevenmusic.ai
+DOMAIN-SUFFIX,exa.ai
 DOMAIN-SUFFIX,factory.ai
 DOMAIN-SUFFIX,fal.ai
 DOMAIN-SUFFIX,fal.media
@@ -112,21 +123,18 @@ DOMAIN-SUFFIX,fal.run
 DOMAIN-SUFFIX,fastgpt.in
 DOMAIN-SUFFIX,fathom.video
 DOMAIN-SUFFIX,featuregates.org
+DOMAIN-SUFFIX,firecrawl.dev
 DOMAIN-SUFFIX,fireflies.ai
 DOMAIN-SUFFIX,firefly.adobe.com
 DOMAIN-SUFFIX,firefly.adobe.io
 DOMAIN-SUFFIX,fireworks.ai
 DOMAIN-SUFFIX,fish.audio
 DOMAIN-SUFFIX,flowiseai.com
-DOMAIN-SUFFIX,flux.ai
 DOMAIN-SUFFIX,gamma.app
-DOMAIN-SUFFIX,gateway.icloud.com
 DOMAIN-SUFFIX,genspark.ai
-DOMAIN-SUFFIX,ghcr.io
-DOMAIN-SUFFIX,github.com
-DOMAIN-SUFFIX,githubassets.com
 DOMAIN-SUFFIX,githubcopilot.com
-DOMAIN-SUFFIX,githubusercontent.com
+DOMAIN-SUFFIX,githubnext.com
+DOMAIN-SUFFIX,glama.ai
 DOMAIN-SUFFIX,glean.com
 DOMAIN-SUFFIX,grammarly.com
 DOMAIN-SUFFIX,granola.so
@@ -137,11 +145,12 @@ DOMAIN-SUFFIX,h2o.ai
 DOMAIN-SUFFIX,haiper.ai
 DOMAIN-SUFFIX,harpa.ai
 DOMAIN-SUFFIX,hedra.com
-DOMAIN-SUFFIX,hermes-agent.nousresearch.com
 DOMAIN-SUFFIX,heygen.com
 DOMAIN-SUFFIX,hf.co
 DOMAIN-SUFFIX,hf.space
+DOMAIN-SUFFIX,higgsfield.ai
 DOMAIN-SUFFIX,huggingface.co
+DOMAIN-SUFFIX,hume.ai
 DOMAIN-SUFFIX,hyperbolic.xyz
 DOMAIN-SUFFIX,ideogram.ai
 DOMAIN-SUFFIX,inflection.ai
@@ -155,6 +164,7 @@ DOMAIN-SUFFIX,jetbrains.ai
 DOMAIN-SUFFIX,julius.ai
 DOMAIN-SUFFIX,kilo.ai
 DOMAIN-SUFFIX,kilo.codes
+DOMAIN-SUFFIX,kilocode.ai
 DOMAIN-SUFFIX,kimi.ai
 DOMAIN-SUFFIX,kiro.dev
 DOMAIN-SUFFIX,klingai.com
@@ -162,8 +172,6 @@ DOMAIN-SUFFIX,krea.ai
 DOMAIN-SUFFIX,lambdalabs.com
 DOMAIN-SUFFIX,langchain.com
 DOMAIN-SUFFIX,langsmith.com
-DOMAIN-SUFFIX,lcicat.org
-DOMAIN-SUFFIX,lcicollections.org
 DOMAIN-SUFFIX,leonardo.ai
 DOMAIN-SUFFIX,limitless.ai
 DOMAIN-SUFFIX,lingyiwanwu.com
@@ -182,9 +190,9 @@ DOMAIN-SUFFIX,maxai.me
 DOMAIN-SUFFIX,mcbaas.work
 DOMAIN-SUFFIX,mcdemo.show
 DOMAIN-SUFFIX,mchost.guru
+DOMAIN-SUFFIX,mcp.so
 DOMAIN-SUFFIX,mcpservertest.online
 DOMAIN-SUFFIX,meshy.ai
-DOMAIN-SUFFIX,miaibox.com
 DOMAIN-SUFFIX,midjourney.cdn.b-cdn.net
 DOMAIN-SUFFIX,midjourney.com
 DOMAIN-SUFFIX,minimax.io
@@ -197,16 +205,17 @@ DOMAIN-SUFFIX,modelcontextprotocol.org
 DOMAIN-SUFFIX,modelscope.com
 DOMAIN-SUFFIX,monica.im
 DOMAIN-SUFFIX,moonshot.ai
-DOMAIN-SUFFIX,muthos.com
 DOMAIN-SUFFIX,nebius.ai
+DOMAIN-SUFFIX,nousresearch.com
 DOMAIN-SUFFIX,novita.ai
 DOMAIN-SUFFIX,oaistatic.com
 DOMAIN-SUFFIX,oaistatsig.com
 DOMAIN-SUFFIX,oaiusercontent.com
-DOMAIN-SUFFIX,observeit.net
 DOMAIN-SUFFIX,ollama.ai
 DOMAIN-SUFFIX,ollama.com
 DOMAIN-SUFFIX,openai.com
+DOMAIN-SUFFIX,openai.fm
+DOMAIN-SUFFIX,openai.org
 DOMAIN-SUFFIX,openart.ai
 DOMAIN-SUFFIX,openclaw.ai
 DOMAIN-SUFFIX,opencode.ai
@@ -228,6 +237,7 @@ DOMAIN-SUFFIX,q.eu-central-1.amazonaws.com
 DOMAIN-SUFFIX,q.us-east-1.amazonaws.com
 DOMAIN-SUFFIX,qdrant.tech
 DOMAIN-SUFFIX,qoder.com
+DOMAIN-SUFFIX,qodo.ai
 DOMAIN-SUFFIX,quillbot.com
 DOMAIN-SUFFIX,qwen.ai
 DOMAIN-SUFFIX,raycast.com
@@ -247,6 +257,7 @@ DOMAIN-SUFFIX,runpod.io
 DOMAIN-SUFFIX,runway.com
 DOMAIN-SUFFIX,runway.team
 DOMAIN-SUFFIX,runwayml.com
+DOMAIN-SUFFIX,sambanova.ai
 DOMAIN-SUFFIX,scale.com
 DOMAIN-SUFFIX,searchgpt.com
 DOMAIN-SUFFIX,sentry-cdn.com
@@ -256,6 +267,7 @@ DOMAIN-SUFFIX,sider.ai
 DOMAIN-SUFFIX,sift.com
 DOMAIN-SUFFIX,sillylittleguy.org
 DOMAIN-SUFFIX,skywork.ai
+DOMAIN-SUFFIX,smithery.ai
 DOMAIN-SUFFIX,sora.com
 DOMAIN-SUFFIX,sourcegraph.com
 DOMAIN-SUFFIX,sso.amazonaws.com
@@ -265,7 +277,9 @@ DOMAIN-SUFFIX,stepfun.ai
 DOMAIN-SUFFIX,suno.ai
 DOMAIN-SUFFIX,suno.com
 DOMAIN-SUFFIX,synthesia.io
+DOMAIN-SUFFIX,t3.chat
 DOMAIN-SUFFIX,tabnine.com
+DOMAIN-SUFFIX,tavily.com
 DOMAIN-SUFFIX,tcwqqdy.guru
 DOMAIN-SUFFIX,todesktop.com
 DOMAIN-SUFFIX,together.ai
@@ -274,11 +288,14 @@ DOMAIN-SUFFIX,topazlabs.com
 DOMAIN-SUFFIX,trae.ai
 DOMAIN-SUFFIX,trae.guru
 DOMAIN-SUFFIX,tripo3d.ai
+DOMAIN-SUFFIX,trufo.ai
 DOMAIN-SUFFIX,trychroma.com
 DOMAIN-SUFFIX,typeface.ai
 DOMAIN-SUFFIX,udio.com
 DOMAIN-SUFFIX,v0.app
 DOMAIN-SUFFIX,v0.dev
+DOMAIN-SUFFIX,vast.ai
+DOMAIN-SUFFIX,venice.ai
 DOMAIN-SUFFIX,viggle.ai
 DOMAIN-SUFFIX,wandb.ai
 DOMAIN-SUFFIX,wandb.com
@@ -306,11 +323,15 @@ PROCESS-NAME,chatgpt
 PROCESS-NAME,ChatGPT.exe
 PROCESS-NAME,Claude
 PROCESS-NAME,claude
+PROCESS-NAME,Claude Helper*
 PROCESS-NAME,Claude.exe
 PROCESS-NAME,claude.exe
 PROCESS-NAME,Codex
 PROCESS-NAME,codex
+PROCESS-NAME,Codex (*
 PROCESS-NAME,Codex.exe
+PROCESS-NAME,codex.exe
+PROCESS-NAME,CodexBar
 PROCESS-NAME,cowork-svc.exe
 PROCESS-NAME,Cursor
 PROCESS-NAME,cursor
@@ -319,13 +340,16 @@ PROCESS-NAME,Windsurf
 PROCESS-NAME,windsurf
 PROCESS-NAME,Windsurf.exe
 
-IP-CIDR,24.199.123.28/32,no-resolve
-IP-CIDR,64.23.132.171/32,no-resolve
+IP-CIDR,153.61.0.0/16,no-resolve
 IP-CIDR,160.79.104.0/21,no-resolve
 IP-CIDR,199.47.142.0/23,no-resolve
+IP-CIDR,216.73.216.0/22,no-resolve
 
 IP-CIDR6,2604:f20::/32,no-resolve
 IP-CIDR6,2607:6bc0::/32,no-resolve
 
 IP-ASN,399358,no-resolve
+IP-ASN,400243,no-resolve
 IP-ASN,401518,no-resolve
+IP-ASN,401551,no-resolve
+IP-ASN,401864,no-resolve

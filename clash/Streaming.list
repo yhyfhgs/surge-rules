@@ -1,6 +1,6 @@
 # AUTO-GENERATED — Clash(Mihomo) classical 规则，由 ../lists/Streaming.list 派生
 # 勿手工编辑；修改 Surge 源后运行 python3 tools/surge2clash.py 重新生成
-# 已剔除 Clash 不支持的规则: URL-REGEX x 1, USER-AGENT x 68
+# 已剔除 Clash 不支持的规则: USER-AGENT x 63
 
 # Streaming — 国际流媒体聚合 (Netflix/Disney/HBO/Spotify/AppleMedia 等)；2026-08-25 并入 blackmatrix7:GlobalMedia+Netflix+Disney+HBO+PrimeVideo+Hulu+Spotify+Bahamut+AbemaTV+BBC+AppleTV+AppleMusic+AppleMedia+AppleNews
 # 规范化排序：规则类型分区，区内字母序
@@ -567,6 +567,7 @@ DOMAIN-SUFFIX,go.com
 DOMAIN-SUFFIX,golos-ameriki.ru
 DOMAIN-SUFFIX,golosameriki.com
 DOMAIN-SUFFIX,gooddaychicago.com
+DOMAIN-SUFFIX,hamivideo.cdn.hinet.net
 DOMAIN-SUFFIX,hath.network
 DOMAIN-SUFFIX,hayabusa.dev
 DOMAIN-SUFFIX,hayabusa.io
@@ -1078,10 +1079,8 @@ DOMAIN-SUFFIX,zype.com
 DOMAIN-KEYWORD,apiproxy-device-prod-nlb-
 DOMAIN-KEYWORD,avoddashs
 DOMAIN-KEYWORD,bbcfmt
-DOMAIN-KEYWORD,discovery.uplynk.com
 DOMAIN-KEYWORD,dualstack.apiproxy-
 DOMAIN-KEYWORD,dualstack.ichnaea-web-
-DOMAIN-KEYWORD,hamivideo.cdn.hinet.net
 DOMAIN-KEYWORD,hbogoasia
 DOMAIN-KEYWORD,japonx
 DOMAIN-KEYWORD,japronx
@@ -1091,7 +1090,6 @@ DOMAIN-KEYWORD,nivod
 DOMAIN-KEYWORD,nowtv100
 DOMAIN-KEYWORD,rthklive
 DOMAIN-KEYWORD,spotify
-DOMAIN-KEYWORD,tiktokcdn
 DOMAIN-KEYWORD,ttvnw
 DOMAIN-KEYWORD,tvbanywhere
 DOMAIN-KEYWORD,uk-live

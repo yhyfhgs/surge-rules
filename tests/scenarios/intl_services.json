@@ -12,8 +12,8 @@
       {"host": "codeload.github.com", "note": "zip/tarball 下载"},
       {"host": "collector.github.com", "note": "前端遥测"}
     ],
-    "assert": {"same_policy": true, "policy": "AI", "no_dns_leak": true},
-    "note": "2026-08-25 F1 已修复（期望值随裁决变更）：FIX-B 把 GitHub 全生态统一到 AI 组（开发工具链 + Copilot 一致性），DownloadCDN 中 github 相关条目已删除。"
+    "assert": {"same_policy": true, "policy": "Google-X-Meta-MS", "no_dns_leak": true},
+    "note": "2026-08-29 用户裁决（生态归属优先）：撤销 FIX-B，GitHub 平台域 10 条自 AI.list 迁入 Microsoft.list，整链仍同组同出口（登录态 + LFS 分片依赖此一致性），仅组别由 AI 变为 Google-X-Meta-MS。"
   },
   {
     "name": "netflix_watch",

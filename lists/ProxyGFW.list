@@ -1,6 +1,6 @@
 # ProxyGFW — GFW 被墙域名兜底；2026-08-25 并入 blackmatrix7:Proxy
 # 规范化排序：规则类型分区，区内字母序
-# 2026-08-25 维护：接收 stripe.com/stripe.network/auth0.com；docker.com/npmjs.com 移交 DownloadCDN、login.microsoftonline.com 移交 AI、社交伴生域移交 SocialOthers/Meta；删 1 条失效域
+# 2026-08-25 维护：接收 auth0.com；docker.com/npmjs.com 移交 DownloadCDN、login.microsoftonline.com 移交 AI、社交伴生域移交 SocialOthers/Meta；删 1 条失效域。2026-08-29 维护：stripe.com/stripe.network/gumroad.com/paddle.com/DOMAIN-KEYWORD,paypal 移交新建 Payment.list(支付需固定出口)；USER-AGENT,PayPal* 未动，待 UA 方案统一裁决
 
 DOMAIN,api.waqi.info
 DOMAIN,assets-priconne-redive-us.akamaized.net
@@ -2309,7 +2309,6 @@ DOMAIN-SUFFIX,guangming.com.my
 DOMAIN-SUFFIX,guangnianvpn.com
 DOMAIN-SUFFIX,guardster.com
 DOMAIN-SUFFIX,guishan.org
-DOMAIN-SUFFIX,gumroad.com
 DOMAIN-SUFFIX,gun-world.net
 DOMAIN-SUFFIX,gunsamerica.com
 DOMAIN-SUFFIX,gunsandammo.com
@@ -4018,8 +4017,6 @@ DOMAIN-SUFFIX,pacificpoker.com
 DOMAIN-SUFFIX,packetix.net
 DOMAIN-SUFFIX,pacom.mil
 DOMAIN-SUFFIX,pacopacomama.com
-DOMAIN-SUFFIX,paddle.com
-DOMAIN-SUFFIX,paddleapi.com
 DOMAIN-SUFFIX,padmanet.com
 DOMAIN-SUFFIX,pagodabox.com
 DOMAIN-SUFFIX,paimon.moe
@@ -4959,8 +4956,6 @@ DOMAIN-SUFFIX,streamingthe.net
 DOMAIN-SUFFIX,streema.com
 DOMAIN-SUFFIX,streetvoice.com
 DOMAIN-SUFFIX,strikingly.com
-DOMAIN-SUFFIX,stripe.com
-DOMAIN-SUFFIX,stripe.network
 DOMAIN-SUFFIX,strongvpn.com
 DOMAIN-SUFFIX,strongwindpress.com
 DOMAIN-SUFFIX,student.tw
@@ -6429,7 +6424,6 @@ DOMAIN-KEYWORD,beetalk
 DOMAIN-KEYWORD,dlercloud
 DOMAIN-KEYWORD,dropbox
 DOMAIN-KEYWORD,github
-DOMAIN-KEYWORD,paypal
 DOMAIN-KEYWORD,sci-hub
 
 USER-AGENT,battleroyale*

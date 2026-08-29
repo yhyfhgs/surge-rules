@@ -56,6 +56,7 @@ CONF_ORDER = [
     ("Streaming", "流媒体"),
     ("Games", "游戏"),
     ("DownloadCDN", "下载"),
+    ("Payment", "Payment"),
     ("AppleCN", "DIRECT"),
     ("MicrosoftCN", "DIRECT"),
     ("ProxyGFW", "Final"),

@@ -1,8 +1,7 @@
 # US — 美国区域服务
 # 规范化排序：规则类型分区，区内字母序
-# 2026-08-25 维护：GEOIP/IP-ASN 兜底保留本表，随表整体置于 Apple/微软/GFW 之后（防遮蔽其 IP 规则）
+# 2026-08-25 维护：GEOIP/IP-ASN 兜底保留本表，随表整体置于 Apple/微软/GFW 之后（防遮蔽其 IP 规则）。2026-08-29 维护：americanexpress.com/discover.com 移交新建 Payment.list(卡组织需与支付会话同出口)；银行/券商/征信域(chase/citi/wellsfargo/schwab/equifax 等)非支付渠道，按裁决留本表
 
-DOMAIN-SUFFIX,americanexpress.com
 DOMAIN-SUFFIX,att.com
 DOMAIN-SUFFIX,att.net
 DOMAIN-SUFFIX,bankofamerica.com
@@ -20,7 +19,6 @@ DOMAIN-SUFFIX,creditkarma.com
 DOMAIN-SUFFIX,cricketwireless.com
 DOMAIN-SUFFIX,criterionchannel.com
 DOMAIN-SUFFIX,directv.com
-DOMAIN-SUFFIX,discover.com
 DOMAIN-SUFFIX,equifax.com
 DOMAIN-SUFFIX,espnplus.com
 DOMAIN-SUFFIX,experian.com

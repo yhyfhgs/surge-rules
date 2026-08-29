@@ -563,6 +563,7 @@ DOMAIN-SUFFIX,go.com
 DOMAIN-SUFFIX,golos-ameriki.ru
 DOMAIN-SUFFIX,golosameriki.com
 DOMAIN-SUFFIX,gooddaychicago.com
+DOMAIN-SUFFIX,hamivideo.cdn.hinet.net
 DOMAIN-SUFFIX,hath.network
 DOMAIN-SUFFIX,hayabusa.dev
 DOMAIN-SUFFIX,hayabusa.io
@@ -1074,10 +1075,8 @@ DOMAIN-SUFFIX,zype.com
 DOMAIN-KEYWORD,apiproxy-device-prod-nlb-
 DOMAIN-KEYWORD,avoddashs
 DOMAIN-KEYWORD,bbcfmt
-DOMAIN-KEYWORD,discovery.uplynk.com
 DOMAIN-KEYWORD,dualstack.apiproxy-
 DOMAIN-KEYWORD,dualstack.ichnaea-web-
-DOMAIN-KEYWORD,hamivideo.cdn.hinet.net
 DOMAIN-KEYWORD,hbogoasia
 DOMAIN-KEYWORD,japonx
 DOMAIN-KEYWORD,japronx
@@ -1087,18 +1086,15 @@ DOMAIN-KEYWORD,nivod
 DOMAIN-KEYWORD,nowtv100
 DOMAIN-KEYWORD,rthklive
 DOMAIN-KEYWORD,spotify
-DOMAIN-KEYWORD,tiktokcdn
 DOMAIN-KEYWORD,ttvnw
 DOMAIN-KEYWORD,tvbanywhere
 DOMAIN-KEYWORD,uk-live
 DOMAIN-KEYWORD,voddazn
 
-URL-REGEX,^https?:\/\/www\.amazon\.com\/(Amazon-Video|gp\/video)\/
 
 USER-AGENT,*Spotify*
 USER-AGENT,AbemaTV*
 USER-AGENT,All4*
-USER-AGENT,Anime*
 USER-AGENT,app/bstar*
 USER-AGENT,AppleTV*
 USER-AGENT,Argo*
@@ -1134,10 +1130,7 @@ USER-AGENT,JOOX*
 USER-AGENT,KKTV*
 USER-AGENT,LINE TV*
 USER-AGENT,LINE%20TV*
-USER-AGENT,LINE*
 USER-AGENT,LINETV*
-USER-AGENT,Max*
-USER-AGENT,Music*
 USER-AGENT,My5*
 USER-AGENT,mytv*
 USER-AGENT,Naver TV*
@@ -1157,7 +1150,6 @@ USER-AGENT,Spotify*
 USER-AGENT,TaiwanGood*
 USER-AGENT,TIDAL*
 USER-AGENT,TIDAL*dia
-USER-AGENT,TikTok*
 USER-AGENT,TVer-Release*
 USER-AGENT,Viu*
 USER-AGENT,ViuTV*

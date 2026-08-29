@@ -232,7 +232,7 @@
       },
       {
         "host": "gateway.icloud.com",
-        "note": "AI.list 收录，PCC/中继网关"
+        "note": "PCC/中继网关；2026-08-29 起归 AppleCN(DIRECT)"
       },
       {
         "host": "mask.icloud.com",
@@ -261,8 +261,8 @@
         },
         {
           "host": "gateway.icloud.com",
-          "policy": "AI",
-          "reason": "刻意：Apple Intelligence PCC 网关随 AI 组，是与 Siri 直连之间的取舍（见 allowlist）。"
+          "policy": "DIRECT",
+          "reason": "2026-08-29 用户裁决（生态归属优先）：自 AI.list 摘除，由 AppleCN.list 的 DOMAIN-SUFFIX,icloud.com 接管直连。代价：Apple Intelligence(PCC) 大陆 IP 不受支持，功能将不可用；如需恢复，在 AI.list 重新加入 DOMAIN-SUFFIX,gateway.icloud.com 即可（AI 在 conf 96 先于 AppleCN 105）。"
         },
         {
           "host": "mask.icloud.com",

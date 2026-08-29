@@ -3,7 +3,7 @@
 
 # Telegram — Telegram 域名与 IP 段；2026-08-25 并入 blackmatrix7:Telegram
 # 规范化排序：规则类型分区，区内字母序
-# 2026-08-25 维护：删末尾与前 5 条 IP-ASN 等价的 OR 逻辑行
+# 2026-08-25 维护：删末尾与前 5 条 IP-ASN 等价的 OR 逻辑行；2026-08-29 维护：补 macOS/Windows 实际进程名（Telegram / Telegram.exe / TelegramShare），上游无变动
 
 DOMAIN,events-gateway.ncdev.site
 
@@ -34,7 +34,10 @@ DOMAIN-KEYWORD,telegram
 
 PROCESS-NAME,nekox.messenger
 PROCESS-NAME,org.telegram.messenger
+PROCESS-NAME,Telegram
 PROCESS-NAME,telegram-desktop
+PROCESS-NAME,Telegram.exe
+PROCESS-NAME,TelegramShare
 PROCESS-NAME,tw.nekomimi.nekogram
 PROCESS-NAME,xyz.nextalone.nagram
 

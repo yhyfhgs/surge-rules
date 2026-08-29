@@ -97,8 +97,8 @@
       {"host": "q.stripe.com", "note": "遥测/风控信标"},
       {"host": "m.stripe.network", "note": "设备指纹/风控"}
     ],
-    "assert": {"same_policy": true, "policy": "Final", "no_dns_leak": true},
-    "note": "2026-08-25 F1 已修复：stripe.com 自 AI.list 移入 ProxyGFW.list，并补 stripe.network。"
+    "assert": {"same_policy": true, "policy": "Payment", "no_dns_leak": true},
+    "note": "2026-08-25 F1：stripe.com 自 AI.list 移入 ProxyGFW.list，并补 stripe.network。2026-08-29：新建 Payment.list（国际支付渠道专表），stripe.com/stripe.network 自 ProxyGFW.list 移入，stripecdn.com/stripeassets.com 自 DownloadCDN.list 移入；期望落点由兜底组 Final 改为专用策略组 Payment（固定家宽出口，保证 Elements/API/Checkout/风控信标同 IP）。本断言需 Surge.conf 增加 RULE-SET,…/Payment.list,Payment 后方能通过——conf 由主控统一落地。"
   },
   {
     "name": "third_party_saas_captured_by_ai_list",
