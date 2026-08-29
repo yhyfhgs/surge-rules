@@ -31,6 +31,11 @@
 - `.gitignore` 追加 `reference/`。
 - 仓库根 `README.md` 重写:补上架构图、目录结构树、按 0–8 九区组织的 32 表总览、Surge/Clash 双端引用示例与文档导航。
 
+### Security
+
+- **全部 git 历史已执行脱敏重写**(`git filter-repo`):清除 `tests/` 历史版本中曾出现的真实节点地址与私有线路标识(替换为 `<REDACTED-*>` 占位);测试工具的私有节点映射外置到 gitignored 的 `tests/live_check_local.json`,公开代码只保留通用 ISP 关键词。
+- **影响**:自「Audit overhaul」(现 `bd85d83`)起的 commit hash 与旧历史不同,旧 clone / fork 需要重新拉取;更早的 commit hash 未受影响。
+
 ### 影响面
 
 - **Surge 用户需换 URL**:conf 中 32 处 RULE-SET 引用要从 `@main/<Name>.list` 改为 `@main/lists/<Name>.list`(其中 Reject 一处为注释停用态)。
@@ -92,8 +97,8 @@
 ### Changed
 
 - **AI 与生态边界重划**:AI.list 收窄 KEYWORD(sentry / datadog / sift / openai),移除 DO / Vultr ASN;国内厂商的国际站(coze / qwen.ai / z.ai / minimax.io / moonshot.ai 等)移入 AI.list 走代理,对应 `.cn` 域移出走直连;GitHub 全生态统一到 AI 策略。
-- **Microsoft.list 独立成表**(commit `39c4025`)—— Copilot / Bing / MSN / 国际登录面共 25 条从 AI 组拆出,与 Google / Twitter / Meta 同走一组。
-- **策略组更名** Google-X-Meta → **Google-X-Meta-MS**(commit `d7bd596`),测试断言与工具链同步改名。
+- **Microsoft.list 独立成表**(commit `8ec6a8b`)—— Copilot / Bing / MSN / 国际登录面共 25 条从 AI 组拆出,与 Google / Twitter / Meta 同走一组。
+- **策略组更名** Google-X-Meta → **Google-X-Meta-MS**(commit `48c4895`),测试断言与工具链同步改名。
 - **CDN 配对整理**:国内媒体 CDN(bilibili / iqiyi)归还 DIRECT;NTP 与 captive portal 归 DIRECT;stripe / docker / npm 归属统一;bstar → Streaming;pximg → Japan。DownloadCDN 定位收窄为「大流量批量下载域」,剥离 **533 个**站点静态资源域。
 - **地区表自包含并后置**:Japan / UK / Europe / US 的 GEOIP / IP-ASN 规则收进各自表内,整体移到 Apple / 微软 / GFW 之后、国内区之前 —— 修掉了 Apple 17/8 与 ProxyGFW 的 IP 规则被 `GEOIP,US` / `GEOIP,JP` / `GEOIP,DE` 抢先遮蔽的问题。
 - LINE 归入 Japan 表。
@@ -102,7 +107,7 @@
 ### Removed
 
 - 死规则与冗余清理合计 **-855 条**,其中 TencentCN 的 233 条伪 KEYWORD 规则、以及各处重复 / 被遮蔽 / 过期条目。
-- 停止跟踪 `__pycache__`,并加入 `.gitignore`(commits `76c20c7`、`6c6d378`)。
+- 停止跟踪 `__pycache__`,并加入 `.gitignore`(commits `7213d22`、`6f366bb`)。
 
 ### 影响面
 
