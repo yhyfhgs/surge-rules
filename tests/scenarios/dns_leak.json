@@ -11,7 +11,7 @@
       {"host": "chat.mistral.ai"},
       {"host": "huggingface.co"},
       {"host": "api.groq.com"},
-      {"host": "cursor.com"},
+      {"host": "openrouter.ai"},
       {"host": "poe.com"}
     ],
     "assert": {"same_policy": true, "policy": "AI", "no_dns_leak": true}

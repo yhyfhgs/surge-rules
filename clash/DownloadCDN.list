@@ -5,7 +5,8 @@
 # 规范化排序：规则类型分区，区内字母序
 # 2026-08-25 维护：撤出 533 条浏览伴生静态子域(落回主站所在组)；GitHub 生态交 AI.list、bstar 交 Streaming、pximg 交 Japan、NTP/captive 交 Domestic；纳入 docker.com/npmjs.com 主域。2026-08-29 维护：24 条支付渠道 JS/静态/风控子域移交新建 Payment.list(stripecdn/stripeassets/paypalobjects/braintreegateway/klarnacdn/chargebee/recurly/afterpay/affirm/plaid/squarecdn/onfastspring 等)；downloads.lemonsqueezy.com 与 public-files.gumroad.com 属真·批量下载域，按裁决留本表
 # 2026-08-30 维护：8 条 CA 吊销/AIA 端点移交 Domestic.list 直连(cacerts.digicert/crl.verisign/crl3.digicert/crt.sectigo/lencr.org/ocsp.digicert/ocsp.sectigo/DOMAIN-WILDCARD ocsp.*.amazontrust)——几 KB 小包位于 TLS 握手关键路径，非批量下载域；oneocsp.microsoft.com 暂留本表：移入 Domestic 会被更前位的 ProxyGFW DOMAIN-SUFFIX,microsoft.com 遮蔽为代理，需先收窄该条
-# 2026-08-30 收尾：cacerts.rapidssl.com 同批移交 Domestic；删 cdn.fellou.ai/logos.composio.dev/ph.langfuse.com/releases.warp.dev 4 条伴生子域(顶域已入 AI.list，成对处理防死规则)
+# 2026-08-30 收尾：cacerts.rapidssl.com 同批移交 Domestic、oneocsp.microsoft.com 移交 MicrosoftCN；删 cdn.fellou.ai/logos.composio.dev/ph.langfuse.com/releases.warp.dev 4 条伴生子域(顶域已入 AI.list，成对处理防死规则)
+# 2026-08-30 四大厂归属核查迁出：mm.bing.net/sapphire/static.edge.microsoftapp/designerapp/MSN 图视 CDN 共 6 条→Microsoft.list(会话配套 CDN 与会话面同组)；Edge/Defender/VS Code 更新类微软域为真·下载面，刻意保留
 
 DOMAIN,account-api.bandainamcoid.com
 DOMAIN,account.bandainamcoid.com
@@ -804,7 +805,6 @@ DOMAIN-SUFFIX,cdn.decrypt.co
 DOMAIN-SUFFIX,cdn.decrypt.day
 DOMAIN-SUFFIX,cdn.delight-vr.com
 DOMAIN-SUFFIX,cdn.delve.co
-DOMAIN-SUFFIX,cdn.designerapp.osi.office.net
 DOMAIN-SUFFIX,cdn.designsystem.arm.com
 DOMAIN-SUFFIX,cdn.deta.space
 DOMAIN-SUFFIX,cdn.devdojo.com
@@ -1032,7 +1032,6 @@ DOMAIN-SUFFIX,cdn.runcloud.io
 DOMAIN-SUFFIX,cdn.s7s.ai
 DOMAIN-SUFFIX,cdn.safecharge.com
 DOMAIN-SUFFIX,cdn.sanity.io
-DOMAIN-SUFFIX,cdn.sapphire.microsoftapp.net
 DOMAIN-SUFFIX,cdn.sc.gl
 DOMAIN-SUFFIX,cdn.scalar.com
 DOMAIN-SUFFIX,cdn.scaleflex.it
@@ -2543,7 +2542,6 @@ DOMAIN-SUFFIX,img-cos.mandaoo.com
 DOMAIN-SUFFIX,img-dpreview.com
 DOMAIN-SUFFIX,img-en.fs.com
 DOMAIN-SUFFIX,img-new.cgtrader.com
-DOMAIN-SUFFIX,img-s-msn-com.akamaized.net
 DOMAIN-SUFFIX,img.177pica.com
 DOMAIN-SUFFIX,img.321cdn.com
 DOMAIN-SUFFIX,img.3movs.com
@@ -3655,7 +3653,6 @@ DOMAIN-SUFFIX,mjedge.net
 DOMAIN-SUFFIX,mkt-site-asset.crypto.com
 DOMAIN-SUFFIX,mktgcdn.com
 DOMAIN-SUFFIX,mlcdn.com
-DOMAIN-SUFFIX,mm.bing.net
 DOMAIN-SUFFIX,mm.fcix.net
 DOMAIN-SUFFIX,mma.prnewswire.com
 DOMAIN-SUFFIX,mms.businesswire.com
@@ -3777,7 +3774,6 @@ DOMAIN-SUFFIX,omtmapupdate.garmin.com
 DOMAIN-SUFFIX,on-fleek.app
 DOMAIN-SUFFIX,onekey-asset.com
 DOMAIN-SUFFIX,onelink-edge.com
-DOMAIN-SUFFIX,oneocsp.microsoft.com
 DOMAIN-SUFFIX,onepluscommunityserver.com
 DOMAIN-SUFFIX,onrender.com
 DOMAIN-SUFFIX,ooklaserver.net
@@ -3987,7 +3983,6 @@ DOMAIN-SUFFIX,prod-cdn.webtune.ai
 DOMAIN-SUFFIX,prod-east.frontend.public.atl-paas.net
 DOMAIN-SUFFIX,prod-images.rippling.com
 DOMAIN-SUFFIX,prod-packager-packages.codesandbox.io
-DOMAIN-SUFFIX,prod-streaming-video-msn-com.akamaized.net
 DOMAIN-SUFFIX,prod-video-cms-amp-microsoft-com.akamaized.net
 DOMAIN-SUFFIX,prod.addictinggames.com
 DOMAIN-SUFFIX,prod.public.atl-paas.net
@@ -4783,7 +4778,6 @@ DOMAIN-SUFFIX,static.domains
 DOMAIN-SUFFIX,static.doujins.com
 DOMAIN-SUFFIX,static.driffle.com
 DOMAIN-SUFFIX,static.dzeninfra.ru
-DOMAIN-SUFFIX,static.edge.microsoftapp.net
 DOMAIN-SUFFIX,static.elfsight.com
 DOMAIN-SUFFIX,static.eroterest.net
 DOMAIN-SUFFIX,static.esimplus.net

@@ -209,6 +209,18 @@
       {
         "host": "substrate.office.com",
         "note": "Office 上下文"
+      },
+      {
+        "host": "copilot.com",
+        "note": "消费者主域（2026-08-30 四大厂核查补入）"
+      },
+      {
+        "host": "m365copilot.com",
+        "note": "企业版入口，301→m365.cloud.microsoft"
+      },
+      {
+        "host": "m365.cloud.microsoft",
+        "note": "M365 Copilot 聊天主面"
       }
     ],
     "assert": {

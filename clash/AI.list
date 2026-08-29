@@ -10,6 +10,7 @@
 # 取舍记录：本表 PROCESS-NAME 位于国内直连区之前，会捕获这些进程的全部流量（含其内置浏览器访问的国内站点）——刻意取舍
 # 进程收录判据（三条须同时满足）：① 进程名 ↔ AI 服务一一对应 ② 误捕流量无更好归属 ③ 域名侧不够用。Raycast / Zed / VS Code / Obsidian 等多功能应用明确不加进程规则
 # 2026-08-30 收尾（统筹裁决）：fellou.ai / composio.dev / langfuse.com / warp.dev 四顶域已收，与 DownloadCDN 删除其 4 条伴生子域成对完成（AI 会话同出口优先；releases.warp.dev 归 AI 组沿用「AI 应用更新包走 AI 组不比下载组差」先例）；另收 /Users/*/.codex/* 与 /Users/*/.local/share/claude/versions/* 两条全路径通配进程（surge-cli 实测命中，修复终端版 Claude Code 可执行名为版本号的漏网），注意其覆盖对应目录下全部二进制
+# 2026-08-30 用户裁决（四大厂媒体与 AI 归各自独立表）：Cursor/Grok Bot 全家迁出→Twitter.list(域 anysphere.co/cursor-cdn/cursor.com/cursor.sh/cursorapi/cursorvm + 进程 Cursor 三变体/Grok Bot 三变体/两条 App Bundle)——Grok Bot 品牌属 xAI 且 cursor 基建随迁同组，会话链一致；githubcopilot.com/githubnext.com 迁出→Microsoft.list(Copilot 整链同组，推翻 8-29「纯 AI 推理面留本表」裁决)；todesktop.com 为通用 Electron 分发平台非 Cursor 专属，留本表
 
 DOMAIN,anthropic-com.ghost.io
 DOMAIN,aws-language-servers.us-east-1.amazonaws.com
@@ -47,7 +48,6 @@ DOMAIN-SUFFIX,anthropic.com.cdn.cloudflare.net
 DOMAIN-SUFFIX,anthropic.team
 DOMAIN-SUFFIX,antspace.dev
 DOMAIN-SUFFIX,anyscale.com
-DOMAIN-SUFFIX,anysphere.co
 DOMAIN-SUFFIX,anythingllm.com
 DOMAIN-SUFFIX,api.statsig.com
 DOMAIN-SUFFIX,arcade.dev
@@ -121,11 +121,6 @@ DOMAIN-SUFFIX,coze.com
 DOMAIN-SUFFIX,crewai.com
 DOMAIN-SUFFIX,crixet.com
 DOMAIN-SUFFIX,crusoe.ai
-DOMAIN-SUFFIX,cursor-cdn.com
-DOMAIN-SUFFIX,cursor.com
-DOMAIN-SUFFIX,cursor.sh
-DOMAIN-SUFFIX,cursorapi.com
-DOMAIN-SUFFIX,cursorvm.com
 DOMAIN-SUFFIX,datadoghq.com
 DOMAIN-SUFFIX,daytona.io
 DOMAIN-SUFFIX,deepgram.com
@@ -165,8 +160,6 @@ DOMAIN-SUFFIX,fish.audio
 DOMAIN-SUFFIX,flowiseai.com
 DOMAIN-SUFFIX,gamma.app
 DOMAIN-SUFFIX,genspark.ai
-DOMAIN-SUFFIX,githubcopilot.com
-DOMAIN-SUFFIX,githubnext.com
 DOMAIN-SUFFIX,glama.ai
 DOMAIN-SUFFIX,glean.com
 DOMAIN-SUFFIX,grammarly.com
@@ -397,8 +390,6 @@ DOMAIN-KEYWORD,openaicom-api
 PROCESS-NAME,/Applications/ChatGPT.app/
 PROCESS-NAME,/Applications/Claude.app/
 PROCESS-NAME,/Applications/CodexBar.app/
-PROCESS-NAME,/Applications/Cursor.app/
-PROCESS-NAME,/Applications/Grok Bot.app/
 PROCESS-NAME,/Users/*/.codex/*
 PROCESS-NAME,/Users/*/.local/share/claude/versions/*
 PROCESS-NAME,Augment
@@ -419,12 +410,6 @@ PROCESS-NAME,Codex.exe
 PROCESS-NAME,codex.exe
 PROCESS-NAME,CodexBar
 PROCESS-NAME,cowork-svc.exe
-PROCESS-NAME,Cursor
-PROCESS-NAME,cursor
-PROCESS-NAME,Cursor.exe
-PROCESS-NAME,Grok Bot
-PROCESS-NAME,Grok Bot Helper*
-PROCESS-NAME,Grok Bot.exe
 PROCESS-NAME,Windsurf
 PROCESS-NAME,windsurf
 PROCESS-NAME,Windsurf.exe

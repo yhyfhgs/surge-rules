@@ -45,7 +45,7 @@ REJECT_POLICIES = frozenset(("REJECT", "REJECT-DROP", "REJECT-TINYGIF",
 DEFAULT_ALLOWLIST = os.path.join(os.path.dirname(os.path.abspath(__file__)),
                                  "allowlist.json")
 
-ALL_CHECKS = ("A1", "A2", "A3", "A4", "A5", "A6")
+ALL_CHECKS = ("A1", "A2", "A3", "A4", "A5", "A6", "A7")
 
 
 #: 形如 IPv4 前缀的关键词（A6 启发式提示用，例如 "101.91.69." / "1.2.3.4"）
@@ -576,6 +576,39 @@ class Auditor(object):
                       "low")
         return len(self.keywords)
 
+    # -- A7 ---------------------------------------------------------------
+
+    A7_PREFIXES = ("DOMAIN,", "DOMAIN-SUFFIX,", "DOMAIN-KEYWORD,", "DOMAIN-WILDCARD,",
+                   "USER-AGENT,", "PROCESS-NAME,", "URL-REGEX,",
+                   "IP-CIDR,", "IP-CIDR6,", "IP-ASN,", "GEOIP,",
+                   "AND,", "OR,", "NOT,")
+
+    def check_a7(self):
+        """A7：规则行格式 lint。无类型前缀的裸行会被 Surge 与本套引擎静默忽略——
+        表面上已收录、实际不存在，且任何落点测试都不会替它报错
+        （2026-08-30 迁移脚本踩坑后固化为发布闸门）。"""
+        n = 0
+        for fname in sorted(os.listdir(self.e.rules_dir)):
+            if not fname.endswith(".list"):
+                continue
+            path = os.path.join(self.e.rules_dir, fname)
+            with open(path, "r", encoding="utf-8") as fh:
+                for lineno, raw in enumerate(fh, 1):
+                    t = raw.strip()
+                    if not t or t.startswith("#"):
+                        continue
+                    if any(t.startswith(p) for p in self.A7_PREFIXES):
+                        continue
+                    n += 1
+                    self._add("A7", "P1", "format", fname, t[:80],
+                              "%s:%d 无已知规则类型前缀：%s —— Surge 与离线引擎都会静默忽略此行。"
+                              % (fname, lineno, t[:80]),
+                              "规则看似已收录、实际不生效：目标域/进程落到后位表或 FINAL，"
+                              "且所有测试都不会替它报错，属于最隐蔽的一类失效。",
+                              "补上正确的类型前缀（如 DOMAIN-SUFFIX,），或删除该行。",
+                              "high")
+        return n
+
     # -- 运行 --------------------------------------------------------------
 
     def run(self, checks):
@@ -592,6 +625,8 @@ class Auditor(object):
             stats["A5"] = self.check_a5()
         if "A6" in checks:
             stats["A6"] = self.check_a6()
+        if "A7" in checks:
+            stats["A7"] = self.check_a7()
         self.findings.sort(key=lambda f: (SEVERITY_ORDER[f["severity"]],
                                           f["check"], f["id"]))
         return stats
@@ -608,6 +643,7 @@ CHECK_TITLE = {
     "A4": "A4 跨 list 遮蔽",
     "A5": "A5 conf 引用完整性",
     "A6": "A6 DOMAIN-KEYWORD 审查表（不判错）",
+    "A7": "A7 规则行格式 lint（裸行/未知前缀 → P1）",
 }
 
 SEV_TITLE = {

@@ -1,7 +1,14 @@
 # Twitter — X/Twitter 生态 (含 xAI: Grok/x.ai)；2026-08-25 并入 blackmatrix7:Twitter
 # 规范化排序：规则类型分区，区内字母序
+# 2026-08-30 用户裁决：接收 Cursor/Grok Bot 全家（6 域 + 8 进程，自 AI.list）——Grok Bot(com.anysphere.sand) 实测后端为 cursor 基建(api2.cursor.sh/*.cursorvm.com)，品牌属 xAI，域+进程同表保证会话链同出口
 
+DOMAIN-SUFFIX,anysphere.co
 DOMAIN-SUFFIX,cms-twdigitalassets.com
+DOMAIN-SUFFIX,cursor-cdn.com
+DOMAIN-SUFFIX,cursor.com
+DOMAIN-SUFFIX,cursor.sh
+DOMAIN-SUFFIX,cursorapi.com
+DOMAIN-SUFFIX,cursorvm.com
 DOMAIN-SUFFIX,grok.com
 DOMAIN-SUFFIX,grokipedia.com
 DOMAIN-SUFFIX,periscope.tv
@@ -22,6 +29,15 @@ DOMAIN-SUFFIX,x.ai
 DOMAIN-SUFFIX,x.com
 
 DOMAIN-KEYWORD,twitter
+
+PROCESS-NAME,/Applications/Cursor.app/
+PROCESS-NAME,/Applications/Grok Bot.app/
+PROCESS-NAME,Cursor
+PROCESS-NAME,cursor
+PROCESS-NAME,Cursor.exe
+PROCESS-NAME,Grok Bot
+PROCESS-NAME,Grok Bot Helper*
+PROCESS-NAME,Grok Bot.exe
 
 IP-CIDR,69.195.160.0/19,no-resolve
 IP-CIDR,104.244.40.0/21,no-resolve

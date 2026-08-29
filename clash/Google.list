@@ -5,6 +5,7 @@
 # Google — Google 全家桶 (含 .google/.goog gTLD、Gemini/Antigravity/DeepMind；不含 YouTube)；2026-08-25 并入 blackmatrix7:Google
 # 规范化排序：规则类型分区，区内字母序
 # 2026-08-25 维护：接收 ai.studio/g.ai(自 AI.list)与 gvt2.com(自 YouTube.list)
+# 2026-08-30 四大厂归属核查：自 ProxyGFW 迁入 20 条 Google 自有域(12 搜索 ccTLD 含 google.hk + googlegroups/googlehosted + 6 条低流量历史域，DoH 全部 AS15169)——同一搜索会话不再跨出口；.google/.goog gTLD 后缀已兜底 deepmind.google/labs.google/ai.google 等 AI 门面，无需单列
 
 DOMAIN-SUFFIX,0emm.com
 DOMAIN-SUFFIX,1e100.net
@@ -26,6 +27,7 @@ DOMAIN-SUFFIX,advertiserscommunity.com
 DOMAIN-SUFFIX,adwords-community.com
 DOMAIN-SUFFIX,adwords.com
 DOMAIN-SUFFIX,adwordsexpress.com
+DOMAIN-SUFFIX,agoogleaday.com
 DOMAIN-SUFFIX,ai.studio
 DOMAIN-SUFFIX,amp.dev
 DOMAIN-SUFFIX,ampproject.com
@@ -187,8 +189,11 @@ DOMAIN-SUFFIX,google-analytics-cn.com
 DOMAIN-SUFFIX,google-analytics.com
 DOMAIN-SUFFIX,google-ohttp-relay-safebrowsing.fastly-edge.com
 DOMAIN-SUFFIX,google-syndication.com
+DOMAIN-SUFFIX,google.ac
 DOMAIN-SUFFIX,google.ad
 DOMAIN-SUFFIX,google.ae
+DOMAIN-SUFFIX,google.af
+DOMAIN-SUFFIX,google.ai
 DOMAIN-SUFFIX,google.al
 DOMAIN-SUFFIX,google.am
 DOMAIN-SUFFIX,google.as
@@ -271,6 +276,7 @@ DOMAIN-SUFFIX,google.com.mt
 DOMAIN-SUFFIX,google.com.mx
 DOMAIN-SUFFIX,google.com.my
 DOMAIN-SUFFIX,google.com.na
+DOMAIN-SUFFIX,google.com.nf
 DOMAIN-SUFFIX,google.com.ng
 DOMAIN-SUFFIX,google.com.ni
 DOMAIN-SUFFIX,google.com.np
@@ -305,6 +311,7 @@ DOMAIN-SUFFIX,google.dm
 DOMAIN-SUFFIX,google.dz
 DOMAIN-SUFFIX,google.ee
 DOMAIN-SUFFIX,google.es
+DOMAIN-SUFFIX,google.eu
 DOMAIN-SUFFIX,google.fi
 DOMAIN-SUFFIX,google.fm
 DOMAIN-SUFFIX,google.fr
@@ -313,8 +320,10 @@ DOMAIN-SUFFIX,google.ge
 DOMAIN-SUFFIX,google.gg
 DOMAIN-SUFFIX,google.gl
 DOMAIN-SUFFIX,google.gm
+DOMAIN-SUFFIX,google.gp
 DOMAIN-SUFFIX,google.gr
 DOMAIN-SUFFIX,google.gy
+DOMAIN-SUFFIX,google.hk
 DOMAIN-SUFFIX,google.hn
 DOMAIN-SUFFIX,google.hr
 DOMAIN-SUFFIX,google.ht
@@ -324,6 +333,7 @@ DOMAIN-SUFFIX,google.im
 DOMAIN-SUFFIX,google.iq
 DOMAIN-SUFFIX,google.is
 DOMAIN-SUFFIX,google.it
+DOMAIN-SUFFIX,google.it.ao
 DOMAIN-SUFFIX,google.je
 DOMAIN-SUFFIX,google.jo
 DOMAIN-SUFFIX,google.kg
@@ -345,6 +355,7 @@ DOMAIN-SUFFIX,google.ms
 DOMAIN-SUFFIX,google.mu
 DOMAIN-SUFFIX,google.mv
 DOMAIN-SUFFIX,google.mw
+DOMAIN-SUFFIX,google.mx
 DOMAIN-SUFFIX,google.ne
 DOMAIN-SUFFIX,google.net
 DOMAIN-SUFFIX,google.nl
@@ -372,13 +383,16 @@ DOMAIN-SUFFIX,google.sr
 DOMAIN-SUFFIX,google.st
 DOMAIN-SUFFIX,google.td
 DOMAIN-SUFFIX,google.tg
+DOMAIN-SUFFIX,google.tk
 DOMAIN-SUFFIX,google.tl
 DOMAIN-SUFFIX,google.tm
 DOMAIN-SUFFIX,google.tn
 DOMAIN-SUFFIX,google.to
 DOMAIN-SUFFIX,google.tt
+DOMAIN-SUFFIX,google.us
 DOMAIN-SUFFIX,google.ventures
 DOMAIN-SUFFIX,google.vg
+DOMAIN-SUFFIX,google.vn
 DOMAIN-SUFFIX,google.vu
 DOMAIN-SUFFIX,google.ws
 DOMAIN-SUFFIX,googleacquisitionmigration.com
@@ -391,10 +405,12 @@ DOMAIN-SUFFIX,googleapis.com
 DOMAIN-SUFFIX,googleapps-cn.com
 DOMAIN-SUFFIX,googleapps.com
 DOMAIN-SUFFIX,googlearth.com
+DOMAIN-SUFFIX,googleartproject.com
 DOMAIN-SUFFIX,googleblog.com
 DOMAIN-SUFFIX,googlebot.com
 DOMAIN-SUFFIX,googlecapital.com
 DOMAIN-SUFFIX,googlecert.net
+DOMAIN-SUFFIX,googlechinawebmaster.com
 DOMAIN-SUFFIX,googlecode.com
 DOMAIN-SUFFIX,googlecommerce.com
 DOMAIN-SUFFIX,googlecompare.co.uk
@@ -407,6 +423,10 @@ DOMAIN-SUFFIX,googlefiber.com
 DOMAIN-SUFFIX,googlefiber.net
 DOMAIN-SUFFIX,googlefinland.com
 DOMAIN-SUFFIX,googleflights-cn.net
+DOMAIN-SUFFIX,googlegroups.com
+DOMAIN-SUFFIX,googlehosted.com
+DOMAIN-SUFFIX,googleideas.com
+DOMAIN-SUFFIX,googleinsidesearch.com
 DOMAIN-SUFFIX,googlemail.com
 DOMAIN-SUFFIX,googlemaps.com
 DOMAIN-SUFFIX,googlemashups.com
@@ -431,6 +451,7 @@ DOMAIN-SUFFIX,googletraveladservices.com
 DOMAIN-SUFFIX,googleusercontent.com
 DOMAIN-SUFFIX,googlevads-cn.com
 DOMAIN-SUFFIX,googleventures.com
+DOMAIN-SUFFIX,googleweblight.com
 DOMAIN-SUFFIX,googlezip.net
 DOMAIN-SUFFIX,googlr.com
 DOMAIN-SUFFIX,goolge.com

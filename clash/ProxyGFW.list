@@ -6,6 +6,7 @@
 # 规范化排序：规则类型分区，区内字母序
 # 2026-08-25 维护：接收 auth0.com；docker.com/npmjs.com 移交 DownloadCDN、login.microsoftonline.com 移交 AI、社交伴生域移交 SocialOthers/Meta；删 1 条失效域。2026-08-29 维护：stripe.com/stripe.network/gumroad.com/paddle.com/DOMAIN-KEYWORD,paypal 移交新建 Payment.list(支付需固定出口)；USER-AGENT,PayPal* 未动，待 UA 方案统一裁决
 # 2026-08-30 维护：删 USER-AGENT,OneDrive*（与 MicrosoftCN 直连裁决矛盾）、USER-AGENT,WhatsApp*（Meta.list 域名面已覆盖）、DOMAIN-SUFFIX,ocsp.int-x3.letsencrypt.org（2021 年已退役端点）；移出 USER-AGENT,PayPal* → Payment.list、DOMAIN-SUFFIX,arena.ai → AI.list、USER-AGENT,battleroyale* 与 USER-AGENT,hearthstone* → Games.list（游戏 UA 归游戏组）；移入 DOMAIN-SUFFIX,api.mixpanel.com（自 Telegram，通用分析域）与 awsapps.com / awsstatic.com / sso.amazonaws.com（自 AI，通用 AWS 客户域；后者被本表既有 DOMAIN-SUFFIX,amazonaws.com 兜底覆盖，保留为显式归属登记）
+# 2026-08-30 四大厂归属核查迁出：20 条 Google 自有域→Google.list、bing 三后缀+microsoftapp.net→Microsoft.list、facebook.de→Meta.list；microsoft.com/azureedge.net 兜底为刻意分层(同 amazonaws.com 铁律)保留
 
 DOMAIN,api.waqi.info
 DOMAIN,assets-priconne-redive-us.akamaized.net
@@ -221,7 +222,6 @@ DOMAIN-SUFFIX,afantibbs.com
 DOMAIN-SUFFIX,afr.com
 DOMAIN-SUFFIX,afreecatv.com
 DOMAIN-SUFFIX,agnesb.fr
-DOMAIN-SUFFIX,agoogleaday.com
 DOMAIN-SUFFIX,agro.hk
 DOMAIN-SUFFIX,ai-kan.net
 DOMAIN-SUFFIX,ai-wen.net
@@ -623,9 +623,6 @@ DOMAIN-SUFFIX,binance.com
 DOMAIN-SUFFIX,binance.org
 DOMAIN-SUFFIX,binance.us
 DOMAIN-SUFFIX,binancezh.cc
-DOMAIN-SUFFIX,bing.com
-DOMAIN-SUFFIX,bing.net
-DOMAIN-SUFFIX,bingapis.com
 DOMAIN-SUFFIX,bintray.com
 DOMAIN-SUFFIX,binux.me
 DOMAIN-SUFFIX,binwang.me
@@ -1699,7 +1696,6 @@ DOMAIN-SUFFIX,ezua.com
 DOMAIN-SUFFIX,f2pool.com
 DOMAIN-SUFFIX,f95zone.to
 DOMAIN-SUFFIX,fabric.io
-DOMAIN-SUFFIX,facebook.de
 DOMAIN-SUFFIX,faceless.me
 DOMAIN-SUFFIX,facesofnyfw.com
 DOMAIN-SUFFIX,facesoftibetanselfimmolators.info
@@ -2238,25 +2234,6 @@ DOMAIN-SUFFIX,goodreads.com
 DOMAIN-SUFFIX,goodtv.com.tw
 DOMAIN-SUFFIX,goodtv.tv
 DOMAIN-SUFFIX,goofind.com
-DOMAIN-SUFFIX,google.ac
-DOMAIN-SUFFIX,google.af
-DOMAIN-SUFFIX,google.ai
-DOMAIN-SUFFIX,google.com.nf
-DOMAIN-SUFFIX,google.eu
-DOMAIN-SUFFIX,google.gp
-DOMAIN-SUFFIX,google.hk
-DOMAIN-SUFFIX,google.it.ao
-DOMAIN-SUFFIX,google.mx
-DOMAIN-SUFFIX,google.tk
-DOMAIN-SUFFIX,google.us
-DOMAIN-SUFFIX,google.vn
-DOMAIN-SUFFIX,googleartproject.com
-DOMAIN-SUFFIX,googlechinawebmaster.com
-DOMAIN-SUFFIX,googlegroups.com
-DOMAIN-SUFFIX,googlehosted.com
-DOMAIN-SUFFIX,googleideas.com
-DOMAIN-SUFFIX,googleinsidesearch.com
-DOMAIN-SUFFIX,googleweblight.com
 DOMAIN-SUFFIX,gopetition.com
 DOMAIN-SUFFIX,goproxing.net
 DOMAIN-SUFFIX,goreforum.com
@@ -3407,7 +3384,6 @@ DOMAIN-SUFFIX,mhwindow.org
 DOMAIN-SUFFIX,michaelmarketl.com
 DOMAIN-SUFFIX,microsoft-falcon.io
 DOMAIN-SUFFIX,microsoft.com
-DOMAIN-SUFFIX,microsoftapp.net
 DOMAIN-SUFFIX,microsofttranslator.com
 DOMAIN-SUFFIX,microvpn.com
 DOMAIN-SUFFIX,middle-way.net

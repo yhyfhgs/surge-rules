@@ -1,28 +1,30 @@
 # Microsoft — 微软海外服务与 AI（Copilot/Bing/MSN/国际登录面）；仿 Google/Twitter 模式独立成表，走 Google-X-Meta 组
 # 规范化排序：规则类型分区，区内字母序
 # 2026-08-25 创建：自 AI.list 拆出（微软自有 AI 归微软生态）；GitHub 生态原留 AI.list；国内 CDN/下载直连域仍归 MicrosoftCN.list；2026-08-29 用户裁决改为生态归属优先：GitHub 平台域 10 条自 AI.list 迁入本表（githubcopilot.com/githubnext.com 为纯 AI 推理面仍留 AI.list）
+# 2026-08-30 用户裁决：githubcopilot.com/githubnext.com 自 AI.list 迁入——Copilot 登录/平台/推理整链同组（推翻 8-29「纯 AI 推理面留 AI」，四大厂 AI 归各自生态表）
+# 2026-08-30 四大厂归属核查：补 Copilot 独立域(copilot.com/m365copilot.com/DOMAIN,m365.cloud.microsoft——刻意窄方案，不收 cloud.microsoft 整 gTLD 防拉 Office Web 与 MicrosoftCN 直连面冲突)；Bing 三分裂修复(bing.com/bing.net/bingapis.com 后缀自 ProxyGFW 迁入+8 条同表精确条收敛)；microsoftapp.net 后缀收敛(自 ProxyGFW+DownloadCDN 三处归一)；接收 designer/MSN 配套 CDN 3 条(自 DownloadCDN)；勿把 microsoft.com 整条搬入——会遮蔽 MicrosoftCN 45 条直连域
 
 DOMAIN,api.msn.com
 DOMAIN,copilot.cloud.microsoft
 DOMAIN,copilotprodattachments.blob.core.windows.net
 DOMAIN,gateway.bingviz.microsoft.net
-DOMAIN,gateway.bingviz.microsoftapp.net
 DOMAIN,location.microsoft.com
 DOMAIN,login.live.com
 DOMAIN,login.microsoftonline.com
+DOMAIN,m365.cloud.microsoft
 DOMAIN,odc.officeapps.live.com
-DOMAIN,r.bing.com
 DOMAIN,self.events.data.microsoft.com
-DOMAIN,services.bingapis.com
 DOMAIN,substrate.office.com
-DOMAIN,www.bing.com
 
-DOMAIN-SUFFIX,api.microsoftapp.net
 DOMAIN-SUFFIX,assets.msn.com
 DOMAIN-SUFFIX,bing-shopping.microsoft-falcon.io
+DOMAIN-SUFFIX,bing.com
+DOMAIN-SUFFIX,bing.net
+DOMAIN-SUFFIX,bingapis.com
+DOMAIN-SUFFIX,cdn.designerapp.osi.office.net
+DOMAIN-SUFFIX,copilot.com
 DOMAIN-SUFFIX,copilot.microsoft.com
 DOMAIN-SUFFIX,designer.microsoft.com
-DOMAIN-SUFFIX,edgeservices.bing.com
 DOMAIN-SUFFIX,ghcr.io
 DOMAIN-SUFFIX,github.blog
 DOMAIN-SUFFIX,github.com
@@ -30,11 +32,15 @@ DOMAIN-SUFFIX,github.community
 DOMAIN-SUFFIX,github.dev
 DOMAIN-SUFFIX,githubapp.com
 DOMAIN-SUFFIX,githubassets.com
+DOMAIN-SUFFIX,githubcopilot.com
+DOMAIN-SUFFIX,githubnext.com
 DOMAIN-SUFFIX,githubpreview.dev
 DOMAIN-SUFFIX,githubuniverse.com
 DOMAIN-SUFFIX,githubusercontent.com
+DOMAIN-SUFFIX,img-s-msn-com.akamaized.net
 DOMAIN-SUFFIX,in.appcenter.ms
+DOMAIN-SUFFIX,m365copilot.com
+DOMAIN-SUFFIX,microsoftapp.net
 DOMAIN-SUFFIX,msauth.net
 DOMAIN-SUFFIX,msftauth.net
-DOMAIN-SUFFIX,sydney.bing.com
-DOMAIN-SUFFIX,th.bing.com
+DOMAIN-SUFFIX,prod-streaming-video-msn-com.akamaized.net
