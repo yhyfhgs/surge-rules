@@ -1,6 +1,7 @@
 # YouTube — YouTube/YouTube Music 全量 (先于 Google 匹配)；2026-08-25 并入 blackmatrix7:YouTube
 # 规范化排序：规则类型分区，区内字母序
 # 2026-08-25 维护：gvt2.com 移交 Google.list(Google 更新/遥测域，非 YouTube)
+# 2026-08-30 用户裁决（纯域名+IP 架构）：移除本表全部 PROCESS-NAME/USER-AGENT——两类规则按 App 维度全域生效，会把 App 内异质流量（内置浏览器/webview/系统共享域）误接管；域名收录已密+extended-matching+IP 段兜底足以覆盖，未收录新域落 FINAL 仍走代理无功能损失
 
 DOMAIN,yt3.ggpht.com
 DOMAIN,yt4.ggpht.com
@@ -12,14 +13,6 @@ DOMAIN-SUFFIX,yt.be
 DOMAIN-SUFFIX,ytimg.com
 
 DOMAIN-KEYWORD,youtube
-
-USER-AGENT,*com.google.ios.youtubemusic*
-USER-AGENT,*youtube*
-USER-AGENT,*YouTubeMusic*
-USER-AGENT,com.google.ios.youtube*
-USER-AGENT,com.google.ios.youtubemusic*
-USER-AGENT,YouTube*
-USER-AGENT,YouTubeMusic*
 
 IP-CIDR,172.110.32.0/21,no-resolve
 IP-CIDR,216.73.80.0/20,no-resolve

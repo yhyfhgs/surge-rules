@@ -3,6 +3,7 @@
 # 2026-08-29 新建：自 ProxyGFW(stripe.com/stripe.network/DOMAIN-KEYWORD,paypal/gumroad/paddle)、DownloadCDN(24 条支付 JS/静态/风控域)、US(americanexpress/discover) 移入；域名依据 blackmatrix7 PayPal/Stripe/VISA 上游 + 各渠道官方接入文档，逐域 DNS/重定向实测核验；生态自有支付(alipay/unionpay/Apple Pay/微信支付/Google Pay)按既有裁决留原表不动
 # 2026-08-30 维护：新增 10 域（cardinalcommerce/worldpay/mollie/nuvei/gocardless/paysafe/skrill/neteller/trustly/xoom，逐家实测）；自 ProxyGFW 移入 USER-AGENT,PayPal*——PayPal app 访问未收录域时锁定 Payment 出口，防跨出口 3DS
 # 明确拒绝且勿再提：revolut / remitly / safecharge / dlocal / rapyd / westernunion / moneygram / worldline / shop.app / checkout.shopify.com——银行类归区域表；Shopify 结账域与店铺同会话不拆分（单独切出反而自制 3DS 风控）
+# 2026-08-30 用户裁决（纯域名+IP 架构）：移除本表全部 PROCESS-NAME/USER-AGENT——两类规则按 App 维度全域生效，会把 App 内异质流量（内置浏览器/webview/系统共享域）误接管；域名收录已密+extended-matching+IP 段兜底足以覆盖，未收录新域落 FINAL 仍走代理无功能损失
 
 DOMAIN-SUFFIX,2checkout.com
 DOMAIN-SUFFIX,2co.com
@@ -67,4 +68,3 @@ DOMAIN-SUFFIX,xoom.com
 
 DOMAIN-KEYWORD,paypal
 
-USER-AGENT,PayPal*

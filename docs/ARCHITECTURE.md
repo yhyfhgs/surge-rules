@@ -194,11 +194,11 @@ lists/*.list  ──(tools/surge2clash.py 全量再生)──▶  clash/*.list +
 | D4 | **DownloadCDN 定位收窄为「大流量批量下载域」** | 它一度膨胀成站点静态资源大杂烩,与生态表大面积重叠。收窄后职责单一,533 个站点静态域已剥离 |
 | D5 | **`gateway.icloud.com` 留在 AI.list** | Apple Intelligence 的取舍:该域承载 AI 相关流量,归 AI 组比归 AppleCN 更贴合实际用途 |
 | D6 | **`DOMAIN-SUFFIX,amazonaws.com` 留在 ProxyGFW** | 刻意的 AWS 兜底。具体 CDN 子域已在 DownloadCDN 分层承接,`amazonaws.com` 本身作为宽口径兜底留在 GFW 表 |
-| D7 | **PROCESS-NAME 大小写变体不去重**(`Claude` / `claude` 等) | 刻意的跨平台覆盖:不同系统上进程名大小写不同,归一化会漏掉一半平台 |
+| D7 | **全库不使用 PROCESS-NAME / USER-AGENT**(2026-08-30 用户裁决,替代旧 D7「大小写变体不去重」) | 两类规则按 App 维度**全域生效**:App 内异质流量(内置浏览器/webview/系统共享域)会被整体误接管,且防误抓完全依赖 conf 顺序这一根独木桥(实证:Codex (Service) 访问 bilibili 曾被拽进 AI 组)。域名收录+extended-matching+IP 段兜底已足;未收录新域落 FINAL 仍走代理,无功能损失。**上游合并与再生一律剔除这两类规则**;若日后接入下游 iOS 设备(网关/Ponte,进程规则不可用、UA 成为区分 App 的唯一手段)可重新评估 |
 | D8 | **地区表自包含 IP 规则并整体后置** | 地区表内的 GEOIP / IP-ASN 若前置,会遮蔽 Apple 17/8 与 ProxyGFW 的 IP 规则 |
 | D9 | **`DC-X.conf` 保留** | 已补 `no-resolve` 加固,不违反零本地 DNS 解析约束 |
 | D10 | **MITM 的 enable 键不写进 conf** | MITM 已启用,开关在 GUI 运行态。Surge 会把 `enable` 键从 conf 规范化移除;conf 只保留 `h2=true`。**不要反复往 conf 写 `enable`** —— 它每次都会被抹掉 |
-| D11 | **合并排除表** | 以下上游条目**不合并**:`DOMAIN-KEYWORD,google`、`akadns.net`、`stripe`、`ms`(ccTLD)、porn / facebook 等关键词;以及 5 条宽 `USER-AGENT`:`Microsoft*`、`hide*`、`TeamViewer*`、`QQ*`、`TIM*`。它们过于宽泛,合并会造成大面积误伤 |
+| D11 | **合并排除表** | 以下上游条目**不合并**:`DOMAIN-KEYWORD,google`、`akadns.net`、`stripe`、`ms`(ccTLD)、porn / facebook 等关键词;以及(按 D7 新裁决)**全部 `USER-AGENT` 与 `PROCESS-NAME` 类型规则**——上游合并、ChinaDomain 再生时按类型整体剔除,无需逐条列举(下方 5 条宽 UA 清单保留作历史依据与危险性说明) |
 
 #### D11 附:5 条宽 `USER-AGENT` 排除项(2026-08-30 审计新增)
 

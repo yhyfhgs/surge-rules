@@ -5,12 +5,9 @@
 # 规范化排序：规则类型分区，区内字母序
 # 2026-08-25 维护：sentry/datadog/sift/openai 关键词收窄为精确后缀；stripe/auth0→ProxyGFW，identrust/ppio/xingyeai/xiaoaiassist→Domestic，字节海外域→TikTok，ai.studio/g.ai→Google；删 Private Relay 8 域与 DigitalOcean/Vultr 全网段 ASN；GitHub 全生态归本表；微软海外面(Copilot/Bing/登录)已拆至 Microsoft.list(Google-X-Meta 组)；并入国内厂商国际站(coze.com/qwen.ai/z.ai/kimi.ai 等 13 域)；2026-08-29 维护：补 OpenAI 上游精确域 6 与 GitHub 生态 7 域、近一年 AI 新服务 26 域；PROCESS-NAME 依 lsof 实测补 Claude Helper/Codex (Service)/CodexBar/codex.exe；删 DigitalOcean 两个 /32(RDAP 非 AI 厂商)，补 Anthropic 153.61.0.0/16+216.73.216.0/22 与 ASN 400243/401551/401864(ARIN 核实)；xAI/grok 已在 Twitter.list、deepseek/kimi.com 在 Domestic.list，均不重复收录；2026-08-29 迁移(用户裁决，生态归属优先)：GitHub 平台域 10 条→Microsoft.list、gateway.icloud.com→AppleCN.list(直连；Apple Intelligence 将不可用，需恢复则移回本表)，githubcopilot/githubnext 为纯 AI 推理面留本表；删错误归属 10 域(flux.ai/lcicat/lcicollections/muthos/observeit/anthropic.com.cn/miaibox/doudou/chatbotclaude/claudemcpclient，RDAP+archive.org 证据)；Claude Helper*/Codex (* 通配化覆盖 Electron helper 全变体
 # 2026-08-30 维护：新增 72 域 = A 档失效/并行顶域 4(cognition.com / baseten.com / moonshotai.com / elevenreader.io) + 基础设施 5(coreweave / jina / llamaindex / litellm / browser-use) + W1 §4.2 B 档 59（桌面客户端/编码 agent/新实验室/推理云/检索/浏览器 agent/agent 平台/语音/视频图像/MCP/app builder；C·D 档一律不收，bolt.com 是支付公司明确禁收） + cursorvm.com(W2 实测 Grok Bot Helper 目标) + browser-intake-datadoghq.com 与 browser-intake-us5-datadoghq.com（连字符平级域，不被 datadoghq.com 后缀覆盖）+ arena.ai(自 ProxyGFW 移入，lmarena.ai 新主域，归属一致性)；移出 awsapps.com / awsstatic.com / sso.amazonaws.com → ProxyGFW（通用 AWS 客户域，Q/CodeWhisperer 已有精确条覆盖；aws.dev 与 console.aws.a2z.com 保留本表）；PROCESS-NAME 补 Grok Bot 三变体与 5 条 App Bundle 全路径
-# PROCESS-NAME 全路径形态实测（surge-cli rule temp + rule match，Surge 6.9.0）：字面前缀带尾 / 命中（/Applications/Claude.app/ 等 5 条已入库）；含 * 的形态必须整串通配并以 * 结尾才命中——/Users/*/.codex/ 与 /Users/*/.local/share/claude/versions/ 实测均不命中，故未入库，域名侧已兜底
-# codex 说明：codex 的网络主体是名为 codex 的原生二进制（npm 版为 vendor 子进程，app 版为 ChatGPT.app/Contents/Resources/codex）；父级 node 垫片只转发 stdio 不联网，故本表严禁收 node 进程
-# 取舍记录：本表 PROCESS-NAME 位于国内直连区之前，会捕获这些进程的全部流量（含其内置浏览器访问的国内站点）——刻意取舍
-# 进程收录判据（三条须同时满足）：① 进程名 ↔ AI 服务一一对应 ② 误捕流量无更好归属 ③ 域名侧不够用。Raycast / Zed / VS Code / Obsidian 等多功能应用明确不加进程规则
 # 2026-08-30 收尾（统筹裁决）：fellou.ai / composio.dev / langfuse.com / warp.dev 四顶域已收，与 DownloadCDN 删除其 4 条伴生子域成对完成（AI 会话同出口优先；releases.warp.dev 归 AI 组沿用「AI 应用更新包走 AI 组不比下载组差」先例）；另收 /Users/*/.codex/* 与 /Users/*/.local/share/claude/versions/* 两条全路径通配进程（surge-cli 实测命中，修复终端版 Claude Code 可执行名为版本号的漏网），注意其覆盖对应目录下全部二进制
 # 2026-08-30 用户裁决（四大厂媒体与 AI 归各自独立表）：Cursor/Grok Bot 全家迁出→Twitter.list(域 anysphere.co/cursor-cdn/cursor.com/cursor.sh/cursorapi/cursorvm + 进程 Cursor 三变体/Grok Bot 三变体/两条 App Bundle)——Grok Bot 品牌属 xAI 且 cursor 基建随迁同组，会话链一致；githubcopilot.com/githubnext.com 迁出→Microsoft.list(Copilot 整链同组，推翻 8-29「纯 AI 推理面留本表」裁决)；todesktop.com 为通用 Electron 分发平台非 Cursor 专属，留本表
+# 2026-08-30 用户裁决（纯域名+IP 架构）：移除本表全部 PROCESS-NAME/USER-AGENT——两类规则按 App 维度全域生效，会把 App 内异质流量（内置浏览器/webview/系统共享域）误接管；域名收录已密+extended-matching+IP 段兜底足以覆盖，未收录新域落 FINAL 仍走代理无功能损失
 
 DOMAIN,anthropic-com.ghost.io
 DOMAIN,aws-language-servers.us-east-1.amazonaws.com
@@ -386,33 +383,6 @@ DOMAIN-SUFFIX,zilliz.com
 
 DOMAIN-KEYWORD,chatgpt-async-webps-prod
 DOMAIN-KEYWORD,openaicom-api
-
-PROCESS-NAME,/Applications/ChatGPT.app/
-PROCESS-NAME,/Applications/Claude.app/
-PROCESS-NAME,/Applications/CodexBar.app/
-PROCESS-NAME,/Users/*/.codex/*
-PROCESS-NAME,/Users/*/.local/share/claude/versions/*
-PROCESS-NAME,Augment
-PROCESS-NAME,augment
-PROCESS-NAME,Augment.exe
-PROCESS-NAME,ChatGPT
-PROCESS-NAME,chatgpt
-PROCESS-NAME,ChatGPT.exe
-PROCESS-NAME,Claude
-PROCESS-NAME,claude
-PROCESS-NAME,Claude Helper*
-PROCESS-NAME,Claude.exe
-PROCESS-NAME,claude.exe
-PROCESS-NAME,Codex
-PROCESS-NAME,codex
-PROCESS-NAME,Codex (*
-PROCESS-NAME,Codex.exe
-PROCESS-NAME,codex.exe
-PROCESS-NAME,CodexBar
-PROCESS-NAME,cowork-svc.exe
-PROCESS-NAME,Windsurf
-PROCESS-NAME,windsurf
-PROCESS-NAME,Windsurf.exe
 
 IP-CIDR,153.61.0.0/16,no-resolve
 IP-CIDR,160.79.104.0/21,no-resolve

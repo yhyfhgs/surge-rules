@@ -1,6 +1,7 @@
 # AlibabaCN — 阿里系直连（blackmatrix7:Alibaba+AliPay；2026-08-25 建）
 # 规范化排序：规则类型分区，区内字母序
 # 2026-08-25 维护：qwen.ai(国际站) 移出至 AI.list，国内通义域不动
+# 2026-08-30 用户裁决（纯域名+IP 架构）：移除本表全部 PROCESS-NAME/USER-AGENT——两类规则按 App 维度全域生效，会把 App 内异质流量（内置浏览器/webview/系统共享域）误接管；域名收录已密+extended-matching+IP 段兜底足以覆盖，未收录新域落 FINAL 仍走代理无功能损失
 
 DOMAIN-SUFFIX,10029.com
 DOMAIN-SUFFIX,1688.com
@@ -1261,4 +1262,3 @@ DOMAIN-SUFFIX,zuodao.com
 DOMAIN-SUFFIX,zwmrxd.com
 DOMAIN-SUFFIX,zwtianshangm.com
 
-PROCESS-NAME,com.taobao.taobao

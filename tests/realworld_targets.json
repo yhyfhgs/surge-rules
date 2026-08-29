@@ -18,14 +18,15 @@
     "注意：画像 UA 不得意外命中任何 USER-AGENT 规则，否则模拟出来的落点是假的；",
     "--clients 每轮都会跑一次 UA 副作用自检，命中了会报出来。"
   ],
-
   "clients": [
     {
       "id": "curl_baseline",
       "desc": "对照组：不带任何画像的裸 curl",
       "ua": "curl/8.7.1",
       "http": "1.1",
-      "headers": {"Accept": "*/*"}
+      "headers": {
+        "Accept": "*/*"
+      }
     },
     {
       "id": "safari_macos",
@@ -71,196 +72,383 @@
       "desc": "通用 iOS 原生 App（NSURLSession 默认形态）",
       "ua": "MyApp/2.4.1 (com.example.myapp; build:2410; iOS 18.5.0) Alamofire/5.10.2",
       "http": "2",
-      "headers": {"Accept": "application/json", "Accept-Language": "zh-CN;q=1.0"}
+      "headers": {
+        "Accept": "application/json",
+        "Accept-Language": "zh-CN;q=1.0"
+      }
     },
     {
       "id": "chatgpt_app",
       "desc": "ChatGPT 客户端形态（Alamofire + bundle id）",
       "ua": "ChatGPT/1.2025.070 (com.openai.chat; build 15437; iOS 18.5.0) Alamofire/5.10.2",
       "http": "2",
-      "headers": {"Accept": "application/json", "Accept-Language": "zh-CN;q=1.0"}
+      "headers": {
+        "Accept": "application/json",
+        "Accept-Language": "zh-CN;q=1.0"
+      }
     },
     {
       "id": "claude_app",
       "desc": "Claude 桌面端形态（Electron 壳）",
       "ua": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Claude/1.0.0 Chrome/134.0.6998.205 Electron/35.0.0 Safari/537.36",
       "http": "2",
-      "headers": {"Accept": "application/json, text/plain, */*", "Accept-Language": "zh-CN"}
+      "headers": {
+        "Accept": "application/json, text/plain, */*",
+        "Accept-Language": "zh-CN"
+      }
     },
     {
       "id": "telegram_app",
       "desc": "Telegram iOS 客户端形态",
       "ua": "Telegram-iOS/11.5 (iPhone; iOS 18.5; Scale/3.00)",
       "http": "1.1",
-      "headers": {"Accept": "*/*"}
+      "headers": {
+        "Accept": "*/*"
+      }
     }
   ],
-
   "groups": [
     {
       "group": "AI",
       "desc": "海外独立 AI（AI.list）",
-      "clients": ["chatgpt_app", "claude_app", "safari_macos"],
+      "clients": [
+        "chatgpt_app",
+        "claude_app",
+        "safari_macos"
+      ],
       "hosts": [
-        {"host": "chatgpt.com", "url": "https://chatgpt.com/cdn-cgi/trace", "echo": "cf_trace"},
-        {"host": "claude.ai", "url": "https://claude.ai/cdn-cgi/trace", "echo": "cf_trace"},
-        {"host": "api.openai.com", "url": "https://api.openai.com/v1/models", "echo": null}
+        {
+          "host": "chatgpt.com",
+          "url": "https://chatgpt.com/cdn-cgi/trace",
+          "echo": "cf_trace"
+        },
+        {
+          "host": "claude.ai",
+          "url": "https://claude.ai/cdn-cgi/trace",
+          "echo": "cf_trace"
+        },
+        {
+          "host": "api.openai.com",
+          "url": "https://api.openai.com/v1/models",
+          "echo": null
+        }
       ]
     },
     {
       "group": "Google-X-Meta-MS",
       "desc": "Google / X / Meta / Microsoft 合并组",
-      "clients": ["chrome_macos", "ios_safari"],
+      "clients": [
+        "chrome_macos",
+        "ios_safari"
+      ],
       "hosts": [
-        {"host": "x.com", "url": "https://x.com/cdn-cgi/trace", "echo": "cf_trace"},
-        {"host": "www.google.com", "url": "https://www.google.com/generate_204", "echo": null},
-        {"host": "www.facebook.com", "url": "https://www.facebook.com/robots.txt", "echo": null}
+        {
+          "host": "x.com",
+          "url": "https://x.com/cdn-cgi/trace",
+          "echo": "cf_trace"
+        },
+        {
+          "host": "www.google.com",
+          "url": "https://www.google.com/generate_204",
+          "echo": null
+        },
+        {
+          "host": "www.facebook.com",
+          "url": "https://www.facebook.com/robots.txt",
+          "echo": null
+        }
       ]
     },
     {
       "group": "社交媒体",
       "desc": "TikTok / SocialOthers",
-      "clients": ["ios_native_app", "chrome_macos"],
+      "clients": [
+        "ios_native_app",
+        "chrome_macos"
+      ],
       "hosts": [
-        {"host": "discord.com", "url": "https://discord.com/robots.txt", "echo": null},
-        {"host": "www.reddit.com", "url": "https://www.reddit.com/robots.txt", "echo": null},
-        {"host": "bsky.app", "url": "https://bsky.app/robots.txt", "echo": null}
+        {
+          "host": "discord.com",
+          "url": "https://discord.com/robots.txt",
+          "echo": null
+        },
+        {
+          "host": "www.reddit.com",
+          "url": "https://www.reddit.com/robots.txt",
+          "echo": null
+        },
+        {
+          "host": "bsky.app",
+          "url": "https://bsky.app/robots.txt",
+          "echo": null
+        }
       ]
     },
     {
       "group": "Telegram",
       "desc": "Telegram.list",
-      "clients": ["telegram_app"],
+      "clients": [
+        "telegram_app"
+      ],
       "hosts": [
-        {"host": "telegram.org", "url": "https://telegram.org/robots.txt", "echo": null},
-        {"host": "api.telegram.org", "url": "https://api.telegram.org/", "echo": null}
+        {
+          "host": "telegram.org",
+          "url": "https://telegram.org/robots.txt",
+          "echo": null
+        },
+        {
+          "host": "api.telegram.org",
+          "url": "https://api.telegram.org/",
+          "echo": null
+        }
       ]
     },
     {
       "group": "Payment",
       "desc": "Payment.list（刻意不做自动测速，出口 IP 要稳）",
-      "clients": ["safari_macos"],
+      "clients": [
+        "safari_macos"
+      ],
       "hosts": [
-        {"host": "stripe.com", "url": "https://stripe.com/robots.txt", "echo": null},
-        {"host": "www.paypal.com", "url": "https://www.paypal.com/robots.txt", "echo": null}
+        {
+          "host": "stripe.com",
+          "url": "https://stripe.com/robots.txt",
+          "echo": null
+        },
+        {
+          "host": "www.paypal.com",
+          "url": "https://www.paypal.com/robots.txt",
+          "echo": null
+        }
       ]
     },
     {
       "group": "流媒体",
       "desc": "Streaming.list + YouTube.list",
-      "clients": ["ios_native_app", "safari_macos"],
+      "clients": [
+        "ios_native_app",
+        "safari_macos"
+      ],
       "hosts": [
-        {"host": "api.fast.com",
-         "url": "https://api.fast.com/netflix/speedtest/v2?https=true&token=YXNkZmFzZGxmbnNkYWZoYXNkZmhrYWxm&urlCount=1",
-         "echo": "fast_json"},
-        {"host": "www.netflix.com", "url": "https://www.netflix.com/robots.txt", "echo": null},
-        {"host": "open.spotify.com", "url": "https://open.spotify.com/robots.txt", "echo": null}
+        {
+          "host": "api.fast.com",
+          "url": "https://api.fast.com/netflix/speedtest/v2?https=true&token=YXNkZmFzZGxmbnNkYWZoYXNkZmhrYWxm&urlCount=1",
+          "echo": "fast_json"
+        },
+        {
+          "host": "www.netflix.com",
+          "url": "https://www.netflix.com/robots.txt",
+          "echo": null
+        },
+        {
+          "host": "open.spotify.com",
+          "url": "https://open.spotify.com/robots.txt",
+          "echo": null
+        }
       ]
     },
     {
       "group": "游戏",
       "desc": "Games.list",
-      "clients": ["curl_baseline"],
+      "clients": [
+        "curl_baseline"
+      ],
       "hosts": [
-        {"host": "store.steampowered.com", "url": "https://store.steampowered.com/robots.txt", "echo": null},
-        {"host": "www.epicgames.com", "url": "https://www.epicgames.com/robots.txt", "echo": null}
+        {
+          "host": "store.steampowered.com",
+          "url": "https://store.steampowered.com/robots.txt",
+          "echo": null
+        },
+        {
+          "host": "www.epicgames.com",
+          "url": "https://www.epicgames.com/robots.txt",
+          "echo": null
+        }
       ]
     },
     {
       "group": "下载",
       "desc": "DownloadCDN.list",
-      "clients": ["curl_baseline"],
+      "clients": [
+        "curl_baseline"
+      ],
       "hosts": [
-        {"host": "cdn.jsdelivr.net", "url": "https://cdn.jsdelivr.net/cdn-cgi/trace", "echo": "cf_trace"},
-        {"host": "download.mozilla.org", "url": "https://download.mozilla.org/robots.txt", "echo": null}
+        {
+          "host": "cdn.jsdelivr.net",
+          "url": "https://cdn.jsdelivr.net/cdn-cgi/trace",
+          "echo": "cf_trace"
+        },
+        {
+          "host": "download.mozilla.org",
+          "url": "https://download.mozilla.org/robots.txt",
+          "echo": null
+        }
       ]
     },
     {
       "group": "🇯🇵日本节点",
       "desc": "Japan.list",
-      "clients": ["ios_safari"],
+      "clients": [
+        "ios_safari"
+      ],
       "hosts": [
-        {"host": "www.pixiv.net", "url": "https://www.pixiv.net/cdn-cgi/trace", "echo": "cf_trace"},
-        {"host": "www.rakuten.co.jp", "url": "https://www.rakuten.co.jp/robots.txt", "echo": null}
+        {
+          "host": "www.pixiv.net",
+          "url": "https://www.pixiv.net/cdn-cgi/trace",
+          "echo": "cf_trace"
+        },
+        {
+          "host": "www.rakuten.co.jp",
+          "url": "https://www.rakuten.co.jp/robots.txt",
+          "echo": null
+        }
       ]
     },
     {
       "group": "🇬🇧英国节点",
       "desc": "UK.list",
-      "clients": ["safari_macos"],
+      "clients": [
+        "safari_macos"
+      ],
       "hosts": [
-        {"host": "www.bbc.com", "url": "https://www.bbc.com/robots.txt", "echo": null}
+        {
+          "host": "www.bbc.com",
+          "url": "https://www.bbc.com/robots.txt",
+          "echo": null
+        }
       ]
     },
     {
       "group": "🇪🇺欧洲节点",
       "desc": "Europe.list",
-      "clients": ["safari_macos"],
+      "clients": [
+        "safari_macos"
+      ],
       "hosts": [
-        {"host": "www.spiegel.de", "url": "https://www.spiegel.de/robots.txt", "echo": null}
+        {
+          "host": "www.spiegel.de",
+          "url": "https://www.spiegel.de/robots.txt",
+          "echo": null
+        }
       ]
     },
     {
       "group": "🇺🇸美国节点",
       "desc": "US.list",
-      "clients": ["safari_macos"],
+      "clients": [
+        "safari_macos"
+      ],
       "hosts": [
-        {"host": "www.walmart.com", "url": "https://www.walmart.com/robots.txt", "echo": null}
+        {
+          "host": "www.walmart.com",
+          "url": "https://www.walmart.com/robots.txt",
+          "echo": null
+        }
       ]
     },
     {
       "group": "DIRECT",
       "desc": "国内直连（本组出口 IP 即本机真实出口，作为所有泄漏判定的基准值）",
-      "clients": ["ios_native_app", "chrome_macos"],
+      "clients": [
+        "ios_native_app",
+        "chrome_macos"
+      ],
       "hosts": [
-        {"host": "myip.ipip.net", "url": "https://myip.ipip.net/", "echo": "ipip", "baseline": true},
-        {"host": "www.baidu.com", "url": "https://www.baidu.com/robots.txt", "echo": null}
+        {
+          "host": "myip.ipip.net",
+          "url": "https://myip.ipip.net/",
+          "echo": "ipip",
+          "baseline": true
+        },
+        {
+          "host": "www.baidu.com",
+          "url": "https://www.baidu.com/robots.txt",
+          "echo": null
+        }
       ]
     },
     {
       "group": "Final",
       "desc": "不在任何 list → FINAL",
-      "clients": ["curl_baseline", "chrome_macos"],
+      "clients": [
+        "curl_baseline",
+        "chrome_macos"
+      ],
       "hosts": [
-        {"host": "icanhazip.com", "url": "https://icanhazip.com/", "echo": "plain_ip"},
-        {"host": "example.com", "url": "https://example.com/", "echo": null}
+        {
+          "host": "icanhazip.com",
+          "url": "https://icanhazip.com/",
+          "echo": "plain_ip"
+        },
+        {
+          "host": "example.com",
+          "url": "https://example.com/",
+          "echo": null
+        }
       ]
     }
   ],
-
   "ua_matrix_url": "https://chatgpt.com/cdn-cgi/trace",
-
   "stun": {
     "_note": [
       "baseline=true 的那台必须落 DIRECT —— 它回显的 srflx 就是本机真实出口 IP，",
       "所有代理组的 srflx 都拿它当泄漏判定基准，从而不用把任何真实 IP 写进仓库。"
     ],
     "servers": [
-      {"host": "stun.miwifi.com", "port": 3478, "expect_group": "DIRECT", "baseline": true},
-      {"host": "stun.l.google.com", "port": 19302, "expect_group": "Google-X-Meta-MS"},
-      {"host": "stun.cloudflare.com", "port": 3478, "expect_group": "Final"},
-      {"host": "stun.nextcloud.com", "port": 3478, "expect_group": "Final"}
+      {
+        "host": "stun.miwifi.com",
+        "port": 3478,
+        "expect_group": "DIRECT",
+        "baseline": true
+      },
+      {
+        "host": "stun.l.google.com",
+        "port": 19302,
+        "expect_group": "Google-X-Meta-MS"
+      },
+      {
+        "host": "stun.cloudflare.com",
+        "port": 3478,
+        "expect_group": "Final"
+      },
+      {
+        "host": "stun.nextcloud.com",
+        "port": 3478,
+        "expect_group": "Final"
+      }
     ]
   },
-
   "dns": {
-    "hijack_servers": ["8.8.8.8", "1.1.1.1", "9.9.9.9"],
-    "hijack_probe_domains": ["example.com", "www.wikipedia.org"],
+    "hijack_servers": [
+      "8.8.8.8",
+      "1.1.1.1",
+      "9.9.9.9"
+    ],
+    "hijack_probe_domains": [
+      "example.com",
+      "www.wikipedia.org"
+    ],
     "canary_domain": "use-application-dns.net",
     "svcb_probe_domain": "cloudflare.com",
     "leak_sample": {
       "_note": "proxy 里的域名走代理，Surge 不该为它们做本地解析；direct 里的走直连，本地解析是期望行为。",
-      "proxy": ["www.eff.org", "www.mozilla.org", "news.ycombinator.com", "duckduckgo.com"],
-      "direct": ["www.qq.com", "www.bilibili.com"]
+      "proxy": [
+        "www.eff.org",
+        "www.mozilla.org",
+        "news.ycombinator.com",
+        "duckduckgo.com"
+      ],
+      "direct": [
+        "www.qq.com",
+        "www.bilibili.com"
+      ]
     }
   },
-
   "ua_routing": {
     "_note": [
-      "UA 分流生效性用例。每条给一个「本身落点已知」的宿主域，再挂一个应当改变落点的 UA。",
-      "expect_policy 必须与 baseline_policy 不同，否则这条用例证明不了任何东西。",
-      "rule 层用 surge-cli rule match 判定（随时可跑）；",
-      "wire 层实发请求判定，只有 wire_ok 的通道才有意义（见 README 的四格矩阵）。"
+      "2026-08-30 用户裁决后本块语义反转：全库已移除全部 USER-AGENT 规则（纯域名+IP 架构）。",
+      "每条用例改为负向验证：带 UA 与不带 UA 的落点必须完全相同（expect_policy == baseline_policy），",
+      "且命中表不得是任何 UA 规则。任何一条失败 = 有 UA 规则回流，应删规则本身。"
     ],
     "cases": [
       {
@@ -270,10 +458,10 @@
         "echo": "plain_ip",
         "ua": "bilibili/1.0",
         "baseline_ua": "curl/8.7.1",
-        "expect_policy": "DIRECT",
+        "expect_policy": "Final",
         "baseline_policy": "Final",
         "source_rule": "USER-AGENT,*bili* (ChinaMedia.list)",
-        "desc": "带 bilibili UA 的请求应被拉回直连；出口 IP 应变成本机真实出口"
+        "desc": "负向验证：UA 规则已全删，该 UA 不得改变落点（=baseline）"
       },
       {
         "id": "ua_gdrive_to_google",
@@ -282,10 +470,10 @@
         "echo": "plain_ip",
         "ua": "Google.Drive/94.0 (Macintosh; Intel Mac OS X 15.5)",
         "baseline_ua": "curl/8.7.1",
-        "expect_policy": "Google-X-Meta-MS",
+        "expect_policy": "Final",
         "baseline_policy": "Final",
         "source_rule": "USER-AGENT,Google.Drive* (Google.list)",
-        "desc": "Google Drive 客户端 UA 应改判 Google 组；该组与 Final 当前物理出口不同，线路层可用 IP 判定"
+        "desc": "负向验证：UA 规则已全删，该 UA 不得改变落点（=baseline）"
       },
       {
         "id": "ua_spotify_to_streaming",
@@ -294,10 +482,10 @@
         "echo": "plain_ip",
         "ua": "Spotify/8.9.0 iOS",
         "baseline_ua": "curl/8.7.1",
-        "expect_policy": "流媒体",
+        "expect_policy": "Final",
         "baseline_policy": "Final",
         "source_rule": "USER-AGENT,*Spotify* (Streaming.list)",
-        "desc": "带 Spotify UA 应改判流媒体组（两组当前若同一物理出口，IP 层不做断言）"
+        "desc": "负向验证：UA 规则已全删，该 UA 不得改变落点（=baseline）"
       },
       {
         "id": "ua_youtube_to_streaming",
@@ -306,10 +494,10 @@
         "echo": null,
         "ua": "com.google.ios.youtube/20.10.4 (iPhone17,1; U; CPU iOS 18_5 like Mac OS X)",
         "baseline_ua": "curl/8.7.1",
-        "expect_policy": "流媒体",
+        "expect_policy": "Final",
         "baseline_policy": "Final",
         "source_rule": "USER-AGENT,com.google.ios.youtube* (YouTube.list)",
-        "desc": "YouTube App UA 应落流媒体组而非 Google 组（YouTube.list 刻意排在 Google.list 之前）"
+        "desc": "负向验证：UA 规则已全删，该 UA 不得改变落点（=baseline）"
       },
       {
         "id": "ua_onedrive_deleted",
@@ -321,8 +509,7 @@
         "expect_policy": "Final",
         "baseline_policy": "Final",
         "source_rule": "（已删除）USER-AGENT,OneDrive* 原在 ProxyGFW.list",
-        "desc": "回归固化 2026-08-30 裁决：OneDrive* UA 已删（与 MicrosoftCN 的 onedrive 直连裁决矛盾），该 UA 不应再命中任何 UA 规则、应落 FINAL 兜底",
-        "expect_source": "<FINAL>"
+        "desc": "负向验证：UA 规则已全删，该 UA 不得改变落点（=baseline）"
       }
     ]
   }

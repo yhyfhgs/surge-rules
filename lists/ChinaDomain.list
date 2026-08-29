@@ -1,6 +1,7 @@
 # ChinaDomain — 大陆域名直连兜底大表（blackmatrix7 ChinaMaxNoIP，机器管理层；手工条目请加 Domestic）
 # 规范化排序：规则类型分区，区内字母序
 # 2026-08-30 维护：删 5 条全域生效的危险 USER-AGENT(Microsoft*/hide*/TeamViewer*/QQ*/TIM*)——已实证会把境外未收录域打成 DIRECT；已登记进 docs D11 合并排除表与 tests/allowlist.json，再生本表时须过滤
+# 2026-08-30 用户裁决（纯域名+IP 架构）：移除本表全部 PROCESS-NAME/USER-AGENT——两类规则按 App 维度全域生效，会把 App 内异质流量（内置浏览器/webview/系统共享域）误接管；域名收录已密+extended-matching+IP 段兜底足以覆盖，未收录新域落 FINAL 仍走代理无功能损失
 
 DOMAIN,1-fss24-s0.streamhoster.com
 DOMAIN,14033.live.streamtheworld.com
@@ -106499,26 +106500,3 @@ DOMAIN-KEYWORD,officecdn
 DOMAIN-KEYWORD,taobao
 DOMAIN-KEYWORD,weibo
 
-USER-AGENT,%E4%B8%AD%E5%9B%BD%E5%B7%A5%E5%95%86%E9%93%B6%E8%A1%8C*
-USER-AGENT,%E4%BA%AC%E4%B8%9C%E5%88%B0%E5%AE%B6*
-USER-AGENT,%E4%BC%81%E4%B8%9A%E5%BE%AE%E4%BF%A1*
-USER-AGENT,%E5%8D%B3%E5%88%BB*
-USER-AGENT,*Vainglory*
-USER-AGENT,AdBlock*
-USER-AGENT,arrowio*
-USER-AGENT,balls*
-USER-AGENT,Best%20Trace*
-USER-AGENT,cmb*
-USER-AGENT,cmblife*
-USER-AGENT,eusoft_ting_en_iphone
-USER-AGENT,MegaWerewolf*
-USER-AGENT,MicroMessenger%20Client
-USER-AGENT,MicroMessengerClient*
-USER-AGENT,Moke*
-USER-AGENT,RemotePlay*
-USER-AGENT,ting_en
-USER-AGENT,WebTorrent*
-
-PROCESS-NAME,com.jjwxc.reader
-PROCESS-NAME,com.xiaomi.mibrain.speech
-PROCESS-NAME,Thunder

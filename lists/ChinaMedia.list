@@ -1,7 +1,7 @@
 # ChinaMedia — 国内流媒体/视频/直播/音乐直连（blackmatrix7:ChinaMedia+BiliBili+iQIYI+Youku+TencentVideo+NetEaseMusic+KugouKuwo+Douyu+HuYa+KuaiShou；2026-08-25 建）
 # 规范化排序：规则类型分区，区内字母序
 # 2026-08-25 维护：bstar(B 站国际版) 域移交 Streaming.list；删 8 条同表覆盖冗余条目(A3)
-# 2026-08-30 维护：本表 PROCESS-NAME 区含 Android 包名，服务于 clash/ 派生层，Surge 侧恒不命中，勿当死规则清理
+# 2026-08-30 用户裁决（纯域名+IP 架构）：移除本表全部 PROCESS-NAME/USER-AGENT——两类规则按 App 维度全域生效，会把 App 内异质流量（内置浏览器/webview/系统共享域）误接管；域名收录已密+extended-matching+IP 段兜底足以覆盖，未收录新域落 FINAL 仍走代理无功能损失
 
 DOMAIN,00713915daab0be43def5c338c02c80b.dlied1.cdntips.net
 DOMAIN,0gr4uqmtt8y41hcjsgrzdrc31.ourdvsss.com
@@ -983,46 +983,3 @@ DOMAIN-SUFFIX,zygvqivs.com
 DOMAIN-KEYWORD,bilibili
 DOMAIN-KEYWORD,qiyi
 
-USER-AGENT,%E5%92%AA%E5%92%95%E8%A7%86%E9%A2%91
-USER-AGENT,%E7%BD%91%E6%98%93%E4%BA%91%E9%9F%B3%E4%B9%90
-USER-AGENT,%E7%BD%91%E6%98%93%E4%BA%91%E9%9F%B3%E4%B9%90*
-USER-AGENT,%E9%85%B7%E6%88%91%E9%9F%B3%E4%B9%90*
-USER-AGENT,*bili*
-USER-AGENT,*QIYI*
-USER-AGENT,AcFun*
-USER-AGENT,baiduyinyue
-USER-AGENT,bili*
-USER-AGENT,bili-inter*
-USER-AGENT,Bilibili*
-USER-AGENT,bilibili*
-USER-AGENT,DomesticMedia*
-USER-AGENT,iQIYI*
-USER-AGENT,iQiYi*
-USER-AGENT,iQiyi*
-USER-AGENT,live4iphone*
-USER-AGENT,MGTV*
-USER-AGENT,MiguVideo*
-USER-AGENT,MOO%E9%9F%B3%E4%B9%90*
-USER-AGENT,MOO*
-USER-AGENT,NeteaseMusic*
-USER-AGENT,PPStream*
-USER-AGENT,QIYI*
-USER-AGENT,QQ%E9%9F%B3%E4%B9%90
-USER-AGENT,QQ%e9%9f%b3%e4%b9%90*
-USER-AGENT,qqlive4iphone*
-USER-AGENT,QQMusic*
-USER-AGENT,QYPlayer*
-USER-AGENT,TencentMidasConnect*
-USER-AGENT,walkman*
-USER-AGENT,xiami*
-USER-AGENT,Youku*
-USER-AGENT,youku*
-USER-AGENT,YYeTs*
-
-PROCESS-NAME,com.bilibili.app.blue
-PROCESS-NAME,com.bilibili.app.in
-PROCESS-NAME,com.bilibili.comic
-PROCESS-NAME,com.bilibili.comic.intl
-PROCESS-NAME,com.qiyi.video
-PROCESS-NAME,tv.danmaku.bili
-PROCESS-NAME,tv.danmaku.bilibilihd

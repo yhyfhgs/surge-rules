@@ -1,12 +1,12 @@
 # AUTO-GENERATED — Clash(Mihomo) classical 规则，由 ../lists/ProxyGFW.list 派生
 # 勿手工编辑；修改 Surge 源后运行 python3 tools/surge2clash.py 重新生成
-# 已剔除 Clash 不支持的规则: USER-AGENT x 2
 
 # ProxyGFW — GFW 被墙域名兜底；2026-08-25 并入 blackmatrix7:Proxy
 # 规范化排序：规则类型分区，区内字母序
 # 2026-08-25 维护：接收 auth0.com；docker.com/npmjs.com 移交 DownloadCDN、login.microsoftonline.com 移交 AI、社交伴生域移交 SocialOthers/Meta；删 1 条失效域。2026-08-29 维护：stripe.com/stripe.network/gumroad.com/paddle.com/DOMAIN-KEYWORD,paypal 移交新建 Payment.list(支付需固定出口)；USER-AGENT,PayPal* 未动，待 UA 方案统一裁决
 # 2026-08-30 维护：删 USER-AGENT,OneDrive*（与 MicrosoftCN 直连裁决矛盾）、USER-AGENT,WhatsApp*（Meta.list 域名面已覆盖）、DOMAIN-SUFFIX,ocsp.int-x3.letsencrypt.org（2021 年已退役端点）；移出 USER-AGENT,PayPal* → Payment.list、DOMAIN-SUFFIX,arena.ai → AI.list、USER-AGENT,battleroyale* 与 USER-AGENT,hearthstone* → Games.list（游戏 UA 归游戏组）；移入 DOMAIN-SUFFIX,api.mixpanel.com（自 Telegram，通用分析域）与 awsapps.com / awsstatic.com / sso.amazonaws.com（自 AI，通用 AWS 客户域；后者被本表既有 DOMAIN-SUFFIX,amazonaws.com 兜底覆盖，保留为显式归属登记）
 # 2026-08-30 四大厂归属核查迁出：20 条 Google 自有域→Google.list、bing 三后缀+microsoftapp.net→Microsoft.list、facebook.de→Meta.list；microsoft.com/azureedge.net 兜底为刻意分层(同 amazonaws.com 铁律)保留
+# 2026-08-30 用户裁决（纯域名+IP 架构）：移除本表全部 PROCESS-NAME/USER-AGENT——两类规则按 App 维度全域生效，会把 App 内异质流量（内置浏览器/webview/系统共享域）误接管；域名收录已密+extended-matching+IP 段兜底足以覆盖，未收录新域落 FINAL 仍走代理无功能损失
 
 DOMAIN,api.waqi.info
 DOMAIN,assets-priconne-redive-us.akamaized.net
@@ -6408,7 +6408,6 @@ DOMAIN-KEYWORD,dlercloud
 DOMAIN-KEYWORD,dropbox
 DOMAIN-KEYWORD,github
 DOMAIN-KEYWORD,sci-hub
-
 
 IP-CIDR,13.32.0.0/15,no-resolve
 IP-CIDR,13.35.0.0/17,no-resolve

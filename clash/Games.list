@@ -1,11 +1,11 @@
 # AUTO-GENERATED — Clash(Mihomo) classical 规则，由 ../lists/Games.list 派生
 # 勿手工编辑；修改 Surge 源后运行 python3 tools/surge2clash.py 重新生成
-# 已剔除 Clash 不支持的规则: USER-AGENT x 2
 
 # Games — 游戏平台 (Steam/Epic/暴雪 国际服)；2026-08-25 并入 blackmatrix7:Game
 # 规范化排序：规则类型分区，区内字母序
 # 2026-08-25 维护：国服域(暴雪国服 9 + .cn/.com.cn 品牌域 20 + steam.*.qtlglb.com 4)移交 GameDownloadCN 直连；login.live.com/logincdn.msauth.net 移交 AI.list；删 4 条死条目
 # 2026-08-30 维护：自 ProxyGFW 移入 USER-AGENT,battleroyale* 与 USER-AGENT,hearthstone*（游戏 UA 归游戏组）；UA 分区依全库既有类型顺序置于 DOMAIN-KEYWORD 与 IP-CIDR 之间
+# 2026-08-30 用户裁决（纯域名+IP 架构）：移除本表全部 PROCESS-NAME/USER-AGENT——两类规则按 App 维度全域生效，会把 App 内异质流量（内置浏览器/webview/系统共享域）误接管；域名收录已密+extended-matching+IP 段兜底足以覆盖，未收录新域落 FINAL 仍走代理无功能损失
 
 DOMAIN,eaasserts-a.akamaihd.net
 DOMAIN,gog.salesmanago.com
@@ -497,7 +497,6 @@ DOMAIN-KEYWORD,epicgames
 DOMAIN-KEYWORD,steambroadcast
 DOMAIN-KEYWORD,steamstore
 DOMAIN-KEYWORD,steamuserimages
-
 
 IP-CIDR,3.1.80.68/32,no-resolve
 IP-CIDR,3.25.190.152/32,no-resolve

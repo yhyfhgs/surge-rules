@@ -2,6 +2,7 @@
 # 规范化排序：规则类型分区，区内字母序
 # 2026-08-25 维护：接收 ai.studio/g.ai(自 AI.list)与 gvt2.com(自 YouTube.list)
 # 2026-08-30 四大厂归属核查：自 ProxyGFW 迁入 20 条 Google 自有域(12 搜索 ccTLD 含 google.hk + googlegroups/googlehosted + 6 条低流量历史域，DoH 全部 AS15169)——同一搜索会话不再跨出口；.google/.goog gTLD 后缀已兜底 deepmind.google/labs.google/ai.google 等 AI 门面，无需单列
+# 2026-08-30 用户裁决（纯域名+IP 架构）：移除本表全部 PROCESS-NAME/USER-AGENT——两类规则按 App 维度全域生效，会把 App 内异质流量（内置浏览器/webview/系统共享域）误接管；域名收录已密+extended-matching+IP 段兜底足以覆盖，未收录新域落 FINAL 仍走代理无功能损失
 
 DOMAIN-SUFFIX,0emm.com
 DOMAIN-SUFFIX,1e100.net
@@ -625,20 +626,6 @@ DOMAIN-SUFFIX,zynamics.com
 DOMAIN-KEYWORD,blogspot
 DOMAIN-KEYWORD,gmail
 DOMAIN-KEYWORD,recaptcha
-
-USER-AGENT,%E4%BA%91%E7%AB%AF%E7%A1%AC%E7%9B%98*
-USER-AGENT,*com.google.Drive*
-USER-AGENT,Google.Drive*
-
-PROCESS-NAME,Antigravity
-PROCESS-NAME,antigravity
-PROCESS-NAME,Antigravity Helper*
-PROCESS-NAME,Antigravity.exe
-PROCESS-NAME,BackupandSync
-PROCESS-NAME,com.android.vending
-PROCESS-NAME,com.google.android.gms
-PROCESS-NAME,com.google.android.gsf
-PROCESS-NAME,com.google.android.play.games
 
 IP-CIDR,8.8.4.4/32,no-resolve
 IP-CIDR,8.8.8.8/32,no-resolve

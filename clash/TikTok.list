@@ -4,7 +4,7 @@
 # TikTok — TikTok 国际版 (字节国内域归 Domestic)；2026-08-25 并入 blackmatrix7:TikTok
 # 规范化排序：规则类型分区，区内字母序
 # 2026-08-25 维护：接收字节海外域 byteoversea.com/tron-sg.bytelemon.com；补 tiktokcdn.net
-# 2026-08-30 维护：本表 PROCESS-NAME 区含 Android 包名，服务于 clash/ 派生层，Surge 侧恒不命中，勿当死规则清理
+# 2026-08-30 用户裁决（纯域名+IP 架构）：移除本表全部 PROCESS-NAME/USER-AGENT——两类规则按 App 维度全域生效，会把 App 内异质流量（内置浏览器/webview/系统共享域）误接管；域名收录已密+extended-matching+IP 段兜底足以覆盖，未收录新域落 FINAL 仍走代理无功能损失
 
 DOMAIN,api.snapkit.com
 DOMAIN,cocacola.co.jp
@@ -91,8 +91,6 @@ DOMAIN-KEYWORD,tiktokcdn.com.
 DOMAIN-KEYWORD,tiktokv.com.
 DOMAIN-KEYWORD,ttcdn-tos.
 DOMAIN-KEYWORD,ttlivecdn.com.
-
-PROCESS-NAME,com.zhiliaoapp.musically
 
 IP-ASN,11983,no-resolve
 IP-ASN,138699,no-resolve

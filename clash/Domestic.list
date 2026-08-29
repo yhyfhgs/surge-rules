@@ -1,12 +1,12 @@
 # AUTO-GENERATED — Clash(Mihomo) classical 规则，由 ../lists/Domestic.list 派生
 # 勿手工编辑；修改 Surge 源后运行 python3 tools/surge2clash.py 重新生成
-# 已剔除 Clash 不支持的规则: USER-AGENT x 3
 
 # Domestic — 国内服务直连 (含国内 AI/字节系/券商)
 # 规范化排序：规则类型分区，区内字母序
 # 2026-08-25 维护：接收 identrust/ppio/xingyeai/xiaoaiassist 与 NTP/captive 探测域(pool.ntp.org/time.windows.com/msftconnecttest.com/detectportal.firefox.com)、bootcdn.net；移出 11 个国内厂商国际站至 AI.list；删 8 条死条目/失效域
 # 2026-08-30 维护：CA 吊销/AIA 端点集中直连（TLS 握手关键路径，soft-fail 安全）——自 DownloadCDN 接收 8 条 + 补 crl.globalsign.com、status.rapidssl.com；ocsp.usertrust.com / ocsp.entrust.net / oneocsp.microsoft.com 未纳入：ProxyGFW 的 usertrust.com / entrust.net / microsoft.com 后缀位次更前，加进本表只会成为永不生效的死条目
 # 2026-08-30 收尾：补 cacerts.rapidssl.com(与 status.rapidssl.com 同厂归并)；oneocsp/ocsp/crl.microsoft.com 因 ProxyGFW 后缀遮蔽改入 MicrosoftCN；ocsp.usertrust.com/ocsp.entrust.net 维持 ProxyGFW→Final(无语义合适的前位直连表，soft-fail 下走代理无害，刻意不收)
+# 2026-08-30 用户裁决（纯域名+IP 架构）：移除本表全部 PROCESS-NAME/USER-AGENT——两类规则按 App 维度全域生效，会把 App 内异质流量（内置浏览器/webview/系统共享域）误接管；域名收录已密+extended-matching+IP 段兜底足以覆盖，未收录新域落 FINAL 仍走代理无功能损失
 
 DOMAIN,cn.download.nvidia.com
 DOMAIN,config.ubnt.com
@@ -631,7 +631,6 @@ DOMAIN-SUFFIX,zuimeitianqi.com
 
 DOMAIN-REGEX,^.*\.qhimgs.\.com$
 DOMAIN-REGEX,^ocsp\..*\.amazontrust\.com$
-
 
 IP-CIDR,140.205.1.0/24,no-resolve
 IP-CIDR,162.14.0.0/18,no-resolve
