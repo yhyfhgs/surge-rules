@@ -44,6 +44,7 @@ CONF_ORDER = [
     ("PrivateLAN", "DIRECT"),
     ("PKU", "DIRECT"),
     ("GameDownloadCN", "DIRECT"),
+    ("ModelDownloadCDN", "下载"),
     ("YouTube", "流媒体"),
     ("Google", "Google-X-Meta-MS"),
     ("Twitter", "Google-X-Meta-MS"),

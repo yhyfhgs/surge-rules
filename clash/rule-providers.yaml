@@ -130,6 +130,13 @@ rule-providers:
     url: https://cdn.jsdelivr.net/gh/yhyfhgs/surge-rules@main/clash/MicrosoftCN.list
     path: ./rule-sets/surge-rules/MicrosoftCN.list
     interval: 86400
+  ModelDownloadCDN:
+    type: http
+    behavior: classical
+    format: text
+    url: https://cdn.jsdelivr.net/gh/yhyfhgs/surge-rules@main/clash/ModelDownloadCDN.list
+    path: ./rule-sets/surge-rules/ModelDownloadCDN.list
+    interval: 86400
   NetEaseCN:
     type: http
     behavior: classical
@@ -244,6 +251,7 @@ rule-providers:
 #  - RULE-SET,PrivateLAN,DIRECT
 #  - RULE-SET,PKU,DIRECT
 #  - RULE-SET,GameDownloadCN,DIRECT
+#  - RULE-SET,ModelDownloadCDN,下载
 #  - RULE-SET,YouTube,流媒体
 #  - RULE-SET,Google,Google-X-Meta-MS
 #  - RULE-SET,Twitter,Google-X-Meta-MS

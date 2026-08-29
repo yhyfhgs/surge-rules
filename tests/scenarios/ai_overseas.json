@@ -198,7 +198,17 @@
       {"host": "hf.co"},
       {"host": "hf.space", "note": "Spaces 运行域"}
     ],
-    "assert": {"same_policy": true, "policy": "AI", "no_dns_leak": true}
+    "assert": {
+      "same_policy": false,
+      "no_dns_leak": true,
+      "per_request": [
+        {"host": "huggingface.co", "policy": "AI"},
+        {"host": "cdn-lfs.huggingface.co", "policy": "下载", "reason": "2026-08-30 起 ModelDownloadCDN.list 先于 AI 接管大文件端点"},
+        {"host": "cdn-lfs-us-1.hf.co", "policy": "下载", "reason": "同上"},
+        {"host": "hf.co", "policy": "AI"},
+        {"host": "hf.space", "policy": "AI"}
+      ]
+    }
   },
   {
     "name": "ai_audio_elevenlabs_suno",
