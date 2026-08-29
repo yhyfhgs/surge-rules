@@ -50,7 +50,7 @@ rules/tests/
 ├── live_check.py        L3 在线实测（Surge HTTP API + 真实请求）
 ├── realworld.py         L4 真实客户端 / 网络栈实测（surge-cli + curl + 系统命令）
 ├── realworld_targets.json  L4 的数据驱动配置（各组代表域 / 客户端画像 / STUN / UA 用例）
-├── live_check_local.json   私有节点名映射（**已 gitignore**，勿入库）
+├── live_check_local.json   私有出口映射覆盖档（**已 gitignore**，勿入库；见下）
 ├── allowlist.json       审计豁免表（把「刻意设计」标出来，免得每次都报）
 ├── scenarios/           场景数据集，九个 .json，共 90 场景 / 500 请求
 │   ├── ai_overseas.json      海外独立 AI（OpenAI / Anthropic / Perplexity …）
@@ -78,10 +78,32 @@ tests/live_report.md
 tests/live_check_local.json
 ```
 
-**私有节点信息一律外置。** `tests/` 会随公开仓库分发，所以真实节点名、出口 IP、
-线路标识不许写进任何会入库的文件：节点名关键字映射放已 gitignore 的
-`tests/live_check_local.json`，报告里要贴给别人看就加 `realworld.py --redact`
+**私有节点信息一律外置。** `tests/` 会随公开仓库分发，所以真实策略组名、节点名、
+出口 IP、线路商与机房标识、自家线路的 ASN 都不许写进任何会入库的文件。代码里只留
+**中性占位默认值**（`美国家宽A` / `US-HOME-A` / `ISP-A` / `DC-X` / 私有段 ASN `64500`…），
+真实映射放本地私有覆盖档，运行时覆盖合并。报告要贴给别人看就加 `realworld.py --redact`
 （节点名折叠成 `🇺🇸<节点:US-HOME-A>`，IP 尾段打码）。
+
+覆盖档 `engine.py` 与 `live_check.py` 共用，schema 与查找顺序一致：
+
+```json
+{
+  "exit_class_exact":    {"<策略组或叶子出口组名>": "<exit_class>"},
+  "exit_class_keywords": [["<物理节点名关键字>", "<exit_class>"]],
+  "asn_map":             {"<ASN>": "<注释>"},
+  "residential_hints":   ["<RDAP 机构/网段名关键字>"],
+  "datacenter_hints":    ["<RDAP 机构/网段名关键字>"]
+}
+```
+
+查找顺序取**第一个存在的文件**（不叠加）：
+
+1. 环境变量 `LIVE_CHECK_LOCAL` 指定的路径；
+2. `<repo>/../rules-local/live_check_local.json` —— 推荐，整个目录都在仓库外；
+3. `<repo>/tests/live_check_local.json` —— 旧路径，靠 `.gitignore` 兜底。
+
+文件缺失不报错，全部走中性默认值：`engine.py` 自检里针对真实 conf 的出口画像断言
+（R03–R05）会自动标记为 skipped，`live_check.py` 的启发式归类退化到国旗兜底。
 
 ---
 
@@ -114,7 +136,8 @@ python3 engine.py --selftest                         # 内置自检（≥20 条�
 | `dns_leak_at`     | 是哪一条                                                    |
 
 `exit_class` 取值：`US-HOME-A` / `US-HOME-B` / `US-DC` / `JP-HOME` / `JP-DC` /
-`EU` / `DIRECT` / `REJECT`。
+`EU` / `DIRECT` / `REJECT`（取值集合是共享契约；哪个策略组算哪一类，由本地私有
+覆盖档的 `exit_class_exact` 提供，见上文「私有节点信息一律外置」）。
 
 **注意引擎的两个前提**，看结果时要记着：
 
@@ -301,7 +324,9 @@ python3 live_check.py --scenario --hosts chatgpt.com,claude.ai,api.anthropic.com
 }
 ```
 
-64500 =ISP-A，64501 =ISP-B，64502 =DC-X。
+（示例里用的是 RFC 5398 私有段 ASN 占位：`64500` = 家宽线路商 ISP-A，`64501` = ISP-B，
+`64502` = 落地机房 DC-X。填自己真实的 ASN 即可 —— 真实 ASN 能反查线路商，
+所以 `expected_asn.json` 建议一并加进 `.gitignore`。）
 
 **`--dns-leak`** 先 `POST /v1/dns/flush` 清本地 DNS 缓存，再依次访问 `dns_leak.json` 里的
 代理域名，然后读 `/v1/dns`：这些域名**不该**出现在本地解析记录里，出现了就是 P1 实锤；
@@ -555,7 +580,7 @@ Safari、Chrome、iOS 网页、iOS 原生 App、ChatGPT 客户端、Claude 桌�
 
 **6. `--exit-map` 的 ASN 列是空的**
 ARIN 的 RDAP 对家宽客户网段经常不返回 ASN（`originAS` 为空），机构名写成 `Private Customer`。
-这时候看**网段名**：`ATT-NET-REDACTED` 一样能确认是 ISP-A。空 ASN 不代表异常。
+这时候看**网段名**：形如 `<ISP>-NET-<段号>` 的网段名一样能确认归属。空 ASN 不代表异常。
 
 **7. 「实测≠推导」**
 两种可能：链路降级了（家宽那一跳没走通，退回落地机房出口），或者中转商改写了出口。

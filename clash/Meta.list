@@ -1,10 +1,9 @@
 # AUTO-GENERATED — Clash(Mihomo) classical 规则，由 ../lists/Meta.list 派生
 # 勿手工编辑；修改 Surge 源后运行 python3 tools/surge2clash.py 重新生成
 
-# Meta — Meta 生态 (含 Meta AI/Llama)；2026-08-25 并入 blackmatrix7:Facebook+Instagram+Whatsapp+Threads
-# 规范化排序：规则类型分区，区内字母序
-# 2026-08-25 维护：接收 threads.com(与 threads.net 同组)
-# 2026-08-30 四大厂归属核查：facebook.de 自 ProxyGFW 迁入(ccTLD 补齐)；核查确认 meta.ai/llama.com/fbcdn/cdninstagram/fbsbx/oculus/threads 全覆盖；llama-api.com(Cloudflare 第三方)/metaquest.com(无解析)/horizonworlds.com(非 Meta IP) 明确不收
+# Meta — Meta 生态（Facebook/Instagram/WhatsApp/Threads/Oculus，含 Meta AI 与 llama.com）
+# 排序：规则类型分区，区内字母序
+# 明确不收：llama-api.com（Cloudflare 第三方）、metaquest.com（无解析）、horizonworlds.com（非 Meta IP）
 
 DOMAIN-SUFFIX,aboutfacebook.com
 DOMAIN-SUFFIX,accessfacebookfromschool.com

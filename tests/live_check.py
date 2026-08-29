@@ -46,11 +46,81 @@ VERSION = "1.0.0"
 SELF_DIR = os.path.dirname(os.path.abspath(__file__))
 
 # ---------------------------------------------------------------------------
-# 常量: 出口分类映射(与 spec/testkit.md「共享 Schema」一致, 禁止私改)
+# 本地私有覆盖档(不入库)
+# ---------------------------------------------------------------------------
+#
+# 本仓库公开发布, tests/ 随之发布, 所以代码里**只放中性占位默认值**:
+# 真实的策略组名、物理节点关键字、ASN、RDAP 归属关键字都带线路商与机房品牌标识,
+# 一律外置到本地覆盖档。engine.py 复用同一份 schema 与同一套查找顺序。
+#
+#   {
+#     "exit_class_exact":    {"<策略组或叶子出口组名>": "<exit_class>"},
+#     "exit_class_keywords": [["<物理节点名关键字>", "<exit_class>"], ...],
+#     "asn_map":             {"<ASN>": "<注释>"},
+#     "residential_hints":   ["<RDAP 机构/网段名关键字>", ...],
+#     "datacenter_hints":    ["<RDAP 机构/网段名关键字>", ...]
+#   }
+#
+# 查找顺序(取第一个存在的文件, 不叠加):
+#   1. 环境变量 LIVE_CHECK_LOCAL 指定的路径
+#   2. <repo>/../rules-local/live_check_local.json   ← 推荐: 整个目录都在仓库外
+#   3. <repo>/tests/live_check_local.json            ← 旧路径, 已 gitignore
+#
+# 文件缺失时全部走中性默认值, 不报错(只是启发式归类会退化到国旗兜底)。
+
+#: 兼容旧键名(rules-local 早期草案), 值语义完全一致。
+_LOCAL_KEY_ALIASES = {
+    "exit_class_exact": ("exit_class_exact", "policy_exit_class"),
+    "exit_class_keywords": ("exit_class_keywords",),
+    "asn_map": ("asn_map", "known_asn_extra"),
+    "residential_hints": ("residential_hints", "residential_hints_extra"),
+    "datacenter_hints": ("datacenter_hints", "datacenter_hints_extra"),
+}
+
+
+def local_profile_candidates(self_dir=SELF_DIR):
+    """返回本地覆盖档的候选路径(按优先级)。"""
+    repo = os.path.dirname(self_dir)
+    out = []
+    env = os.environ.get("LIVE_CHECK_LOCAL")
+    if env:
+        out.append(env)
+    out.append(os.path.join(os.path.dirname(repo), "rules-local",
+                            "live_check_local.json"))
+    out.append(os.path.join(self_dir, "live_check_local.json"))
+    return out
+
+
+def load_local_profile(self_dir=SELF_DIR):
+    """读本地私有覆盖档, 返回 (归一化后的 dict, 实际读到的路径 or None)。"""
+    for path in local_profile_candidates(self_dir):
+        try:
+            with open(path, encoding="utf-8") as fh:
+                raw = json.load(fh)
+        except (OSError, ValueError):
+            continue
+        if not isinstance(raw, dict):
+            continue
+        out = {}
+        for canon, names in _LOCAL_KEY_ALIASES.items():
+            for n in names:
+                if n in raw:
+                    out[canon] = raw[n]
+                    break
+        return out, path
+    return {}, None
+
+
+LOCAL_PROFILE, LOCAL_PROFILE_PATH = load_local_profile()
+
+# ---------------------------------------------------------------------------
+# 常量: 出口分类映射(exit_class 取值集合与 spec/testkit.md「共享 Schema」一致;
+#       键/关键字是本机 conf 的私有名字, 由本地覆盖档提供)
 # ---------------------------------------------------------------------------
 
-# 策略组/物理节点名 → exit_class 精确映射
-EXIT_CLASS_EXACT = {
+# 策略组/物理节点名 → exit_class 精确映射。
+# 这里只登记中性占位组名; 真实组名由覆盖档的 exit_class_exact 覆盖合并进来。
+EXIT_CLASS_EXACT_DEFAULT = {
     "🇺🇸美国家宽A": "US-HOME-A",
     "🇺🇸美国家宽B": "US-HOME-B",
     "🇺🇸美国落地": "US-DC",
@@ -63,26 +133,25 @@ EXIT_CLASS_EXACT = {
     "DIRECT": "DIRECT",
     "REJECT": "REJECT",
 }
+EXIT_CLASS_EXACT = dict(EXIT_CLASS_EXACT_DEFAULT)
+_lc_exact = LOCAL_PROFILE.get("exit_class_exact") or {}
+if isinstance(_lc_exact, dict):
+    EXIT_CLASS_EXACT.update({str(k): str(v) for k, v in _lc_exact.items()})
 
 # 物理节点名(如 🇺🇸<ISP>-<机房>-LAX)的启发式归类。
 # 在线拿到的 policyName 往往是链路末端的物理节点而不是策略组名, 用关键字回推 exit_class。
 # 注意: 这是启发式, 输出中会标 "~" 前缀提示。
-# 只放公开 ISP 通名; 私有节点/线路标识的补充映射放 tests/live_check_local.json
-# (已 gitignore, 勿入库 —— tests/ 随公开仓库发布), 格式:
-#   {"exit_class_keywords": [["<节点名关键字>", "<exit_class>"], ...]}
-EXIT_CLASS_KEYWORDS = [
-    ("ISP-A", "US-HOME-A"),
-    ("KW-A","US-HOME-A"),
-    ("ISP-B", "US-HOME-B"),
-    ("ISP-C", "JP-HOME"),
+# 节点名里的 ISP / 机房关键字是私有信息, 内置表只留一条中性示例说明格式,
+# 真实关键字放本地覆盖档的 exit_class_keywords, 形如:
+#   [["KW-A", "US-HOME-A"], ["KW-B", "US-HOME-B"]]
+EXIT_CLASS_KEYWORDS_DEFAULT = [
+    ("KW-A", "US-HOME-A"),
 ]
-try:
-    with open(os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                           "live_check_local.json"), encoding="utf-8") as _f:
-        EXIT_CLASS_KEYWORDS += [tuple(x) for x in
-                                json.load(_f).get("exit_class_keywords", [])]
-except (OSError, ValueError):
-    pass
+# 覆盖档的关键字排在内置示例之前 —— 首个子串命中即返回, 覆盖档优先。
+EXIT_CLASS_KEYWORDS = [tuple(x) for x in
+                       (LOCAL_PROFILE.get("exit_class_keywords") or [])
+                       if isinstance(x, (list, tuple)) and len(x) == 2]
+EXIT_CLASS_KEYWORDS += list(EXIT_CLASS_KEYWORDS_DEFAULT)
 EXIT_CLASS_FLAGS = [
     ("🇺🇸", "US-DC"),
     ("🇯🇵", "JP-DC"),
@@ -158,24 +227,42 @@ EXIT_PROBES = [
 ]
 
 # 仅用于给 RDAP 结果加注释的内置 ASN 表(不参与断言)。
-KNOWN_ASN = {
-    "64500": "ISP-A (美国住宅宽带)",
-    "64501": "ISP-B (美国住宅宽带)",
-    "64502": "DC-X (机房)",
+# 只收录与本机线路无关的公共云 ASN; 自己上游线路的 ASN 是私有信息,
+# 放本地覆盖档的 asn_map。
+KNOWN_ASN_DEFAULT = {
     "20473": "The Constant Company / Vultr (机房)",
     "14061": "DigitalOcean (机房)",
     "399358": "Anthropic (机房)",
     "401518": "Anthropic (机房)",
 }
+KNOWN_ASN = dict(KNOWN_ASN_DEFAULT)
+_lc_asn = LOCAL_PROFILE.get("asn_map") or {}
+if isinstance(_lc_asn, dict):
+    KNOWN_ASN.update({str(k): str(v) for k, v in _lc_asn.items()})
 
-RESIDENTIAL_HINTS = ("ISP-A", "KW-A-NET", "COMCAST", "CHARTER", "SPECTRUM",
-                     "VERIZON", "COX", "FRONTIER", "CENTURYLINK", "BIGLOBE",
-                     "NTT", "KDDI", "SOFTBANK", "OCN", "BROADBAND", "CABLE",
-                     "TELECOM", "RESIDENTIAL", "FTTH")
-DATACENTER_HINTS = ("HOSTING", "CLOUD", "DATACENTER", "DATA CENTER", "SERVER",
-                    "VPS", "VULTR", "DIGITALOCEAN", "LINODE", "AMAZON",
-                    "GOOGLE LLC", "OVH", "HETZNER", "CHOOPA", "COLO", "IDC",
-                    "LEASEWEB", "M247", "DC-Y", "DC-Z")
+# RDAP 机构名/网段名 → 住宅 or 机房 的关键字启发式。
+# 内置表只放行业通名; 自己实际用的线路商 / 机房品牌放本地覆盖档的
+# residential_hints / datacenter_hints。
+RESIDENTIAL_HINTS_DEFAULT = ("COMCAST", "CHARTER", "SPECTRUM",
+                             "VERIZON", "COX", "FRONTIER", "CENTURYLINK", "BIGLOBE",
+                             "NTT", "KDDI", "SOFTBANK", "OCN", "BROADBAND", "CABLE",
+                             "TELECOM", "RESIDENTIAL", "FTTH")
+DATACENTER_HINTS_DEFAULT = ("HOSTING", "CLOUD", "DATACENTER", "DATA CENTER", "SERVER",
+                            "VPS", "VULTR", "DIGITALOCEAN", "LINODE", "AMAZON",
+                            "GOOGLE LLC", "OVH", "HETZNER", "CHOOPA", "COLO", "IDC",
+                            "LEASEWEB", "M247")
+
+
+def _merge_hints(default, key):
+    extra = LOCAL_PROFILE.get(key) or []
+    if not isinstance(extra, (list, tuple)):
+        extra = []
+    return tuple(default) + tuple(str(x).upper() for x in extra
+                                  if str(x).upper() not in default)
+
+
+RESIDENTIAL_HINTS = _merge_hints(RESIDENTIAL_HINTS_DEFAULT, "residential_hints")
+DATACENTER_HINTS = _merge_hints(DATACENTER_HINTS_DEFAULT, "datacenter_hints")
 
 # --dns-leak 在 scenarios/dns_leak.json 缺失时使用的内置兜底样本。
 FALLBACK_PROXY_HOSTS = [
@@ -1327,7 +1414,7 @@ def cmd_exit_map(api, proxy, log, result, expected_map):
     log("        真正面向互联网的是家宽节点自身的 server 地址, 所以「推导出口 IP」取的就是它;")
     log("        实测与推导一致 = 链路正常; 不一致 = 链路降级/被中转商改写, 需要人工看一眼。")
     log("  说明: ARIN RDAP 对家宽客户网段常常不返回 ASN(originAS 为空)、机构写成 Private Customer,")
-    log("        此时以「网段名」(如 ATT-NET-…)判断归属, ASN 列为空不代表异常。")
+    log("        此时以「网段名」(如 <ISP>-NET-<段号>)判断归属, ASN 列为空不代表异常。")
     result["exit_map"] = {"entries": entries, "assert_failures": fail}
     return 1 if fail else 0
 

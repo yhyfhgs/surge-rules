@@ -1,11 +1,9 @@
 # AUTO-GENERATED — Clash(Mihomo) classical 规则，由 ../lists/MicrosoftCN.list 派生
 # 勿手工编辑；修改 Surge 源后运行 python3 tools/surge2clash.py 重新生成
 
-# MicrosoftCN — 微软 CDN/OneDrive (直连)
-# 规范化排序：规则类型分区，区内字母序
-# 2026-08-25 维护：删 3 条同表覆盖冗余条目(A3)与 1 条已被 AI.list 抢跑的 msftauth.net
-# 2026-08-30 维护：接收微软自家 CA 端点 3 条(crl/ocsp/oneocsp.microsoft.com；oneocsp 自 DownloadCDN 移入)——ProxyGFW 的 microsoft.com 后缀位次更前，Domestic 无法接收，本表(先于 GFW)是唯一语义合适的直连位
-# 2026-08-30 用户裁决（纯域名+IP 架构）：移除本表全部 PROCESS-NAME/USER-AGENT——两类规则按 App 维度全域生效，会把 App 内异质流量（内置浏览器/webview/系统共享域）误接管；域名收录已密+extended-matching+IP 段兜底足以覆盖，未收录新域落 FINAL 仍走代理无功能损失
+# MicrosoftCN — 微软 CDN/OneDrive/Office 国内可直连面；位次先于 ProxyGFW，是微软域唯一能生效的直连位
+# 排序：规则类型分区，区内字母序
+# 微软自家 CA 端点（crl / ocsp / oneocsp.microsoft.com）收在本表：Domestic 在 ProxyGFW 的 microsoft.com 后缀之后，接不住
 
 DOMAIN,res-1.cdn.office.net
 DOMAIN,res-2.cdn.office.net

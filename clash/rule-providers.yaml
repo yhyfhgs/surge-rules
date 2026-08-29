@@ -247,7 +247,7 @@ rule-providers:
 # Surge 内置 SYSTEM/LAN 集在 Clash 端的等价前置规则：
 #  - GEOIP,lan,DIRECT,no-resolve
 # rules:
-#  - RULE-SET,Reject,REJECT   # Surge.conf 已停用，Clash 端按需启用（须置于放行规则之前）
+#  - RULE-SET,Reject,REJECT   # 与 Surge.conf 同步启用（须置于放行规则之前）
 #  - RULE-SET,PrivateLAN,DIRECT
 #  - RULE-SET,PKU,DIRECT
 #  - RULE-SET,GameDownloadCN,DIRECT

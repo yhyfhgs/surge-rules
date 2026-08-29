@@ -1,8 +1,8 @@
 # AUTO-GENERATED — Clash(Mihomo) classical 规则，由 ../lists/NetEaseCN.list 派生
 # 勿手工编辑；修改 Surge 源后运行 python3 tools/surge2clash.py 重新生成
 
-# NetEaseCN — 网易系直连（blackmatrix7:NetEase；2026-08-25 建）
-# 规范化排序：规则类型分区，区内字母序
+# NetEaseCN — 网易系国内域直连（上游 blackmatrix7 NetEase）；境外托管的国际版站点（neteasegames.com/.net）不收
+# 排序：规则类型分区，区内字母序
 
 DOMAIN-SUFFIX,126.am
 DOMAIN-SUFFIX,126.com
@@ -79,8 +79,6 @@ DOMAIN-SUFFIX,netease.com
 DOMAIN-SUFFIX,netease.im
 DOMAIN-SUFFIX,neteasegame.com
 DOMAIN-SUFFIX,neteasegame.net
-DOMAIN-SUFFIX,neteasegames.com
-DOMAIN-SUFFIX,neteasegames.net
 DOMAIN-SUFFIX,netstatic.net
 DOMAIN-SUFFIX,njdiip.com
 DOMAIN-SUFFIX,ntes53.com

@@ -1,12 +1,9 @@
 # AUTO-GENERATED — Clash(Mihomo) classical 规则，由 ../lists/Domestic.list 派生
 # 勿手工编辑；修改 Surge 源后运行 python3 tools/surge2clash.py 重新生成
 
-# Domestic — 国内服务直连 (含国内 AI/字节系/券商)
-# 规范化排序：规则类型分区，区内字母序
-# 2026-08-25 维护：接收 identrust/ppio/xingyeai/xiaoaiassist 与 NTP/captive 探测域(pool.ntp.org/time.windows.com/msftconnecttest.com/detectportal.firefox.com)、bootcdn.net；移出 11 个国内厂商国际站至 AI.list；删 8 条死条目/失效域
-# 2026-08-30 维护：CA 吊销/AIA 端点集中直连（TLS 握手关键路径，soft-fail 安全）——自 DownloadCDN 接收 8 条 + 补 crl.globalsign.com、status.rapidssl.com；ocsp.usertrust.com / ocsp.entrust.net / oneocsp.microsoft.com 未纳入：ProxyGFW 的 usertrust.com / entrust.net / microsoft.com 后缀位次更前，加进本表只会成为永不生效的死条目
-# 2026-08-30 收尾：补 cacerts.rapidssl.com(与 status.rapidssl.com 同厂归并)；oneocsp/ocsp/crl.microsoft.com 因 ProxyGFW 后缀遮蔽改入 MicrosoftCN；ocsp.usertrust.com/ocsp.entrust.net 维持 ProxyGFW→Final(无语义合适的前位直连表，soft-fail 下走代理无害，刻意不收)
-# 2026-08-30 用户裁决（纯域名+IP 架构）：移除本表全部 PROCESS-NAME/USER-AGENT——两类规则按 App 维度全域生效，会把 App 内异质流量（内置浏览器/webview/系统共享域）误接管；域名收录已密+extended-matching+IP 段兜底足以覆盖，未收录新域落 FINAL 仍走代理无功能损失
+# Domestic — 国内服务直连手工层（含国内 AI/券商、NTP 与 captive 探测域）；上游未覆盖、需立刻生效的特例都加这里
+# 排序：规则类型分区，区内字母序
+# 兼作 CA 吊销/AIA 端点集中直连位（TLS 握手关键路径，soft-fail）；被 ProxyGFW 前位后缀遮蔽的端点收不进本表，去向见 docs/MAINTENANCE.md「裁决登记」
 
 DOMAIN,cn.download.nvidia.com
 DOMAIN,config.ubnt.com
@@ -238,7 +235,6 @@ DOMAIN-SUFFIX,freshippo.com
 DOMAIN-SUFFIX,fun.tv
 DOMAIN-SUFFIX,funshion.com
 DOMAIN-SUFFIX,futu.cn
-DOMAIN-SUFFIX,futu5.com
 DOMAIN-SUFFIX,futubull.cn
 DOMAIN-SUFFIX,futunn.com
 DOMAIN-SUFFIX,g.cn
@@ -298,7 +294,6 @@ DOMAIN-SUFFIX,i4.cn
 DOMAIN-SUFFIX,ibreader.com
 DOMAIN-SUFFIX,ibuscloud.com
 DOMAIN-SUFFIX,iciba.com
-DOMAIN-SUFFIX,id6.com
 DOMAIN-SUFFIX,id6.me
 DOMAIN-SUFFIX,identrust.com
 DOMAIN-SUFFIX,ifeng.com
@@ -321,7 +316,6 @@ DOMAIN-SUFFIX,jiemian.com
 DOMAIN-SUFFIX,jiguang.cn
 DOMAIN-SUFFIX,jomoxc.com
 DOMAIN-SUFFIX,jpush.cn
-DOMAIN-SUFFIX,jstarkan.com
 DOMAIN-SUFFIX,kaiyanapp.com
 DOMAIN-SUFFIX,kdocs.cn
 DOMAIN-SUFFIX,kdslife.com
@@ -339,7 +333,6 @@ DOMAIN-SUFFIX,ksosoft.com
 DOMAIN-SUFFIX,ksyun.com
 DOMAIN-SUFFIX,ku6.com
 DOMAIN-SUFFIX,lagou.com
-DOMAIN-SUFFIX,lancdn.com
 DOMAIN-SUFFIX,landian.vip
 DOMAIN-SUFFIX,landiannews.com
 DOMAIN-SUFFIX,leetcode-cn.com
@@ -351,8 +344,6 @@ DOMAIN-SUFFIX,lenovomm.com
 DOMAIN-SUFFIX,letvimg.com
 DOMAIN-SUFFIX,lianjia.com
 DOMAIN-SUFFIX,linkedin.cn
-DOMAIN-SUFFIX,linux.do
-DOMAIN-SUFFIX,linuxdo.org
 DOMAIN-SUFFIX,ljcdn.com
 DOMAIN-SUFFIX,lkcoffee.com
 DOMAIN-SUFFIX,lltskb.com
@@ -377,7 +368,6 @@ DOMAIN-SUFFIX,meixincdn.com
 DOMAIN-SUFFIX,meizu.cn
 DOMAIN-SUFFIX,meizu.com
 DOMAIN-SUFFIX,mi-fds.com
-DOMAIN-SUFFIX,mi-idc.com
 DOMAIN-SUFFIX,mi-img.com
 DOMAIN-SUFFIX,mi.com
 DOMAIN-SUFFIX,mifile.cn
@@ -395,7 +385,6 @@ DOMAIN-SUFFIX,mobileservice.cn
 DOMAIN-SUFFIX,modelscope.cn
 DOMAIN-SUFFIX,mojicdn.com
 DOMAIN-SUFFIX,moonshot.cn
-DOMAIN-SUFFIX,mrw.so
 DOMAIN-SUFFIX,msftconnecttest.com
 DOMAIN-SUFFIX,mtyun.com
 DOMAIN-SUFFIX,mubu.com
@@ -421,7 +410,6 @@ DOMAIN-SUFFIX,ocsp.sectigo.com
 DOMAIN-SUFFIX,officewebapps.cn
 DOMAIN-SUFFIX,okr.com
 DOMAIN-SUFFIX,oneplus.cn
-DOMAIN-SUFFIX,oneplus.net
 DOMAIN-SUFFIX,oneplusbbs.com
 DOMAIN-SUFFIX,onlinedown.com
 DOMAIN-SUFFIX,openinstall.io
@@ -499,7 +487,6 @@ DOMAIN-SUFFIX,saxyit.com
 DOMAIN-SUFFIX,segmentfault.com
 DOMAIN-SUFFIX,sevencdn.com
 DOMAIN-SUFFIX,sharepoint.cn
-DOMAIN-SUFFIX,sifou.com
 DOMAIN-SUFFIX,siliconflow.cn
 DOMAIN-SUFFIX,siliconflow.com
 DOMAIN-SUFFIX,sina.cn

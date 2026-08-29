@@ -1,10 +1,9 @@
 # AUTO-GENERATED — Clash(Mihomo) classical 规则，由 ../lists/ChinaDomain.list 派生
 # 勿手工编辑；修改 Surge 源后运行 python3 tools/surge2clash.py 重新生成
 
-# ChinaDomain — 大陆域名直连兜底大表（blackmatrix7 ChinaMaxNoIP，机器管理层；手工条目请加 Domestic）
-# 规范化排序：规则类型分区，区内字母序
-# 2026-08-30 维护：删 5 条全域生效的危险 USER-AGENT(Microsoft*/hide*/TeamViewer*/QQ*/TIM*)——已实证会把境外未收录域打成 DIRECT；已登记进 docs D11 合并排除表与 tests/allowlist.json，再生本表时须过滤
-# 2026-08-30 用户裁决（纯域名+IP 架构）：移除本表全部 PROCESS-NAME/USER-AGENT——两类规则按 App 维度全域生效，会把 App 内异质流量（内置浏览器/webview/系统共享域）误接管；域名收录已密+extended-matching+IP 段兜底足以覆盖，未收录新域落 FINAL 仍走代理无功能损失
+# ChinaDomain — 大陆域名直连长尾兜底（上游 blackmatrix7 ChinaMaxNoIP）；机器管理层，整表刷新，手工条目一律加 Domestic.list
+# 排序：规则类型分区，区内字母序
+# 再生须过滤：全部 USER-AGENT / PROCESS-NAME（ARCHITECTURE D7、D11）与已删的 17 条投毒/境外托管域，清单见 docs/MAINTENANCE.md「裁决登记」
 
 DOMAIN,1-fss24-s0.streamhoster.com
 DOMAIN,14033.live.streamtheworld.com
@@ -1727,7 +1726,6 @@ DOMAIN-SUFFIX,123aoe.com
 DOMAIN-SUFFIX,123baofeng.com
 DOMAIN-SUFFIX,123bo.com
 DOMAIN-SUFFIX,123boligang.com
-DOMAIN-SUFFIX,123du.cc
 DOMAIN-SUFFIX,123ems.com
 DOMAIN-SUFFIX,123fc.com
 DOMAIN-SUFFIX,123fh.com
@@ -3098,7 +3096,6 @@ DOMAIN-SUFFIX,23qb.net
 DOMAIN-SUFFIX,23qcw.com
 DOMAIN-SUFFIX,23sk.com
 DOMAIN-SUFFIX,23txt.com
-DOMAIN-SUFFIX,23us.so
 DOMAIN-SUFFIX,23us23us.com
 DOMAIN-SUFFIX,23uswx.com
 DOMAIN-SUFFIX,23uswx.info
@@ -9973,7 +9970,6 @@ DOMAIN-SUFFIX,adrkwai.com
 DOMAIN-SUFFIX,ads66.com
 DOMAIN-SUFFIX,adsalecdn.com
 DOMAIN-SUFFIX,adsalecprj.com
-DOMAIN-SUFFIX,adsame.com
 DOMAIN-SUFFIX,adsctl.com
 DOMAIN-SUFFIX,adseye.com
 DOMAIN-SUFFIX,adseyeservice.com
@@ -15362,7 +15358,6 @@ DOMAIN-SUFFIX,biyouxue.com
 DOMAIN-SUFFIX,biyuandi.com
 DOMAIN-SUFFIX,biyuansh.com
 DOMAIN-SUFFIX,biyuanshuiwu.com
-DOMAIN-SUFFIX,biyuwu.cc
 DOMAIN-SUFFIX,biyuzg.com
 DOMAIN-SUFFIX,biz-abroad.com
 DOMAIN-SUFFIX,biz-east.com
@@ -30993,7 +30988,6 @@ DOMAIN-SUFFIX,emqx.net
 DOMAIN-SUFFIX,emr-volces.com
 DOMAIN-SUFFIX,ems-audio.com
 DOMAIN-SUFFIX,ems517.com
-DOMAIN-SUFFIX,emsec.hk
 DOMAIN-SUFFIX,emsepc.com
 DOMAIN-SUFFIX,emshost.com
 DOMAIN-SUFFIX,emshua.com
@@ -41182,7 +41176,6 @@ DOMAIN-SUFFIX,handyfriendship.com
 DOMAIN-SUFFIX,hanergy.com
 DOMAIN-SUFFIX,hanex.cc
 DOMAIN-SUFFIX,hanfakg.com
-DOMAIN-SUFFIX,hanfan.cc
 DOMAIN-SUFFIX,hanfei.net
 DOMAIN-SUFFIX,hanfeiyl.com
 DOMAIN-SUFFIX,hanfugong.com
@@ -44706,7 +44699,6 @@ DOMAIN-SUFFIX,hostdie.com
 DOMAIN-SUFFIX,hostgw.net
 DOMAIN-SUFFIX,hostidc.net
 DOMAIN-SUFFIX,hostkvm.com
-DOMAIN-SUFFIX,hostloc.me
 DOMAIN-SUFFIX,hostmonit.com
 DOMAIN-SUFFIX,hostoexp.com
 DOMAIN-SUFFIX,hostxen.com
@@ -59525,7 +59517,6 @@ DOMAIN-SUFFIX,locoy.com
 DOMAIN-SUFFIX,locoyposter.com
 DOMAIN-SUFFIX,locren.com
 DOMAIN-SUFFIX,loctek.com
-DOMAIN-SUFFIX,locvps.com
 DOMAIN-SUFFIX,locvps.net
 DOMAIN-SUFFIX,lodashjs.com
 DOMAIN-SUFFIX,loexu.com
@@ -62650,7 +62641,6 @@ DOMAIN-SUFFIX,mhpdf.com
 DOMAIN-SUFFIX,mhpin.com
 DOMAIN-SUFFIX,mhrooz.xyz
 DOMAIN-SUFFIX,mhskso.sbs
-DOMAIN-SUFFIX,mht.la
 DOMAIN-SUFFIX,mhtclub.com
 DOMAIN-SUFFIX,mhtes.com
 DOMAIN-SUFFIX,mhtyd.com
@@ -63716,10 +63706,6 @@ DOMAIN-SUFFIX,mojichina.com
 DOMAIN-SUFFIX,mojichina.net
 DOMAIN-SUFFIX,mojidict.com
 DOMAIN-SUFFIX,mojidoc.com
-DOMAIN-SUFFIX,mojie.app
-DOMAIN-SUFFIX,mojie.co
-DOMAIN-SUFFIX,mojie.kim
-DOMAIN-SUFFIX,mojieai.com
 DOMAIN-SUFFIX,mojitest.com
 DOMAIN-SUFFIX,mojitok-c.com
 DOMAIN-SUFFIX,mojocube.com
@@ -67226,7 +67212,6 @@ DOMAIN-SUFFIX,nszmz.com
 DOMAIN-SUFFIX,nszone.com
 DOMAIN-SUFFIX,nszxsyxx.com
 DOMAIN-SUFFIX,nszynd66ggbcx.com
-DOMAIN-SUFFIX,nt.app
 DOMAIN-SUFFIX,nt.cc
 DOMAIN-SUFFIX,nt56.net
 DOMAIN-SUFFIX,nt6y.com
@@ -68777,9 +68762,6 @@ DOMAIN-SUFFIX,pangmaovc.com
 DOMAIN-SUFFIX,pangod.com
 DOMAIN-SUFFIX,pangodsxbj.com
 DOMAIN-SUFFIX,pangoing.com
-DOMAIN-SUFFIX,pangolin-sdk-toutiao2.com
-DOMAIN-SUFFIX,pangolin-sdk-toutiao3.com
-DOMAIN-SUFFIX,pangolin-sdk-toutiao4.com
 DOMAIN-SUFFIX,pangomicro.com
 DOMAIN-SUFFIX,pangqiu.com
 DOMAIN-SUFFIX,pangshare.com
@@ -80642,7 +80624,6 @@ DOMAIN-SUFFIX,spring4all.com
 DOMAIN-SUFFIX,spring56.com
 DOMAIN-SUFFIX,springairlines.com
 DOMAIN-SUFFIX,springcocoon.com
-DOMAIN-SUFFIX,springerlink.com
 DOMAIN-SUFFIX,springpharma.net
 DOMAIN-SUFFIX,springsunday.net
 DOMAIN-SUFFIX,springtour.com
@@ -95971,7 +95952,6 @@ DOMAIN-SUFFIX,xs3cnc.com
 DOMAIN-SUFFIX,xs52.com
 DOMAIN-SUFFIX,xs7.cc
 DOMAIN-SUFFIX,xs7.com
-DOMAIN-SUFFIX,xs7.la
 DOMAIN-SUFFIX,xs9999.com
 DOMAIN-SUFFIX,xsa239.com
 DOMAIN-SUFFIX,xsappxz.com
@@ -98832,7 +98812,6 @@ DOMAIN-SUFFIX,yirenzhushou.com
 DOMAIN-SUFFIX,yirenzuji.com
 DOMAIN-SUFFIX,yirlir.com
 DOMAIN-SUFFIX,yirong.com
-DOMAIN-SUFFIX,yiruan.la
 DOMAIN-SUFFIX,yiruantong.com
 DOMAIN-SUFFIX,yiruide.com
 DOMAIN-SUFFIX,yiruikecorp.com
@@ -106491,7 +106470,6 @@ DOMAIN-SUFFIX,zzzymjg.com
 DOMAIN-SUFFIX,zzzyy.com
 DOMAIN-SUFFIX,zzzyyy.com
 DOMAIN-SUFFIX,zzzzaaaa.com
-DOMAIN-SUFFIX,zzzzzz.me
 
 DOMAIN-KEYWORD,.tmall.com
 DOMAIN-KEYWORD,alicdn

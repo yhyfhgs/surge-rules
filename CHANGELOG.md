@@ -4,6 +4,24 @@
 
 ---
 
+## [2026-08-30] Reject 启用 + DIRECT 过度覆盖修复 + 全库注释精简 + 公开仓库脱敏
+
+### Added
+- **Reject.list 重构启用**(1152 → 364 行):定位收敛为「广告投放/网盟/流氓变现 SDK + HTTPDNS 私有 DoH + 恶意与假冒站」。新增恶意层 183 条(源:blackmatrix7 Hijacking,长期在册的假冒官网下载站/返利劫持链/私服垃圾站/住宅代理 SDK);HTTPDNS 上游差集补 4 条。**埋点/统计/归因/推送/APM/个性化推荐域一律放行**并以负向断言锁死;795 条无注解 IP 沉洞不再回收。Surge.conf 第 1 区已启用为 REJECT。
+- `tests/scenarios/reject_layer.json` 扩为 14 场景/151 断言(正向拦截 + 负向防误杀)。
+- `docs/MAINTENANCE.md` 新增「裁决登记」:20 条操作性红线自各表头注释集中迁入。
+
+### Changed
+- **DIRECT 过度覆盖修复 48 条**:`linux.do`/`linuxdo.org` 等 17 域经 DNS 投毒与直连超时双实证自直连层移入 ProxyGFW;13 条境外托管不可达域自 Domestic/ChinaDomain/NetEaseCN 删除落 FINAL;`biliintl.co` 移交 Streaming。回归对照 11 个国内域保持 DIRECT。
+- **全库注释精简**:34 张表头注释 143 → 83 行(字节 −65%),统一「定位/排序/红线」≤3 行;日期叙事与重复裁决段落删除,仍有效约束迁入 MAINTENANCE 裁决登记;Surge.conf 注释同步重写并把分区重编号为 0–10 连续序列;本文件内 commit hash 引用全部改为「日期+标题」(历史重写会更换全部 hash,hash 引用不再可靠)。
+- **公开仓库脱敏(外置 + 中性默认)**:tests 内策略组名/线路关键词/ASN 映射下沉到仓库外覆盖档(三级查找:`LIVE_CHECK_LOCAL` → `rules-local/live_check_local.json` 真源 → `tests/live_check_local.json` 兜底;schema:`exit_class_exact`/`exit_class_keywords`/`asn_map`/`residential_hints`/`datacenter_hints`),公开代码仅含中性占位;缺档时相关断言自动 skipped。`lists/Europe.list` 移除一条服务商官网域。
+
+### Security
+- 本 commit 之后执行 `git filter-repo` 全历史重写:清除历史 blob 与 commit message 中残留的线路商/机房标识、ASN 与含标识的组名(真实节点地址与密钥经复核在全历史零存在)。旧 commit hash 全部失效。
+
+### Removed
+- `ChinaDomain.list`/`AlibabaCN.list` 各删 1 条被 Reject 前位抢占的死条目(adsame.com/yukhj.com)。
+
 ## [2026-08-29] 布局重构 v2 —— 待发布
 
 > 状态:本地重构完成、audit/runsuite 全绿、已本地 commit。**push 与 CDN 切换由用户执行**,步骤见本节末尾「发布切换顺序」。
@@ -33,8 +51,10 @@
 
 ### Security
 
-- **全部 git 历史已执行脱敏重写**(`git filter-repo`):清除 `tests/` 历史版本中曾出现的真实节点地址与私有线路标识(替换为 `<REDACTED-*>` 占位);测试工具的私有节点映射外置到 gitignored 的 `tests/live_check_local.json`,公开代码只保留通用 ISP 关键词。
-- **影响**:自「Audit overhaul」(现 `bd85d83`)起的 commit hash 与旧历史不同,旧 clone / fork 需要重新拉取;更早的 commit hash 未受影响。
+- **全部 git 历史已执行脱敏重写**(`git filter-repo`):清除 `tests/` 历史版本中曾出现的真实节点地址与私有线路标识(替换为 `<REDACTED-*>` 占位);测试工具的私有节点映射外置到仓库外,公开代码只保留通用 ISP 关键词。
+- **私有映射的三级查找**(`live_check.py`,取第一个存在的文件,不叠加):① 环境变量 `LIVE_CHECK_LOCAL` 指定的路径;② `<repo>/../rules-local/live_check_local.json` —— **真源**,整个目录都在仓库外;③ `<repo>/tests/live_check_local.json` —— 旧路径兜底,靠 `.gitignore` 守着。schema 含 `exit_class_exact` / `exit_class_keywords` / `asn_map` / `residential_hints` / `datacenter_hints`(并兼容早期键名);文件全缺时走中性默认值,不报错,只是出口归类退化到国旗兜底。
+- **影响**:自 2026-08-25「Audit overhaul: AI/CDN routing fixes, region GEOIP reorder, dead-rule cleanup, add tests/」起的 commit hash 与旧历史不同,旧 clone / fork 需要重新拉取。
+- **本文件不写 commit hash**,一律用「日期 + commit 标题」引用 —— 历史重写会让所有 hash 永久失效,标题可用 `git log --grep` 稳定定位。
 
 ### 影响面
 
@@ -97,8 +117,8 @@
 ### Changed
 
 - **AI 与生态边界重划**:AI.list 收窄 KEYWORD(sentry / datadog / sift / openai),移除 DO / Vultr ASN;国内厂商的国际站(coze / qwen.ai / z.ai / minimax.io / moonshot.ai 等)移入 AI.list 走代理,对应 `.cn` 域移出走直连;GitHub 全生态统一到 AI 策略。
-- **Microsoft.list 独立成表**(commit `8ec6a8b`)—— Copilot / Bing / MSN / 国际登录面共 25 条从 AI 组拆出,与 Google / Twitter / Meta 同走一组。
-- **策略组更名** Google-X-Meta → **Google-X-Meta-MS**(commit `48c4895`),测试断言与工具链同步改名。
+- **Microsoft.list 独立成表**(2026-08-25 commit「Restructure: Microsoft.list (Google-X-Meta), region lists self-contained IP rules moved after Apple/MS/GFW, LINE to Japan, drop conf pins」)—— Copilot / Bing / MSN / 国际登录面共 25 条从 AI 组拆出,与 Google / Twitter / Meta 同走一组。
+- **策略组更名** Google-X-Meta → **Google-X-Meta-MS**(2026-08-25 commit「Rename policy group to Google-X-Meta-MS across test assertions and tooling」),测试断言与工具链同步改名。
 - **CDN 配对整理**:国内媒体 CDN(bilibili / iqiyi)归还 DIRECT;NTP 与 captive portal 归 DIRECT;stripe / docker / npm 归属统一;bstar → Streaming;pximg → Japan。DownloadCDN 定位收窄为「大流量批量下载域」,剥离 **533 个**站点静态资源域。
 - **地区表自包含并后置**:Japan / UK / Europe / US 的 GEOIP / IP-ASN 规则收进各自表内,整体移到 Apple / 微软 / GFW 之后、国内区之前 —— 修掉了 Apple 17/8 与 ProxyGFW 的 IP 规则被 `GEOIP,US` / `GEOIP,JP` / `GEOIP,DE` 抢先遮蔽的问题。
 - LINE 归入 Japan 表。
@@ -107,7 +127,7 @@
 ### Removed
 
 - 死规则与冗余清理合计 **-855 条**,其中 TencentCN 的 233 条伪 KEYWORD 规则、以及各处重复 / 被遮蔽 / 过期条目。
-- 停止跟踪 `__pycache__`,并加入 `.gitignore`(commits `7213d22`、`6f366bb`)。
+- 停止跟踪 `__pycache__`,并加入 `.gitignore`(2026-08-25 commit「Drop tracked __pycache__」与「Ignore __pycache__」)。
 
 ### 影响面
 
@@ -121,8 +141,8 @@
 
 ### Added
 
-- **国内直连三层格局成形**(commit `9b928b1`):在既有 Domestic 手工层之上,补入 6 个厂商细分表(ChinaMedia / TencentCN / AlibabaCN / ByteDanceCN / BaiduCN / NetEaseCN),再以 ChinaDomain(**约 10.6 万条**)做长尾兜底。
-- `update.sh`(commit `70a6ee2`)—— 一条命令完成 push + 逐文件 purge jsDelivr + md5 校验,解决了 CDN 缓存导致"改了但没生效"的老问题。
+- **国内直连三层格局成形**(2026-08-25 commit「merge blackmatrix7: 6 CN sub-lists + ChinaDomain fallback」):在既有 Domestic 手工层之上,补入 6 个厂商细分表(ChinaMedia / TencentCN / AlibabaCN / ByteDanceCN / BaiduCN / NetEaseCN),再以 ChinaDomain(**约 10.6 万条**)做长尾兜底。
+- `update.sh`(2026-08-25 commit「Add update.sh: one-command push + jsDelivr purge + verify」)—— 一条命令完成 push + 逐文件 purge jsDelivr + md5 校验,解决了 CDN 缓存导致"改了但没生效"的老问题。
 
 ### 影响面
 
@@ -135,13 +155,13 @@
 
 ### Added
 
-- 首次发布 **23 个**去重后的 Surge 规则集(commit `f3d85ea`),确立「每个域名/IP 全链唯一归属」的核心原则。
+- 首次发布 **23 个**去重后的 Surge 规则集(2026-08-25 commit「Initial release: 23 deduplicated Surge rulesets」),确立「每个域名/IP 全链唯一归属」的核心原则。
 
 ### Changed
 
-- 国内 AI 厂商域名(Kimi / Qwen / Zhipu / MiniMax / Kling / Coze 国际站等)移入 Domestic 走直连(commit `c853f2c`)—— 该归属在后续审计中被重新裁决:国际站改走代理、`.cn` 域保持直连。
-- 生态绑定的 CDN 归还各自服务表(commit `981f0d3`):Angular / googlezip → Google,SteamOS / Epic / Blizzard CDN → Games。
+- 国内 AI 厂商域名(Kimi / Qwen / Zhipu / MiniMax / Kling / Coze 国际站等)移入 Domestic 走直连(2026-08-25 commit「Move domestic AI vendors (Kimi/Qwen/Zhipu/MiniMax/Kling/Coze intl etc.) to Domestic DIRECT」)—— 该归属在后续审计中被重新裁决:国际站改走代理、`.cn` 域保持直连。
+- 生态绑定的 CDN 归还各自服务表(2026-08-25 commit「Move ecosystem-bound CDNs to their service lists (Angular/googlezip->Google, SteamOS/Epic/Blizzard CDN->Games)」):Angular / googlezip → Google,SteamOS / Epic / Blizzard CDN → Games。
 
 ### Removed
 
-- ProxyGFW 中失效的 `googlezip.net` 条目(commit `15df72a`),归属权已属 Google 表 —— 唯一归属原则的第一次落地执行。
+- ProxyGFW 中失效的 `googlezip.net` 条目(2026-08-25 commit「Remove dead googlezip.net entry from ProxyGFW (owned by Google list)」),归属权已属 Google 表 —— 唯一归属原则的第一次落地执行。

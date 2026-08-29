@@ -1,6 +1,5 @@
-# Japan — 日本区域服务
-# 规范化排序：规则类型分区，区内字母序
-# 2026-08-25 维护：接收 pximg.net(与 pixiv.net 同组)；GEOIP/IP-ASN 兜底保留本表，随表整体置于 Apple/微软/GFW 之后(防遮蔽其 IP 规则)
+# Japan — 日本区域服务（含 pixiv/pximg、LINE）；域名与 GEOIP/IP-ASN 同表自包含，整表刻意置于 Apple/微软/GFW 之后（前置会遮蔽它们的 IP 规则）
+# 排序：规则类型分区，区内字母序
 
 DOMAIN-SUFFIX,ahamo.com
 DOMAIN-SUFFIX,amazon.co.jp

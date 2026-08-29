@@ -1,8 +1,8 @@
 # AUTO-GENERATED — Clash(Mihomo) classical 规则，由 ../lists/ByteDanceCN.list 派生
 # 勿手工编辑；修改 Surge 源后运行 python3 tools/surge2clash.py 重新生成
 
-# ByteDanceCN — 字节跳动系直连（blackmatrix7:ByteDance；2026-08-25 建）
-# 规范化排序：规则类型分区，区内字母序
+# ByteDanceCN — 字节跳动系国内域直连（上游 blackmatrix7 ByteDance）；TikTok 与字节海外域归 TikTok.list
+# 排序：规则类型分区，区内字母序
 
 DOMAIN-SUFFIX,2333333333333.com
 DOMAIN-SUFFIX,365yg.com
@@ -240,9 +240,6 @@ DOMAIN-SUFFIX,pacmantwo.com
 DOMAIN-SUFFIX,pangle.cn
 DOMAIN-SUFFIX,pangolin-dsp-toutiao-b.com
 DOMAIN-SUFFIX,pangolin-dsp-toutiao.com
-DOMAIN-SUFFIX,pangolin-sdk-toutiao-b.com
-DOMAIN-SUFFIX,pangolin-sdk-toutiao.com
-DOMAIN-SUFFIX,pangolin-sdk-toutiao1.com
 DOMAIN-SUFFIX,panplayable-toutiao-b.com
 DOMAIN-SUFFIX,panplayable-toutiao.com
 DOMAIN-SUFFIX,pglstatp-toutiao-b.com

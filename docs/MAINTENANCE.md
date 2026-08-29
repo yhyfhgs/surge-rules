@@ -26,7 +26,7 @@ flowchart TD
     S["要新增一条规则"] --> Q0{"是内网 / 校园网<br/>/ 系统流量?"}
     Q0 -->|是| Z0["区 0:PrivateLAN 或 PKU"]
     Q0 -->|否| Q1{"是广告 / 追踪<br/>要拦截?"}
-    Q1 -->|是| Z1["区 1:Reject<br/>(当前停用,见下注)"]
+    Q1 -->|是| Z1["区 1:Reject"]
     Q1 -->|否| Q2{"是国服游戏下载 CDN?"}
     Q2 -->|是| Z2["区 2:GameDownloadCN"]
     Q2 -->|否| Q3{"属于某个大生态?<br/>Google / X / Meta / 微软国际<br/>/ AI 服务 / YouTube"}
@@ -44,7 +44,7 @@ flowchart TD
     LQ1 -->|否| LA["第一层:Domestic"]
 ```
 
-> 注:Reject 在 conf 中当前为**注释停用态**。往 Reject.list 新增拦截条目前,先确认 conf 里对应的 RULE-SET 行已取消注释,否则加了也不生效。
+> 注:Reject 已在 conf 区 1 启用(`REJECT`,位次全链最前),**收录即抢占**。新增条目前先确认不会误伤正常服务;埋点 / 统计 / 归因 / 推送 / 崩溃 APM / 推荐类域是刻意放行的,勿再往里收,宽后缀一律禁收。
 
 ### 1.2 两步定位
 
@@ -90,7 +90,7 @@ grep -rn "example.com" lists/
 python3 tests/runsuite.py
 ```
 
-跑 `tests/scenarios/*.json` 里的 **90 个真实场景**、**931 条断言**,其中 **351 条是 DNS 泄漏断言**。
+跑 `tests/scenarios/*.json` 里的 **103 个真实场景**、**1044 条断言**,其中 **333 条是 DNS 泄漏断言**。
 
 **输出怎么读**:每条断言失败时会告诉你三件事 —— 哪个场景、期望落到哪个策略、实际落到了哪个策略。定位方法:
 
@@ -108,7 +108,7 @@ python3 tests/runsuite.py
 python3 tests/audit.py --check all
 ```
 
-跑 A1–A6 六项结构性检查(判据清单见 [ARCHITECTURE.md §7](ARCHITECTURE.md))。发布闸门用的是更严格的形式:
+跑 A1–A7 七项结构性检查(判据清单见 [ARCHITECTURE.md §7](ARCHITECTURE.md))。发布闸门用的是更严格的形式:
 
 ```bash
 python3 tests/audit.py --check all --fail-on P1
@@ -145,8 +145,8 @@ python3 tests/live_check.py
 | 3 | **clash 再生** —— `tools/surge2clash.py` 由 `lists/` 全量重建 `clash/*.list` 与 `clash/rule-providers.yaml` | 遇未知规则类型 fail-fast 中止 |
 | 4 | **commit** —— 带上你传入的 message | — |
 | 5 | **push** —— 推到 `origin/main` | 网络/鉴权问题,重试即可 |
-| 6 | **purge** —— 逐文件调用 jsDelivr purge 接口,共 **65 个文件**(`lists/` 下 32 + `clash/` 下 32 + `clash/rule-providers.yaml`) | 见 §5.2 |
-| 7 | **md5 校验** —— 逐文件比对 CDN 返回内容与本地文件 | 报出未刷新的文件,见 §5.2 |
+| 6 | **purge** —— **增量**调用 jsDelivr purge 接口:只处理本次 push 实际变更的分发文件,且 purge 前先比对 CDN md5,已一致的直接跳过(全量候选集 **69 个**:`lists/` 34 + `clash/` 34 + `clash/rule-providers.yaml`) | 见 §5.2 |
+| 7 | **md5 复验** —— 只复验本轮真正发出过 purge 的文件 | 报出未刷新的文件,见 §5.2 |
 
 **双闸门的意义**:任何一个闸门不过,流程在 commit 之前就中止。这保证了仓库里不会出现"提交了但没通过验证"的状态,`main` 永远是可发布的。
 
@@ -194,7 +194,8 @@ jsDelivr 对 `@main` 分支路径有边缘缓存,**push 不等于生效**:
 1. **push 真的成功了吗** —— `git log origin/main --oneline -1` 看远端最新 commit 是不是你刚才那条。
 2. **重跑一次** —— purge 有时需要一点传播时间,重新执行 `update.sh` 会再 purge 再校验一遍。
 3. **等自然过期** —— 实在刷不动,`@main` 路径的缓存最长约 **12 小时**过期。这期间旧内容仍可用,不会中断服务,只是新规则还没铺开。
-4. **确认文件集合** —— purge / md5 集合是 65 个文件。如果新增或删除了 `.list`,这个集合会变,需要同步核对 `update.sh` 里的文件收集逻辑。
+4. **确认文件集合** —— 全量候选是 69 个文件(增量模式下只处理本次变更的那些)。如果新增或删除了 `.list`,这个集合会变,需要同步核对 `update.sh` 里的文件收集逻辑。
+5. **被限流了** —— 同一路径高频 purge 会被 jsDelivr throttle:受理但不执行,重置窗口约 1 小时。`update.sh` 会如实报告剩余秒数,等窗口过去再重跑即可,不要盲目重发。
 
 ### 5.3 `live_check.py` 连不上
 
@@ -218,7 +219,7 @@ conf 没开 http-api。这是前置条件,不是脚本故障。
 |---|---|---|
 | 1 | **勿手工编辑 `clash/`** | 下次 `update.sh` 全量覆盖,改动无声消失 |
 | 2 | **勿去重 PROCESS-NAME 大小写变体**(`Claude` / `claude` 等) | 破坏刻意的跨平台覆盖,一半平台上规则失效 |
-| 3 | **勿引入无 `no-resolve` 的 IP 规则** | DNS 泄漏 + 延迟惩罚 + 错误分流,351 条断言就是为它设的 |
+| 3 | **勿引入无 `no-resolve` 的 IP 规则** | DNS 泄漏 + 延迟惩罚 + 错误分流,333 条断言就是为它设的 |
 | 4 | **勿往 conf 写 MITM 的 `enable` 键** | Surge 规范化时会把它移除,反复写只是白费功夫。MITM 开关在 GUI 运行态,conf 只保留 `h2=true` |
 | 5 | **手工条目勿加 ChinaDomain** | 该表整表机器刷新,手写条目会被无声抹掉。要加就加进 Domestic 或对应厂商细分表 |
 | 6 | **勿 `git add` `reference/`** | 它是本地参考库,已在 `.gitignore` 中,不入库 |
@@ -249,7 +250,37 @@ conf 侧出问题时,用 `Profiles/Backup/` 下对应的备份替换,Surge GUI �
 
 ---
 
-## 8. 相关文档
+## 8. 裁决登记
+
+已生效、但不值得占用规则表头注释的操作性约束,逐条登记在此。与 [ARCHITECTURE.md §6](ARCHITECTURE.md) 的设计裁决表、`tests/allowlist.json` 的审计豁免互补 —— 那两处说明「为什么规则长成这样」,这张表说明「下次维护时不许做什么」。
+
+| 表 | 约束 |
+|---|---|
+| AI | AI 站分档收录:A / B 档收(自研模型、自有推理面、主流 agent 与工具链),**C · D 档一律不收**。`bolt.com` 是支付公司(与 bolt.new 无关),明确禁收 |
+| AI | AI 应用的更新 / 分发包(如 `releases.warp.dev`)随应用留 AI 组,**不拆去下载组** —— 已成先例,勿再按「下载域归 DownloadCDN」搬走 |
+| AI | `aws.dev` / `console.aws.a2z.com` 留 AI.list;`awsapps.com` / `awsstatic.com` / `sso.amazonaws.com` 属通用 AWS 客户域,归 ProxyGFW |
+| ChinaDomain | 整表再生后须重新过滤 **17 条已删域**:`123du.cc` `23us.so` `biyuwu.cc` `emsec.hk` `hanfan.cc` `hostloc.me` `locvps.com` `mht.la` `mojie.app` `mojie.co` `nt.app` `xs7.la` `yiruan.la` `zzzzzz.me`(已转 ProxyGFW)+ `mojie.kim` `mojieai.com` `springerlink.com`(仅删除,落 FINAL)—— 国内 DNS 已被投毒或站点境外托管,直连必超时 |
+| ChinaIP | 数据源必须用 blackmatrix7 `ChinaIPs`(IPv4 + IPv6 全量)。曾用的不完整源 IPv4 覆盖率仅 78.6%,缺 `59.192.0.0/10`、`43.0.0.0/10`、`175.64.0.0/11` 等已核实的 CN 大段,**不可回退换源** |
+| Domestic | CA 吊销 / AIA 端点集中收在本表直连(TLS 握手关键路径,soft-fail)。但 `ocsp.usertrust.com` / `ocsp.entrust.net` **刻意不收** —— ProxyGFW 的 `usertrust.com` / `entrust.net` 后缀位次更前,收了也只是死条目;走代理 → Final 在 soft-fail 下无害 |
+| Domestic | 已删的境外托管 / 直连不可达域勿再收回:`id6.com` `mi-idc.com` `jstarkan.com` `mrw.so` `sifou.com` `lancdn.com` `oneplus.net`(落 FINAL)、`linux.do` `linuxdo.org` `futu5.com`(已转 ProxyGFW) |
+| MicrosoftCN | 微软自家 CA 端点(`crl` / `ocsp` / `oneocsp.microsoft.com`)归 **MicrosoftCN**,不归 Domestic —— Domestic 位次在 ProxyGFW 的 `microsoft.com` 后缀之后,收了不生效 |
+| DownloadCDN | 顶域与其伴生子域必须**成对处理**:顶域移入生态表时,同步删掉本表的伴生子域,否则留下永不命中的死规则 |
+| DownloadCDN | 刻意留在本表的真·下载面:`downloads.lemonsqueezy.com`、`public-files.gumroad.com`,以及 Edge / Defender / VS Code 的更新域 —— 勿以「该归它的生态表」为由搬走 |
+| Microsoft | **勿把 `DOMAIN-SUFFIX,microsoft.com` 整条搬进 Microsoft.list** —— 它位次先于 MicrosoftCN,会一次性遮蔽后者 **45 条**国内直连域。同理 `cloud.microsoft` 整 gTLD 不收(会把 Office Web 与 MicrosoftCN 直连面拽进代理),只收 `m365.cloud.microsoft` 这类精确子域 |
+| Meta | 明确不收:`llama-api.com`(Cloudflare 上的第三方)、`metaquest.com`(无解析)、`horizonworlds.com`(不落 Meta IP) |
+| Google | `.google` / `.goog` gTLD 后缀已兜底 `deepmind.google` / `labs.google` / `ai.google` 等 AI 门面,无需单列 |
+| ModelDownloadCDN | 定位是「须先于生态表匹配的大流量下载端点」。日后同类(如容器镜像层)也归本表,不要为此在 conf 另开新区 |
+| Payment | **明确拒绝且勿再提**:revolut / remitly / safecharge / dlocal / rapyd / westernunion / moneygram / worldline / shop.app / checkout.shopify.com —— 银行类归区域表;Shopify 结账域与店铺同会话,单独切出反而自制 3DS 风控 |
+| Payment | 生态自有支付(alipay / unionpay / Apple Pay / 微信支付 / Google Pay)留在各自生态表,**不并入 Payment.list** |
+| Payment | `Payment` 策略组必须是 `select` 类,**不可改成 url-test / fallback 等自动测速组** —— 出口漂移会直接触发 3DS 重验与拒付 |
+| ProxyGFW | `amazonaws.com` / `microsoft.com` / `azureedge.net` 等宽后缀留在本表是**刻意的分层兜底**(具体子域已由前位表承接),审计报「重复 / 遮蔽」属预期,勿删 |
+| Reject | 上游那 42 条**无注解的劫持 IP** 不收 —— 条目陈旧,且部分落在中国 IP 段,收进来会误伤;本表 IP 区只留 HTTPDNS 服务 IP |
+| SocialOthers | Discord 只收实际在用的功能域;上游那批防御性注册域不收 |
+| US | 银行 / 券商 / 征信域(chase / citi / wellsfargo / schwab / equifax 等)留 US.list —— **不算支付渠道**,勿并入 Payment |
+
+---
+
+## 9. 相关文档
 
 - [ARCHITECTURE.md](ARCHITECTURE.md) —— 规则序、三层设计、零本地 DNS 解析、设计裁决、测试体系
 - [DEVELOPMENT.md](DEVELOPMENT.md) —— module / script 开发指南

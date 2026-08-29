@@ -1,6 +1,6 @@
-# US — 美国区域服务
-# 规范化排序：规则类型分区，区内字母序
-# 2026-08-25 维护：GEOIP/IP-ASN 兜底保留本表，随表整体置于 Apple/微软/GFW 之后（防遮蔽其 IP 规则）。2026-08-29 维护：americanexpress.com/discover.com 移交新建 Payment.list(卡组织需与支付会话同出口)；银行/券商/征信域(chase/citi/wellsfargo/schwab/equifax 等)非支付渠道，按裁决留本表
+# US — 美国区域服务，含银行/券商/征信域（chase/citi/wellsfargo/schwab/equifax 等，非支付渠道，刻意不入 Payment.list）
+# 排序：规则类型分区，区内字母序
+# 域名与 GEOIP/IP-ASN 同表自包含，整表刻意置于 Apple/微软/GFW 之后（前置会遮蔽它们的 IP 规则）
 
 DOMAIN-SUFFIX,att.com
 DOMAIN-SUFFIX,att.net

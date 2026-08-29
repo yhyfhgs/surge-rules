@@ -38,7 +38,7 @@ PASSTHROUGH = {
 }
 DROP = {"USER-AGENT", "URL-REGEX"}
 
-# Surge.conf 第 8 区的引用顺序（规则顺序即优先级），用于生成 rules 参考序列。
+# Surge.conf 第 10 区（国内直连）的引用顺序（规则顺序即优先级），用于生成 rules 参考序列。
 # (文件名, Surge 策略名)；SYSTEM/LAN 为 Surge 内置集，Clash 端以注释说明等价物。
 CONF_ORDER = [
     ("PrivateLAN", "DIRECT"),
@@ -159,7 +159,7 @@ def write_providers(names):
         "# Surge 内置 SYSTEM/LAN 集在 Clash 端的等价前置规则：",
         "#  - GEOIP,lan,DIRECT,no-resolve",
         "# rules:",
-        "#  - RULE-SET,Reject,REJECT   # Surge.conf 已停用，Clash 端按需启用（须置于放行规则之前）",
+        "#  - RULE-SET,Reject,REJECT   # 与 Surge.conf 同步启用（须置于放行规则之前）",
     ]
     ordered = {n for n, _ in CONF_ORDER} | {"Reject"}
     for stem, policy in CONF_ORDER:

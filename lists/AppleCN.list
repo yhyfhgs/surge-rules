@@ -1,7 +1,5 @@
-# AppleCN — Apple 服务与 CDN (直连；Apple 流媒体归 Streaming)；2026-08-25 并入 blackmatrix7:Apple
-# 规范化排序：规则类型分区，区内字母序
-# 2026-08-25 维护：删 7 条被同表 apple.com/cdn-apple.com/icloud.com 后缀覆盖的冗余条目(A3)
-# 2026-08-30 用户裁决（纯域名+IP 架构）：移除本表全部 PROCESS-NAME/USER-AGENT——两类规则按 App 维度全域生效，会把 App 内异质流量（内置浏览器/webview/系统共享域）误接管；域名收录已密+extended-matching+IP 段兜底足以覆盖，未收录新域落 FINAL 仍走代理无功能损失
+# AppleCN — Apple 服务与 CDN 直连（上游 blackmatrix7 Apple）；Apple 流媒体（TV/Music/News）归 Streaming.list
+# 排序：规则类型分区，区内字母序
 
 DOMAIN,apple-events.akamaized.net
 DOMAIN,appleworldwidedeveloper.hb-api.omtrdc.net

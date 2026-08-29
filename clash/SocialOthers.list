@@ -1,10 +1,9 @@
 # AUTO-GENERATED — Clash(Mihomo) classical 规则，由 ../lists/SocialOthers.list 派生
 # 勿手工编辑；修改 Surge 源后运行 python3 tools/surge2clash.py 重新生成
 
-# SocialOthers — 其他社交 (Discord/Bluesky/Reddit 等)
-# 规范化排序：规则类型分区，区内字母序
-# 2026-08-25 维护：补齐 redditstatic.com/discord.media/dis.gd/bsky.network/txmblr.com 五个配对域
-# 2026-08-30 维护：补 Discord 实际在用功能域 4（discord.gift / discord.new / discordcdn.com / discordsays.com）；上游其余 Discord 防御域拒绝收录
+# SocialOthers — 其他社交（Discord/Bluesky/Reddit/Tumblr 等）
+# 排序：规则类型分区，区内字母序
+# Discord 只收实际在用的功能域；上游其余防御性域名不收
 
 DOMAIN-SUFFIX,bsky.app
 DOMAIN-SUFFIX,bsky.network

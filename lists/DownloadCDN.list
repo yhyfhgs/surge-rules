@@ -1,9 +1,6 @@
-# DownloadCDN — 境外下载/CDN 大流量域 (github/googleapis/云厂商海外桶等)；2026-08-25 并入 blackmatrix7:GameDownload
-# 规范化排序：规则类型分区，区内字母序
-# 2026-08-25 维护：撤出 533 条浏览伴生静态子域(落回主站所在组)；GitHub 生态交 AI.list、bstar 交 Streaming、pximg 交 Japan、NTP/captive 交 Domestic；纳入 docker.com/npmjs.com 主域。2026-08-29 维护：24 条支付渠道 JS/静态/风控子域移交新建 Payment.list(stripecdn/stripeassets/paypalobjects/braintreegateway/klarnacdn/chargebee/recurly/afterpay/affirm/plaid/squarecdn/onfastspring 等)；downloads.lemonsqueezy.com 与 public-files.gumroad.com 属真·批量下载域，按裁决留本表
-# 2026-08-30 维护：8 条 CA 吊销/AIA 端点移交 Domestic.list 直连(cacerts.digicert/crl.verisign/crl3.digicert/crt.sectigo/lencr.org/ocsp.digicert/ocsp.sectigo/DOMAIN-WILDCARD ocsp.*.amazontrust)——几 KB 小包位于 TLS 握手关键路径，非批量下载域；oneocsp.microsoft.com 暂留本表：移入 Domestic 会被更前位的 ProxyGFW DOMAIN-SUFFIX,microsoft.com 遮蔽为代理，需先收窄该条
-# 2026-08-30 收尾：cacerts.rapidssl.com 同批移交 Domestic、oneocsp.microsoft.com 移交 MicrosoftCN；删 cdn.fellou.ai/logos.composio.dev/ph.langfuse.com/releases.warp.dev 4 条伴生子域(顶域已入 AI.list，成对处理防死规则)
-# 2026-08-30 四大厂归属核查迁出：mm.bing.net/sapphire/static.edge.microsoftapp/designerapp/MSN 图视 CDN 共 6 条→Microsoft.list(会话配套 CDN 与会话面同组)；Edge/Defender/VS Code 更新类微软域为真·下载面，刻意保留
+# DownloadCDN — 境外大流量批量下载域（云厂商海外桶/包 registry/镜像站/客户端更新通道）；站点浏览伴生的静态子域不收，落回主站所在组
+# 排序：规则类型分区，区内字母序
+# 删伴生子域须与顶域成对处理，防留下死规则；刻意保留项见 docs/MAINTENANCE.md「裁决登记」与 tests/allowlist.json
 
 DOMAIN,account-api.bandainamcoid.com
 DOMAIN,account.bandainamcoid.com
@@ -5466,7 +5463,6 @@ DOMAIN-SUFFIX,widgets.coaches.gnc.com
 DOMAIN-SUFFIX,widgets.goaffpro.app
 DOMAIN-SUFFIX,widgets.listenlive.co
 DOMAIN-SUFFIX,widgets.media.weather.com
-DOMAIN-SUFFIX,widgets.outbrain.com
 DOMAIN-SUFFIX,widgets.tree-nation.com
 DOMAIN-SUFFIX,widgets.turnto.com
 DOMAIN-SUFFIX,widgets.zohosalesiq.com

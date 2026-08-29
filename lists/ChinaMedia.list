@@ -1,7 +1,5 @@
-# ChinaMedia — 国内流媒体/视频/直播/音乐直连（blackmatrix7:ChinaMedia+BiliBili+iQIYI+Youku+TencentVideo+NetEaseMusic+KugouKuwo+Douyu+HuYa+KuaiShou；2026-08-25 建）
-# 规范化排序：规则类型分区，区内字母序
-# 2026-08-25 维护：bstar(B 站国际版) 域移交 Streaming.list；删 8 条同表覆盖冗余条目(A3)
-# 2026-08-30 用户裁决（纯域名+IP 架构）：移除本表全部 PROCESS-NAME/USER-AGENT——两类规则按 App 维度全域生效，会把 App 内异质流量（内置浏览器/webview/系统共享域）误接管；域名收录已密+extended-matching+IP 段兜底足以覆盖，未收录新域落 FINAL 仍走代理无功能损失
+# ChinaMedia — 国内流媒体/视频/直播/音乐直连（上游 blackmatrix7 ChinaMedia 系）；国际版域（bstar/biliintl）归 Streaming.list
+# 排序：规则类型分区，区内字母序
 
 DOMAIN,00713915daab0be43def5c338c02c80b.dlied1.cdntips.net
 DOMAIN,0gr4uqmtt8y41hcjsgrzdrc31.ourdvsss.com
@@ -270,7 +268,6 @@ DOMAIN-SUFFIX,biligame.com
 DOMAIN-SUFFIX,biligame.net
 DOMAIN-SUFFIX,biligo.com
 DOMAIN-SUFFIX,biliimg.com
-DOMAIN-SUFFIX,biliintl.co
 DOMAIN-SUFFIX,biliplus.com
 DOMAIN-SUFFIX,bilivideo.cn
 DOMAIN-SUFFIX,bilivideo.com

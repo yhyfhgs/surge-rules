@@ -1,9 +1,6 @@
-# ProxyGFW — GFW 被墙域名兜底；2026-08-25 并入 blackmatrix7:Proxy
-# 规范化排序：规则类型分区，区内字母序
-# 2026-08-25 维护：接收 auth0.com；docker.com/npmjs.com 移交 DownloadCDN、login.microsoftonline.com 移交 AI、社交伴生域移交 SocialOthers/Meta；删 1 条失效域。2026-08-29 维护：stripe.com/stripe.network/gumroad.com/paddle.com/DOMAIN-KEYWORD,paypal 移交新建 Payment.list(支付需固定出口)；USER-AGENT,PayPal* 未动，待 UA 方案统一裁决
-# 2026-08-30 维护：删 USER-AGENT,OneDrive*（与 MicrosoftCN 直连裁决矛盾）、USER-AGENT,WhatsApp*（Meta.list 域名面已覆盖）、DOMAIN-SUFFIX,ocsp.int-x3.letsencrypt.org（2021 年已退役端点）；移出 USER-AGENT,PayPal* → Payment.list、DOMAIN-SUFFIX,arena.ai → AI.list、USER-AGENT,battleroyale* 与 USER-AGENT,hearthstone* → Games.list（游戏 UA 归游戏组）；移入 DOMAIN-SUFFIX,api.mixpanel.com（自 Telegram，通用分析域）与 awsapps.com / awsstatic.com / sso.amazonaws.com（自 AI，通用 AWS 客户域；后者被本表既有 DOMAIN-SUFFIX,amazonaws.com 兜底覆盖，保留为显式归属登记）
-# 2026-08-30 四大厂归属核查迁出：20 条 Google 自有域→Google.list、bing 三后缀+microsoftapp.net→Microsoft.list、facebook.de→Meta.list；microsoft.com/azureedge.net 兜底为刻意分层(同 amazonaws.com 铁律)保留
-# 2026-08-30 用户裁决（纯域名+IP 架构）：移除本表全部 PROCESS-NAME/USER-AGENT——两类规则按 App 维度全域生效，会把 App 内异质流量（内置浏览器/webview/系统共享域）误接管；域名收录已密+extended-matching+IP 段兜底足以覆盖，未收录新域落 FINAL 仍走代理无功能损失
+# ProxyGFW — GFW 被墙域名兜底（上游 blackmatrix7 Proxy）；位次在生态/分类/地区表之后，是代理侧最宽的一层
+# 排序：规则类型分区，区内字母序
+# amazonaws.com / microsoft.com / azureedge.net 等宽后缀是刻意分层兜底（具体子域已由前位表承接），勿以「重复」为由删除
 
 DOMAIN,api.waqi.info
 DOMAIN,assets-priconne-redive-us.akamaized.net
@@ -20,6 +17,7 @@ DOMAIN-SUFFIX,10beasts.net
 DOMAIN-SUFFIX,10conditionsoflove.com
 DOMAIN-SUFFIX,10musume.com
 DOMAIN-SUFFIX,111666.best
+DOMAIN-SUFFIX,123du.cc
 DOMAIN-SUFFIX,123rf.com
 DOMAIN-SUFFIX,12bet.com
 DOMAIN-SUFFIX,12vpn.com
@@ -72,6 +70,7 @@ DOMAIN-SUFFIX,21sextury.com
 DOMAIN-SUFFIX,228.net.tw
 DOMAIN-SUFFIX,233abc.com
 DOMAIN-SUFFIX,233v2.com
+DOMAIN-SUFFIX,23us.so
 DOMAIN-SUFFIX,24hbook.com
 DOMAIN-SUFFIX,24hrs.ca
 DOMAIN-SUFFIX,24smile.org
@@ -649,6 +648,7 @@ DOMAIN-SUFFIX,bittorrent.com
 DOMAIN-SUFFIX,bitvise.com
 DOMAIN-SUFFIX,bitwarden.com
 DOMAIN-SUFFIX,bitz.ai
+DOMAIN-SUFFIX,biyuwu.cc
 DOMAIN-SUFFIX,bizhat.com
 DOMAIN-SUFFIX,bjnewlife.org
 DOMAIN-SUFFIX,bjs.org
@@ -1584,6 +1584,7 @@ DOMAIN-SUFFIX,emanna.com
 DOMAIN-SUFFIX,embr.in
 DOMAIN-SUFFIX,emilylau.org.hk
 DOMAIN-SUFFIX,empfil.com
+DOMAIN-SUFFIX,emsec.hk
 DOMAIN-SUFFIX,emule-ed2k.com
 DOMAIN-SUFFIX,emulefans.com
 DOMAIN-SUFFIX,emuparadise.me
@@ -2001,6 +2002,7 @@ DOMAIN-SUFFIX,futu1.com
 DOMAIN-SUFFIX,futu2.com
 DOMAIN-SUFFIX,futu3.com
 DOMAIN-SUFFIX,futu4.com
+DOMAIN-SUFFIX,futu5.com
 DOMAIN-SUFFIX,futu6.com
 DOMAIN-SUFFIX,futu7.com
 DOMAIN-SUFFIX,futu8.com
@@ -2324,6 +2326,7 @@ DOMAIN-SUFFIX,haiwaikan.com
 DOMAIN-SUFFIX,hakkatv.org.tw
 DOMAIN-SUFFIX,halktv.com.tr
 DOMAIN-SUFFIX,handcraftedsoftware.org
+DOMAIN-SUFFIX,hanfan.cc
 DOMAIN-SUFFIX,hanime.tv
 DOMAIN-SUFFIX,hanime1.me
 DOMAIN-SUFFIX,hanminzu.org
@@ -2503,6 +2506,7 @@ DOMAIN-SUFFIX,hornygamer.com
 DOMAIN-SUFFIX,hornytrip.com
 DOMAIN-SUFFIX,horrorporn.com
 DOMAIN-SUFFIX,hostloc.com
+DOMAIN-SUFFIX,hostloc.me
 DOMAIN-SUFFIX,hotair.com
 DOMAIN-SUFFIX,hotav.tv
 DOMAIN-SUFFIX,hotbak.net
@@ -3142,7 +3146,9 @@ DOMAIN-SUFFIX,linktr.ee
 DOMAIN-SUFFIX,linkuswell.com
 DOMAIN-SUFFIX,linode.com
 DOMAIN-SUFFIX,linpie.com
+DOMAIN-SUFFIX,linux.do
 DOMAIN-SUFFIX,linux.org.hk
+DOMAIN-SUFFIX,linuxdo.org
 DOMAIN-SUFFIX,linuxtoy.org
 DOMAIN-SUFFIX,lionsroar.com
 DOMAIN-SUFFIX,lipuman.com
@@ -3182,6 +3188,7 @@ DOMAIN-SUFFIX,localbitcoins.com
 DOMAIN-SUFFIX,localdomain.ws
 DOMAIN-SUFFIX,localpresshk.com
 DOMAIN-SUFFIX,lockestek.com
+DOMAIN-SUFFIX,locvps.com
 DOMAIN-SUFFIX,logbot.net
 DOMAIN-SUFFIX,logiqx.com
 DOMAIN-SUFFIX,logmein.com
@@ -3377,6 +3384,7 @@ DOMAIN-SUFFIX,mfxmedia.com
 DOMAIN-SUFFIX,mgoon.com
 DOMAIN-SUFFIX,mgstage.com
 DOMAIN-SUFFIX,mh4u.org
+DOMAIN-SUFFIX,mht.la
 DOMAIN-SUFFIX,mhwindow.org
 DOMAIN-SUFFIX,michaelmarketl.com
 DOMAIN-SUFFIX,microsoft-falcon.io
@@ -3472,6 +3480,8 @@ DOMAIN-SUFFIX,mog.com
 DOMAIN-SUFFIX,mohu.club
 DOMAIN-SUFFIX,mohu.ml
 DOMAIN-SUFFIX,mohu.rocks
+DOMAIN-SUFFIX,mojie.app
+DOMAIN-SUFFIX,mojie.co
 DOMAIN-SUFFIX,mojim.com
 DOMAIN-SUFFIX,molihua.org
 DOMAIN-SUFFIX,momoshop.com.tw
@@ -3801,6 +3811,7 @@ DOMAIN-SUFFIX,ns1.name
 DOMAIN-SUFFIX,ns2.name
 DOMAIN-SUFFIX,ns3.name
 DOMAIN-SUFFIX,nssurge.com
+DOMAIN-SUFFIX,nt.app
 DOMAIN-SUFFIX,ntd.tv
 DOMAIN-SUFFIX,ntdtv.ca
 DOMAIN-SUFFIX,ntdtv.co.kr
@@ -6173,6 +6184,7 @@ DOMAIN-SUFFIX,xnxx.com
 DOMAIN-SUFFIX,xpdo.net
 DOMAIN-SUFFIX,xpud.org
 DOMAIN-SUFFIX,xrentdvd.com
+DOMAIN-SUFFIX,xs7.la
 DOMAIN-SUFFIX,xsden.info
 DOMAIN-SUFFIX,xskywalker.com
 DOMAIN-SUFFIX,xskywalker.net
@@ -6253,6 +6265,7 @@ DOMAIN-SUFFIX,ying.com
 DOMAIN-SUFFIX,yingsuoss.com
 DOMAIN-SUFFIX,yinlei.org
 DOMAIN-SUFFIX,yipub.com
+DOMAIN-SUFFIX,yiruan.la
 DOMAIN-SUFFIX,yizhihongxing.com
 DOMAIN-SUFFIX,yobit.net
 DOMAIN-SUFFIX,yobt.com
@@ -6395,6 +6408,7 @@ DOMAIN-SUFFIX,zyxel.com
 DOMAIN-SUFFIX,zzcartoon.com
 DOMAIN-SUFFIX,zzcloud.me
 DOMAIN-SUFFIX,zzux.com
+DOMAIN-SUFFIX,zzzzzz.me
 
 DOMAIN-KEYWORD,1e100
 DOMAIN-KEYWORD,abema

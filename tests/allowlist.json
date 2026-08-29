@@ -48,12 +48,6 @@
       "reason": "具体 AWS/S3 子域在 AI.list / Games.list / Streaming.list / DownloadCDN.list 分层，均排在 ProxyGFW.list 之前，是刻意分层而非遮蔽。"
     },
     {
-      "check": "A5",
-      "file": "Reject.list",
-      "rule": "*",
-      "reason": "Reject.list 在 Surge.conf 中被注释停用但文件保留（随时可恢复拦截层），刻意不被引用。见 00-context.md。"
-    },
-    {
       "check": [
         "A2",
         "A3",
@@ -176,7 +170,7 @@
       "file": "*",
       "rule": "DOMAIN-SUFFIX,gateway.icloud.com",
       "preventive": true,
-      "reason": "F1/FIX-B 裁决：gateway.icloud.com（Apple Intelligence / PCC 网关）刻意留在 AI 组，代价是与 Siri 直连(guzzoni/smoot.apple.com→AppleCN DIRECT)不同组。场景 apple_intelligence_pcc 已按现状固化为 same_policy:false。"
+      "reason": "沿革：该域曾单列 AI 组（Apple Intelligence/PCC 取舍），2026-08-30 起不再单列，由 AppleCN 的 DOMAIN-SUFFIX,icloud.com 直连覆盖；豁免保留为 preventive，防未来恢复单列时误报。"
     },
     {
       "check": [

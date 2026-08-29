@@ -1,0 +1,322 @@
+[
+  {
+    "name": "ad_serving_global_reject",
+    "desc": "全球广告投放/RTB 竞价面：GAM/DoubleClick、SSP/DSP、移动广告 SDK。Reject.list 位次全链最前，全部应命中 REJECT",
+    "requests": [
+      {"host": "pagead2.googlesyndication.com", "note": "Google AdSense/GAM 投放"},
+      {"host": "googleads.g.doubleclick.net", "note": "DoubleClick 广告请求"},
+      {"host": "static.doubleclick.net"},
+      {"host": "www.googleadservices.com", "note": "Google Ads 点击跳转"},
+      {"host": "ib.adnxs.com", "note": "Xandr/AppNexus 竞价"},
+      {"host": "match.adsrvr.org", "note": "The Trade Desk DSP"},
+      {"host": "gum.criteo.com"},
+      {"host": "static.criteo.net"},
+      {"host": "ads.pubmatic.com"},
+      {"host": "aax.amazon-adsystem.com"},
+      {"host": "d.applovin.com", "note": "移动广告 SDK"},
+      {"host": "auction.unityads.unity3d.com", "note": "Unity Ads 竞价；unity3d.com 主域仍归 ProxyGFW"},
+      {"host": "sdk.inmobi.com"},
+      {"host": "api.vungle.com"}
+    ],
+    "assert": {"same_policy": true, "policy": "REJECT"}
+  },
+  {
+    "name": "ad_serving_cn_reject",
+    "desc": "国内广告投放面：百度联盟、腾讯广点通、阿里妈妈 TANX、穿山甲 Pangle、聚效、小米系统广告。均为投放/素材域，非统计域",
+    "requests": [
+      {"host": "cpro.baidu.com", "note": "百度联盟投放"},
+      {"host": "pos.baidu.com"},
+      {"host": "cpro.baidustatic.com", "note": "百度联盟广告素材"},
+      {"host": "dup.baidustatic.com"},
+      {"host": "win.gdt.qq.com", "note": "腾讯广点通；仅收 gdt.qq.com 窄后缀，qq.com 量级宽后缀严禁收录"},
+      {"host": "c.gdt.qq.com"},
+      {"host": "pgdt.ugdtimg.com", "note": "广点通素材图床"},
+      {"host": "ex.tanx.com", "note": "阿里妈妈 TANX 广告交易"},
+      {"host": "pangolin-sdk-toutiao.com", "note": "穿山甲 SDK"},
+      {"host": "pangolin-sdk-toutiao-b.com", "note": "穿山甲变体域，靠 KEYWORD 覆盖"},
+      {"host": "pangle.io"},
+      {"host": "z.mediav.com", "note": "聚效广告"},
+      {"host": "api.ad.xiaomi.com", "note": "小米系统广告；xiaomi.com 主域不受影响"},
+      {"host": "ads-partner.tiktok.com", "note": "DOMAIN-WILDCARD 命中"},
+      {"host": "ads-normal.xhscdn.com", "note": "小红书广告素材"}
+    ],
+    "assert": {"same_policy": true, "policy": "REJECT"}
+  },
+  {
+    "name": "chumbox_content_farm_ads_reject",
+    "desc": "chumbox 内容农场推荐广告位（新闻站底部「你可能还想看」），用户明确要求保留屏蔽",
+    "requests": [
+      {"host": "trc.taboola.com"},
+      {"host": "cdn.taboola.com"},
+      {"host": "widgets.outbrain.com", "note": "DownloadCDN.list 亦收录同名域，本表前位抢占"},
+      {"host": "images.outbrain.com"},
+      {"host": "c.mgid.com"},
+      {"host": "trends.revcontent.com"}
+    ],
+    "assert": {"same_policy": true, "policy": "REJECT"}
+  },
+  {
+    "name": "httpdns_private_doh_reject",
+    "desc": "HTTPDNS / 私有 DoH 端点：绕过系统 DNS 会直接破坏本架构的域名分流，属劫持拦截类，全部保留",
+    "requests": [
+      {"host": "dns.weixin.qq.com", "note": "微信私有 DNS"},
+      {"host": "udns.weixin.qq.com"},
+      {"host": "httpdns.baidu.com"},
+      {"host": "httpdns.aliyuncs.com"},
+      {"host": "httpdns.n.netease.com"},
+      {"host": "resolver.mi.xiaomi.com"},
+      {"host": "doh.iqiyi.com"},
+      {"host": "ttnet-doh.feishu.cn", "note": "字节 TTNet DoH"},
+      {"host": "httpdns.meituan.com"},
+      {"host": "httpdns.gslb.yy.com"},
+      {"host": "dnspod.meituan.httpdns.start.qcloud.com", "note": "2026-08-30 补录：GetSomeFries 差集；.start. 变体不被 DOMAIN-SUFFIX,httpdns.qcloud.com 覆盖"},
+      {"host": "httpdns.immomo.com", "note": "2026-08-30 补录：陌陌"},
+      {"host": "httpdns.yunxinfw.com", "note": "2026-08-30 补录：网易云信；与已有 httpdns.yunxindns.com 是两套端点"},
+      {"host": "yuyin-httpdns.gslb.yy.com", "note": "2026-08-30 补录：YY 语音"}
+    ],
+    "assert": {"same_policy": true, "policy": "REJECT"}
+  },
+  {
+    "name": "malware_hijacking_reject",
+    "desc": "恶意层（2026-08-30 新增，源 blackmatrix7 Hijacking.list）：运营商劫持注入、假冒官网下载站、返利/推广劫持分发链、私服垃圾站、scareware。全部应命中 REJECT",
+    "requests": [
+      {"host": "www.flash.cn", "note": "重庆重橙 Flash 中国版：捆绑弹窗推广的官方分发站"},
+      {"host": "www.mackeeper.com", "note": "MacKeeper scareware"},
+      {"host": "www.kuaizip.com", "note": "快压：捆绑安装流氓推广"},
+      {"host": "www.mairuan.com", "note": "麦软商城：下列全部假冒官网的运营主体"},
+      {"host": "www.mindmanager.cc", "note": "假冒 MindManager 中文官网"},
+      {"host": "www.ntfsformac.cn", "note": "假冒 Tuxera/Paragon NTFS 中文站"},
+      {"host": "www.imazingchina.com", "note": "假冒 iMazing 中文站"},
+      {"host": "www.zbrushcn.com", "note": "假冒 ZBrush 中文站"},
+      {"host": "www.mycleanmymac.com", "note": "假冒 CleanMyMac"},
+      {"host": "www.bianxianmao.com", "note": "变现猫：流氓变现 SDK"},
+      {"host": "api.tuia.cn", "note": "推啊：弹窗抽奖广告联盟"},
+      {"host": "www.mobjump.com", "note": "移动端强制跳转推广"},
+      {"host": "www.goufanli100.com", "note": "返利劫持分发链"},
+      {"host": "www.gouwubang.com"},
+      {"host": "www.cjmakeding.com", "note": "makeding 系推广跳转"},
+      {"host": "www.kualianyingxiao.cn"},
+      {"host": "www.pinzhitmall.com"},
+      {"host": "www.sifubo.cn", "note": "私服垃圾站（sifu*.cn 系列 11 域）"},
+      {"host": "www.tt114.net", "note": "114 导航劫持"},
+      {"host": "cdn.smgru.net", "note": "劫持注入脚本分发"},
+      {"host": "www.adsame.com", "note": "安沃 adsame 广告网络；ChinaDomain.list 亦收录同域为 DIRECT，本表前位抢占——须联动从 ChinaDomain 删除"},
+      {"host": "www.yukhj.com", "note": "AlibabaCN.list 亦收录（上游抓取噪声），本表前位抢占——须联动从 AlibabaCN 删除"}
+    ],
+    "assert": {"same_policy": true, "policy": "REJECT"}
+  },
+  {
+    "name": "rogue_monetization_sdk_reject",
+    "desc": "流氓变现：住宅代理 SDK（Bright Data/Luminati/Hola，把用户设备当出口卖）、浏览器挖矿池、偷带宽 SDK。属原则②，与埋点无关",
+    "requests": [
+      {"host": "lum-sdk.io", "note": "Luminati/Bright Data SDK"},
+      {"host": "brdtest.com"},
+      {"host": "earnapp.com", "note": "Bright Data 卖带宽客户端"},
+      {"host": "holacdn.com", "note": "Hola 免费 VPN 的出口网络"},
+      {"host": "hostingcloud.racing", "note": "DOMAIN-KEYWORD,hostingcloud —— Coinhive 后继挖矿脚本宿主"},
+      {"host": "api.nimiqpool.com", "note": "DOMAIN-KEYWORD,nimiqpool"},
+      {"host": "sdk.packetsdk.com", "note": "DOMAIN-KEYWORD,packetsdk —— 偷带宽 SDK"}
+    ],
+    "assert": {"same_policy": true, "policy": "REJECT"}
+  },
+  {
+    "name": "malware_layer_no_overcapture",
+    "desc": "恶意层误伤面回归：183 条假冒官网/劫持后缀不得牵连被假冒的真官网，也不得越界到「拦广告不拦统计」的分界之外",
+    "requests": [
+      {"host": "www.mindmanager.com", "note": "真 MindManager；表内只收 mindmanager.cc / mindmanager.cn"},
+      {"host": "www.anydesk.com", "note": "真 AnyDesk；表内只收 anydeskchina.cn"},
+      {"host": "www.mathtype.com", "note": "真 MathType；表内只收 mathtype.cn"},
+      {"host": "www.adobe.com", "note": "Adobe 主站"},
+      {"host": "geo2.adobe.com", "note": "上游 Hijacking.list 唯一 DOMAIN 条目，刻意未收——它是 Adobe 地理重定向端点，属功能规避而非恶意基础设施"},
+      {"host": "www.flashcn.cn", "note": "flash.cn 是后缀，不得误伤同名不同域"},
+      {"host": "www.topitme.com", "note": "刻意未收：图片社区真实站点名，恶意判定置信不足"},
+      {"host": "newapi.com", "note": "刻意未收：与开源 LLM 网关 New API 生态命名撞车"},
+      {"host": "googletagmanager.com", "note": "GTM 是标签/统计容器，非投放面——按原则③放行"}
+    ],
+    "assert": {
+      "same_policy": false,
+      "per_request": [
+        {"host": "www.mindmanager.com", "policy": "Final"},
+        {"host": "www.anydesk.com", "policy": "Final"},
+        {"host": "www.mathtype.com", "policy": "Final"},
+        {"host": "www.adobe.com", "policy": "Final"},
+        {"host": "geo2.adobe.com", "policy": "Final"},
+        {"host": "www.flashcn.cn", "policy": "DIRECT"},
+        {"host": "www.topitme.com", "policy": "Final"},
+        {"host": "newapi.com", "policy": "Final"},
+        {"host": "googletagmanager.com", "policy": "Google-X-Meta-MS"}
+      ]
+    }
+  },
+  {
+    "name": "httpdns_service_ip_reject",
+    "desc": "HTTPDNS 服务器 IP：SDK 通常以 IP 字面量直连（无 DNS 查询），域名规则拦不住，必须保留 IP 层。全部带 no-resolve",
+    "requests": [
+      {"host": "203.107.1.33", "note": "阿里云 HTTPDNS"},
+      {"host": "119.29.29.98", "note": "腾讯 DNSPod HTTPDNS"},
+      {"host": "182.254.116.117"},
+      {"host": "180.76.76.200", "note": "百度 HTTPDNS"}
+    ],
+    "assert": {"same_policy": true, "policy": "REJECT"},
+    "note": "203.107.1.0/24 与 ChinaIP.list:11191 精确重复（A2 P0），本表前位胜出——这是刻意裁决，非缺陷。"
+  },
+  {
+    "name": "product_analytics_never_rejected",
+    "desc": "产品分析/埋点：重构必须放行的第一类。逐域写出应有落点，任何一条落 REJECT 即为回归",
+    "requests": [
+      {"host": "hm.baidu.com", "note": "百度统计"},
+      {"host": "www.google-analytics.com"},
+      {"host": "cn.umeng.com", "note": "友盟"},
+      {"host": "alog.umeng.com"},
+      {"host": "api.mixpanel.com"},
+      {"host": "api2.amplitude.com"},
+      {"host": "sdk.growingio.com"},
+      {"host": "datasink.sensorsdata.cn", "note": "神策"},
+      {"host": "sdk.talkingdata.com"},
+      {"host": "api.segment.io"},
+      {"host": "app-measurement.com", "note": "Firebase Analytics"},
+      {"host": "log.mmstat.com", "note": "阿里一方行为日志"},
+      {"host": "cnzz.mmstat.com", "note": "CNZZ 站长统计"}
+    ],
+    "assert": {
+      "same_policy": false,
+      "per_request": [
+        {"host": "hm.baidu.com", "policy": "DIRECT", "reason": "百度统计归 BaiduCN 直连"},
+        {"host": "www.google-analytics.com", "policy": "Google-X-Meta-MS", "reason": "Google 生态组"},
+        {"host": "cn.umeng.com", "policy": "DIRECT", "reason": "AlibabaCN 直连；旧表 DOMAIN-KEYWORD,umeng 已删"},
+        {"host": "alog.umeng.com", "policy": "DIRECT"},
+        {"host": "api.mixpanel.com", "policy": "Final", "reason": "无显式收录，落 FINAL 走代理"},
+        {"host": "api2.amplitude.com", "policy": "Final", "reason": "旧表 DOMAIN-SUFFIX,amplitude.com 已删"},
+        {"host": "sdk.growingio.com", "policy": "Final"},
+        {"host": "datasink.sensorsdata.cn", "policy": "DIRECT", "reason": "ChinaDomain 直连"},
+        {"host": "sdk.talkingdata.com", "policy": "Final"},
+        {"host": "api.segment.io", "policy": "Final"},
+        {"host": "app-measurement.com", "policy": "Google-X-Meta-MS"},
+        {"host": "log.mmstat.com", "policy": "DIRECT", "reason": "旧表 DOMAIN,log.mmstat.com 已删"},
+        {"host": "cnzz.mmstat.com", "policy": "DIRECT", "reason": "旧表 DOMAIN-SUFFIX,cnzz.mmstat.com 已删"}
+      ]
+    }
+  },
+  {
+    "name": "attribution_push_apm_never_rejected",
+    "desc": "归因 / 推送 / 崩溃与 APM：重构必须放行的第二类",
+    "requests": [
+      {"host": "api.appsflyer.com", "note": "归因"},
+      {"host": "app.adjust.com"},
+      {"host": "api2.branch.io"},
+      {"host": "api.jpush.cn", "note": "极光推送"},
+      {"host": "sdk.open.inapi.getui.com", "note": "个推"},
+      {"host": "resolver.msg.xiaomi.net", "note": "对照组：小米 push 通道解析器属 HTTPDNS，仍应 REJECT"},
+      {"host": "android.bugly.qq.com", "note": "腾讯 Bugly"},
+      {"host": "o1.ingest.sentry.io"},
+      {"host": "firebase-settings.crashlytics.com"}
+    ],
+    "assert": {
+      "same_policy": false,
+      "per_request": [
+        {"host": "api.appsflyer.com", "policy": "Final", "reason": "旧表 DOMAIN-KEYWORD,appsflyer 及 5 条 appsflyersdk 关键词已删"},
+        {"host": "app.adjust.com", "policy": "Final", "reason": "旧表 DOMAIN-KEYWORD,adjust. 已删（该关键词还会误伤任意 adjust.<自有域>）"},
+        {"host": "api2.branch.io", "policy": "Final"},
+        {"host": "api.jpush.cn", "policy": "DIRECT"},
+        {"host": "sdk.open.inapi.getui.com", "policy": "Final"},
+        {"host": "resolver.msg.xiaomi.net", "policy": "REJECT", "reason": "HTTPDNS 类保留：push 长连接的私有解析器，会绕过系统 DNS"},
+        {"host": "android.bugly.qq.com", "policy": "DIRECT"},
+        {"host": "o1.ingest.sentry.io", "policy": "AI", "reason": "现状由 AI.list 裁决，与本表无关，只需不落 REJECT"},
+        {"host": "firebase-settings.crashlytics.com", "policy": "Google-X-Meta-MS"}
+      ]
+    }
+  },
+  {
+    "name": "third_party_measurement_never_rejected",
+    "desc": "第三方广告效果监测：测量不是投放，为求精简一律放行（秒针/AdMaster/comScore/DoubleVerify/Moat/IAS）",
+    "requests": [
+      {"host": "g.cn.miaozhen.com", "note": "秒针"},
+      {"host": "track.admaster.com.cn", "note": "AdMaster；旧表 DOMAIN-KEYWORD,admaster 已删"},
+      {"host": "sb.scorecardresearch.com", "note": "comScore；旧表 DOMAIN-SUFFIX,scorecardresearch.com 已删"},
+      {"host": "cs.doubleverify.com"},
+      {"host": "px.moatads.com"},
+      {"host": "static.adsafeprotected.com"}
+    ],
+    "assert": {
+      "same_policy": false,
+      "per_request": [
+        {"host": "g.cn.miaozhen.com", "policy": "Final"},
+        {"host": "track.admaster.com.cn", "policy": "DIRECT"},
+        {"host": "sb.scorecardresearch.com", "policy": "Final"},
+        {"host": "cs.doubleverify.com", "policy": "Final"},
+        {"host": "px.moatads.com", "policy": "Final"},
+        {"host": "static.adsafeprotected.com", "policy": "Final"}
+      ]
+    }
+  },
+  {
+    "name": "personalization_recsys_never_rejected",
+    "desc": "个性化推荐 / 内容分发打点：重构必须放行的第四类。用户裁定「推荐算法失效伤体验」，这些域一旦落 REJECT 即为回归",
+    "requests": [
+      {"host": "recommend.taobao.com", "note": "淘宝推荐"},
+      {"host": "rec.qq.com", "note": "腾讯推荐"},
+      {"host": "lf-hl-recommend.bytescm.com", "note": "字节推荐资源"},
+      {"host": "is.snssdk.com", "note": "字节 Feed/推荐下发"},
+      {"host": "mcs.zijieapi.com", "note": "字节埋点上报"},
+      {"host": "data.bilibili.com", "note": "B 站行为上报（喂推荐）"},
+      {"host": "personalization.tiktokv.com", "note": "TikTok 个性化"},
+      {"host": "api.smoot.apple.com", "note": "Apple Siri 建议/Spotlight 推荐"},
+      {"host": "firebaseinstallations.googleapis.com", "note": "Firebase 安装 ID：统计/推送前置，放行"}
+    ],
+    "assert": {
+      "same_policy": false,
+      "per_request": [
+        {"host": "recommend.taobao.com", "policy": "DIRECT"},
+        {"host": "rec.qq.com", "policy": "DIRECT"},
+        {"host": "lf-hl-recommend.bytescm.com", "policy": "DIRECT"},
+        {"host": "is.snssdk.com", "policy": "DIRECT"},
+        {"host": "mcs.zijieapi.com", "policy": "DIRECT"},
+        {"host": "data.bilibili.com", "policy": "DIRECT"},
+        {"host": "personalization.tiktokv.com", "policy": "社交媒体"},
+        {"host": "api.smoot.apple.com", "policy": "DIRECT"},
+        {"host": "firebaseinstallations.googleapis.com", "policy": "Google-X-Meta-MS"}
+      ]
+    }
+  },
+  {
+    "name": "reject_keyword_no_overcapture",
+    "desc": "关键词误伤面回归：旧表 144 条 DOMAIN-KEYWORD 已裁到 16 条，被删关键词的受害域必须恢复原归属",
+    "requests": [
+      {"host": "juejin.cn", "note": "掘金；旧表 DOMAIN-SUFFIX,juejin.cn 直接屏蔽整站"},
+      {"host": "deadspacegame.com", "note": "旧 DOMAIN-KEYWORD,adspace 命中 de-adspace-game"},
+      {"host": "downloadserver.example.com", "note": "旧 DOMAIN-KEYWORD,adserver 命中 downlo-adserver"},
+      {"host": "downloadsdk.example.com", "note": "旧 DOMAIN-KEYWORD,adsdk 命中 downlo-adsdk"},
+      {"host": "17admob.com", "note": "旧 DOMAIN-KEYWORD,admob 命中，现改窄后缀 admob.com"},
+      {"host": "www.zooplus.de", "note": "旧 DOMAIN-KEYWORD,.zooplus. 屏蔽整站"},
+      {"host": "www.footlocker.com", "note": "旧 DOMAIN-KEYWORD,.footlocker. 屏蔽整站"},
+      {"host": "adwords.google.com", "note": "旧 DOMAIN-KEYWORD,adwords 命中广告主后台"}
+    ],
+    "assert": {
+      "same_policy": false,
+      "per_request": [
+        {"host": "juejin.cn", "policy": "DIRECT"},
+        {"host": "deadspacegame.com", "policy": "游戏"},
+        {"host": "downloadserver.example.com", "policy": "Final"},
+        {"host": "downloadsdk.example.com", "policy": "Final"},
+        {"host": "17admob.com", "policy": "DIRECT"},
+        {"host": "www.zooplus.de", "policy": "Final"},
+        {"host": "www.footlocker.com", "policy": "Final"},
+        {"host": "adwords.google.com", "policy": "Google-X-Meta-MS"}
+      ]
+    }
+  },
+  {
+    "name": "ad_domain_neighbors_stay_direct",
+    "desc": "窄后缀边界：被屏蔽的广告子域不得牵连同厂正常业务（禁收 qq.com/baidu.com 量级宽后缀）",
+    "requests": [
+      {"host": "www.baidu.com"},
+      {"host": "mp.weixin.qq.com"},
+      {"host": "item.taobao.com"},
+      {"host": "www.xiaohongshu.com"},
+      {"host": "cache.video.iqiyi.com", "note": "爱奇艺取流；本表刻意不收视频贴片广告后端"},
+      {"host": "upos-sz-mirrorcos.bilivideo.com"},
+      {"host": "wxsnsdythumb.wxs.qq.com", "note": "旧 DOMAIN-KEYWORD,wxsnsdy 命中朋友圈资源域"}
+    ],
+    "assert": {"same_policy": true, "policy": "DIRECT"}
+  }
+]

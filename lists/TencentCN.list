@@ -1,7 +1,5 @@
-# TencentCN — 腾讯系直连（blackmatrix7:Tencent+WeChat；2026-08-25 建）
-# 规范化排序：规则类型分区，区内字母序
-# 2026-08-25 维护：清理 233 条 IPv4 前缀伪装的 DOMAIN-KEYWORD(219 条已被 ChinaIP 覆盖直接删除，14 条腾讯海外段改写为 IP-CIDR,no-resolve)；删 4 条同表覆盖冗余条目(A3)
-# 2026-08-30 维护：删 USER-AGENT,MicroMessenger* 与 USER-AGENT,WeChat*——铁律 5「TencentCN 加微信进程有害」的 UA 同构体（微信内置浏览器打开境外外链会被强制直连而失效）；国内域名面已完整覆盖 DIRECT，删除无损失
+# TencentCN — 腾讯系国内域直连（上游 blackmatrix7 Tencent + WeChat）；腾讯云海外段以 IP-CIDR + no-resolve 登记
+# 排序：规则类型分区，区内字母序
 
 DOMAIN,slife.xy-asia.com
 
@@ -1974,7 +1972,6 @@ DOMAIN-SUFFIX,uatmrrvendor.com
 DOMAIN-SUFFIX,ugc-up-dom.com
 DOMAIN-SUFFIX,ugc-up-dom.net
 DOMAIN-SUFFIX,ugcimg.cn
-DOMAIN-SUFFIX,ugdtimg.com
 DOMAIN-SUFFIX,uisa0.cn
 DOMAIN-SUFFIX,um.run
 DOMAIN-SUFFIX,uncnn.cn

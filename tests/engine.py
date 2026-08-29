@@ -13,7 +13,9 @@ engine.py — Surge 规则语义引擎（分流测试套件 L0 层）
   * python3 标准库 only（macOS 自带 3.9+ 可跑）；
   * 全程只读，绝不写入 Surge Profiles 目录；
   * 无法离线精确判定的语义（GEOIP 非 CN、IP-ASN、URL-REGEX、内置 SYSTEM/LAN 规则集）
-    一律采用**显式标注的近似实现**，并在 Engine.warnings 中留痕。
+    一律采用**显式标注的近似实现**，并在 Engine.warnings 中留痕；
+  * 本文件公开发布，**不含任何真实策略组名 / 线路商 / 机房标识**，这类映射一律外置到
+    本地私有覆盖档（见下方「本地私有覆盖档」，与 live_check.py 共用同一 schema）。
 
 CLI：
   engine.py match <host> [--process P] [--ip I] [--ua U] [--conf PATH] [--json]
@@ -29,6 +31,75 @@ import json
 import os
 import re
 import sys
+
+# ---------------------------------------------------------------------------
+# 本地私有覆盖档（不入库）
+# ---------------------------------------------------------------------------
+#
+# 本仓库公开发布，代码里**只放中性占位默认值**；真实的策略组名 / 节点关键字 /
+# ASN / RDAP 归属关键字都带线路商与机房品牌标识，一律外置到本地覆盖档，
+# 由 live_check.py 与 engine.py 共用同一份 schema：
+#
+#   {
+#     "exit_class_exact":    {"<策略组或叶子出口组名>": "<exit_class>"},
+#     "exit_class_keywords": [["<物理节点名关键字>", "<exit_class>"], ...],
+#     "asn_map":             {"<ASN>": "<注释>"},
+#     "residential_hints":   ["<RDAP 机构/网段名关键字>", ...],
+#     "datacenter_hints":    ["<RDAP 机构/网段名关键字>", ...]
+#   }
+#
+# 查找顺序（取第一个存在的文件，不叠加）:
+#   1. 环境变量 LIVE_CHECK_LOCAL 指定的路径
+#   2. <repo>/../rules-local/live_check_local.json   ← 推荐：整个目录都在仓库外
+#   3. <repo>/tests/live_check_local.json            ← 旧路径，已 gitignore
+#
+# 文件缺失时全部走中性默认值，不报错（离线自检、干净 clone 都能跑）。
+
+#: 兼容旧键名（rules-local 早期草案），值语义完全一致。
+_LOCAL_KEY_ALIASES = {
+    "exit_class_exact": ("exit_class_exact", "policy_exit_class"),
+    "exit_class_keywords": ("exit_class_keywords",),
+    "asn_map": ("asn_map", "known_asn_extra"),
+    "residential_hints": ("residential_hints", "residential_hints_extra"),
+    "datacenter_hints": ("datacenter_hints", "datacenter_hints_extra"),
+}
+
+
+def local_profile_candidates(self_dir=None):
+    """返回本地覆盖档的候选路径（按优先级）。"""
+    self_dir = self_dir or os.path.dirname(os.path.abspath(__file__))
+    repo = os.path.dirname(self_dir)
+    out = []
+    env = os.environ.get("LIVE_CHECK_LOCAL")
+    if env:
+        out.append(env)
+    out.append(os.path.join(os.path.dirname(repo), "rules-local",
+                            "live_check_local.json"))
+    out.append(os.path.join(self_dir, "live_check_local.json"))
+    return out
+
+
+def load_local_profile(self_dir=None):
+    """读本地私有覆盖档，返回 (归一化后的 dict, 实际读到的路径 or None)。"""
+    for path in local_profile_candidates(self_dir):
+        try:
+            with open(path, encoding="utf-8") as fh:
+                raw = json.load(fh)
+        except (OSError, ValueError):
+            continue
+        if not isinstance(raw, dict):
+            continue
+        out = {}
+        for canon, names in _LOCAL_KEY_ALIASES.items():
+            for n in names:
+                if n in raw:
+                    out[canon] = raw[n]
+                    break
+        return out, path
+    return {}, None
+
+
+LOCAL_PROFILE, LOCAL_PROFILE_PATH = load_local_profile()
 
 # ---------------------------------------------------------------------------
 # 常量与近似实现表
@@ -63,8 +134,14 @@ KNOWN_MODIFIERS = frozenset((
     "pre-matching", "update-interval", "hidden",
 ))
 
-#: 出口画像映射（spec/testkit.md「共享 Schema」原文，不得私改）
-EXIT_CLASS_MAP = {
+#: 出口画像映射（exit_class 共享 Schema，与 spec/testkit.md 一致）。
+#:
+#: exit_class 的**取值集合**是共享契约，改名要同步 spec 与 live_check.py；
+#: 但**键**（策略组名）是每个人自己的 conf 里的名字，真实名字带线路商 / ISP
+#: 标识，不入库 —— 这里只登记中性占位组名，真实组名由本地私有覆盖档的
+#: exit_class_exact 覆盖合并进来（见文件顶部「本地私有覆盖档」）。
+#: 覆盖档缺失时，未登记的组名走 _infer_exit_class 的国旗前缀兜底。
+EXIT_CLASS_MAP_DEFAULT = {
     "🇺🇸美国家宽A": "US-HOME-A",
     "🇺🇸美国家宽B": "US-HOME-B",
     "🇺🇸美国落地": "US-DC",
@@ -77,6 +154,15 @@ EXIT_CLASS_MAP = {
     "DIRECT": "DIRECT",
     "REJECT": "REJECT",
 }
+
+EXIT_CLASS_MAP = dict(EXIT_CLASS_MAP_DEFAULT)
+_local_exact = LOCAL_PROFILE.get("exit_class_exact") or {}
+if isinstance(_local_exact, dict):
+    EXIT_CLASS_MAP.update({str(k): str(v) for k, v in _local_exact.items()})
+
+#: 本地覆盖档是否真的提供了 exit_class_exact。
+#: 自检里针对**真实 conf**的落点断言只有在它为真时才有意义（否则真实组名不在表内）。
+LOCAL_EXIT_CLASS_LOADED = bool(_local_exact)
 
 #: 内置 SYSTEM 规则集的**近似**实现。
 #: Surge 内置 SYSTEM 集合不公开，这里只收录 spec 点名的三个域 + 少量同类
@@ -280,7 +366,7 @@ class Engine(object):
     def __init__(self, conf_path, rules_dir=None):
         self.conf_path = os.path.abspath(conf_path)
         base = os.path.dirname(self.conf_path)
-        # 默认布局：<conf 同级>/rules/ 是规则仓库根，32 个 .list 收纳在其 lists/ 下。
+        # 默认布局：<conf 同级>/rules/ 是规则仓库根，全部 .list 收纳在其 lists/ 下。
         # 显式传入 rules_dir 时原样使用（自检的 tempdir fixture 走这一支）。
         self.rules_dir = os.path.abspath(
             rules_dir or os.path.join(base, "rules", "lists"))
@@ -590,9 +676,9 @@ class Engine(object):
     def resolve_exit(self, policy):
         """递归取策略组首项，直到落到已知物理出口名或 [Proxy] 条目。
 
-        spec 的 exit_class 表以「🇺🇸美国家宽A」这类**叶子出口组**为键，
-        故递归遇到表内名字即停（此时它就是 physical_exit）；表外的组继续下钻
-        到 [Proxy] 物理名。
+        exit_class 表以「🇺🇸美国家宽A」这类**叶子出口组**为键（真实组名由本地
+        私有覆盖档提供），故递归遇到表内名字即停（此时它就是 physical_exit）；
+        表外的组继续下钻到 [Proxy] 物理名。
         """
         seen, cur = set(), policy
         while True:
@@ -1124,13 +1210,26 @@ def run_selftest(verbose=True):
                   len(re_engine.rules) > 100000, True)
             check("R02 FINAL 存在且指向 Final 组",
                   re_engine.final_rule.policy, "Final")
-            check("R03 Final 组递归到 ISP-A 家宽",
-                  re_engine.resolve_exit("Final"), ("🇺🇸美国家宽A", "US-HOME-A"))
-            check("R04 AI 组递归到 ISP-A 家宽",
-                  re_engine.resolve_exit("AI"), ("🇺🇸美国家宽A", "US-HOME-A"))
-            check("R05 Google-X-Meta-MS 组递归到 WAVE 家宽",
-                  re_engine.resolve_exit("Google-X-Meta-MS"),
-                  ("🇺🇸美国家宽B", "US-HOME-B"))
+            # R03–R05 断言真实 conf 的叶子出口**画像**而不是组名 —— 组名带线路商
+            # 标识，不入库；组名→exit_class 的对照放本地私有覆盖档。覆盖档缺失时
+            # 真实组名不在 EXIT_CLASS_MAP 内，这三条只能退化为国旗兜底，故跳过。
+            if LOCAL_EXIT_CLASS_LOADED:
+                check("R03 Final 组递归到美国家宽 A 出口",
+                      re_engine.resolve_exit("Final")[1], "US-HOME-A")
+                check("R04 AI 组递归到美国家宽 A 出口",
+                      re_engine.resolve_exit("AI")[1], "US-HOME-A")
+                check("R05 Google-X-Meta-MS 组递归到美国家宽 B 出口",
+                      re_engine.resolve_exit("Google-X-Meta-MS")[1], "US-HOME-B")
+                check("R05b Final 与 AI 落到同一个叶子出口组",
+                      re_engine.resolve_exit("Final")[0] ==
+                      re_engine.resolve_exit("AI")[0], True)
+            else:
+                for _n in ("R03 Final 组出口画像", "R04 AI 组出口画像",
+                           "R05 Google-X-Meta-MS 组出口画像"):
+                    results.append({
+                        "name": _n, "ok": True,
+                        "got": "skipped(无本地 exit_class_exact 覆盖档)",
+                        "want": "skipped"})
             check("R06 社交媒体组递归到美国落地",
                   re_engine.resolve_exit("社交媒体"), ("🇺🇸美国落地", "US-DC"))
             check("R07 chatgpt.com → AI 组",

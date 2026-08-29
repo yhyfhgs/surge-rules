@@ -1,21 +1,17 @@
-# Google — Google 全家桶 (含 .google/.goog gTLD、Gemini/Antigravity/DeepMind；不含 YouTube)；2026-08-25 并入 blackmatrix7:Google
-# 规范化排序：规则类型分区，区内字母序
-# 2026-08-25 维护：接收 ai.studio/g.ai(自 AI.list)与 gvt2.com(自 YouTube.list)
-# 2026-08-30 四大厂归属核查：自 ProxyGFW 迁入 20 条 Google 自有域(12 搜索 ccTLD 含 google.hk + googlegroups/googlehosted + 6 条低流量历史域，DoH 全部 AS15169)——同一搜索会话不再跨出口；.google/.goog gTLD 后缀已兜底 deepmind.google/labs.google/ai.google 等 AI 门面，无需单列
-# 2026-08-30 用户裁决（纯域名+IP 架构）：移除本表全部 PROCESS-NAME/USER-AGENT——两类规则按 App 维度全域生效，会把 App 内异质流量（内置浏览器/webview/系统共享域）误接管；域名收录已密+extended-matching+IP 段兜底足以覆盖，未收录新域落 FINAL 仍走代理无功能损失
+# Google — Google 全家桶（含 .google/.goog gTLD、搜索 ccTLD、Gemini/AI Studio/DeepMind/NotebookLM）；YouTube 全量在前表匹配
+# 排序：规则类型分区，区内字母序
+# .google/.goog 后缀已兜底各 AI 门面（deepmind.google / labs.google / ai.google 等），无需单列
 
 DOMAIN-SUFFIX,0emm.com
 DOMAIN-SUFFIX,1e100.net
 DOMAIN-SUFFIX,1ucrs.com
 DOMAIN-SUFFIX,265.com
 DOMAIN-SUFFIX,2mdn-cn.net
-DOMAIN-SUFFIX,2mdn.net
 DOMAIN-SUFFIX,466453.com
 DOMAIN-SUFFIX,abc.xyz
 DOMAIN-SUFFIX,adgoogle.net
 DOMAIN-SUFFIX,admeld.com
 DOMAIN-SUFFIX,admob-cn.com
-DOMAIN-SUFFIX,admob.com
 DOMAIN-SUFFIX,adsense.com
 DOMAIN-SUFFIX,adsensecustomsearchads.com
 DOMAIN-SUFFIX,adsenseformobileapps.com
@@ -128,7 +124,6 @@ DOMAIN-SUFFIX,digitalassetlinks.org
 DOMAIN-SUFFIX,digitalattackmap.com
 DOMAIN-SUFFIX,doubleclick-cn.net
 DOMAIN-SUFFIX,doubleclick.com
-DOMAIN-SUFFIX,doubleclick.net
 DOMAIN-SUFFIX,episodic.com
 DOMAIN-SUFFIX,fastlane.ci
 DOMAIN-SUFFIX,fastlane.tools
@@ -395,7 +390,6 @@ DOMAIN-SUFFIX,google.ws
 DOMAIN-SUFFIX,googleacquisitionmigration.com
 DOMAIN-SUFFIX,googleadapis.com
 DOMAIN-SUFFIX,googleadservices-cn.com
-DOMAIN-SUFFIX,googleadservices.com
 DOMAIN-SUFFIX,googleanalytics.com
 DOMAIN-SUFFIX,googleapis-cn.com
 DOMAIN-SUFFIX,googleapis.com
@@ -438,11 +432,9 @@ DOMAIN-SUFFIX,googlesource.com
 DOMAIN-SUFFIX,googlestore.com
 DOMAIN-SUFFIX,googlesverige.com
 DOMAIN-SUFFIX,googlesyndication-cn.com
-DOMAIN-SUFFIX,googlesyndication.com
 DOMAIN-SUFFIX,googletagmanager-cn.com
 DOMAIN-SUFFIX,googletagmanager.com
 DOMAIN-SUFFIX,googletagservices-cn.com
-DOMAIN-SUFFIX,googletagservices.com
 DOMAIN-SUFFIX,googletraveladservices-cn.com
 DOMAIN-SUFFIX,googletraveladservices.com
 DOMAIN-SUFFIX,googleusercontent.com

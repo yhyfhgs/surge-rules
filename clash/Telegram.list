@@ -1,11 +1,8 @@
 # AUTO-GENERATED — Clash(Mihomo) classical 规则，由 ../lists/Telegram.list 派生
 # 勿手工编辑；修改 Surge 源后运行 python3 tools/surge2clash.py 重新生成
 
-# Telegram — Telegram 域名与 IP 段；2026-08-25 并入 blackmatrix7:Telegram
-# 规范化排序：规则类型分区，区内字母序
-# 2026-08-25 维护：删末尾与前 5 条 IP-ASN 等价的 OR 逻辑行；2026-08-29 维护：补 macOS/Windows 实际进程名（Telegram / Telegram.exe / TelegramShare），上游无变动
-# 2026-08-30 维护：补 PROCESS-NAME,Swiftgram（域名侧 swiftgram.app 已在表，进程侧补对称）与 PROCESS-NAME,Unigram.exe；移出 DOMAIN-SUFFIX,api.mixpanel.com → ProxyGFW（通用分析域，任何 app 的上报都不应走 Telegram 专属出口）
-# 2026-08-30 用户裁决（纯域名+IP 架构）：移除本表全部 PROCESS-NAME/USER-AGENT——两类规则按 App 维度全域生效，会把 App 内异质流量（内置浏览器/webview/系统共享域）误接管；域名收录已密+extended-matching+IP 段兜底足以覆盖，未收录新域落 FINAL 仍走代理无功能损失
+# Telegram — Telegram 域名与 IP 段（上游 blackmatrix7 Telegram）；通用分析域（如 api.mixpanel.com）不收，归 ProxyGFW.list
+# 排序：规则类型分区，区内字母序
 
 DOMAIN,events-gateway.ncdev.site
 

@@ -1,7 +1,5 @@
-# Streaming — 国际流媒体聚合 (Netflix/Disney/HBO/Spotify/AppleMedia 等)；2026-08-25 并入 blackmatrix7:GlobalMedia+Netflix+Disney+HBO+PrimeVideo+Hulu+Spotify+Bahamut+AbemaTV+BBC+AppleTV+AppleMusic+AppleMedia+AppleNews
-# 规范化排序：规则类型分区，区内字母序
-# 2026-08-25 维护：接收 bstar(B 站国际版)域；cache.video.iqiyi.com/apm-misaka.biliapi.net 交还国内直连、itunes.apple.com 交还 AppleCN、copilot.cloud.microsoft 交 AI；删 4 条 2 字符进程名与 6 条失效域
-# 2026-08-30 用户裁决（纯域名+IP 架构）：移除本表全部 PROCESS-NAME/USER-AGENT——两类规则按 App 维度全域生效，会把 App 内异质流量（内置浏览器/webview/系统共享域）误接管；域名收录已密+extended-matching+IP 段兜底足以覆盖，未收录新域落 FINAL 仍走代理无功能损失
+# Streaming — 国际流媒体聚合（Netflix/Disney/HBO/PrimeVideo/Hulu/Spotify/BBC/巴哈姆特/AbemaTV/Apple TV·Music·News，含 B 站国际版 bstar/biliintl）；国内流媒体归 ChinaMedia.list
+# 排序：规则类型分区，区内字母序
 
 DOMAIN,4gtvfreepcvod-cds.cdn.hinet.net
 DOMAIN,ana.video.friday.tw
@@ -156,6 +154,7 @@ DOMAIN-SUFFIX,bigbigchannel.com.hk
 DOMAIN-SUFFIX,bigbigshop.com
 DOMAIN-SUFFIX,biggggg.com
 DOMAIN-SUFFIX,bilibili.tv
+DOMAIN-SUFFIX,biliintl.co
 DOMAIN-SUFFIX,biliintl.com
 DOMAIN-SUFFIX,blobstore.apple.com
 DOMAIN-SUFFIX,bravotv.com

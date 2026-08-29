@@ -1,9 +1,9 @@
 # AUTO-GENERATED — Clash(Mihomo) classical 规则，由 ../lists/ModelDownloadCDN.list 派生
 # 勿手工编辑；修改 Surge 源后运行 python3 tools/surge2clash.py 重新生成
 
-# ModelDownloadCDN — 大模型权重/数据集大文件下载端点（HuggingFace LFS/Xet 等）；conf 位置刻意在 AI 之前、走「下载」组——大文件不占 AI 组家宽中转，HF 站点浏览与 API 仍归 AI.list
-# 规范化排序：规则类型分区，区内字母序
-# 2026-08-30 创建（用户裁决：conf 保持简洁、内联规则收进 list 承载）：自 conf 区 2.7 内联迁入 4 条；日后同类「须先于生态表的大流量下载域」（如容器镜像层）也归本表
+# ModelDownloadCDN — 大模型权重/数据集大文件下载端点（HuggingFace LFS/Xet 等），走「下载」组；conf 位置刻意先于 AI，大文件不占 AI 组家宽中转
+# 排序：规则类型分区，区内字母序
+# HF 站点浏览与 API 仍归 AI.list；日后同类「须先于生态表的大流量下载域」（如容器镜像层）也归本表
 
 DOMAIN-SUFFIX,cdn-lfs-eu-1.hf.co
 DOMAIN-SUFFIX,cdn-lfs-us-1.hf.co

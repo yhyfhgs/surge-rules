@@ -60,7 +60,7 @@ Surge 的 `[Rule]` 段是**自上而下首次命中即停**。因此规则序就
 | **2** | GameDownloadCN | DIRECT | **须先于 Games / DownloadCDN**。国服游戏下载 CDN 与国际游戏平台、通用下载域高度重叠,不抢先命中就会被拉去走代理,把大流量下载塞进代理链路 |
 | **3** | YouTube | 流媒体 | **须先于 Google**。YouTube 域名属于 Google 生态,若 Google 表先命中,YouTube 会被归到 Google-X-Meta-MS 组而非流媒体组,解锁与线路选择全错位 |
 | **4** | Google / Twitter / Meta / Microsoft | Google-X-Meta-MS | 生态归属优先于服务分类。**须先于 AI** —— Gemini 属 Google、Grok 属 Twitter、Meta AI 属 Meta,若 AI 表先命中会把它们从各自生态里剥走 |
-| **4** | AI(`extended-matching`) | AI 组 | 三大生态与 Microsoft 之后。独立 AI 服务商 + GitHub 全生态 + 国内厂商国际站。`extended-matching` 让规则同时匹配 SNI 等扩展信息,提升命中率 |
+| **4** | AI(`extended-matching`) | AI 组 | 三大生态与 Microsoft 之后。独立 AI 服务商 + 国内厂商国际站(GitHub 平台域与 Copilot 整链已归 Microsoft.list)。`extended-matching` 让规则同时匹配 SNI 等扩展信息,提升命中率 |
 | **4** | TikTok / SocialOthers | 社交媒体 | 生态表之后的服务分类层 |
 | **4** | Telegram | Telegram(独立组) | 服务分类层;单独成组便于独立选线 |
 | **4** | Streaming | 流媒体 | 同上;YouTube 已在区 3 单独提前 |
@@ -189,14 +189,14 @@ lists/*.list  ──(tools/surge2clash.py 全量再生)──▶  clash/*.list +
 | # | 裁决 | 理由 |
 |---|---|---|
 | D1 | **Microsoft.list 独立成表**(Copilot / Bing / MSN / 国际登录面,共 25 条),与 Google / Twitter / Meta 同走 Google-X-Meta-MS 组 | 微软国际面是独立生态,不是 AI 服务。曾并入 AI 组,已改回独立表 |
-| D2 | **GitHub 全生态留在 AI 组** | 开发工具链一致性:GitHub 与各 AI 服务在同一条工作流里,策略分裂会造成来回切换 |
+| D2 | **GitHub 平台域与 Copilot 整链归 Microsoft.list**(2026-08-30 裁决,推翻早期「留 AI 组」方案) | 生态归属优先:github.com/githubassets/ghcr.io 与 githubcopilot.com/githubnext.com 同走 Google-X-Meta-MS 组,登录/平台/推理整链同出口 |
 | D3 | **国内厂商的国际站走代理**(coze.com / qwen.ai / z.ai / minimax.io / moonshot.ai / fastgpt.in 等归 AI.list),对应 `.cn` 域直连 | 国际站部署在境外,直连体验差;同厂商的 `.cn` 域仍是国内服务,保持直连 |
 | D4 | **DownloadCDN 定位收窄为「大流量批量下载域」** | 它一度膨胀成站点静态资源大杂烩,与生态表大面积重叠。收窄后职责单一,533 个站点静态域已剥离 |
-| D5 | **`gateway.icloud.com` 留在 AI.list** | Apple Intelligence 的取舍:该域承载 AI 相关流量,归 AI 组比归 AppleCN 更贴合实际用途 |
+| D5 | **`gateway.icloud.com` 不再单列**,由 AppleCN 的 `icloud.com` 后缀直连覆盖(2026-08-30 裁决,推翻早期「留 AI.list」方案) | 代价:Apple Intelligence/PCC 在大陆出口不可用;若需恢复,在 AI.list 重新单列该域 |
 | D6 | **`DOMAIN-SUFFIX,amazonaws.com` 留在 ProxyGFW** | 刻意的 AWS 兜底。具体 CDN 子域已在 DownloadCDN 分层承接,`amazonaws.com` 本身作为宽口径兜底留在 GFW 表 |
 | D7 | **全库不使用 PROCESS-NAME / USER-AGENT**(2026-08-30 用户裁决,替代旧 D7「大小写变体不去重」) | 两类规则按 App 维度**全域生效**:App 内异质流量(内置浏览器/webview/系统共享域)会被整体误接管,且防误抓完全依赖 conf 顺序这一根独木桥(实证:Codex (Service) 访问 bilibili 曾被拽进 AI 组)。域名收录+extended-matching+IP 段兜底已足;未收录新域落 FINAL 仍走代理,无功能损失。**上游合并与再生一律剔除这两类规则**;若日后接入下游 iOS 设备(网关/Ponte,进程规则不可用、UA 成为区分 App 的唯一手段)可重新评估 |
 | D8 | **地区表自包含 IP 规则并整体后置** | 地区表内的 GEOIP / IP-ASN 若前置,会遮蔽 Apple 17/8 与 ProxyGFW 的 IP 规则 |
-| D9 | **`DC-X.conf` 保留** | 已补 `no-resolve` 加固,不违反零本地 DNS 解析约束 |
+| D9 | **落地机房线路商随附的 conf 保留**(备份在仓库外的 `Backup/`,文件名带厂商标识故不入库) | 已补 `no-resolve` 加固,不违反零本地 DNS 解析约束 |
 | D10 | **MITM 的 enable 键不写进 conf** | MITM 已启用,开关在 GUI 运行态。Surge 会把 `enable` 键从 conf 规范化移除;conf 只保留 `h2=true`。**不要反复往 conf 写 `enable`** —— 它每次都会被抹掉 |
 | D11 | **合并排除表** | 以下上游条目**不合并**:`DOMAIN-KEYWORD,google`、`akadns.net`、`stripe`、`ms`(ccTLD)、porn / facebook 等关键词;以及(按 D7 新裁决)**全部 `USER-AGENT` 与 `PROCESS-NAME` 类型规则**——上游合并、ChinaDomain 再生时按类型整体剔除,无需逐条列举(下方 5 条宽 UA 清单保留作历史依据与危险性说明) |
 
