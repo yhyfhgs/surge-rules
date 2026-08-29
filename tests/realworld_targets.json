@@ -312,7 +312,7 @@
         "desc": "YouTube App UA 应落流媒体组而非 Google 组（YouTube.list 刻意排在 Google.list 之前）"
       },
       {
-        "id": "ua_onedrive_to_proxygfw",
+        "id": "ua_onedrive_deleted",
         "host": "example.com",
         "url": "http://example.com/",
         "echo": null,
@@ -320,9 +320,9 @@
         "baseline_ua": "curl/8.7.1",
         "expect_policy": "Final",
         "baseline_policy": "Final",
-        "source_rule": "USER-AGENT,OneDrive* (ProxyGFW.list)",
-        "desc": "同落点用例：只验命中的 list 变了（ProxyGFW.list），策略组本来就相同，故不做策略差异断言",
-        "expect_source": "ProxyGFW.list"
+        "source_rule": "（已删除）USER-AGENT,OneDrive* 原在 ProxyGFW.list",
+        "desc": "回归固化 2026-08-30 裁决：OneDrive* UA 已删（与 MicrosoftCN 的 onedrive 直连裁决矛盾），该 UA 不应再命中任何 UA 规则、应落 FINAL 兜底",
+        "expect_source": "<FINAL>"
       }
     ]
   }
