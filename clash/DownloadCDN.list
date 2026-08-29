@@ -4,6 +4,8 @@
 # DownloadCDN — 境外下载/CDN 大流量域 (github/googleapis/云厂商海外桶等)；2026-08-25 并入 blackmatrix7:GameDownload
 # 规范化排序：规则类型分区，区内字母序
 # 2026-08-25 维护：撤出 533 条浏览伴生静态子域(落回主站所在组)；GitHub 生态交 AI.list、bstar 交 Streaming、pximg 交 Japan、NTP/captive 交 Domestic；纳入 docker.com/npmjs.com 主域。2026-08-29 维护：24 条支付渠道 JS/静态/风控子域移交新建 Payment.list(stripecdn/stripeassets/paypalobjects/braintreegateway/klarnacdn/chargebee/recurly/afterpay/affirm/plaid/squarecdn/onfastspring 等)；downloads.lemonsqueezy.com 与 public-files.gumroad.com 属真·批量下载域，按裁决留本表
+# 2026-08-30 维护：8 条 CA 吊销/AIA 端点移交 Domestic.list 直连(cacerts.digicert/crl.verisign/crl3.digicert/crt.sectigo/lencr.org/ocsp.digicert/ocsp.sectigo/DOMAIN-WILDCARD ocsp.*.amazontrust)——几 KB 小包位于 TLS 握手关键路径，非批量下载域；oneocsp.microsoft.com 暂留本表：移入 Domestic 会被更前位的 ProxyGFW DOMAIN-SUFFIX,microsoft.com 遮蔽为代理，需先收窄该条
+# 2026-08-30 收尾：cacerts.rapidssl.com 同批移交 Domestic；删 cdn.fellou.ai/logos.composio.dev/ph.langfuse.com/releases.warp.dev 4 条伴生子域(顶域已入 AI.list，成对处理防死规则)
 
 DOMAIN,account-api.bandainamcoid.com
 DOMAIN,account.bandainamcoid.com
@@ -607,8 +609,6 @@ DOMAIN-SUFFIX,ca.dyi.ng
 DOMAIN-SUFFIX,ca.nfs.pub
 DOMAIN-SUFFIX,ca1.onlyhentaistuff.com
 DOMAIN-SUFFIX,ca2.onlyhentaistuff.com
-DOMAIN-SUFFIX,cacerts.digicert.com
-DOMAIN-SUFFIX,cacerts.rapidssl.com
 DOMAIN-SUFFIX,cache-05.filehippo.net
 DOMAIN-SUFFIX,cache.agilebits.com
 DOMAIN-SUFFIX,cache.armorgames.com
@@ -839,7 +839,6 @@ DOMAIN-SUFFIX,cdn.f5.com
 DOMAIN-SUFFIX,cdn.faire.com
 DOMAIN-SUFFIX,cdn.fastcomments.com
 DOMAIN-SUFFIX,cdn.fasterthanli.me
-DOMAIN-SUFFIX,cdn.fellou.ai
 DOMAIN-SUFFIX,cdn.fera.ai
 DOMAIN-SUFFIX,cdn.filen.io
 DOMAIN-SUFFIX,cdn.fluidplayer.com
@@ -1430,11 +1429,8 @@ DOMAIN-SUFFIX,cravatar.eu
 DOMAIN-SUFFIX,creativajs.altervista.org
 DOMAIN-SUFFIX,creative.eizzih.com
 DOMAIN-SUFFIX,creator-image.javhd.com
-DOMAIN-SUFFIX,crl.verisign.com
-DOMAIN-SUFFIX,crl3.digicert.com
 DOMAIN-SUFFIX,crossbell.io
 DOMAIN-SUFFIX,crossborder-integration.global-e.com
-DOMAIN-SUFFIX,crt.sectigo.com
 DOMAIN-SUFFIX,crunchyrollcdn.com
 DOMAIN-SUFFIX,crysys.hit.bme.hu
 DOMAIN-SUFFIX,csb.app
@@ -2879,7 +2875,6 @@ DOMAIN-SUFFIX,ldstatic.com
 DOMAIN-SUFFIX,learn-attachment.microsoft.com
 DOMAIN-SUFFIX,lecontent.sololearn.com
 DOMAIN-SUFFIX,legacy-us-images.foundryco.app
-DOMAIN-SUFFIX,lencr.org
 DOMAIN-SUFFIX,lethe.chinstrap.org
 DOMAIN-SUFFIX,lf16-larkversion.larksuitecdn.com
 DOMAIN-SUFFIX,liangzipic.com
@@ -2921,7 +2916,6 @@ DOMAIN-SUFFIX,locimg.com
 DOMAIN-SUFFIX,lodash.com
 DOMAIN-SUFFIX,log-collector.17app.co
 DOMAIN-SUFFIX,loggly.com
-DOMAIN-SUFFIX,logos.composio.dev
 DOMAIN-SUFFIX,logos.kiwibrowser.com
 DOMAIN-SUFFIX,logos.speedtestcustom.com
 DOMAIN-SUFFIX,logs.blip.net
@@ -3769,8 +3763,6 @@ DOMAIN-SUFFIX,oaos-resources.allstate.com
 DOMAIN-SUFFIX,object.innei.in
 DOMAIN-SUFFIX,objects.hit.moe
 DOMAIN-SUFFIX,observableusercontent.com
-DOMAIN-SUFFIX,ocsp.digicert.com
-DOMAIN-SUFFIX,ocsp.sectigo.com
 DOMAIN-SUFFIX,oct8neproxy.azurewebsites.net
 DOMAIN-SUFFIX,od-cdn.com
 DOMAIN-SUFFIX,odycdn.com
@@ -3879,7 +3871,6 @@ DOMAIN-SUFFIX,permaweb.io
 DOMAIN-SUFFIX,pf-cdn-content-prod.azureedge.net
 DOMAIN-SUFFIX,pg2dhpc3p5ec22g3.jkforum.net
 DOMAIN-SUFFIX,pgl.yoyo.org
-DOMAIN-SUFFIX,ph.langfuse.com
 DOMAIN-SUFFIX,ph.northflank.com
 DOMAIN-SUFFIX,ph.tryprofound.com
 DOMAIN-SUFFIX,pha-prx.ops.cloud.nx.app
@@ -4101,7 +4092,6 @@ DOMAIN-SUFFIX,releases.hashicorp.com
 DOMAIN-SUFFIX,releases.landrop.app
 DOMAIN-SUFFIX,releases.obsidian.md
 DOMAIN-SUFFIX,releases.stash.ws
-DOMAIN-SUFFIX,releases.warp.dev
 DOMAIN-SUFFIX,releases.whatpulse.org
 DOMAIN-SUFFIX,renderer-assets.typeform.com
 DOMAIN-SUFFIX,rep-ubuntu-il.upress.io
@@ -5635,7 +5625,6 @@ DOMAIN-REGEX,^image.*\.cloudokyo\.cloud$
 DOMAIN-REGEX,^img.\.porngo\.com$
 DOMAIN-REGEX,^img..\.porngo\.com$
 DOMAIN-REGEX,^object\-storage\-.*\.vexxhost\.net$
-DOMAIN-REGEX,^ocsp\..*\.amazontrust\.com$
 DOMAIN-REGEX,^rr.\-\-\-..\.ouo\.si$
 DOMAIN-REGEX,^s3\-.*\.figma\.com$
 DOMAIN-REGEX,^s3\..*\.backblazeb2\.com$

@@ -5,6 +5,7 @@
 # Streaming — 国际流媒体聚合 (Netflix/Disney/HBO/Spotify/AppleMedia 等)；2026-08-25 并入 blackmatrix7:GlobalMedia+Netflix+Disney+HBO+PrimeVideo+Hulu+Spotify+Bahamut+AbemaTV+BBC+AppleTV+AppleMusic+AppleMedia+AppleNews
 # 规范化排序：规则类型分区，区内字母序
 # 2026-08-25 维护：接收 bstar(B 站国际版)域；cache.video.iqiyi.com/apm-misaka.biliapi.net 交还国内直连、itunes.apple.com 交还 AppleCN、copilot.cloud.microsoft 交 AI；删 4 条 2 字符进程名与 6 条失效域
+# 2026-08-30 维护：本表 PROCESS-NAME 区含 Android 包名，服务于 clash/ 派生层，Surge 侧恒不命中，勿当死规则清理；新增 PROCESS-NAME,Spotify 与 Spotify Helper*（macOS 实测在用，比 USER-AGENT 可靠）
 
 DOMAIN,4gtvfreepcvod-cds.cdn.hinet.net
 DOMAIN,ana.video.friday.tw
@@ -1096,7 +1097,6 @@ DOMAIN-KEYWORD,uk-live
 DOMAIN-KEYWORD,voddazn
 
 
-
 PROCESS-NAME,com.amazon.avod.thirdpartyclient
 PROCESS-NAME,com.bstar.intl
 PROCESS-NAME,com.disney.datg.videoplatforms.android.abc
@@ -1112,6 +1112,8 @@ PROCESS-NAME,com.twgood.android
 PROCESS-NAME,com.viu.pad
 PROCESS-NAME,com.viu.phone
 PROCESS-NAME,com.vuclip.viu
+PROCESS-NAME,Spotify
+PROCESS-NAME,Spotify Helper*
 PROCESS-NAME,tv.twitch.android.app
 
 IP-CIDR,1.37.35.6/32,no-resolve

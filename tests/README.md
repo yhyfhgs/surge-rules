@@ -2,7 +2,7 @@
 
 给这套规则体系做「仿真实网络环境」的回归测试：改完规则先跑一遍，别等到用着不对劲了才发现。
 
-四个入口，从纯离线到真实网络，逐层加码：
+五个入口，从纯离线到真实客户端，逐层加码：
 
 | 层  | 入口             | 要不要联网 | 回答的问题                                            | 单次耗时 |
 | --- | ---------------- | ---------- | ----------------------------------------------------- | -------- |
@@ -10,8 +10,16 @@
 | L1  | `audit.py`       | 否         | 规则表本身有没有毛病（DNS 泄漏面、重复、遮蔽、失联）？| ~5 秒    |
 | L2  | `runsuite.py`    | 否         | 90 个真实使用场景的 500 条请求，分流结果符合预期吗？  | ~10 秒   |
 | L3  | `live_check.py`  | **是**     | 真实网络里实际发生的，跟离线推演的一样吗？出口 IP 对吗？| 1–5 分钟 |
+| L4  | `realworld.py`   | 部分       | 真实浏览器/App 发出去会怎样？DNS、WebRTC、TUN、UA 分流真的生效吗？| 3–5 分钟 |
 
 全部 python3 标准库实现，无第三方依赖，macOS 自带的 python3 直接能跑。
+L4 额外用到系统自带的 `curl / dig / netstat / scutil / ifconfig / lsof` 与
+Surge 自带的 `surge-cli`，同样零第三方依赖。
+
+L3 和 L4 是**两个不同的观测面**，不是替代关系：
+
+- L3 靠 Surge HTTP API 回读「Surge 认为发生了什么」——需要你手工开一次 `http-api`；
+- L4 靠真实客户端 + 系统命令 + `surge-cli` 看「机器上实际发生了什么」——**不用改配置**。
 
 ---
 
@@ -23,9 +31,11 @@ cd "/Users/<你>/Library/Application Support/Surge/Profiles/rules/tests"
 python3 engine.py match chatgpt.com      # 查单个域名怎么走
 python3 audit.py                         # 体检规则表
 python3 runsuite.py                      # 跑全部场景断言
+python3 realworld.py --offline           # 接管状态 + 与真实 Surge 对账（不发外网请求）
 ```
 
-这三条不碰网络、不改任何文件，随便跑。第四个入口 `live_check.py` 需要先开一次
+前三条不碰网络、不改任何文件，随便跑。`realworld.py --offline` 也不发外网请求，
+但需要 Surge 正在跑（它要问 surge-cli）。`live_check.py` 需要先开一次
 Surge HTTP API，见下方[开启 Surge HTTP API](#开启-surge-http-api)。
 
 ---
@@ -34,10 +44,13 @@ Surge HTTP API，见下方[开启 Surge HTTP API](#开启-surge-http-api)。
 
 ```
 rules/tests/
-├── engine.py            L0 规则语义引擎（解析 conf + 32 个 list（其中 Reject 在 conf 中注释停用，实际内联 31 个），离线模拟匹配）
+├── engine.py            L0 规则语义引擎（解析 conf + 33 个 list（其中 Reject 在 conf 中注释停用，实际内联 32 个），离线模拟匹配）
 ├── audit.py             L1 静态审计器（A1–A6 六项检查）
 ├── runsuite.py          L2 场景断言运行器
 ├── live_check.py        L3 在线实测（Surge HTTP API + 真实请求）
+├── realworld.py         L4 真实客户端 / 网络栈实测（surge-cli + curl + 系统命令）
+├── realworld_targets.json  L4 的数据驱动配置（各组代表域 / 客户端画像 / STUN / UA 用例）
+├── live_check_local.json   私有节点名映射（**已 gitignore**，勿入库）
 ├── allowlist.json       审计豁免表（把「刻意设计」标出来，免得每次都报）
 ├── scenarios/           场景数据集，九个 .json，共 90 场景 / 500 请求
 │   ├── ai_overseas.json      海外独立 AI（OpenAI / Anthropic / Perplexity …）
@@ -62,7 +75,13 @@ rules/tests/
 ```gitignore
 tests/__pycache__/
 tests/live_report.md
+tests/live_check_local.json
 ```
+
+**私有节点信息一律外置。** `tests/` 会随公开仓库分发，所以真实节点名、出口 IP、
+线路标识不许写进任何会入库的文件：节点名关键字映射放已 gitignore 的
+`tests/live_check_local.json`，报告里要贴给别人看就加 `realworld.py --redact`
+（节点名折叠成 `🇺🇸<节点:US-HOME-A>`，IP 尾段打码）。
 
 ---
 
@@ -157,7 +176,7 @@ P3 风格建议。
 - `preventive: true` 表示这是防回归条目 —— 当前配置本来就不该命中它，没命中不会被算成
   「无用豁免」。
 
-当前表里 14 条，覆盖：PROCESS-NAME 大小写变体、`amazonaws.com` 的兜底与分层、
+当前表里 27 条，覆盖：PROCESS-NAME 大小写变体、`amazonaws.com` 的兜底与分层、
 `Reject.list` 未被引用（文件保留但 conf 里注释停用）、以及 00-context 那张上游合并排除表。
 基线是 2026-08-25 的一次全量审计（A1=0、A4=0，所以本表以防回归为主）。
 
@@ -203,8 +222,9 @@ python3 runsuite.py --list-known-broken      # 只列当前的待修清单
 runsuite 会把它们单独统计成「待修清单」而不是测试失败——这样 CI 才有绿灯可言，
 同时待办也不会被忘掉。修好一条就把标记删掉。
 
-首次全量运行的结论（供参考）：90 场景 / 500 请求 / 933 断言，失败 0，已知待修 78 条；
-351 条 DNS 泄漏断言全通过，说明「零本地 DNS 解析」这条约束目前是成立的。
+当前基线（2026-08-30）：90 场景 / 500 请求 / 930 断言，失败 0，已知待修 0 条；
+351 条 DNS 泄漏断言全通过，说明「零本地 DNS 解析」这条约束目前是成立的
+（L4 的 `realworld.py --dns` 已用实网抽样二次确认，见下文）。
 
 ---
 
@@ -313,6 +333,165 @@ python3 live_check.py --scenario --hosts chatgpt.com,claude.ai,api.anthropic.com
 
 ---
 
+## L4 `realworld.py` —— 真实客户端与网络栈实测
+
+L3 问的是「Surge 认为发生了什么」。L4 换一个观测面：**用真实客户端画像发请求、用系统
+自带命令看网络栈、用 `surge-cli` 直接问 Surge 本人**，回答 L0–L3 都回答不了的六类问题。
+
+它**不需要 `http-api`** —— `surge-cli` 走的是本机控制通道，不用改任何配置。
+
+```bash
+python3 realworld.py --tun          # 接管状态：utun / 默认路由 / 系统 DNS / hijack
+python3 realworld.py --dns          # DNS 深测：hijack 生效性 / fake-IP / canary / SVCB / DoH / 泄漏抽样
+python3 realworld.py --webrtc       # WebRTC：最小 STUN 客户端取 srflx 公网 IP 比对
+python3 realworld.py --clients      # 真实客户端画像 × 各策略组代表域
+python3 realworld.py --crosscheck   # surge-cli 实测语义 vs engine.py 离线推演，逐条对账
+python3 realworld.py --ua-routing   # UA 分流生效性（四格通道矩阵）
+python3 realworld.py --offline      # 只跑不需要外网的部分（--tun --crosscheck --ua-routing）
+python3 realworld.py --full --report ~/Desktop/surge-audit/realworld.md
+python3 realworld.py --list-targets # 只打印数据配置并复核归属，一个外部请求都不发
+```
+
+### 各子命令在做什么
+
+**`--tun` 接管状态。** `ifconfig` 枚举 utun 接口、`netstat -rn` 看 v4/v6 默认路由指向、
+`scutil --dns` 看系统 DNS 指到哪、`scutil --proxy` + `lsof` 看系统代理与监听端口、
+`surge-cli status` 看出站模式与 features。硬断言三条：**出站模式必须是 `rule`**、
+**IPv4 默认路由必须指向 utun**、**系统 DNS 必须指向 Surge 的响应器**
+（macOS 是 `198.18.0.2`，见 `reference/surge-docs/dns/advanced.md`）。任何一条不成立，
+后面所有分流结论都不作数 —— 所以这一节应该第一个跑。
+
+**`--dns` DNS 深测。** 四件事：
+
+1. **hijack-dns 生效性**：`dig @8.8.8.8 / @1.1.1.1 / @9.9.9.9` 查普通域名，
+   应答必须落在 fake-IP 池 `198.18.0.0/15` 里。返回真实 IP 就说明那条 DNS 查询绕过了
+   Surge，对应的域名对 Surge 不可见（分流从源头就失效）。
+2. **响应器行为**：canary 域 `use-application-dns.net` 必须被答成 `NXDOMAIN`
+   （Firefox 靠它关掉内置 DoH）；SVCB/HTTPS（TYPE65）在 `allow-dns-svcb` 默认关闭时
+   必须是 `NOTIMP`（放行的话 HTTPS 记录里的 IP hints 会绕过 fake-IP 机制）。
+3. **DoH 可用性**：对 conf 里每个 `encrypted-dns-server` 发一次 RFC 8484 GET
+   （标准库自己拼线格式 DNS 报文，不经代理），核 HTTP 状态 + rcode + 记录数；
+   再用 `surge-cli dns lookup` 看 **Surge 自己实际用的是哪个上游**，回落到明文 UDP 53
+   会被标出来。
+4. **本地 DNS 泄漏 live 抽样**：`surge-cli dump dns` 取快照 → 真实访问样本域 → 再取快照，
+   **只看新增条目**。代理域名新增 = P1 实锤泄漏；直连域名新增 = 符合预期。
+   只看增量就不用 flush，**全程零写操作**；快照前就存在的条目单列「无法判定」，
+   既不算通过也不算泄漏。
+
+**`--webrtc` WebRTC 泄漏。** 标准库实现的最小 STUN 客户端（RFC 5389 Binding Request /
+XOR-MAPPED-ADDRESS，UDP），向数据配置里的公共 STUN 服务器取 server-reflexive 地址 ——
+那正是 WebRTC 会写进 ICE candidate、对端能看到的公网 IP。判定基准不写死任何 IP：
+配置里 `baseline: true` 的那台 STUN **必须落 DIRECT**，它回显的就是本机真实出口，
+其余各组的 srflx 与它比。
+
+- srflx == 本机真实出口，而该域命中的是代理组 → **泄漏（硬失败）**；
+- srflx ≠ 本机真实出口 → 通过，并顺带和该组的 HTTP 出口 IP 对账（同 IP / 不同 IP 都会标出来）；
+- **超时无应答**：结合 conf 的 `udp-policy-not-supported-behaviour` 解释 ——
+  取值是 `REJECT` 时，策略不支持 UDP 就直接拒绝、不回落直连，所以**无应答等于零泄漏**，
+  不算失败；如果这个值不是 REJECT，程序会警告：UDP 会回落直连，STUN 将直接暴露真实出口。
+- 还会看 UDP 应答的来源地址：应该是 `198.18.0.0/15` 的 fake IP（说明这条流被 TUN 接管了），
+  直接看到真实 IP 就是绕过。
+
+**`--clients` 真实客户端模拟。** 用 `curl` 拼真实 UA / HTTP 版本 / Accept 头组合，模拟
+Safari、Chrome、iOS 网页、iOS 原生 App、ChatGPT 客户端、Claude 桌面端、Telegram 等画像，
+访问每个策略组的 2–3 个代表域。四类判定：
+
+| 判定       | 怎么做                                                     | 级别 |
+| ---------- | ---------------------------------------------------------- | ---- |
+| UA 副作用  | 画像 UA 不能意外命中 `USER-AGENT` 规则，否则量到的落点是假的 | 提示 |
+| 归属复核   | `surge-cli rule explain` 复核代表域确实落在声明的组里       | 硬失败 |
+| 连通性     | 真实请求能不能打通（UNREACHABLE 不算分流错误）             | 仅报告 |
+| 出口落点   | 有回显端点的组取出口 IP；代理组的出口**必须不等于**本机真实出口 | 硬失败 |
+
+另外每组会用 `surge-cli http probe` 发一次真实 HEAD，把 Surge 自己回读的落点
+（物理节点 + Cloudflare colo 代码）并排放在表里；再用一张「UA 端到端到达矩阵」
+（`chatgpt.com/cdn-cgi/trace` 会回显 `uag=`）确认每个画像的 UA 原样到了源站没被改写。
+
+> 画像里的 `Accept-Encoding` 会被换成 `curl --compressed` 自行协商 —— macOS 自带的
+> libcurl 不会解 brotli，原样发出去只能拿到一坨没法解析的压缩正文。内容编码不参与
+> 任何分流判定，所以这个替换是安全的。
+
+**`--crosscheck` 分流落点交叉验证。** 这是**抓离线引擎与真实 Surge 语义差异的关键测试**：
+把 `scenarios/*.json` 的请求摊平去重，逐条同时问 `surge-cli rule explain`（不建立连接）
+和离线 `engine.py`，对账两件事 —— 策略组、命中的 list。
+
+- 域名类查询不一致 → **硬失败**（域名语义两边都能精确实现，不一致就是引擎 bug）；
+- 纯 IP 查询不一致 → 默认只提示（`GEOIP` 非 CN / `IP-ASN` 在离线层是**显式声明的近似**），
+  `--strict` 可以把它升成硬失败；
+- 命中表不一致（策略组相同、命中的 list 不同）→ 提示，多数是级联去重的自然结果。
+
+顺带还做一件事：比对期间对 Surge 的 DNS 缓存取前后快照，**规则评估本身不应触发任何本地
+解析**（全表 IP 类规则都带 `no-resolve`），有新增就说明哪里漏了 `no-resolve`。
+
+**`--ua-routing` UA 分流生效性。** `USER-AGENT` 规则只在「Surge 的 HTTP 引擎能读到 UA」
+时生效（`reference/surge-docs/rules/http.md`）。能不能读到取决于请求走哪条通道，
+所以本节按**四格矩阵**逐格实测：
+
+| 通道          | 路径          | 协议  | Surge 能否读到 UA | 为什么                                    |
+| ------------- | ------------- | ----- | ----------------- | ----------------------------------------- |
+| `proxy_https` | Surge HTTP 代理 | HTTPS | **可以**          | UA 出现在 `CONNECT` 请求头里，不解密也可见 |
+| `proxy_http`  | Surge HTTP 代理 | HTTP  | **可以**          | HTTP 引擎直接读到                          |
+| `tun_http`    | 绕开代理走 TUN  | HTTP  | **可以**          | 明文 HTTP 仍由 HTTP 引擎处理               |
+| `tun_https`   | 绕开代理走 TUN  | HTTPS | 需 MITM           | 只有 SNI，UA 不可见 —— **未启用时自动跳过** |
+
+每条用例跑两层：
+
+- **规则层**：`surge-cli rule explain <域> user-agent=<UA>` 与不带 UA 的基线对比，
+  断言策略组/命中表符合预期。不建立连接、不需要外网，**随时可跑**。
+- **线路层**：真的发两次请求（带 UA / 基线 UA），比对回显的出口 IP。
+  只有当两个落点的**物理出口本来就不同**时才做 IP 层断言，否则标「区分不出」——
+  避免拿一个证明不了任何事的断言充数。
+
+`tun_https` 这一格是**给 MITM 预留的骨架**：程序读 conf 的 `[MITM] hostname`，
+未启用或没覆盖该域就打 SKIP 并说明原因；一旦把该域加进 `hostname`，这一格会自动开始断言。
+同时会检查 conf 自己写下的那条红线：**启用 `hostname` 时 `auto-quic-block` 必须是 `true`**，
+否则命中域的 HTTP/3 会绕过 MITM 形成半解密。
+
+### 数据驱动配置 `realworld_targets.json`
+
+改测什么不用改代码，全在这个文件里：
+
+| 段            | 内容                                                             |
+| ------------- | ---------------------------------------------------------------- |
+| `clients`     | 客户端画像：`ua` / `http`（1.1 或 2）/ `headers`                  |
+| `groups`      | 每个策略组的 2–3 个代表域 + 该组要用哪些画像                       |
+| `stun`        | STUN 服务器；`baseline: true` 的那台必须落 DIRECT                  |
+| `dns`         | hijack 探测用的 DNS 服务器与域名、canary、SVCB 探测域、泄漏抽样样本 |
+| `ua_routing`  | UA 用例：宿主域 + UA + 期望落点 + 基线落点 + 对应的规则出处        |
+
+`groups[].hosts` 的选取标准只有一条：**这个域名本身必须命中该策略组的规则**，否则量到的
+不是这个组的出口。程序每轮都会用 `surge-cli` 复核归属，域名换了组会直接报失败 ——
+所以这张表是**自校验**的，不用担心它悄悄过期。`echo` 字段声明 IP 回显端点的解析方式
+（`cf_trace` / `fast_json` / `ipip` / `plain_ip` / `null`），取值与 `live_check.py` 通用。
+
+### 常用参数
+
+| 参数              | 说明                                                                 |
+| ----------------- | -------------------------------------------------------------------- |
+| `--via`           | 真实请求走哪条通道：`auto`（沿用环境变量/系统代理，即真实 App 的行为，默认）/ `proxy` / `tun` |
+| `--redact`        | 遮蔽节点名与出口 IP 尾段，方便把报告贴到公开处                        |
+| `--strict`        | 把纯 IP 查询的离线/在线差异也升级为硬失败                             |
+| `--filter`        | 只跑名字含该子串的策略组 / 场景                                       |
+| `--limit`         | `--crosscheck` 最多跑多少条查询                                       |
+| `--targets`       | 换一个数据配置文件                                                    |
+| `--surge-cli`     | surge-cli 不在默认路径时指过去                                        |
+| `--timeout` / `--rate` | 单请求超时（默认 10 秒）/ 每秒请求数上限（默认 3）               |
+| `--report`        | 报告输出路径（markdown，含控制台全文 + 断言明细 + 机器可读 JSON）     |
+| `--json`          | stdout 只输出 JSON                                                    |
+
+### 安全边界
+
+- **纯只读**：不改任何系统状态、不 reload Surge、不 flush DNS、不切策略、不写配置。
+  `surge-cli` 只用 `status` / `rule explain` / `http probe` / `dump dns` / `dns lookup`
+  这几个不改状态的读命令。
+- **外发最小化**：只访问 `realworld_targets.json` 里登记的公共探测端点与被测域，
+  普通 GET/HEAD，不携带任何本机标识，默认限速 3 req/s。
+  `--offline` / `--list-targets` 一个外部请求都不发。
+- **不打印敏感字段**：从不读取或输出 psk、ca-p12；`--redact` 还能把节点名与出口 IP 一起打码。
+- **`--dns` 里唯一一次主动解析**用的是直连域（本地解析对它本就是期望行为），不会污染判定面。
+
+---
+
 ## 开启 Surge HTTP API
 
 只有 L3 需要。**程序不会替你改配置，请手工加这一行。**
@@ -409,6 +588,25 @@ ARIN 的 RDAP 对家宽客户网段经常不返回 ASN（`originAS` 为空），
 A2/A3 那些 P2 条目大部分是分层设计的自然产物（同一厂商在细分表和长尾兜底表里都出现）。
 先处理 P0/P1，P2 攒着一起清。
 
+**13. `realworld.py --webrtc` 里 STUN 超时**
+conf 里 `udp-policy-not-supported-behaviour = REJECT` 的语义就是「策略不支持 UDP 就直接拒绝、
+不回落直连」。所以**超时 = 那条 UDP 被挡住了 = 零泄漏**，是好事不是坏事。真正要盯的是
+反过来：拿到了应答、而且那个应答等于本机真实出口 IP。
+
+**14. `realworld.py --clients` 里两个组的出口 IP 相同**
+不同策略组的成员首项可能指向同一个物理节点（比如 `Final` 与 `流媒体` 当前都落到同一台
+日本家宽），此时 IP 层就是区分不出来的。要看它们确实是**不同的组**，看
+`surge-cli http probe` 回读的那一列，或者跑 `--crosscheck`。
+
+**15. `--ua-routing` 里一堆 SKIP**
+三种原因，表格最后一列都写着：`tun_https` 是 MITM 未启用（**这就是它该有的样子**）；
+「没有 IP 回显端点」是那条用例的宿主域拿不到出口 IP；「两个落点物理出口相同」是
+IP 层区分不出来 —— 这三种都只影响线路层，规则层的断言照常跑。
+
+**16. `--crosscheck` 报纯 IP 不一致**
+`GEOIP` 非 CN 在离线层判不出来，这是已登记的近似盲区（见「已知限制」）。默认只提示，
+要当硬失败用 `--strict`。域名类不一致才是真问题。
+
 ---
 
 ## 典型工作流
@@ -426,12 +624,20 @@ python3 runsuite.py --json > ~/Desktop/surge-audit/before.json
 python3 audit.py --out ~/Desktop/surge-audit/after
 python3 runsuite.py                       # 失败数应为 0，known_broken 应该只减不增
 python3 engine.py match <你改动涉及的域名>  # 逐个确认命中了预期的规则
+python3 realworld.py --crosscheck         # 离线推演与真实 Surge 有没有对不上的
 ```
 
 **推送之前**（联网确认一次）：
 
 ```bash
 python3 live_check.py --full --report ~/Desktop/surge-audit/live_report.md
+python3 realworld.py --full --redact --report ~/Desktop/surge-audit/realworld.md
+```
+
+**只想快速确认「Surge 现在真的在正常接管」**（10 秒，不发外网请求）：
+
+```bash
+python3 realworld.py --tun
 ```
 
 **挂进 `update.sh` 当前置钩子**（可选）：
@@ -443,11 +649,13 @@ python3 "$(dirname "$0")/tests/audit.py" --fail-on P1 || {
 python3 "$(dirname "$0")/tests/runsuite.py" || exit 1
 ```
 
+L3/L4 刻意不进闸门 —— 理由见[退出码约定](#退出码约定)最后一段。
+
 ---
 
 ## 退出码约定
 
-`0` 通过、`1` 有失败项，这两条四个入口都一样；`2` 以上各家含义略有差别：
+`0` 通过、`1` 有失败项，这两条五个入口都一样；`2` 以上各家含义略有差别：
 
 | 入口            | 0        | 1                             | 2                          | 3                        |
 | --------------- | -------- | ----------------------------- | -------------------------- | ------------------------ |
@@ -455,9 +663,14 @@ python3 "$(dirname "$0")/tests/runsuite.py" || exit 1
 | `audit.py`      | 无发现   | 命中 `--fail-on` 级别（默认 P1）| —                        | —                        |
 | `runsuite.py`   | 断言全过 | 有断言失败                    | 场景目录或引擎不可用       | —                        |
 | `live_check.py` | 通过     | 有失败项 / DNS 泄漏 / 无可判定结果 | Surge HTTP API 不可用 | 用法错误或被 Ctrl-C 打断 |
+| `realworld.py`  | 通过     | 有硬失败（FAIL）项            | Surge 未运行 / surge-cli 缺失 / 出站模式不是 rule | 用法错误或被 Ctrl-C 打断 |
 
-`known_broken` 和「仅报告不断言」的项目一律不计为失败。所有入口都支持 `--json`，
-配合退出码方便接 CI。
+`known_broken`、`realworld.py` 里标 `WARN` 的提示项、以及「仅报告不断言」的项目，
+一律不计为失败。所有入口都支持 `--json`，配合退出码方便接 CI。
+
+**`update.sh` 的发布闸门只有 `audit.py` 与 `runsuite.py` 两个**（纯离线、无外部依赖、
+结果可复现）。`live_check.py` 与 `realworld.py` 依赖真实网络和运行中的 Surge，
+结果会随节点状态、站点可达性波动，**刻意不挂进闸门** —— 它们是推送前手工跑一遍的确认步骤。
 
 ---
 
@@ -465,12 +678,30 @@ python3 "$(dirname "$0")/tests/runsuite.py" || exit 1
 
 - **离线层的 IP 判定是近似的。** `GEOIP,CN` 用 `ChinaIP.list` 近似，`IP-ASN` 用内置小表，
   `URL-REGEX` 因为离线没有 URL 上下文而恒不匹配。纯 IP 和 URL 相关的结论以在线为准。
+  具体盲区已由 `realworld.py --crosscheck` 量化（2026-08-30 实测）：**426 条域名查询与真实
+  Surge 逐条一致，全部差异都集中在纯 IP 上**，且都是 `GEOIP` 非 CN 判不出来
+  —— 区域表 `US.list` / `UK.list` / `Europe.list` / `Japan.list` 里的 `GEOIP,XX` 规则，
+  离线层一律判不匹配、落 Final，真实 Surge 会把这些 IP 收进对应的区域组。
+  补齐它需要 MaxMind 库（第三方依赖 + 上百 MB 数据），与「标准库 only」的设计冲突，
+  因此**刻意不补**：这类结论一律以 `--crosscheck` 的在线结果为准。
 - **`RULE-SET,SYSTEM` 和 `RULE-SET,LAN` 是近似实现**（系统域集合 / RFC1918 段），
-  Surge 内置表的确切内容不公开。
+  Surge 内置表的确切内容不公开。`BUILTIN_SYSTEM_DOMAINS` 采用「实测补录」策略：
+  `--crosscheck` 发现某域真实命中 `RULE-SET SYSTEM` 而表里没有时，按在线为准补进去
+  （已补录 `guzzoni.apple.com`）。
+- **`USER-AGENT` 规则的生效面取决于通道，不取决于 MITM 开关。** 实测四格矩阵：
+  经 Surge HTTP 代理时 UA 在 `CONNECT` 头里，**HTTPS 未解密也能匹配**；走 TUN 时
+  明文 HTTP 能匹配、HTTPS 不能。所以「hostname 留空 ⇒ UA 规则只对明文 HTTP 生效」
+  是个常见误解 —— 详见 `--ua-routing`。
 - **离线层按策略组首项推演**，跟你手选的节点可能不一致，先跑 `--policies` 确认。
 - **在线层依赖 recent requests 匹配**，连接复用或请求合并时会拿不到记录（`NOT_FOUND`）。
 - **exit-map 的探针域名会失效**（站点换 CDN、关掉 trace 端点）。失效时该组退化为
   「配置推导 + 归属验证」，不会报错。换端点只需改 `live_check.py` 顶部的 `EXIT_PROBES` 表，
   选取标准就一条：**这个域名本身必须命中目标组的规则**。
 - **场景数据集是手工维护的。** 厂商换域名、加 CDN，场景就会过时；请求失败先怀疑域名过期，
-  再怀疑规则。
+  再怀疑规则。`realworld.py --list-targets` 能一眼看出 L4 的代表域有没有换组。
+- **L4 的出口 IP 只在有回显端点的组量得到。** 没有回显端点的组（社交媒体、Telegram、
+  Payment、游戏、UK/EU/US 区域组等）退化为「归属复核 + 连通性 + `surge-cli http probe`
+  回读的物理节点 + Cloudflare colo 代码」，不会报错。
+- **L4 的结果会随时间漂。** 节点被手动切过、CDN 出口 IP 变化、站点挡爬虫，都会让两次跑的
+  结果不同。硬失败只有三类：出站模式/接管状态不对、代理组出口等于本机真实出口、
+  WebRTC srflx 等于本机真实出口。其余一律是提示或仅报告。

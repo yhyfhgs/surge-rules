@@ -8,7 +8,9 @@
     "file / rule / by / by_file 均支持 fnmatch 通配（* ?）。每条必须写 reason。",
     "基线：2026-08-25 对当前配置运行 audit.py 的结果 —— A1=0, A4=0，本表以防回归条目为主。",
     "2026-08-25 F1 维护批次追加：机器层(ChinaDomain/ChinaIP)不可手改导致的重复、",
-    "以及 fix_spec FIX-B/D7 裁决为「刻意保留」的条目（见下方 F1 分组）。"
+    "以及 fix_spec FIX-B/D7 裁决为「刻意保留」的条目（见下方 F1 分组）。",
+    "2026-08-30 B2 批次追加：ChinaDomain 已删的 5 条危险宽 UA 的防回流条目、",
+    "AI.list 通用第三方组件域 6 类裁决、Streaming/ChinaMedia/TikTok 的 Android 包名说明。"
   ],
 
   "exemptions": [
@@ -205,6 +207,122 @@
       "rule": "DOMAIN-SUFFIX,*azureedge.net",
       "preventive": true,
       "reason": "F1/FIX-D7 未裁决：azureedge.net 是共享 CDN，子域归属逐条判定不可靠，17 条整块保留原状。"
+    },
+
+    {
+      "check": ["A2", "A3", "A4"],
+      "file": "*",
+      "rule": "USER-AGENT,Microsoft*",
+      "preventive": true,
+      "reason": "B2/2026-08-30 审计：全域生效的宽 UA 会把境外域打直连、国内域打代理。已从 ChinaDomain.list 删除并入 D11 合并排除表，再生时必须过滤。Office 系 app（UA 形如 Microsoft Office/16.0）访问的境外未收录域曾被实证打成 DIRECT。本条命中即说明它被误合并回来了——应删条目本身而非扩大豁免；禁止在更早的表加对冲 UA（任何位置都会误伤，见 ARCHITECTURE.md §6 D11 附）。"
+    },
+    {
+      "check": ["A2", "A3", "A4"],
+      "file": "*",
+      "rule": "USER-AGENT,hide*",
+      "preventive": true,
+      "reason": "B2/2026-08-30 审计：同上批次。极宽——hide.me 等 VPN 服务及任何 UA 以 hide 开头者会被强制直连。已从 ChinaDomain.list 删除并入 D11 合并排除表。"
+    },
+    {
+      "check": ["A2", "A3", "A4"],
+      "file": "*",
+      "rule": "USER-AGENT,TeamViewer*",
+      "preventive": true,
+      "reason": "B2/2026-08-30 审计：同上批次。国际远控服务被强制直连。已从 ChinaDomain.list 删除并入 D11 合并排除表。"
+    },
+    {
+      "check": ["A2", "A3", "A4"],
+      "file": "*",
+      "rule": "USER-AGENT,QQ*",
+      "preventive": true,
+      "reason": "B2/2026-08-30 审计：同上批次。QQ / QQ 浏览器内置浏览器打开境外链接会失效，与铁律「TencentCN 加微信进程有害」同构。已从 ChinaDomain.list 删除并入 D11 合并排除表；同批次亦删除了 TencentCN.list 的 USER-AGENT,MicroMessenger* 与 USER-AGENT,WeChat*（手工表，直接删，不入排除表）。"
+    },
+    {
+      "check": ["A2", "A3", "A4"],
+      "file": "*",
+      "rule": "USER-AGENT,TIM*",
+      "preventive": true,
+      "reason": "B2/2026-08-30 审计：同上批次，与 USER-AGENT,QQ* 同因（TIM 是 QQ 的办公版，UA 同构）。已从 ChinaDomain.list 删除并入 D11 合并排除表。"
+    },
+
+    {
+      "check": ["A2", "A3", "A4"],
+      "file": "AI.list",
+      "rule": "DOMAIN*,*datadoghq.com",
+      "preventive": true,
+      "reason": "B2/2026-08-30 裁决（AI 会话同出口优先于组件归属）：datadoghq.com 及连字符平级域 browser-intake-datadoghq.com / browser-intake-us5-datadoghq.com 是通用 APM/RUM 组件，但 Claude/ChatGPT 桌面端会话期内持续上报，与会话不同出口会引入额外链路。刻意留在 AI 组，代价是其他站点的 Datadog RUM 一并被带走。DownloadCDN.list 的 DOMAIN-WILDCARD,*-intake-*-datadoghq.com 位次在 AI.list 之后，不构成遮蔽。"
+    },
+    {
+      "check": ["A2", "A3", "A4"],
+      "file": "AI.list",
+      "rule": "DOMAIN*,*statsig*",
+      "preventive": true,
+      "reason": "B2/2026-08-30 裁决（AI 会话同出口优先于组件归属）：api.statsig.com / statsigapi.net / oaistatsig.com 三域是通用特性开关（feature flag）服务，但 OpenAI 全线产品用它下发实验分组，跨出口会导致分组抖动。刻意留在 AI 组。"
+    },
+    {
+      "check": ["A2", "A3", "A4"],
+      "file": "AI.list",
+      "rule": "DOMAIN*,*growthbook*",
+      "preventive": true,
+      "reason": "B2/2026-08-30 裁决（AI 会话同出口优先于组件归属）：cdn.growthbook.io 是通用 A/B 实验组件，同 statsig 理由留在 AI 组。"
+    },
+    {
+      "check": ["A2", "A3", "A4"],
+      "file": "AI.list",
+      "rule": "DOMAIN*,*cloudflareinsights.com",
+      "preventive": true,
+      "reason": "B2/2026-08-30 裁决（AI 会话同出口优先于组件归属）：static.cloudflareinsights.com 是 Cloudflare Web Analytics 的通用 beacon，被极多站点引用；刻意留在 AI 组是与 challenges.cloudflare.com（Turnstile，见上方 F1/FIX-B 条）一致的取舍——AI 登录链上的 Cloudflare 组件同出口可降低验证码率。"
+    },
+    {
+      "check": ["A2", "A3", "A4"],
+      "file": "AI.list",
+      "rule": "DOMAIN*,*arkoselabs.com",
+      "preventive": true,
+      "reason": "B2/2026-08-30 裁决（AI 会话同出口优先于组件归属）：openai-api.arkoselabs.com / client-api.arkoselabs.com 是通用风控验证组件。ChatGPT 登录与注册链强依赖它，验证与会话跨出口会直接抬高挑战失败率，故刻意留在 AI 组。注意本表只收这两个精确子域，不收 arkoselabs.com 顶域。"
+    },
+    {
+      "check": ["A2", "A3", "A4"],
+      "file": "AI.list",
+      "rule": "DOMAIN*,*todesktop.com",
+      "preventive": true,
+      "reason": "B2/2026-08-30 裁决（AI 会话同出口优先于组件归属）：todesktop.com 是通用 Electron 应用打包/更新分发平台，但本机在用的 AI 桌面端（Cursor 等）用它做增量更新，与应用本体同出口更稳。刻意留在 AI 组。"
+    },
+
+    {
+      "check": ["A2", "A3", "A4", "A6"],
+      "file": "Streaming.list",
+      "rule": "PROCESS-NAME,com.*",
+      "preventive": true,
+      "reason": "B2/2026-08-30：Streaming.list / ChinaMedia.list / TikTok.list 的 PROCESS-NAME 区含 Android 包名（com.spotify.music、com.netflix.mediaclient、tv.danmaku.bili、com.zhiliaoapp.musically 等），服务于 clash/ 派生层，Surge 侧恒不命中。**不是死规则，勿清理**（表头已同步注明）。同表 macOS 侧进程名（Spotify / Spotify Helper*）与之并存，是刻意的双平台覆盖。"
+    },
+    {
+      "check": ["A2", "A3", "A4", "A6"],
+      "file": "ChinaMedia.list",
+      "rule": "PROCESS-NAME,*",
+      "preventive": true,
+      "reason": "B2/2026-08-30：同上——ChinaMedia.list 的 7 条 PROCESS-NAME 全为 Android 包名（com.bilibili.* / com.qiyi.video / tv.danmaku.*），服务 clash/ 派生层，Surge 侧恒不命中，勿当死规则清理。"
+    },
+    {
+      "check": ["A2", "A3", "A4", "A6"],
+      "file": "TikTok.list",
+      "rule": "PROCESS-NAME,*",
+      "preventive": true,
+      "reason": "B2/2026-08-30：同上——TikTok.list 的 PROCESS-NAME,com.zhiliaoapp.musically 为 Android 包名，服务 clash/ 派生层，Surge 侧恒不命中，勿当死规则清理。"
+    },
+
+    {
+      "check": "A2",
+      "file": "ChinaIP.list",
+      "by_file": "TencentCN.list",
+      "reason": "B2/2026-08-30 ChinaIP 换源重建的必然结果：新源（blackmatrix7 ChinaIPs@65e8adf，IPv4 17265 + IPv6 5153）覆盖了 TencentCN.list 手工登记的 14 个腾讯云段（43.156.* / 101.32.* / 101.33.* / 129.226.* / 150.109.* / 203.205.*）。二者同为 DIRECT，TencentCN.list 位次在前生效，无功能影响。与上方 ChinaIP × PKU 条同理：ChinaIP.list 是机器生成层，约定零手改，故长期豁免。"
+    },
+    {
+      "check": "A4",
+      "file": "Domestic.list",
+      "rule": "DOMAIN-SUFFIX,*digicert.com",
+      "by": "DOMAIN-SUFFIX,digicert.com",
+      "by_file": "AppleCN.list",
+      "reason": "B2/2026-08-30 裁决即如此：CA 吊销/AIA 端点集中直连，cacerts.digicert.com / crl3.digicert.com / ocsp.digicert.com 三条自 DownloadCDN.list 移入 Domestic.list。AppleCN.list:836 的 DOMAIN-SUFFIX,digicert.com 位次更前且同为 DIRECT，实际生效的是它——移入的目的（脱离 DownloadCDN → 下载组 → 欧洲出口，恢复直连）已达成；三条在 Domestic 内作为「CA 端点集中登记」保留，是可接受的冗余，也修复了 W3 §A6.1 指出的「同一厂商分裂到两个出口」。"
     }
   ]
 }

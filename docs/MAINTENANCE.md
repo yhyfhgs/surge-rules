@@ -77,6 +77,8 @@ grep -rn "example.com" lists/
 - **IP 类规则(`IP-CIDR` / `IP-CIDR6` / `GEOIP` / `IP-ASN`)必须带 `no-resolve`。** 没有例外。原理见 [ARCHITECTURE.md §4](ARCHITECTURE.md)。
 - **PROCESS-NAME 保留大小写变体。** `Claude` 和 `claude` 都要在,那是刻意的跨平台覆盖,不是重复。
 - 关键词类规则慎用。合并排除表里的那几个(`DOMAIN-KEYWORD,google`、`akadns.net`、`stripe`、`ms` ccTLD、porn / facebook 等)是踩过坑的,别再往里加同量级的宽口径关键词。
+- **宽 `USER-AGENT` 一律不收。** UA 规则是全域生效的:它不看域名,只看 User-Agent,一条宽 UA 就能把该 app 访问的**任何**域按本表策略处理 —— 境外域被打直连、国内域被打代理。2026-08-30 审计已把 `Microsoft*`、`hide*`、`TeamViewer*`、`QQ*`、`TIM*` 五条从 `ChinaDomain.list` 删除并写进 D11 合并排除表,**再生 ChinaDomain 时必须过滤**(见 [ARCHITECTURE.md §6 D11 附](ARCHITECTURE.md))。同理删掉了 `TencentCN.list` 的 `MicroMessenger*` / `WeChat*`。
+  别用「在更早的表加一条对冲 UA」来救 —— 任何位置的对冲都会误伤别的表,这条路已经论证死了。
 
 ---
 

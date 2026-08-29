@@ -1,6 +1,8 @@
 # Domestic — 国内服务直连 (含国内 AI/字节系/券商)
 # 规范化排序：规则类型分区，区内字母序
 # 2026-08-25 维护：接收 identrust/ppio/xingyeai/xiaoaiassist 与 NTP/captive 探测域(pool.ntp.org/time.windows.com/msftconnecttest.com/detectportal.firefox.com)、bootcdn.net；移出 11 个国内厂商国际站至 AI.list；删 8 条死条目/失效域
+# 2026-08-30 维护：CA 吊销/AIA 端点集中直连（TLS 握手关键路径，soft-fail 安全）——自 DownloadCDN 接收 8 条 + 补 crl.globalsign.com、status.rapidssl.com；ocsp.usertrust.com / ocsp.entrust.net / oneocsp.microsoft.com 未纳入：ProxyGFW 的 usertrust.com / entrust.net / microsoft.com 后缀位次更前，加进本表只会成为永不生效的死条目
+# 2026-08-30 收尾：补 cacerts.rapidssl.com(与 status.rapidssl.com 同厂归并)；oneocsp/ocsp/crl.microsoft.com 因 ProxyGFW 后缀遮蔽改入 MicrosoftCN；ocsp.usertrust.com/ocsp.entrust.net 维持 ProxyGFW→Final(无语义合适的前位直连表，soft-fail 下走代理无害，刻意不收)
 
 DOMAIN,cn.download.nvidia.com
 DOMAIN,config.ubnt.com
@@ -110,6 +112,8 @@ DOMAIN-SUFFIX,bosszhipin.com
 DOMAIN-SUFFIX,byteacctimg.com
 DOMAIN-SUFFIX,c-ctrip.com
 DOMAIN-SUFFIX,c-t.work
+DOMAIN-SUFFIX,cacerts.digicert.com
+DOMAIN-SUFFIX,cacerts.rapidssl.com
 DOMAIN-SUFFIX,cailianpress.com
 DOMAIN-SUFFIX,caiyunapp.com
 DOMAIN-SUFFIX,caiyuncdn.com
@@ -165,6 +169,10 @@ DOMAIN-SUFFIX,cozefn.cn
 DOMAIN-SUFFIX,cozeide.cn
 DOMAIN-SUFFIX,cozesdk.com
 DOMAIN-SUFFIX,cqcbank.com
+DOMAIN-SUFFIX,crl.globalsign.com
+DOMAIN-SUFFIX,crl.verisign.com
+DOMAIN-SUFFIX,crl3.digicert.com
+DOMAIN-SUFFIX,crt.sectigo.com
 DOMAIN-SUFFIX,csdn.com
 DOMAIN-SUFFIX,csdn.net
 DOMAIN-SUFFIX,csdnimg.cn
@@ -334,6 +342,7 @@ DOMAIN-SUFFIX,leetcode-cn.com
 DOMAIN-SUFFIX,leetcode.cn
 DOMAIN-SUFFIX,leiniao.com
 DOMAIN-SUFFIX,leleketang.com
+DOMAIN-SUFFIX,lencr.org
 DOMAIN-SUFFIX,lenovomm.com
 DOMAIN-SUFFIX,letvimg.com
 DOMAIN-SUFFIX,lianjia.com
@@ -403,6 +412,8 @@ DOMAIN-SUFFIX,nlark.com
 DOMAIN-SUFFIX,nmc.cn
 DOMAIN-SUFFIX,nubia.cn
 DOMAIN-SUFFIX,nubia.com
+DOMAIN-SUFFIX,ocsp.digicert.com
+DOMAIN-SUFFIX,ocsp.sectigo.com
 DOMAIN-SUFFIX,officewebapps.cn
 DOMAIN-SUFFIX,okr.com
 DOMAIN-SUFFIX,oneplus.cn
@@ -508,6 +519,7 @@ DOMAIN-SUFFIX,soulapp.cn
 DOMAIN-SUFFIX,speedtest.cn
 DOMAIN-SUFFIX,sspai.com
 DOMAIN-SUFFIX,staticdn.net
+DOMAIN-SUFFIX,status.rapidssl.com
 DOMAIN-SUFFIX,steam.clngaa.com
 DOMAIN-SUFFIX,steam.ksyna.com
 DOMAIN-SUFFIX,stepfun.com
@@ -614,6 +626,7 @@ DOMAIN-SUFFIX,zui.com
 DOMAIN-SUFFIX,zuimeitianqi.com
 
 DOMAIN-WILDCARD,*.qhimgs?.com
+DOMAIN-WILDCARD,ocsp.*.amazontrust.com
 
 USER-AGENT,%E4%BC%98%E9%85%B7*
 USER-AGENT,%E6%89%8B%E6%9C%BA%E6%B7%98%E5%AE%9D*

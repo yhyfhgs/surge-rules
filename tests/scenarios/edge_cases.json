@@ -54,12 +54,12 @@
       "same_policy": false,
       "no_dns_leak": true,
       "per_request": [
-        {"host": "ocsp.digicert.com", "policy": "下载"},
+        {"host": "ocsp.digicert.com", "policy": "DIRECT"},
         {"host": "ocsp.apple.com", "policy": "DIRECT"},
         {"host": "ocsp2.apple.com", "policy": "DIRECT"},
-        {"host": "r3.o.lencr.org", "policy": "下载"},
-        {"host": "x1.c.lencr.org", "policy": "下载"},
-        {"host": "crl.microsoft.com", "policy": "Final"}
+        {"host": "r3.o.lencr.org", "policy": "DIRECT"},
+        {"host": "x1.c.lencr.org", "policy": "DIRECT"},
+        {"host": "crl.microsoft.com", "policy": "DIRECT"}
       ]
     }
   },
@@ -162,12 +162,12 @@
   },
   {
     "name": "user_vps_ip_asn",
-    "desc": "用户自有 VPS 直连 IP：DigitalOcean(AS14061) / Vultr(AS20473) 段。AI.list 有 IP-ASN,14061 与 20473，离线引擎按内置近似表判定，故允许 AI 或 Final",
+    "desc": "用户自有 VPS 直连 IP：DigitalOcean / Vultr 段。realworld.py --crosscheck 实测(2026-08-30)：真实 Surge 会先被区域表的 GEOIP 抓走(159.89.0.1→GEOIP DE@Europe.list→🇪🇺欧洲节点；45.32.0.1→GEOIP US@US.list→🇺🇸美国节点)；离线引擎没有 MaxMind 库、GEOIP 非 CN 一律判不匹配，故落 Final。两种落点都在 policy_in 里，别把它当成断言松懈——这是已登记的离线近似盲区",
     "requests": [
-      {"ip": "159.89.0.1", "note": "DigitalOcean 段样本"},
-      {"ip": "45.32.0.1", "note": "Vultr 段样本"}
+      {"ip": "159.89.0.1", "note": "DigitalOcean 段样本；实测落 🇪🇺欧洲节点(GEOIP DE)"},
+      {"ip": "45.32.0.1", "note": "Vultr 段样本；实测落 🇺🇸美国节点(GEOIP US)"}
     ],
-    "assert": {"policy_in": ["AI", "Final"], "no_dns_leak": true}
+    "assert": {"policy_in": ["AI", "Final", "🇪🇺欧洲节点", "🇺🇸美国节点"], "no_dns_leak": true}
   },
   {
     "name": "campus_and_gov_direct",

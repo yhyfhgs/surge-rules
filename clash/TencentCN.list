@@ -1,10 +1,10 @@
 # AUTO-GENERATED — Clash(Mihomo) classical 规则，由 ../lists/TencentCN.list 派生
 # 勿手工编辑；修改 Surge 源后运行 python3 tools/surge2clash.py 重新生成
-# 已剔除 Clash 不支持的规则: USER-AGENT x 2
 
 # TencentCN — 腾讯系直连（blackmatrix7:Tencent+WeChat；2026-08-25 建）
 # 规范化排序：规则类型分区，区内字母序
 # 2026-08-25 维护：清理 233 条 IPv4 前缀伪装的 DOMAIN-KEYWORD(219 条已被 ChinaIP 覆盖直接删除，14 条腾讯海外段改写为 IP-CIDR,no-resolve)；删 4 条同表覆盖冗余条目(A3)
+# 2026-08-30 维护：删 USER-AGENT,MicroMessenger* 与 USER-AGENT,WeChat*——铁律 5「TencentCN 加微信进程有害」的 UA 同构体（微信内置浏览器打开境外外链会被强制直连而失效）；国内域名面已完整覆盖 DIRECT，删除无损失
 
 DOMAIN,slife.xy-asia.com
 
@@ -2259,7 +2259,6 @@ DOMAIN-SUFFIX,zw-tencentclb.net
 DOMAIN-SUFFIX,zw-tencentclb.work
 DOMAIN-SUFFIX,zxgcloud.com
 DOMAIN-SUFFIX,zxgstock.com
-
 
 IP-CIDR,43.156.86.0/24,no-resolve
 IP-CIDR,43.156.222.0/24,no-resolve

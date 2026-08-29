@@ -1,6 +1,7 @@
 # TikTok — TikTok 国际版 (字节国内域归 Domestic)；2026-08-25 并入 blackmatrix7:TikTok
 # 规范化排序：规则类型分区，区内字母序
 # 2026-08-25 维护：接收字节海外域 byteoversea.com/tron-sg.bytelemon.com；补 tiktokcdn.net
+# 2026-08-30 维护：本表 PROCESS-NAME 区含 Android 包名，服务于 clash/ 派生层，Surge 侧恒不命中，勿当死规则清理
 
 DOMAIN,api.snapkit.com
 DOMAIN,cocacola.co.jp

@@ -1,9 +1,10 @@
 # AUTO-GENERATED — Clash(Mihomo) classical 规则，由 ../lists/ChinaDomain.list 派生
 # 勿手工编辑；修改 Surge 源后运行 python3 tools/surge2clash.py 重新生成
-# 已剔除 Clash 不支持的规则: USER-AGENT x 24
+# 已剔除 Clash 不支持的规则: USER-AGENT x 19
 
 # ChinaDomain — 大陆域名直连兜底大表（blackmatrix7 ChinaMaxNoIP，机器管理层；手工条目请加 Domestic）
 # 规范化排序：规则类型分区，区内字母序
+# 2026-08-30 维护：删 5 条全域生效的危险 USER-AGENT(Microsoft*/hide*/TeamViewer*/QQ*/TIM*)——已实证会把境外未收录域打成 DIRECT；已登记进 docs D11 合并排除表与 tests/allowlist.json，再生本表时须过滤
 
 DOMAIN,1-fss24-s0.streamhoster.com
 DOMAIN,14033.live.streamtheworld.com

@@ -81,6 +81,8 @@ EXIT_CLASS_MAP = {
 #: 内置 SYSTEM 规则集的**近似**实现。
 #: Surge 内置 SYSTEM 集合不公开，这里只收录 spec 点名的三个域 + 少量同类
 #: 「设备激活/描述文件/门户探测」域，刻意取小集合以免掩盖真实分流路径。
+#: 名单里带「实测」标注的，是 realworld.py --crosscheck 拿 surge-cli 逐条对账时
+#: 发现「Surge 实际命中 RULE-SET SYSTEM 而本表没有」的域，按在线为准补录。
 BUILTIN_SYSTEM_DOMAINS = (
     "captive.apple.com",
     "mesu.apple.com",
@@ -91,6 +93,7 @@ BUILTIN_SYSTEM_DOMAINS = (
     "static.ips.apple.com",
     "iprofiles.apple.com",
     "deviceenrollment.apple.com",
+    "guzzoni.apple.com",        # 实测 2026-08-30: Surge 命中 DOMAIN guzzoni.apple.com(in SYSTEM)
 )
 
 #: 内置 LAN 规则集的**近似**实现：RFC1918 / loopback / link-local / 保留段。
@@ -501,6 +504,7 @@ class Engine(object):
         self.by_keyword = []       # [(kw, idx)]
         self.by_wildcard = []      # [(regex, idx)]
         self.by_process = {}
+        self.by_process_pattern = []
         self.by_ua = []            # [(regex, idx, raw)]
         self.ip_nets = []          # [(version, net_int, mask_int, idx)]
         self.asn_rules = []        # [(asn, idx)]
@@ -522,7 +526,11 @@ class Engine(object):
             elif t == "DOMAIN-WILDCARD":
                 self.by_wildcard.append((wildcard_to_regex(r.value.lower()), r.idx))
             elif t == "PROCESS-NAME":
-                self.by_process.setdefault(r.value, []).append(r.idx)
+                if ("*" in r.value) or ("?" in r.value) or r.value.startswith("/"):
+                    # 通配 / 全路径 / App Bundle 形态：无法哈希精确查找，走逐条匹配
+                    self.by_process_pattern.append((r.value, r.idx))
+                else:
+                    self.by_process.setdefault(r.value, []).append(r.idx)
             elif t == "USER-AGENT":
                 self.by_ua.append((wildcard_to_regex(r.value), r.idx, r.value))
             elif t in ("IP-CIDR", "IP-CIDR6"):
@@ -651,9 +659,19 @@ class Engine(object):
 
         # --- 进程名 / UA --------------------------------------------------
         if process:
+            # 精确名快查（查询为全路径时同时按 basename 查，对齐 Surge Filename Mode）
             hits = self.by_process.get(process)
             if hits:
                 consider(hits[0])
+            if "/" in process:
+                base_hits = self.by_process.get(process.rsplit("/", 1)[-1])
+                if base_hits:
+                    consider(base_hits[0])
+            for pv, idx in self.by_process_pattern:
+                if best is not None and idx > best:
+                    continue
+                if self._proc_match(pv, process):
+                    consider(idx)
         if ua:
             for rx, idx, _raw in self.by_ua:
                 if best is not None and idx > best:
@@ -765,6 +783,30 @@ class Engine(object):
             return results and results[0] is False
         return False
 
+    @staticmethod
+    def _proc_match(v, process):
+        """Surge PROCESS-NAME 三种形态（全部大小写敏感，surge-cli 6.9.0 实测语义）：
+        Filename：可执行名，支持 */? 通配（Claude Helper* 命中全部括号变体）。
+        Full Path（/ 开头）无通配：以 / 结尾为路径前缀匹配（App Bundle Mode），否则全路径精确。
+        Full Path 含通配：整串 glob——* 一旦出现即失去前缀语义，须以 * 收尾才能匹配更深路径段。
+        查询侧：process 含 / 视为全路径（Filename 规则对其 basename 匹配）；仅进程名时全路径规则不可判定。
+        """
+        if not process:
+            return False
+        has_glob = ("*" in v) or ("?" in v)
+        if v.startswith("/"):
+            if "/" not in process:
+                return False
+            if has_glob:
+                return bool(wildcard_to_regex(v).match(process))
+            if v.endswith("/"):
+                return process.startswith(v)
+            return process == v
+        name = process.rsplit("/", 1)[-1] if "/" in process else process
+        if has_glob:
+            return bool(wildcard_to_regex(v).match(name))
+        return name == v
+
     def _eval_cond(self, t, v, mods, host, ip_obj, process, ua, is_domain_query):
         if t in DOMAIN_TYPES:
             if not host:
@@ -778,7 +820,7 @@ class Engine(object):
                 return lv in host
             return bool(wildcard_to_regex(lv).match(host))
         if t == "PROCESS-NAME":
-            return process == v
+            return self._proc_match(v, process)
         if t == "USER-AGENT":
             return bool(ua and wildcard_to_regex(v).match(ua))
         if t in IP_TYPES:
@@ -895,6 +937,9 @@ DOMAIN-KEYWORD,kwtoken
 DOMAIN-WILDCARD,wild-*.example.net
 DOMAIN-WILDCARD,two-??.example.net
 PROCESS-NAME,ClaudeApp
+PROCESS-NAME,WildProc*
+PROCESS-NAME,/Applications/BundleApp.app/
+PROCESS-NAME,/Users/*/.hidden/*
 USER-AGENT,MyApp*
 IP-CIDR,203.0.113.0/24,no-resolve
 IP-CIDR6,2001:db8:aa::/48,no-resolve
@@ -1050,6 +1095,21 @@ def run_selftest(verbose=True):
               sorted(["query", "matched_rule", "rule_index", "source", "policy",
                       "physical_exit", "exit_class", "dns_leak", "dns_leak_at",
                       "trace"]))
+
+        # --- 6.5) PROCESS-NAME 通配与全路径形态（2026-08-30 补，对齐 surge-cli 实测语义） --
+        check("T43 PROCESS-NAME 通配命中括号变体",
+              m(host="nomatch.invalid", process="WildProc (Renderer)")["policy"], "AI")
+        check("T44 PROCESS-NAME 通配大小写敏感",
+              m(host="nomatch.invalid", process="wildproc (Renderer)")["policy"], "Final")
+        check("T45 App Bundle 路径前缀命中",
+              m(host="nomatch.invalid",
+                process="/Applications/BundleApp.app/Contents/MacOS/Sub Helper")["policy"], "AI")
+        check("T46 Filename 规则对全路径查询取 basename",
+              m(host="nomatch.invalid", process="/usr/local/bin/ClaudeApp")["policy"], "AI")
+        check("T47 全路径含 * 为整串 glob（* 收尾达深层）",
+              m(host="nomatch.invalid", process="/Users/alice/.hidden/tool")["policy"], "AI")
+        check("T48 仅进程名查询不命中全路径规则",
+              m(host="nomatch.invalid", process="BundleApp")["policy"], "Final")
     finally:
         import shutil
         shutil.rmtree(tmpdir, ignore_errors=True)

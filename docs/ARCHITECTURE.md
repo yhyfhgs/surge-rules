@@ -198,7 +198,23 @@ lists/*.list  ──(tools/surge2clash.py 全量再生)──▶  clash/*.list +
 | D8 | **地区表自包含 IP 规则并整体后置** | 地区表内的 GEOIP / IP-ASN 若前置,会遮蔽 Apple 17/8 与 ProxyGFW 的 IP 规则 |
 | D9 | **`DC-X.conf` 保留** | 已补 `no-resolve` 加固,不违反零本地 DNS 解析约束 |
 | D10 | **MITM 的 enable 键不写进 conf** | MITM 已启用,开关在 GUI 运行态。Surge 会把 `enable` 键从 conf 规范化移除;conf 只保留 `h2=true`。**不要反复往 conf 写 `enable`** —— 它每次都会被抹掉 |
-| D11 | **合并排除表** | 以下上游条目**不合并**:`DOMAIN-KEYWORD,google`、`akadns.net`、`stripe`、`ms`(ccTLD)、porn / facebook 等关键词。它们过于宽泛,合并会造成大面积误伤 |
+| D11 | **合并排除表** | 以下上游条目**不合并**:`DOMAIN-KEYWORD,google`、`akadns.net`、`stripe`、`ms`(ccTLD)、porn / facebook 等关键词;以及 5 条宽 `USER-AGENT`:`Microsoft*`、`hide*`、`TeamViewer*`、`QQ*`、`TIM*`。它们过于宽泛,合并会造成大面积误伤 |
+
+#### D11 附:5 条宽 `USER-AGENT` 排除项(2026-08-30 审计新增)
+
+`USER-AGENT` 规则是**全域生效**的 —— 它不看域名,只看请求的 User-Agent,因此一条宽 UA 会把该 app 访问的**任何**域按本表策略处理。全域生效的宽 UA 会把境外域打直连 / 国内域打代理,再生 `ChinaDomain.list` 时必须过滤:
+
+| 排除条目 | 误伤方式 |
+|---|---|
+| `USER-AGENT,Microsoft*` | Office 系 app(UA 形如 `Microsoft Office/16.0`)访问的境外未收录域被打成 DIRECT。已实证 |
+| `USER-AGENT,hide*` | 极宽;`hide.me` 等 VPN 服务及任何 UA 以 hide 开头者被强制直连 |
+| `USER-AGENT,TeamViewer*` | 国际远控服务被强制直连 |
+| `USER-AGENT,QQ*` | QQ / QQ 浏览器内置浏览器打开境外链接失效(与 D7 旁的铁律「TencentCN 加微信进程有害」同构) |
+| `USER-AGENT,TIM*` | 同上 |
+
+**不要用「在更早的表加对冲 UA」来解决。** 任何位置的对冲都会误伤:放 `Microsoft.list` 会把 `officecdn.microsoft.com` / `office.com` / `onedrive` 等刻意直连的域拽进代理组;放 `ProxyGFW.list` 会劫持其后 Japan / UK / Europe / US / Domestic / 各国内厂商表的域。正确做法只有走本排除表 + 再生时过滤。
+
+这 5 条已于 2026-08-30 从 `ChinaDomain.list` 直接删除,并在 `tests/allowlist.json` 登记 preventive 条目 —— 一旦被误合并回来,审计会立刻发现。同批处理的还有 `TencentCN.list` 的 `USER-AGENT,MicroMessenger*` / `USER-AGENT,WeChat*`(手工表,直接删除,不入排除表)。
 
 ### 6.1 已否决方案(仅作历史记录,勿再提议)
 

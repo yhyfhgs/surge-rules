@@ -1,6 +1,7 @@
 # ProxyGFW — GFW 被墙域名兜底；2026-08-25 并入 blackmatrix7:Proxy
 # 规范化排序：规则类型分区，区内字母序
 # 2026-08-25 维护：接收 auth0.com；docker.com/npmjs.com 移交 DownloadCDN、login.microsoftonline.com 移交 AI、社交伴生域移交 SocialOthers/Meta；删 1 条失效域。2026-08-29 维护：stripe.com/stripe.network/gumroad.com/paddle.com/DOMAIN-KEYWORD,paypal 移交新建 Payment.list(支付需固定出口)；USER-AGENT,PayPal* 未动，待 UA 方案统一裁决
+# 2026-08-30 维护：删 USER-AGENT,OneDrive*（与 MicrosoftCN 直连裁决矛盾）、USER-AGENT,WhatsApp*（Meta.list 域名面已覆盖）、DOMAIN-SUFFIX,ocsp.int-x3.letsencrypt.org（2021 年已退役端点）；移出 USER-AGENT,PayPal* → Payment.list、DOMAIN-SUFFIX,arena.ai → AI.list、USER-AGENT,battleroyale* 与 USER-AGENT,hearthstone* → Games.list（游戏 UA 归游戏组）；移入 DOMAIN-SUFFIX,api.mixpanel.com（自 Telegram，通用分析域）与 awsapps.com / awsstatic.com / sso.amazonaws.com（自 AI，通用 AWS 客户域；后者被本表既有 DOMAIN-SUFFIX,amazonaws.com 兜底覆盖，保留为显式归属登记）
 
 DOMAIN,api.waqi.info
 DOMAIN,assets-priconne-redive-us.akamaized.net
@@ -362,6 +363,7 @@ DOMAIN-SUFFIX,apartments.com
 DOMAIN-SUFFIX,apat1989.org
 DOMAIN-SUFFIX,apetube.com
 DOMAIN-SUFFIX,api.amplitude.com
+DOMAIN-SUFFIX,api.mixpanel.com
 DOMAIN-SUFFIX,api.moomoobull.com
 DOMAIN-SUFFIX,api.proxlet.com
 DOMAIN-SUFFIX,api.shuaiapi.com
@@ -402,7 +404,6 @@ DOMAIN-SUFFIX,archiveofourown.org
 DOMAIN-SUFFIX,archives.gov
 DOMAIN-SUFFIX,arctosia.com
 DOMAIN-SUFFIX,areca-backup.org
-DOMAIN-SUFFIX,arena.ai
 DOMAIN-SUFFIX,arena.taipei
 DOMAIN-SUFFIX,arethusa.su
 DOMAIN-SUFFIX,arlingtoncemetery.mil
@@ -474,6 +475,8 @@ DOMAIN-SUFFIX,avmoo.net
 DOMAIN-SUFFIX,avmoo.pw
 DOMAIN-SUFFIX,avoision.com
 DOMAIN-SUFFIX,avyahoo.com
+DOMAIN-SUFFIX,awsapps.com
+DOMAIN-SUFFIX,awsstatic.com
 DOMAIN-SUFFIX,axios.com
 DOMAIN-SUFFIX,axureformac.com
 DOMAIN-SUFFIX,azerbaycan.tv
@@ -3878,7 +3881,6 @@ DOMAIN-SUFFIX,occupytiananmen.com
 DOMAIN-SUFFIX,oclp.hk
 DOMAIN-SUFFIX,ocreampies.com
 DOMAIN-SUFFIX,ocry.com
-DOMAIN-SUFFIX,ocsp.int-x3.letsencrypt.org
 DOMAIN-SUFFIX,october-review.org
 DOMAIN-SUFFIX,octocaptcha.com
 DOMAIN-SUFFIX,odysee.com
@@ -4897,6 +4899,7 @@ DOMAIN-SUFFIX,ssglobal.co
 DOMAIN-SUFFIX,ssglobal.me
 DOMAIN-SUFFIX,ssh91.com
 DOMAIN-SUFFIX,ssl443.org
+DOMAIN-SUFFIX,sso.amazonaws.com
 DOMAIN-SUFFIX,sspanel.net
 DOMAIN-SUFFIX,sspanel.org
 DOMAIN-SUFFIX,sspro.ml
@@ -6426,13 +6429,8 @@ DOMAIN-KEYWORD,dropbox
 DOMAIN-KEYWORD,github
 DOMAIN-KEYWORD,sci-hub
 
-USER-AGENT,battleroyale*
 USER-AGENT,Duolingo*
-USER-AGENT,hearthstone*
-USER-AGENT,OneDrive*
-USER-AGENT,PayPal*
 USER-AGENT,Roam*
-USER-AGENT,WhatsApp*
 
 IP-CIDR,13.32.0.0/15,no-resolve
 IP-CIDR,13.35.0.0/17,no-resolve

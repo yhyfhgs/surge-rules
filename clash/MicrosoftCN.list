@@ -4,6 +4,7 @@
 # MicrosoftCN — 微软 CDN/OneDrive (直连)
 # 规范化排序：规则类型分区，区内字母序
 # 2026-08-25 维护：删 3 条同表覆盖冗余条目(A3)与 1 条已被 AI.list 抢跑的 msftauth.net
+# 2026-08-30 维护：接收微软自家 CA 端点 3 条(crl/ocsp/oneocsp.microsoft.com)——ProxyGFW 的 microsoft.com 后缀位次更前，Domestic 无法接收，本表(先于 GFW)是唯一语义合适的直连位
 
 DOMAIN,res-1.cdn.office.net
 DOMAIN,res-2.cdn.office.net
@@ -20,6 +21,7 @@ DOMAIN-SUFFIX,cbdstest.download.prss.microsoft.com
 DOMAIN-SUFFIX,cn.windowssearch.com
 DOMAIN-SUFFIX,collaborate.download.prss.microsoft.com
 DOMAIN-SUFFIX,collaborateppe.download.prss.microsoft.com
+DOMAIN-SUFFIX,crl.microsoft.com
 DOMAIN-SUFFIX,ctldl.windowsupdate.com
 DOMAIN-SUFFIX,dl.delivery.mp.microsoft.com
 DOMAIN-SUFFIX,download.microsoft.com
@@ -46,6 +48,7 @@ DOMAIN-SUFFIX,msedge.net
 DOMAIN-SUFFIX,msn.com
 DOMAIN-SUFFIX,msproduct.download.prss.microsoft.com
 DOMAIN-SUFFIX,myvs.download.prss.microsoft.com
+DOMAIN-SUFFIX,ocsp.microsoft.com
 DOMAIN-SUFFIX,oemsoc.download.prss.microsoft.com
 DOMAIN-SUFFIX,oemsocuat.download.prss.microsoft.com
 DOMAIN-SUFFIX,office.com
@@ -54,6 +57,7 @@ DOMAIN-SUFFIX,officecdn.microsoft.com
 DOMAIN-SUFFIX,officemkt.download.prss.microsoft.com
 DOMAIN-SUFFIX,officemktuat.download.prss.microsoft.com
 DOMAIN-SUFFIX,oneclient.sfx.ms
+DOMAIN-SUFFIX,oneocsp.microsoft.com
 DOMAIN-SUFFIX,osrelease.download.prss.microsoft.com
 DOMAIN-SUFFIX,rsm.download.prss.microsoft.com
 DOMAIN-SUFFIX,sdx.microsoft.com
