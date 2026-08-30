@@ -1,9 +1,9 @@
 # AUTO-GENERATED — Clash(Mihomo) classical 规则，由 ../lists/AI.list 派生
 # 勿手工编辑；修改 Surge 源后运行 python3 tools/surge2clash.py 重新生成
 
-# AI — 独立 AI 服务商（OpenAI/Anthropic/Perplexity/Ollama 等）与 AI 基础设施；四大厂自有 AI 归各自生态表（Gemini→Google、Grok/Cursor→Twitter、Copilot/GitHub→Microsoft、Meta AI→Meta）
-# 排序：规则类型分区，区内字母序
+# AI — 独立 AI 服务商（OpenAI/Anthropic/Perplexity/Cursor 等）与 AI 基础设施；四大厂自有 AI 归各自生态表（Gemini→Google、Grok→Twitter、Copilot/GitHub→Microsoft、Meta AI→Meta）
 # 通用第三方组件（datadog/statsig/arkoselabs/turnstile/todesktop 等）刻意留本表——AI 会话同出口优先，逐条理由见 tests/allowlist.json；收录分档与禁收项见 docs/MAINTENANCE.md「裁决登记」
+# 排序：规则类型分区，区内字母序；两条 Azure 主机命名关键词已于 2026-08-31 审计改双向锚定 DOMAIN-WILDCARD
 
 DOMAIN,anthropic-com.ghost.io
 DOMAIN,aws-language-servers.us-east-1.amazonaws.com
@@ -24,7 +24,6 @@ DOMAIN,openaicomproductionae4b.blob.core.windows.net
 DOMAIN,ppl-ai-file-upload.s3.amazonaws.com
 DOMAIN,production-openaicom-storage.azureedge.net
 DOMAIN,q-developer-integration.us-east-1.api.aws
-DOMAIN,static.cloudflareinsights.com
 
 DOMAIN-SUFFIX,abacus.ai
 DOMAIN-SUFFIX,agent-plugins.org
@@ -41,6 +40,7 @@ DOMAIN-SUFFIX,anthropic.com.cdn.cloudflare.net
 DOMAIN-SUFFIX,anthropic.team
 DOMAIN-SUFFIX,antspace.dev
 DOMAIN-SUFFIX,anyscale.com
+DOMAIN-SUFFIX,anysphere.co
 DOMAIN-SUFFIX,anythingllm.com
 DOMAIN-SUFFIX,api.statsig.com
 DOMAIN-SUFFIX,arcade.dev
@@ -114,6 +114,11 @@ DOMAIN-SUFFIX,coze.com
 DOMAIN-SUFFIX,crewai.com
 DOMAIN-SUFFIX,crixet.com
 DOMAIN-SUFFIX,crusoe.ai
+DOMAIN-SUFFIX,cursor-cdn.com
+DOMAIN-SUFFIX,cursor.com
+DOMAIN-SUFFIX,cursor.sh
+DOMAIN-SUFFIX,cursorapi.com
+DOMAIN-SUFFIX,cursorvm.com
 DOMAIN-SUFFIX,datadoghq.com
 DOMAIN-SUFFIX,daytona.io
 DOMAIN-SUFFIX,deepgram.com
@@ -286,6 +291,7 @@ DOMAIN-SUFFIX,qoder.com
 DOMAIN-SUFFIX,qodo.ai
 DOMAIN-SUFFIX,quillbot.com
 DOMAIN-SUFFIX,qwen.ai
+DOMAIN-SUFFIX,qwenlm.ai
 DOMAIN-SUFFIX,raycast.com
 DOMAIN-SUFFIX,recraft.ai
 DOMAIN-SUFFIX,refact.ai
@@ -377,8 +383,8 @@ DOMAIN-SUFFIX,z.ai
 DOMAIN-SUFFIX,zed.dev
 DOMAIN-SUFFIX,zilliz.com
 
-DOMAIN-KEYWORD,chatgpt-async-webps-prod
-DOMAIN-KEYWORD,openaicom-api
+DOMAIN-WILDCARD,chatgpt-async-webps-prod-*.webpubsub.azure.com
+DOMAIN-WILDCARD,openaicom-api-*.azurefd.net
 
 IP-CIDR,153.61.0.0/16,no-resolve
 IP-CIDR,160.79.104.0/21,no-resolve

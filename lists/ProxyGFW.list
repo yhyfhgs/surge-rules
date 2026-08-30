@@ -387,6 +387,10 @@ DOMAIN-SUFFIX,appadvice.com
 DOMAIN-SUFFIX,appbrain.com
 DOMAIN-SUFFIX,appdownloader.net
 DOMAIN-SUFFIX,applecensorship.com
+DOMAIN-SUFFIX,appledaily.com
+DOMAIN-SUFFIX,appledaily.com.hk
+DOMAIN-SUFFIX,appledaily.com.tw
+DOMAIN-SUFFIX,appledaily.hk
 DOMAIN-SUFFIX,appshopper.com
 DOMAIN-SUFFIX,appsocks.net
 DOMAIN-SUFFIX,aptoide.com
@@ -557,6 +561,7 @@ DOMAIN-SUFFIX,bebo.com
 DOMAIN-SUFFIX,beeg.com
 DOMAIN-SUFFIX,beepool.com
 DOMAIN-SUFFIX,beepool.org
+DOMAIN-SUFFIX,beetalk.com
 DOMAIN-SUFFIX,beevpn.com
 DOMAIN-SUFFIX,behance.net
 DOMAIN-SUFFIX,behindkink.com
@@ -1381,6 +1386,9 @@ DOMAIN-SUFFIX,djangosnippets.org
 DOMAIN-SUFFIX,djorz.com
 DOMAIN-SUFFIX,dl-laby.jp
 DOMAIN-SUFFIX,dler.io
+DOMAIN-SUFFIX,dlercloud.com
+DOMAIN-SUFFIX,dlercloud.me
+DOMAIN-SUFFIX,dlercloud.org
 DOMAIN-SUFFIX,dlive.tv
 DOMAIN-SUFFIX,dlsite.jp
 DOMAIN-SUFFIX,dm530.net
@@ -1457,6 +1465,19 @@ DOMAIN-SUFFIX,dribbble.com
 DOMAIN-SUFFIX,drmingxia.org
 DOMAIN-SUFFIX,dronedj.com
 DOMAIN-SUFFIX,dropbooks.tv
+DOMAIN-SUFFIX,dropbox-dns.com
+DOMAIN-SUFFIX,dropbox.com
+DOMAIN-SUFFIX,dropbox.tech
+DOMAIN-SUFFIX,dropbox.zendesk.com
+DOMAIN-SUFFIX,dropboxapi.com
+DOMAIN-SUFFIX,dropboxbusiness.com
+DOMAIN-SUFFIX,dropboxcaptcha.com
+DOMAIN-SUFFIX,dropboxforum.com
+DOMAIN-SUFFIX,dropboxforums.com
+DOMAIN-SUFFIX,dropboxinsiders.com
+DOMAIN-SUFFIX,dropboxmail.com
+DOMAIN-SUFFIX,dropboxpartners.com
+DOMAIN-SUFFIX,dropboxusercontent.com
 DOMAIN-SUFFIX,droplr.com
 DOMAIN-SUFFIX,drsunacademy.com
 DOMAIN-SUFFIX,drtuber.com
@@ -2109,6 +2130,7 @@ DOMAIN-SUFFIX,getastrill.com
 DOMAIN-SUFFIX,getchu.com
 DOMAIN-SUFFIX,getcloak.com
 DOMAIN-SUFFIX,getcloudapp.com
+DOMAIN-SUFFIX,getdropbox.com
 DOMAIN-SUFFIX,getfoxyproxy.org
 DOMAIN-SUFFIX,getfreedur.com
 DOMAIN-SUFFIX,getgom.com
@@ -4887,7 +4909,6 @@ DOMAIN-SUFFIX,ssglobal.co
 DOMAIN-SUFFIX,ssglobal.me
 DOMAIN-SUFFIX,ssh91.com
 DOMAIN-SUFFIX,ssl443.org
-DOMAIN-SUFFIX,sso.amazonaws.com
 DOMAIN-SUFFIX,sspanel.net
 DOMAIN-SUFFIX,sspanel.org
 DOMAIN-SUFFIX,sspro.ml
@@ -6410,14 +6431,8 @@ DOMAIN-SUFFIX,zzcloud.me
 DOMAIN-SUFFIX,zzux.com
 DOMAIN-SUFFIX,zzzzzz.me
 
-DOMAIN-KEYWORD,1e100
-DOMAIN-KEYWORD,abema
-DOMAIN-KEYWORD,appledaily
-DOMAIN-KEYWORD,avtb
-DOMAIN-KEYWORD,beetalk
-DOMAIN-KEYWORD,dlercloud
-DOMAIN-KEYWORD,dropbox
-DOMAIN-KEYWORD,github
+DOMAIN-WILDCARD,avtb*
+
 DOMAIN-KEYWORD,sci-hub
 
 IP-CIDR,13.32.0.0/15,no-resolve

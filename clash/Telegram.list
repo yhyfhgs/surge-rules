@@ -1,11 +1,13 @@
 # AUTO-GENERATED — Clash(Mihomo) classical 规则，由 ../lists/Telegram.list 派生
 # 勿手工编辑；修改 Surge 源后运行 python3 tools/surge2clash.py 重新生成
 
-# Telegram — Telegram 域名与 IP 段（上游 blackmatrix7 Telegram）；通用分析域（如 api.mixpanel.com）不收，归 ProxyGFW.list
+# Telegram — Telegram 域名与 IP 段（上游 blackmatrix7 Telegram + Global 表 nicegram）；通用分析域（如 api.mixpanel.com）不收，归 ProxyGFW.list
+# 2026-08-31 审计：telegram/nicegram 精确后缀恢复后删除两条宽 DOMAIN-KEYWORD
 # 排序：规则类型分区，区内字母序
 
 DOMAIN,events-gateway.ncdev.site
 
+DOMAIN-SUFFIX,cdn-telegram.org
 DOMAIN-SUFFIX,comments.app
 DOMAIN-SUFFIX,contest.com
 DOMAIN-SUFFIX,fragment.com
@@ -14,6 +16,8 @@ DOMAIN-SUFFIX,imem.app
 DOMAIN-SUFFIX,iturrit.com
 DOMAIN-SUFFIX,legra.ph
 DOMAIN-SUFFIX,mbrx.app
+DOMAIN-SUFFIX,nicegram.app
+DOMAIN-SUFFIX,nicegram.cloud
 DOMAIN-SUFFIX,quiz.directory
 DOMAIN-SUFFIX,stel.com
 DOMAIN-SUFFIX,swiftgram.app
@@ -21,14 +25,17 @@ DOMAIN-SUFFIX,t.me
 DOMAIN-SUFFIX,tdesktop.com
 DOMAIN-SUFFIX,telega.one
 DOMAIN-SUFFIX,telegra.ph
+DOMAIN-SUFFIX,telegram-cdn.org
+DOMAIN-SUFFIX,telegram.dog
+DOMAIN-SUFFIX,telegram.me
+DOMAIN-SUFFIX,telegram.org
+DOMAIN-SUFFIX,telegram.space
+DOMAIN-SUFFIX,telegramdownload.com
 DOMAIN-SUFFIX,telesco.pe
 DOMAIN-SUFFIX,tg.dev
 DOMAIN-SUFFIX,tx.me
 DOMAIN-SUFFIX,usercontent.dev
 DOMAIN-SUFFIX,walletbot.me
-
-DOMAIN-KEYWORD,nicegram
-DOMAIN-KEYWORD,telegram
 
 IP-CIDR,5.28.192.0/18,no-resolve
 IP-CIDR,91.105.192.0/23,no-resolve

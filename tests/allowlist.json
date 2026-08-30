@@ -11,20 +11,10 @@
     "以及 fix_spec FIX-B/D7 裁决为「刻意保留」的条目（见下方 F1 分组）。",
     "2026-08-30 B2 批次追加：ChinaDomain 已删的 5 条危险宽 UA 的防回流条目、",
     "AI.list 通用第三方组件域 6 类裁决、Streaming/ChinaMedia/TikTok 的 Android 包名说明。",
-    "2026-08-30 深夜：全库移除 USER-AGENT/PROCESS-NAME（用户裁决，纯域名+IP 架构），Android 包名类豁免随之删除；5 条宽 UA 的 preventive 条目保留（防上游再生回流，命中即删条目本身）。"
+    "2026-08-30 深夜：全库移除 USER-AGENT/PROCESS-NAME（用户裁决，纯域名+IP 架构），Android 包名类豁免随之删除；5 条宽 UA 的 preventive 条目保留（防上游再生回流，命中即删条目本身）。",
+    "2026-08-31 审计整改：preventive 语义拆分——「允许存在的分层/裁决」仍留 exemptions（preventive 只免 unused 告警）；「必须持续不存在」迁入顶层 forbidden 段，由 audit.py A8 扫源文件强制：命中即 P0 且不可豁免。原 5 条宽 UA 与 PROCESS-NAME 的 preventive 条目已由 forbidden 取代删除。"
   ],
   "exemptions": [
-    {
-      "check": [
-        "A2",
-        "A3",
-        "A4"
-      ],
-      "file": "*",
-      "rule": "PROCESS-NAME,*",
-      "preventive": true,
-      "reason": "PROCESS-NAME 大小写变体（Claude / claude / Claude.exe）是跨平台覆盖，禁止去重。audit.py 的 (type,value) 签名对 PROCESS-NAME 已做大小写敏感处理，本条为防回归的双保险；若未来改成大小写不敏感比较，此豁免可阻止误报。"
-    },
     {
       "check": [
         "A2",
@@ -96,7 +86,7 @@
       "file": "*",
       "by": "DOMAIN-KEYWORD,google",
       "preventive": true,
-      "reason": "上游合并排除表项：DOMAIN-KEYWORD,google 已被刻意排除，不应出现在任何 list 中。此条用于在它被误合并进来时，避免它引发的海量遮蔽告警淹没报告——出现即应先删关键词本身。"
+      "reason": "上游合并排除表项：DOMAIN-KEYWORD,google 已被刻意排除，不应出现在任何 list 中。此条用于在它被误合并进来时，避免它引发的海量遮蔽告警淹没报告——出现即应先删关键词本身。规则本身已由本文件 forbidden 段（A8，P0 不可豁免）把守；本条只防它回流瞬间的次生遮蔽告警淹没报告。"
     },
     {
       "check": [
@@ -106,7 +96,7 @@
       "file": "*",
       "by": "DOMAIN-SUFFIX,akadns.net",
       "preventive": true,
-      "reason": "上游合并排除表项：akadns.net（Akamai 通用调度域）已被刻意排除，不应出现在任何 list 中。"
+      "reason": "上游合并排除表项：akadns.net（Akamai 通用调度域）已被刻意排除，不应出现在任何 list 中。规则本身已由本文件 forbidden 段（A8，P0 不可豁免）把守；本条只防它回流瞬间的次生遮蔽告警淹没报告。"
     },
     {
       "check": [
@@ -116,7 +106,7 @@
       "file": "*",
       "by": "DOMAIN-KEYWORD,facebook",
       "preventive": true,
-      "reason": "上游合并排除表项：facebook 关键词已被刻意排除（Meta.list 用精确后缀覆盖）。"
+      "reason": "上游合并排除表项：facebook 关键词已被刻意排除（Meta.list 用精确后缀覆盖）。规则本身已由本文件 forbidden 段（A8，P0 不可豁免）把守；本条只防它回流瞬间的次生遮蔽告警淹没报告。"
     },
     {
       "check": [
@@ -126,7 +116,7 @@
       "file": "*",
       "by": "DOMAIN-KEYWORD,porn",
       "preventive": true,
-      "reason": "上游合并排除表项：porn 等成人内容关键词已被刻意排除。"
+      "reason": "上游合并排除表项：porn 等成人内容关键词已被刻意排除。规则本身已由本文件 forbidden 段（A8，P0 不可豁免）把守；本条只防它回流瞬间的次生遮蔽告警淹没报告。"
     },
     {
       "check": [
@@ -136,18 +126,7 @@
       "file": "*",
       "by": "DOMAIN-SUFFIX,ms",
       "preventive": true,
-      "reason": "上游合并排除表项：ms 作为 ccTLD（蒙特塞拉特）被误当作微软缩写的规则已被刻意排除。"
-    },
-    {
-      "check": [
-        "A2",
-        "A3",
-        "A4"
-      ],
-      "file": "*",
-      "rule": "DOMAIN-SUFFIX,ms",
-      "preventive": true,
-      "reason": "同上：DOMAIN-SUFFIX,ms 若出现即为误合并，应删除而非豁免；本条只是防止它污染遮蔽统计。"
+      "reason": "上游合并排除表项：ms 作为 ccTLD（蒙特塞拉特）被误当作微软缩写的规则已被刻意排除。规则本身已由本文件 forbidden 段（A8，P0 不可豁免）把守；本条只防它回流瞬间的次生遮蔽告警淹没报告。"
     },
     {
       "check": "A2",
@@ -281,61 +260,6 @@
         "A3",
         "A4"
       ],
-      "file": "*",
-      "rule": "USER-AGENT,Microsoft*",
-      "preventive": true,
-      "reason": "B2/2026-08-30 审计：全域生效的宽 UA 会把境外域打直连、国内域打代理。已从 ChinaDomain.list 删除并入 D11 合并排除表，再生时必须过滤。Office 系 app（UA 形如 Microsoft Office/16.0）访问的境外未收录域曾被实证打成 DIRECT。本条命中即说明它被误合并回来了——应删条目本身而非扩大豁免；禁止在更早的表加对冲 UA（任何位置都会误伤，见 ARCHITECTURE.md §6 D11 附）。"
-    },
-    {
-      "check": [
-        "A2",
-        "A3",
-        "A4"
-      ],
-      "file": "*",
-      "rule": "USER-AGENT,hide*",
-      "preventive": true,
-      "reason": "B2/2026-08-30 审计：同上批次。极宽——hide.me 等 VPN 服务及任何 UA 以 hide 开头者会被强制直连。已从 ChinaDomain.list 删除并入 D11 合并排除表。"
-    },
-    {
-      "check": [
-        "A2",
-        "A3",
-        "A4"
-      ],
-      "file": "*",
-      "rule": "USER-AGENT,TeamViewer*",
-      "preventive": true,
-      "reason": "B2/2026-08-30 审计：同上批次。国际远控服务被强制直连。已从 ChinaDomain.list 删除并入 D11 合并排除表。"
-    },
-    {
-      "check": [
-        "A2",
-        "A3",
-        "A4"
-      ],
-      "file": "*",
-      "rule": "USER-AGENT,QQ*",
-      "preventive": true,
-      "reason": "B2/2026-08-30 审计：同上批次。QQ / QQ 浏览器内置浏览器打开境外链接会失效，与铁律「TencentCN 加微信进程有害」同构。已从 ChinaDomain.list 删除并入 D11 合并排除表；同批次亦删除了 TencentCN.list 的 USER-AGENT,MicroMessenger* 与 USER-AGENT,WeChat*（手工表，直接删，不入排除表）。"
-    },
-    {
-      "check": [
-        "A2",
-        "A3",
-        "A4"
-      ],
-      "file": "*",
-      "rule": "USER-AGENT,TIM*",
-      "preventive": true,
-      "reason": "B2/2026-08-30 审计：同上批次，与 USER-AGENT,QQ* 同因（TIM 是 QQ 的办公版，UA 同构）。已从 ChinaDomain.list 删除并入 D11 合并排除表。"
-    },
-    {
-      "check": [
-        "A2",
-        "A3",
-        "A4"
-      ],
       "file": "AI.list",
       "rule": "DOMAIN*,*datadoghq.com",
       "preventive": true,
@@ -370,17 +294,6 @@
         "A4"
       ],
       "file": "AI.list",
-      "rule": "DOMAIN*,*cloudflareinsights.com",
-      "preventive": true,
-      "reason": "B2/2026-08-30 裁决（AI 会话同出口优先于组件归属）：static.cloudflareinsights.com 是 Cloudflare Web Analytics 的通用 beacon，被极多站点引用；刻意留在 AI 组是与 challenges.cloudflare.com（Turnstile，见上方 F1/FIX-B 条）一致的取舍——AI 登录链上的 Cloudflare 组件同出口可降低验证码率。"
-    },
-    {
-      "check": [
-        "A2",
-        "A3",
-        "A4"
-      ],
-      "file": "AI.list",
       "rule": "DOMAIN*,*arkoselabs.com",
       "preventive": true,
       "reason": "B2/2026-08-30 裁决（AI 会话同出口优先于组件归属）：openai-api.arkoselabs.com / client-api.arkoselabs.com 是通用风控验证组件。ChatGPT 登录与注册链强依赖它，验证与会话跨出口会直接抬高挑战失败率，故刻意留在 AI 组。注意本表只收这两个精确子域，不收 arkoselabs.com 顶域。"
@@ -401,14 +314,528 @@
       "file": "ChinaIP.list",
       "by_file": "TencentCN.list",
       "reason": "B2/2026-08-30 ChinaIP 换源重建的必然结果：新源（blackmatrix7 ChinaIPs@65e8adf，IPv4 17265 + IPv6 5153）覆盖了 TencentCN.list 手工登记的 14 个腾讯云段（43.156.* / 101.32.* / 101.33.* / 129.226.* / 150.109.* / 203.205.*）。二者同为 DIRECT，TencentCN.list 位次在前生效，无功能影响。与上方 ChinaIP × PKU 条同理：ChinaIP.list 是机器生成层，约定零手改，故长期豁免。"
+    }
+  ],
+  "forbidden": [
+    {
+      "pattern": "USER-AGENT,*",
+      "reason": "D7 裁决（2026-08-30）：全库零 USER-AGENT——UA 规则全域生效会跨境错分流（Office 系 UA 曾把境外未收录域实证打成 DIRECT），且 Clash 派生会剔除该类型造成双端分叉。曾删除 Microsoft*/hide*/TeamViewer*/QQ*/TIM* 五条宽 UA，出现任何 UA 规则即为回流。"
     },
     {
-      "check": "A4",
-      "file": "Domestic.list",
-      "rule": "DOMAIN-SUFFIX,*digicert.com",
-      "by": "DOMAIN-SUFFIX,digicert.com",
-      "by_file": "AppleCN.list",
-      "reason": "B2/2026-08-30 裁决即如此：CA 吊销/AIA 端点集中直连，cacerts.digicert.com / crl3.digicert.com / ocsp.digicert.com 三条自 DownloadCDN.list 移入 Domestic.list。AppleCN.list:836 的 DOMAIN-SUFFIX,digicert.com 位次更前且同为 DIRECT，实际生效的是它——移入的目的（脱离 DownloadCDN → 下载组 → 欧洲出口，恢复直连）已达成；三条在 Domestic 内作为「CA 端点集中登记」保留，是可接受的冗余，也修复了 W3 §A6.1 指出的「同一厂商分裂到两个出口」。"
+      "pattern": "PROCESS-NAME,*",
+      "reason": "D7 裁决（2026-08-30）：全库零 PROCESS-NAME——App 维度全域生效规则会误接管 App 内异质流量；重新评估触发点=接入 iOS 下游。"
+    },
+    {
+      "pattern": "URL-REGEX,*",
+      "reason": "D7 同批：纯域名+IP 架构；URL 层匹配在 Clash 派生时被剔除，出现即双端分叉。"
+    },
+    {
+      "pattern": "DOMAIN-KEYWORD,google",
+      "reason": "D11 上游合并排除表：命中面无上界（会吞掉一切含 google 子串的第三方域），Google 资产已由精确后缀与 .google/.goog gTLD 承接。"
+    },
+    {
+      "pattern": "DOMAIN-KEYWORD,facebook",
+      "reason": "D11 上游合并排除表：Meta.list 已用精确后缀覆盖。"
+    },
+    {
+      "pattern": "DOMAIN-KEYWORD,porn",
+      "reason": "D11 上游合并排除表：成人内容关键词命中面无上界。"
+    },
+    {
+      "pattern": "DOMAIN-SUFFIX,ms",
+      "reason": "D11 上游合并排除表：ms 是 ccTLD（蒙特塞拉特），被误当微软缩写；整 TLD 后缀会吞掉该国全部域名。"
+    },
+    {
+      "pattern": "DOMAIN-SUFFIX,akadns.net",
+      "reason": "D11 上游合并排除表：Akamai 通用调度域，多租户共享，不属于任何单一业务。"
+    },
+    {
+      "pattern": "DOMAIN-KEYWORD,paypal",
+      "reason": "2026-08-31 审计裁决：Payment.list 已改收 PayPal 官方精确后缀（paypal.com/paypal.me/paypalobjects.com/paypal.cn/paypalcorp.com）；品牌子串会把仿冒域与任意含 paypal 串的第三方域送进固定支付出口。"
+    },
+    {
+      "pattern": "DOMAIN-KEYWORD,.tmall.com",
+      "reason": "2026-08-31 审计裁决：ChinaDomain 再生须过滤的 9 条尾部品牌关键词之一——无边界子串会把 evil.tmall.com.attacker.example 一类域强制 DIRECT；AlibabaCN 已有 tmall.com 精确后缀。"
+    },
+    {
+      "pattern": "DOMAIN-KEYWORD,alicdn",
+      "reason": "2026-08-31 审计裁决（ChinaDomain 尾部关键词）：AlibabaCN 已有 alicdn.com 精确后缀；子串会吞掉任意含 alicdn 的第三方域。"
+    },
+    {
+      "pattern": "DOMAIN-KEYWORD,alipay",
+      "reason": "2026-08-31 审计裁决（ChinaDomain 尾部关键词）：AlibabaCN 已有 alipay.com 精确后缀；支付品牌子串强制 DIRECT 会把仿冒域一并直连，风险最高。"
+    },
+    {
+      "pattern": "DOMAIN-KEYWORD,aliyun",
+      "reason": "2026-08-31 审计裁决（ChinaDomain 尾部关键词）：AlibabaCN 已有 aliyun.com 精确后缀。"
+    },
+    {
+      "pattern": "DOMAIN-KEYWORD,baidu",
+      "reason": "2026-08-31 审计裁决（ChinaDomain 尾部关键词）：BaiduCN 已有 baidu.com 等精确后缀；任意含 baidu 子串的未收录域（含投毒/仿冒域）会被强制 DIRECT。"
+    },
+    {
+      "pattern": "DOMAIN-KEYWORD,hnagroup",
+      "reason": "2026-08-31 审计裁决（ChinaDomain 尾部关键词）：已补 Domestic.list 的 hnagroup.com 精确后缀承接海航集团域。"
+    },
+    {
+      "pattern": "DOMAIN-KEYWORD,officecdn",
+      "reason": "2026-08-31 审计裁决（ChinaDomain 尾部关键词）：MicrosoftCN.list 已有 officecdn.microsoft.com 精确后缀。"
+    },
+    {
+      "pattern": "DOMAIN-KEYWORD,taobao",
+      "reason": "2026-08-31 审计裁决（ChinaDomain 尾部关键词）：AlibabaCN 已有 taobao.com 精确后缀。"
+    },
+    {
+      "pattern": "DOMAIN-KEYWORD,weibo",
+      "reason": "2026-08-31 审计裁决（ChinaDomain 尾部关键词）：Domestic 已有 weibo.com 精确后缀。"
+    },
+    {
+      "pattern": "DOMAIN-KEYWORD,-ad.a.yximgs.com",
+      "reason": "2026-08-31 第一轮整改删除（Reject 边界化，已改 DOMAIN-WILDCARD 锚定），回流即恢复第一优先级误杀面。"
+    },
+    {
+      "pattern": "DOMAIN-KEYWORD,-ad.ixigua.com",
+      "reason": "2026-08-31 第一轮整改删除（Reject 边界化，已改 DOMAIN-WILDCARD 锚定），回流即恢复第一优先级误杀面。"
+    },
+    {
+      "pattern": "DOMAIN-KEYWORD,-ad.sm.cn",
+      "reason": "2026-08-31 第一轮整改删除（Reject 边界化，已改 DOMAIN-WILDCARD 锚定），回流即恢复第一优先级误杀面。"
+    },
+    {
+      "pattern": "DOMAIN-KEYWORD,-ad.video.yximgs.com",
+      "reason": "2026-08-31 第一轮整改删除（Reject 边界化，已改 DOMAIN-WILDCARD 锚定），回流即恢复第一优先级误杀面。"
+    },
+    {
+      "pattern": "DOMAIN-KEYWORD,-ad.wtzw.com",
+      "reason": "2026-08-31 第一轮整改删除（Reject 边界化，已改 DOMAIN-WILDCARD 锚定），回流即恢复第一优先级误杀面。"
+    },
+    {
+      "pattern": "DOMAIN-KEYWORD,-adnow.com",
+      "reason": "2026-08-31 第一轮整改删除（Reject 边界化，已改 DOMAIN-WILDCARD 锚定），回流即恢复第一优先级误杀面。"
+    },
+    {
+      "pattern": "DOMAIN-KEYWORD,-ads.realmemobile.com",
+      "reason": "2026-08-31 第一轮整改删除（Reject 边界化，已改 DOMAIN-WILDCARD 锚定），回流即恢复第一优先级误杀面。"
+    },
+    {
+      "pattern": "DOMAIN-KEYWORD,-rtb.gravite.net",
+      "reason": "2026-08-31 第一轮整改删除（Reject 边界化，已改 DOMAIN-WILDCARD 锚定），回流即恢复第一优先级误杀面。"
+    },
+    {
+      "pattern": "DOMAIN-KEYWORD,dnserror",
+      "reason": "2026-08-31 第一轮整改删除（Reject 边界化，已改 DOMAIN-WILDCARD 锚定），回流即恢复第一优先级误杀面。"
+    },
+    {
+      "pattern": "DOMAIN-KEYWORD,hostingcloud",
+      "reason": "2026-08-31 第一轮整改删除（Reject 边界化，已改 DOMAIN-WILDCARD 锚定），回流即恢复第一优先级误杀面。"
+    },
+    {
+      "pattern": "DOMAIN-KEYWORD,youtube",
+      "reason": "2026-08-31 第二轮整改删除（上游对撞恢复精确资产后移除的宽品牌/结构关键词），回流即恢复无边界子串误捕获。"
+    },
+    {
+      "pattern": "DOMAIN-KEYWORD,blogspot",
+      "reason": "2026-08-31 第二轮整改删除（上游对撞恢复精确资产后移除的宽品牌/结构关键词），回流即恢复无边界子串误捕获。"
+    },
+    {
+      "pattern": "DOMAIN-KEYWORD,gmail",
+      "reason": "2026-08-31 第二轮整改删除（上游对撞恢复精确资产后移除的宽品牌/结构关键词），回流即恢复无边界子串误捕获。"
+    },
+    {
+      "pattern": "DOMAIN-KEYWORD,recaptcha",
+      "reason": "2026-08-31 第二轮整改删除（上游对撞恢复精确资产后移除的宽品牌/结构关键词），回流即恢复无边界子串误捕获。"
+    },
+    {
+      "pattern": "DOMAIN-KEYWORD,twitter",
+      "reason": "2026-08-31 第二轮整改删除（上游对撞恢复精确资产后移除的宽品牌/结构关键词），回流即恢复无边界子串误捕获。"
+    },
+    {
+      "pattern": "DOMAIN-KEYWORD,fbcdn",
+      "reason": "2026-08-31 第二轮整改删除（上游对撞恢复精确资产后移除的宽品牌/结构关键词），回流即恢复无边界子串误捕获。"
+    },
+    {
+      "pattern": "DOMAIN-KEYWORD,instagram",
+      "reason": "2026-08-31 第二轮整改删除（上游对撞恢复精确资产后移除的宽品牌/结构关键词），回流即恢复无边界子串误捕获。"
+    },
+    {
+      "pattern": "DOMAIN-KEYWORD,whatsapp",
+      "reason": "2026-08-31 第二轮整改删除（上游对撞恢复精确资产后移除的宽品牌/结构关键词），回流即恢复无边界子串误捕获。"
+    },
+    {
+      "pattern": "DOMAIN-KEYWORD,telegram",
+      "reason": "2026-08-31 第二轮整改删除（上游对撞恢复精确资产后移除的宽品牌/结构关键词），回流即恢复无边界子串误捕获。"
+    },
+    {
+      "pattern": "DOMAIN-KEYWORD,nicegram",
+      "reason": "2026-08-31 第二轮整改删除（上游对撞恢复精确资产后移除的宽品牌/结构关键词），回流即恢复无边界子串误捕获。"
+    },
+    {
+      "pattern": "DOMAIN-KEYWORD,chatgpt-async-webps-prod",
+      "reason": "2026-08-31 第二轮整改删除（上游对撞恢复精确资产后移除的宽品牌/结构关键词），回流即恢复无边界子串误捕获。"
+    },
+    {
+      "pattern": "DOMAIN-KEYWORD,openaicom-api",
+      "reason": "2026-08-31 第二轮整改删除（上游对撞恢复精确资产后移除的宽品牌/结构关键词），回流即恢复无边界子串误捕获。"
+    },
+    {
+      "pattern": "DOMAIN-KEYWORD,testflight",
+      "reason": "2026-08-31 第二轮整改删除（上游对撞恢复精确资产后移除的宽品牌/结构关键词），回流即恢复无边界子串误捕获。"
+    },
+    {
+      "pattern": "DOMAIN-KEYWORD,1drv",
+      "reason": "2026-08-31 第二轮整改删除（上游对撞恢复精确资产后移除的宽品牌/结构关键词），回流即恢复无边界子串误捕获。"
+    },
+    {
+      "pattern": "DOMAIN-KEYWORD,onedrive",
+      "reason": "2026-08-31 第二轮整改删除（上游对撞恢复精确资产后移除的宽品牌/结构关键词），回流即恢复无边界子串误捕获。"
+    },
+    {
+      "pattern": "DOMAIN-KEYWORD,skydrive",
+      "reason": "2026-08-31 第二轮整改删除（上游对撞恢复精确资产后移除的宽品牌/结构关键词），回流即恢复无边界子串误捕获。"
+    },
+    {
+      "pattern": "DOMAIN-KEYWORD,bilibili",
+      "reason": "2026-08-31 第二轮整改删除（上游对撞恢复精确资产后移除的宽品牌/结构关键词），回流即恢复无边界子串误捕获。"
+    },
+    {
+      "pattern": "DOMAIN-KEYWORD,qiyi",
+      "reason": "2026-08-31 第二轮整改删除（上游对撞恢复精确资产后移除的宽品牌/结构关键词），回流即恢复无边界子串误捕获。"
+    },
+    {
+      "pattern": "DOMAIN-KEYWORD,1e100",
+      "reason": "2026-08-31 第二轮整改删除（上游对撞恢复精确资产后移除的宽品牌/结构关键词），回流即恢复无边界子串误捕获。"
+    },
+    {
+      "pattern": "DOMAIN-KEYWORD,abema",
+      "reason": "2026-08-31 第二轮整改删除（上游对撞恢复精确资产后移除的宽品牌/结构关键词），回流即恢复无边界子串误捕获。"
+    },
+    {
+      "pattern": "DOMAIN-KEYWORD,appledaily",
+      "reason": "2026-08-31 第二轮整改删除（上游对撞恢复精确资产后移除的宽品牌/结构关键词），回流即恢复无边界子串误捕获。"
+    },
+    {
+      "pattern": "DOMAIN-KEYWORD,beetalk",
+      "reason": "2026-08-31 第二轮整改删除（上游对撞恢复精确资产后移除的宽品牌/结构关键词），回流即恢复无边界子串误捕获。"
+    },
+    {
+      "pattern": "DOMAIN-KEYWORD,dlercloud",
+      "reason": "2026-08-31 第二轮整改删除（上游对撞恢复精确资产后移除的宽品牌/结构关键词），回流即恢复无边界子串误捕获。"
+    },
+    {
+      "pattern": "DOMAIN-KEYWORD,dropbox",
+      "reason": "2026-08-31 第二轮整改删除（上游对撞恢复精确资产后移除的宽品牌/结构关键词），回流即恢复无边界子串误捕获。"
+    },
+    {
+      "pattern": "DOMAIN-KEYWORD,github",
+      "reason": "2026-08-31 第二轮整改删除（上游对撞恢复精确资产后移除的宽品牌/结构关键词），回流即恢复无边界子串误捕获。"
+    },
+    {
+      "pattern": "DOMAIN-KEYWORD,avtb",
+      "reason": "2026-08-31 第二轮整改删除（上游对撞恢复精确资产后移除的宽品牌/结构关键词），回流即恢复无边界子串误捕获。"
+    },
+    {
+      "pattern": "DOMAIN-KEYWORD,apple-support.akadns.net",
+      "reason": "2026-08-31 第二轮整改删除（上游对撞恢复精确资产后移除的宽品牌/结构关键词），回流即恢复无边界子串误捕获。"
+    },
+    {
+      "pattern": "DOMAIN-KEYWORD,apple.com.akadns.net",
+      "reason": "2026-08-31 第二轮整改删除（上游对撞恢复精确资产后移除的宽品牌/结构关键词），回流即恢复无边界子串误捕获。"
+    },
+    {
+      "pattern": "DOMAIN-KEYWORD,apple.com.edgekey.net",
+      "reason": "2026-08-31 第二轮整改删除（上游对撞恢复精确资产后移除的宽品牌/结构关键词），回流即恢复无边界子串误捕获。"
+    },
+    {
+      "pattern": "DOMAIN-KEYWORD,icloud.com.akadns.net",
+      "reason": "2026-08-31 第二轮整改删除（上游对撞恢复精确资产后移除的宽品牌/结构关键词），回流即恢复无边界子串误捕获。"
+    },
+    {
+      "pattern": "DOMAIN-KEYWORD,spotify",
+      "reason": "2026-08-31 第二轮整改删除（上游对撞恢复精确资产后移除的宽品牌/结构关键词），回流即恢复无边界子串误捕获。"
+    },
+    {
+      "pattern": "DOMAIN-KEYWORD,uk-live",
+      "reason": "2026-08-31 第二轮整改删除（上游对撞恢复精确资产后移除的宽品牌/结构关键词），回流即恢复无边界子串误捕获。"
+    },
+    {
+      "pattern": "DOMAIN-KEYWORD,bbcfmt",
+      "reason": "2026-08-31 第二轮整改删除（上游对撞恢复精确资产后移除的宽品牌/结构关键词），回流即恢复无边界子串误捕获。"
+    },
+    {
+      "pattern": "DOMAIN-KEYWORD,hbogoasia",
+      "reason": "2026-08-31 第二轮整改删除（上游对撞恢复精确资产后移除的宽品牌/结构关键词），回流即恢复无边界子串误捕获。"
+    },
+    {
+      "pattern": "DOMAIN-KEYWORD,tvbanywhere",
+      "reason": "2026-08-31 第二轮整改删除（上游对撞恢复精确资产后移除的宽品牌/结构关键词），回流即恢复无边界子串误捕获。"
+    },
+    {
+      "pattern": "DOMAIN-KEYWORD,ttvnw",
+      "reason": "2026-08-31 第二轮整改删除（上游对撞恢复精确资产后移除的宽品牌/结构关键词），回流即恢复无边界子串误捕获。"
+    },
+    {
+      "pattern": "DOMAIN-KEYWORD,netflixdnstest",
+      "reason": "2026-08-31 第二轮整改删除（上游对撞恢复精确资产后移除的宽品牌/结构关键词），回流即恢复无边界子串误捕获。"
+    },
+    {
+      "pattern": "DOMAIN-KEYWORD,rthklive",
+      "reason": "2026-08-31 第二轮整改删除（上游对撞恢复精确资产后移除的宽品牌/结构关键词），回流即恢复无边界子串误捕获。"
+    },
+    {
+      "pattern": "DOMAIN-KEYWORD,voddazn",
+      "reason": "2026-08-31 第二轮整改删除（上游对撞恢复精确资产后移除的宽品牌/结构关键词），回流即恢复无边界子串误捕获。"
+    },
+    {
+      "pattern": "DOMAIN-KEYWORD,japonx",
+      "reason": "2026-08-31 第二轮整改删除（上游对撞恢复精确资产后移除的宽品牌/结构关键词），回流即恢复无边界子串误捕获。"
+    },
+    {
+      "pattern": "DOMAIN-KEYWORD,japronx",
+      "reason": "2026-08-31 第二轮整改删除（上游对撞恢复精确资产后移除的宽品牌/结构关键词），回流即恢复无边界子串误捕获。"
+    },
+    {
+      "pattern": "DOMAIN-KEYWORD,nivod",
+      "reason": "2026-08-31 第二轮整改删除（上游对撞恢复精确资产后移除的宽品牌/结构关键词），回流即恢复无边界子串误捕获。"
+    },
+    {
+      "pattern": "DOMAIN-KEYWORD,apiproxy-device-prod-nlb-",
+      "reason": "2026-08-31 第二轮整改删除（上游对撞恢复精确资产后移除的宽品牌/结构关键词），回流即恢复无边界子串误捕获。"
+    },
+    {
+      "pattern": "DOMAIN-KEYWORD,dualstack.apiproxy-",
+      "reason": "2026-08-31 第二轮整改删除（上游对撞恢复精确资产后移除的宽品牌/结构关键词），回流即恢复无边界子串误捕获。"
+    },
+    {
+      "pattern": "DOMAIN-KEYWORD,dualstack.ichnaea-web-",
+      "reason": "2026-08-31 第二轮整改删除（上游对撞恢复精确资产后移除的宽品牌/结构关键词），回流即恢复无边界子串误捕获。"
+    },
+    {
+      "pattern": "DOMAIN-KEYWORD,avoddashs",
+      "reason": "2026-08-31 第二轮整改删除（上游对撞恢复精确资产后移除的宽品牌/结构关键词），回流即恢复无边界子串误捕获。"
+    },
+    {
+      "pattern": "DOMAIN-KEYWORD,jooxweb-api",
+      "reason": "2026-08-31 第二轮整改删除（上游对撞恢复精确资产后移除的宽品牌/结构关键词），回流即恢复无边界子串误捕获。"
+    },
+    {
+      "pattern": "DOMAIN-KEYWORD,nowtv100",
+      "reason": "2026-08-31 第二轮整改删除（上游对撞恢复精确资产后移除的宽品牌/结构关键词），回流即恢复无边界子串误捕获。"
+    },
+    {
+      "pattern": "DOMAIN-KEYWORD,bytedance.map.",
+      "reason": "2026-08-31 第二轮整改删除（上游对撞恢复精确资产后移除的宽品牌/结构关键词），回流即恢复无边界子串误捕获。"
+    },
+    {
+      "pattern": "DOMAIN-KEYWORD,musical.ly.",
+      "reason": "2026-08-31 第二轮整改删除（上游对撞恢复精确资产后移除的宽品牌/结构关键词），回流即恢复无边界子串误捕获。"
+    },
+    {
+      "pattern": "DOMAIN-KEYWORD,tiktokcdn-",
+      "reason": "2026-08-31 第二轮整改删除（上游对撞恢复精确资产后移除的宽品牌/结构关键词），回流即恢复无边界子串误捕获。"
+    },
+    {
+      "pattern": "DOMAIN-KEYWORD,tiktokcdn.com.",
+      "reason": "2026-08-31 第二轮整改删除（上游对撞恢复精确资产后移除的宽品牌/结构关键词），回流即恢复无边界子串误捕获。"
+    },
+    {
+      "pattern": "DOMAIN-KEYWORD,tiktokv.com.",
+      "reason": "2026-08-31 第二轮整改删除（上游对撞恢复精确资产后移除的宽品牌/结构关键词），回流即恢复无边界子串误捕获。"
+    },
+    {
+      "pattern": "DOMAIN-KEYWORD,ttcdn-tos.",
+      "reason": "2026-08-31 第二轮整改删除（上游对撞恢复精确资产后移除的宽品牌/结构关键词），回流即恢复无边界子串误捕获。"
+    },
+    {
+      "pattern": "DOMAIN-KEYWORD,ttlivecdn.com.",
+      "reason": "2026-08-31 第二轮整改删除（上游对撞恢复精确资产后移除的宽品牌/结构关键词），回流即恢复无边界子串误捕获。"
+    },
+    {
+      "pattern": "DOMAIN-KEYWORD,assets.trustpilot.net",
+      "reason": "2026-08-31 第二轮整改删除（上游对撞恢复精确资产后移除的宽品牌/结构关键词），回流即恢复无边界子串误捕获。"
+    },
+    {
+      "pattern": "DOMAIN-KEYWORD,cdn.trustpilot.net",
+      "reason": "2026-08-31 第二轮整改删除（上游对撞恢复精确资产后移除的宽品牌/结构关键词），回流即恢复无边界子串误捕获。"
+    },
+    {
+      "pattern": "DOMAIN-KEYWORD,images.trustpilot.com",
+      "reason": "2026-08-31 第二轮整改删除（上游对撞恢复精确资产后移除的宽品牌/结构关键词），回流即恢复无边界子串误捕获。"
+    },
+    {
+      "pattern": "DOMAIN-KEYWORD,images.trustpilot.net",
+      "reason": "2026-08-31 第二轮整改删除（上游对撞恢复精确资产后移除的宽品牌/结构关键词），回流即恢复无边界子串误捕获。"
+    },
+    {
+      "pattern": "DOMAIN-KEYWORD,scripts.trustpilot.com",
+      "reason": "2026-08-31 第二轮整改删除（上游对撞恢复精确资产后移除的宽品牌/结构关键词），回流即恢复无边界子串误捕获。"
+    },
+    {
+      "pattern": "DOMAIN-KEYWORD,static.trustpilot.com",
+      "reason": "2026-08-31 第二轮整改删除（上游对撞恢复精确资产后移除的宽品牌/结构关键词），回流即恢复无边界子串误捕获。"
+    },
+    {
+      "pattern": "DOMAIN-KEYWORD,dsn.algolia.net",
+      "reason": "2026-08-31 第二轮整改删除（上游对撞恢复精确资产后移除的宽品牌/结构关键词），回流即恢复无边界子串误捕获。"
+    },
+    {
+      "pattern": "DOMAIN-KEYWORD,web-assets.zendesk",
+      "reason": "2026-08-31 第二轮整改删除（上游对撞恢复精确资产后移除的宽品牌/结构关键词），回流即恢复无边界子串误捕获。"
+    },
+    {
+      "pattern": "DOMAIN-KEYWORD,-assets.worldsex.com",
+      "reason": "2026-08-31 第二轮整改删除（上游对撞恢复精确资产后移除的宽品牌/结构关键词），回流即恢复无边界子串误捕获。"
+    },
+    {
+      "pattern": "DOMAIN-KEYWORD,-cdn.eporner.com",
+      "reason": "2026-08-31 第二轮整改删除（上游对撞恢复精确资产后移除的宽品牌/结构关键词），回流即恢复无边界子串误捕获。"
+    },
+    {
+      "pattern": "DOMAIN-KEYWORD,-files.gitbook.io",
+      "reason": "2026-08-31 第二轮整改删除（上游对撞恢复精确资产后移除的宽品牌/结构关键词），回流即恢复无边界子串误捕获。"
+    },
+    {
+      "pattern": "DOMAIN-KEYWORD,-res.cloudinary.com",
+      "reason": "2026-08-31 第二轮整改删除（上游对撞恢复精确资产后移除的宽品牌/结构关键词），回流即恢复无边界子串误捕获。"
+    },
+    {
+      "pattern": "DOMAIN-KEYWORD,-thumbs.pornhost.com",
+      "reason": "2026-08-31 第二轮整改删除（上游对撞恢复精确资产后移除的宽品牌/结构关键词），回流即恢复无边界子串误捕获。"
+    },
+    {
+      "pattern": "DOMAIN-KEYWORD,-thumbs.worldsex.com",
+      "reason": "2026-08-31 第二轮整改删除（上游对撞恢复精确资产后移除的宽品牌/结构关键词），回流即恢复无边界子串误捕获。"
+    },
+    {
+      "pattern": "DOMAIN-KEYWORD,99avcdn",
+      "reason": "2026-08-31 第二轮整改删除（上游对撞恢复精确资产后移除的宽品牌/结构关键词），回流即恢复无边界子串误捕获。"
+    },
+    {
+      "pattern": "DOMAIN-KEYWORD,cdn.adultempire.com",
+      "reason": "2026-08-31 第二轮整改删除（上游对撞恢复精确资产后移除的宽品牌/结构关键词），回流即恢复无边界子串误捕获。"
+    },
+    {
+      "pattern": "DOMAIN-KEYWORD,vod-adaptive.akamaized.net",
+      "reason": "2026-08-31 第二轮整改删除（上游对撞恢复精确资产后移除的宽品牌/结构关键词），回流即恢复无边界子串误捕获。"
+    },
+    {
+      "pattern": "DOMAIN-SUFFIX,blob.core.windows.net",
+      "reason": "2026-08-31 审计裁决：多租户托管/对象存储平台宽后缀不代表业务所有权（P1-01），任何表回收都会把任意租户流量吸入该表出口。"
+    },
+    {
+      "pattern": "DOMAIN-SUFFIX,cloudfront.net",
+      "reason": "2026-08-31 审计裁决：多租户托管/对象存储平台宽后缀不代表业务所有权（P1-01），任何表回收都会把任意租户流量吸入该表出口。"
+    },
+    {
+      "pattern": "DOMAIN-SUFFIX,digitaloceanspaces.com",
+      "reason": "2026-08-31 审计裁决：多租户托管/对象存储平台宽后缀不代表业务所有权（P1-01），任何表回收都会把任意租户流量吸入该表出口。"
+    },
+    {
+      "pattern": "DOMAIN-SUFFIX,github.io",
+      "reason": "2026-08-31 审计裁决：多租户托管/对象存储平台宽后缀不代表业务所有权（P1-01），任何表回收都会把任意租户流量吸入该表出口。"
+    },
+    {
+      "pattern": "DOMAIN-SUFFIX,gitlab.io",
+      "reason": "2026-08-31 审计裁决：多租户托管/对象存储平台宽后缀不代表业务所有权（P1-01），任何表回收都会把任意租户流量吸入该表出口。"
+    },
+    {
+      "pattern": "DOMAIN-SUFFIX,netlify.app",
+      "reason": "2026-08-31 审计裁决：多租户托管/对象存储平台宽后缀不代表业务所有权（P1-01），任何表回收都会把任意租户流量吸入该表出口。"
+    },
+    {
+      "pattern": "DOMAIN-SUFFIX,now.sh",
+      "reason": "2026-08-31 审计裁决：多租户托管/对象存储平台宽后缀不代表业务所有权（P1-01），任何表回收都会把任意租户流量吸入该表出口。"
+    },
+    {
+      "pattern": "DOMAIN-SUFFIX,onrender.com",
+      "reason": "2026-08-31 审计裁决：多租户托管/对象存储平台宽后缀不代表业务所有权（P1-01），任何表回收都会把任意租户流量吸入该表出口。"
+    },
+    {
+      "pattern": "DOMAIN-SUFFIX,pages.dev",
+      "reason": "2026-08-31 审计裁决：多租户托管/对象存储平台宽后缀不代表业务所有权（P1-01），任何表回收都会把任意租户流量吸入该表出口。"
+    },
+    {
+      "pattern": "DOMAIN-SUFFIX,s3.amazonaws.com",
+      "reason": "2026-08-31 审计裁决：多租户托管/对象存储平台宽后缀不代表业务所有权（P1-01），任何表回收都会把任意租户流量吸入该表出口。"
+    },
+    {
+      "pattern": "DOMAIN-SUFFIX,supabase.co",
+      "reason": "2026-08-31 审计裁决：多租户托管/对象存储平台宽后缀不代表业务所有权（P1-01），任何表回收都会把任意租户流量吸入该表出口。"
+    },
+    {
+      "pattern": "DOMAIN-SUFFIX,vercel.app",
+      "reason": "2026-08-31 审计裁决：多租户托管/对象存储平台宽后缀不代表业务所有权（P1-01），任何表回收都会把任意租户流量吸入该表出口。"
+    },
+    {
+      "pattern": "DOMAIN-SUFFIX,workers.dev",
+      "reason": "2026-08-31 审计裁决：多租户托管/对象存储平台宽后缀不代表业务所有权（P1-01），任何表回收都会把任意租户流量吸入该表出口。"
+    },
+    {
+      "pattern": "DOMAIN-SUFFIX,algolianet.com",
+      "reason": "2026-08-31 审计裁决：通用 SaaS/共享组件（评价/搜索/客服/AB 实验/同意管理/归因/APM）与云区域通用后缀不归业务表；须与调用方站点解耦落 FINAL。"
+    },
+    {
+      "pattern": "DOMAIN-SUFFIX,assets.zendesk.com",
+      "reason": "2026-08-31 审计裁决：通用 SaaS/共享组件（评价/搜索/客服/AB 实验/同意管理/归因/APM）与云区域通用后缀不归业务表；须与调用方站点解耦落 FINAL。"
+    },
+    {
+      "pattern": "DOMAIN-SUFFIX,widget.trustpilot.com",
+      "reason": "2026-08-31 审计裁决：通用 SaaS/共享组件（评价/搜索/客服/AB 实验/同意管理/归因/APM）与云区域通用后缀不归业务表；须与调用方站点解耦落 FINAL。"
+    },
+    {
+      "pattern": "DOMAIN-SUFFIX,optimizely.com",
+      "reason": "2026-08-31 审计裁决：通用 SaaS/共享组件（评价/搜索/客服/AB 实验/同意管理/归因/APM）与云区域通用后缀不归业务表；须与调用方站点解耦落 FINAL。"
+    },
+    {
+      "pattern": "DOMAIN-SUFFIX,adobedtm.com",
+      "reason": "2026-08-31 审计裁决：通用 SaaS/共享组件（评价/搜索/客服/AB 实验/同意管理/归因/APM）与云区域通用后缀不归业务表；须与调用方站点解耦落 FINAL。"
+    },
+    {
+      "pattern": "DOMAIN-SUFFIX,braze.com",
+      "reason": "2026-08-31 审计裁决：通用 SaaS/共享组件（评价/搜索/客服/AB 实验/同意管理/归因/APM）与云区域通用后缀不归业务表；须与调用方站点解耦落 FINAL。"
+    },
+    {
+      "pattern": "DOMAIN-SUFFIX,cookielaw.org",
+      "reason": "2026-08-31 审计裁决：通用 SaaS/共享组件（评价/搜索/客服/AB 实验/同意管理/归因/APM）与云区域通用后缀不归业务表；须与调用方站点解耦落 FINAL。"
+    },
+    {
+      "pattern": "DOMAIN-SUFFIX,onetrust.com",
+      "reason": "2026-08-31 审计裁决：通用 SaaS/共享组件（评价/搜索/客服/AB 实验/同意管理/归因/APM）与云区域通用后缀不归业务表；须与调用方站点解耦落 FINAL。"
+    },
+    {
+      "pattern": "DOMAIN-SUFFIX,control.kochava.com",
+      "reason": "2026-08-31 审计裁决：通用 SaaS/共享组件（评价/搜索/客服/AB 实验/同意管理/归因/APM）与云区域通用后缀不归业务表；须与调用方站点解耦落 FINAL。"
+    },
+    {
+      "pattern": "DOMAIN-SUFFIX,us-west-2.amazonaws.com",
+      "reason": "2026-08-31 审计裁决：通用 SaaS/共享组件（评价/搜索/客服/AB 实验/同意管理/归因/APM）与云区域通用后缀不归业务表；须与调用方站点解耦落 FINAL。"
+    },
+    {
+      "pattern": "DOMAIN-SUFFIX,amazonaws.co.uk",
+      "reason": "2026-08-31 审计裁决：通用 SaaS/共享组件（评价/搜索/客服/AB 实验/同意管理/归因/APM）与云区域通用后缀不归业务表；须与调用方站点解耦落 FINAL。"
+    },
+    {
+      "pattern": "DOMAIN-SUFFIX,execute-api.us-east-1.amazonaws.com",
+      "reason": "2026-08-31 审计裁决：通用 SaaS/共享组件（评价/搜索/客服/AB 实验/同意管理/归因/APM）与云区域通用后缀不归业务表；须与调用方站点解耦落 FINAL。"
+    },
+    {
+      "pattern": "DOMAIN-SUFFIX,execute-api.ap-southeast-1.amazonaws.com",
+      "reason": "2026-08-31 审计裁决：通用 SaaS/共享组件（评价/搜索/客服/AB 实验/同意管理/归因/APM）与云区域通用后缀不归业务表；须与调用方站点解耦落 FINAL。"
+    },
+    {
+      "pattern": "DOMAIN-KEYWORD,epicgames",
+      "reason": "2026-08-31 第二轮整改删除（上游对撞恢复精确资产后移除的宽品牌/结构关键词），回流即恢复无边界子串误捕获。"
+    },
+    {
+      "pattern": "DOMAIN-KEYWORD,steambroadcast",
+      "reason": "2026-08-31 第二轮整改删除（上游对撞恢复精确资产后移除的宽品牌/结构关键词），回流即恢复无边界子串误捕获。"
+    },
+    {
+      "pattern": "DOMAIN-KEYWORD,steamstore",
+      "reason": "2026-08-31 第二轮整改删除（上游对撞恢复精确资产后移除的宽品牌/结构关键词），回流即恢复无边界子串误捕获。"
+    },
+    {
+      "pattern": "DOMAIN-KEYWORD,steamuserimages",
+      "reason": "2026-08-31 第二轮整改删除（上游对撞恢复精确资产后移除的宽品牌/结构关键词），回流即恢复无边界子串误捕获。"
     }
   ]
 }

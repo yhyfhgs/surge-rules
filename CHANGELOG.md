@@ -4,6 +4,54 @@
 
 ---
 
+## [2026-08-31·二轮] 审计整改完成:关键词全量迁移(104→8) + DownloadCDN 止血 + ChinaIP 折叠减半 + 测试链加固
+
+同日第二轮,承接首轮(见下节)未尽的「无需真实流量验证即可安全完成」项;9 个并行子任务执行,advisor 统一裁决收口。仍未处理(需 shadow/实测):Streaming 的 1,089 条 AWS IP 段、Meta 防御域拆分、OneDrive 数据面归属、TencentCN 海外段、地区表 canonical owner。
+
+### Changed
+- **关键词全量迁移(84→8,含首轮共 104→8)**:六个生态表/四个直连侧表/两媒体表/Games 的 47 条宽品牌与结构关键词,全部按「上游对撞恢复精确资产 → 删除/锚定 → 正负断言」迁移——恢复精确后缀约 400 条(YouTube 167、Google 76、Spotify 21、bilibili/iQIYI 20、dropbox 14 等),消除报告实证的全部误捕获(qingmail/suningmail、`univod.cn`→DIRECT、`ttcdn-tos.kkimg.cc`、`sf1-ttcdn-tos.pstatp.com`→字节国内直连、iqiyi 系仿冒 buzz 域等)。存留 8 条均为登记观察项(Reject 6 + `smp-device` + `sci-hub`)。全部已删关键词入 forbidden 段(A8,共 126 条模式)。
+- **DownloadCDN 确定级止血(5,622→5,559 条)**:删 13 条多租户平台宽后缀(github.io/vercel.app/pages.dev/cloudfront.net/blob.core.windows.net/s3.amazonaws.com 等,任意租户流量不再被吸入下载出口)与 14 条通用 SaaS 组件规则(Trustpilot/Algolia/Zendesk/Optimizely);`unpkg.com` 经裁决保留(单一注册者包 CDN,与 jsDelivr/cdnjs 同类);本表 DOMAIN-KEYWORD 17→0。FiveM/Cfx 34 条与万代账号域整族迁 Games(`fivem.net`/`cfx.re`/`bandainamcoid.com`)。
+- **Streaming 共享组件清理**:删 AdobeDTM/Braze/Optimizely/Kochava/CookieLaw/OneTrust 与 AWS 区域通用后缀(`execute-api.*`/`us-west-2.amazonaws.com`/`amazonaws.co.uk`)共 11 条,第一方网关只留实证精确 host;补 Abema 4 条缺失资产。**IP-CIDR/IP-ASN 面逐字节未动**(Phase 2 shadow 范畴)。
+- **ChinaIP 等价折叠(22,417→11,090 条,-50.5%)**:新增 `tools/collapse_cidr.py`(写前等价自检,不等价拒绝写);地址集合逐位不变(SHA-256 相同 + 方法独立的 49 万探测点成员判定 0 分歧)。发布链新增折叠漂移闸门(update.sh 步 0.5),上游再生后未折叠会被拦下。
+- **归属收口**:YouTube 专属 googleapis 三子域(`youtubei` 等)归 YouTube.list(App API 面与视频面同会话);AppleCN 4 条 CNAME 调度域改 DOMAIN-SUFFIX 点边界。
+
+### Fixed
+- **runsuite 加载期 schema 严格校验**(报告 P1-10 全部假绿空洞):name 唯一、requests 非空、断言有效性、policy×policy_in 互斥、per_request 键唯一且可对应、未知键报错、known-broken>0 非零退出(`--allow-known-broken` 逃生口)。顺带挖出并重建了两个被 PROCESS-NAME 移除掏空的存量空场景(0 断言却显示通过——正是 P1-10 所指问题的活体)。
+- **surge2clash 事务式**(报告 §13.3):全量解析校验(未知类型一次报全清单)→ 临时目录生成 → 逐文件原子换入,正式 `clash/` 全有或全无;新增 `--check` 漂移门(0/1/2 退出码);内容相同零重写,消除 mtime churn。
+- audit A8 大模式量优化(精确模式 O(1) 查表,126 条模式全库扫描 0.6s)。
+
+### Added
+- `SOURCES.md`:19 个上游/参考来源的 URL、本地快照 revision、许可证(逐个取证,含「未声明」的如实登记)与使用方式;LICENSE 选型(涉 GPL/AGPL 传染性)留待用户裁决。
+- 场景 5 个新文件 + 重建 2 场景:`kw_ecosystem`/`kw_direct`/`kw_media`/`download_cleanup`/`region_coverage`(地区表与 NetEaseCN 首获 L2 正负覆盖)。回归基线 113→**147 场景 / 1,731 断言 / 674 条 DNS 泄漏断言**;Surge 源与 Mihomo 1.19.20 实载守恒 **143,640 条**。
+- MAINTENANCE 裁决登记追加 12 行(二轮批次):多租户平台永久禁收、SaaS 组件解耦、FiveM/Epic/Steam、YouTube googleapis、ChinaDomain 再生回收清单等。
+
+---
+
+## [2026-08-31] 外部审计整改:发布链三态化 + forbidden 门禁 + 归属修正 + 关键词边界化
+
+依据外部审计报告(docs/RULES_AUDIT_AND_OPTIMIZATION_2026-08-31.md)逐条核实后修复其中「确定级」发现;需真实流量验证或整表重建的项(DownloadCDN/Streaming 重构、地区表 canonical owner、上游供应链)未在本轮处理,见报告 Phase 2-4。
+
+### Fixed
+- **update.sh 发布假成功(P0)**:重写为三态结果——`VALIDATED_NOT_PUBLISHED` / `PUBLISHED_AND_VERIFIED`(exit 0)/ `PUBLISHED_BUT_UNVERIFIED`(exit 1)。CDN 拉取失败、purge 未受理、非 JSON 响应、复验 md5 不一致、限流,全部如实计数并以非零退出;不再有任何网络失败路径通向"完成"。`set -euo pipefail`。
+- **update.sh 分支错配(P0)**:只允许 main 分支发布(非 main 立即退出、不产生提交);push 改为显式 `HEAD:main`,push 后 fetch 并校验 `origin/main == HEAD` 才继续刷 CDN——消除「提交 A、推送 B、刷新 A」路径。diff 中的**删除项**也发 purge,防旧内容滞留边缘缓存。
+- **allowlist preventive 双语义(P0)**:「防回归豁免」此前同时承载「允许重叠」与「命中即删」两种相反语义,后者会被静默豁免放行。拆分为:允许存在的仍留 exemptions(39→30 条);「必须持续不存在」迁入顶层 **forbidden 段**(18 条:全类型 USER-AGENT/PROCESS-NAME/URL-REGEX、D11 上游排除项、已删品牌关键词),由新增 **audit A8** 扫源文件强制——命中即 P0 且不可被 exemptions 豁免。
+- **audit 自检盲区**:补 A7 正向 fixture(裸行必须被捕获)与 A8 正向 fixture(植入 PROCESS-NAME 必须被抓、豁免必须无效),自检 27→33 条。
+- **Surge/Clash 顺序分叉**:rule-providers.yaml 的 rules 参考序列此前把 Reject 排在 PrivateLAN/PKU 之前,与 Surge 真实顺序(PrivateLAN→PKU→Reject)相反;Reject 已补入 CONF_ORDER 真实位置,参考序列与 Surge.conf 逐行同序。
+- **文档漂移**:README/ARCHITECTURE/tests README 的表数(32→34)、场景与断言数、A1–A6→A1–A8、Mihomo 守恒数(138,185→154,666)、Reject 停用表述、发布文件数(65→69)全面对齐现状;MAINTENANCE 修正 runsuite「--rules」参数误载(实为 --conf)与已不存在的两个备份目录登记(实际回滚依赖 git 历史与 tag `pre-restructure-20260829`)。
+
+### Changed
+- **归属修正(确定级,共 7 项)**:Cursor/Anysphere 全家(6 域)Twitter→AI(独立公司,更正 08-30 裁决);`qwenlm.ai` Domestic→AI(跳转 chat.qwen.ai,国际站统一代理);`static.cloudflareinsights.com` 移出 AI 落 FINAL(Web Analytics beacon 非 Turnstile,更正 08-30 B2 裁决);`api.snapkit.com` / `sdk.snapkit.com`(Snap 资产)移出 TikTok/DownloadCDN,`cocacola.co.jp`(日本可口可乐)移出 TikTok 迁 Japan.list;`sony.com` 移出 Games(集团总域,PlayStation/SIE 域保留);`digicert.com` AppleCN→Domestic CA 段(CA 所有权归位,直连行为不变,Domestic 内 3 条子域并入宽后缀)。
+- **共享云段清理(3 条)**:Games 删 GCP `35.192.0.0/12`(约 105 万地址客户段)、Meta 删 AWS `18.194.0.0/15`、Google 删 `IP-ASN,396982`(GCP 客户前缀 ASN)——云平台所有权≠业务所有权,云客户 IP 回落 FINAL;第一方专网段(Meta AS32934 等)不受影响。
+- **关键词边界化(104→84 条)**:Reject 10 条改 DOMAIN-WILDCARD 锚定(8 条右锚定片段 + `dnserror.*` + `hostingcloud.*`,拦截意图保持、标签外子串不再有第一优先级误杀面);Payment 的 `paypal` 关键词改为 5 条官方精确后缀(paypal.com/paypal.me/paypalobjects.com/paypal.cn/paypalcorp.com,原表无任何 PayPal 精确规则);ChinaDomain 删尾部 9 条品牌关键词(核心域由厂商表承接,`hnagroup.com` 补入 Domestic 承接)——防含品牌子串的投毒/仿冒域被强制 DIRECT。Reject 剩余 6 条特异词与 MicrosoftCN 3 条产品词列观察项(见 MAINTENANCE 裁决登记)。
+- **Clash 派生 DOMAIN-WILDCARD 原样透传**:Mihomo ≥1.19 原生支持且 `*`/`?` 语义与 Surge 一致,不再转写 DOMAIN-REGEX(消除正则方言差异);Mihomo 1.19.20 实载 34 provider 验证 ruleCount=154,666 与源守恒。
+- **死条目清理**:ProxyGFW 删 `sso.amazonaws.com`(被同表 `amazonaws.com` 覆盖,行为由宽兜底承接不变)。
+
+### Added
+- `tests/scenarios/ownership_fix.json`:10 场景/44 请求/87 断言,锁定本轮全部归属修正与关键词边界化的正/负例(PayPal 仿冒域、品牌子串仿冒域、dnserror/hostingcloud 误杀负例、共享云 IP 落点、Qwen 国际链同出口等)。回归基线 103→113 场景、1044→1131 断言、DNS 泄漏断言 333→374 条。
+- MAINTENANCE「裁决登记」追加 12 行:forbidden 段机制、Cursor/CF Insights 两项裁决更正、SnapKit/可口可乐、Qwen、PayPal 后缀集、ChinaDomain 再生过滤、sony.com、共享云段三禁、Reject 关键词边界红线、MicrosoftCN 观察项。
+
+---
+
 ## [2026-08-30] Reject 启用 + DIRECT 过度覆盖修复 + 全库注释精简 + 公开仓库脱敏
 
 ### Added

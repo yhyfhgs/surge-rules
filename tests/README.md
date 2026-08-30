@@ -8,7 +8,7 @@
 | --- | ---------------- | ---------- | ----------------------------------------------------- | -------- |
 | L0  | `engine.py`      | 否         | 这个域名会命中哪条规则、走哪个组、从哪个出口出去？    | < 1 秒   |
 | L1  | `audit.py`       | 否         | 规则表本身有没有毛病（DNS 泄漏面、重复、遮蔽、失联）？| ~5 秒    |
-| L2  | `runsuite.py`    | 否         | 90 个真实使用场景的 500 条请求，分流结果符合预期吗？  | ~10 秒   |
+| L2  | `runsuite.py`    | 否         | 147 个真实使用场景的 969 条请求，分流结果符合预期吗？ | ~10 秒   |
 | L3  | `live_check.py`  | **是**     | 真实网络里实际发生的，跟离线推演的一样吗？出口 IP 对吗？| 1–5 分钟 |
 | L4  | `realworld.py`   | 部分       | 真实浏览器/App 发出去会怎样？DNS、WebRTC、TUN、UA 分流真的生效吗？| 3–5 分钟 |
 
@@ -44,15 +44,15 @@ Surge HTTP API，见下方[开启 Surge HTTP API](#开启-surge-http-api)。
 
 ```
 rules/tests/
-├── engine.py            L0 规则语义引擎（解析 conf + 33 个 list（其中 Reject 在 conf 中注释停用，实际内联 32 个），离线模拟匹配）
-├── audit.py             L1 静态审计器（A1–A6 六项检查）
+├── engine.py            L0 规则语义引擎（解析 conf + 34 个 list（Reject 已启用），离线模拟匹配）
+├── audit.py             L1 静态审计器（A1–A8 八项检查）
 ├── runsuite.py          L2 场景断言运行器
 ├── live_check.py        L3 在线实测（Surge HTTP API + 真实请求）
 ├── realworld.py         L4 真实客户端 / 网络栈实测（surge-cli + curl + 系统命令）
 ├── realworld_targets.json  L4 的数据驱动配置（各组代表域 / 客户端画像 / STUN / UA 用例）
 ├── live_check_local.json   私有出口映射覆盖档（**已 gitignore**，勿入库；见下）
 ├── allowlist.json       审计豁免表（把「刻意设计」标出来，免得每次都报）
-├── scenarios/           场景数据集，九个 .json，共 90 场景 / 500 请求
+├── scenarios/           场景数据集，16 个 .json，共 147 场景 / 969 请求
 │   ├── ai_overseas.json      海外独立 AI（OpenAI / Anthropic / Perplexity …）
 │   ├── ai_ecosystem.json     大厂 AI 生态一致性（Gemini / Copilot / Grok …）
 │   ├── ai_domestic.json      国内 AI 直连（DeepSeek / Kimi / 通义 …）
@@ -61,6 +61,8 @@ rules/tests/
 │   ├── intl_services.json    国际非 AI（GitHub / Netflix / Steam …）
 │   ├── cdn_pairing.json      主站与 CDN 配对一致性
 │   ├── edge_cases.json       边界（OCSP / NTP / captive / 纯 IP / 遥测域）
+│   ├── reject_layer.json     Reject 拦截层（广告投放 / HTTPDNS / 钓鱼恶意，及刻意放行的埋点域）
+│   ├── ownership_fix.json    2026-08-31 审计整改：归属修正与关键词边界化的正/负例断言
 │   └── dns_leak.json         DNS 泄漏专项
 ├── expected_asn.json     可选，给 live_check --exit-map 做 ASN 断言（默认没有 = 只报告）
 └── README.md             本文件
@@ -160,7 +162,7 @@ python3 audit.py --fail-on P0                     # 只有 P0 才算失败（默
 python3 audit.py --selftest                       # 用植入已知缺陷的合成配置自检
 ```
 
-六项检查：
+八项检查：
 
 | 编号 | 查什么                                   | 为什么重要                                       |
 | ---- | ---------------------------------------- | ------------------------------------------------ |
@@ -170,14 +172,16 @@ python3 audit.py --selftest                       # 用植入已知缺陷的合�
 | A4   | 跨 list 遮蔽                             | 尤其「直连区条目被代理区抢跑」= P0               |
 | A5   | conf 引用完整性                          | 引用了不存在的 list，或有 list 没人引用          |
 | A6   | `DOMAIN-KEYWORD` 清单                    | 只列出来给人复核，不判对错                       |
+| A7   | 规则行格式 lint                          | 无类型前缀的裸行会被静默忽略 = 死规则，判 P1     |
+| A8   | 禁止回流                                 | `forbidden` 段登记的模式一出现即 P0，**不可豁免** |
 
 严重度：P0 功能损坏或明确错误分流 / P1 IP 一致性与 DNS 泄漏风险 / P2 冗余遮蔽但无直接伤害 /
 P3 风格建议。
 
 ### `allowlist.json`
 
-把「明知故犯」的设计登记在案，审计就不会反复报它。按 `(check, file, rule)` 三元组匹配，
-每条**必须**写 `reason`：
+两段结构：`exemptions` 登记「允许存在的刻意设计」，按 `(check, file, rule)` 三元组匹配；
+`forbidden` 登记「必须持续不存在的规则模式」，由 A8 扫源文件强制。两段每条都**必须**写 `reason`：
 
 ```json
 {
@@ -185,10 +189,16 @@ P3 风格建议。
   "exemptions": [
     {
       "check": ["A2", "A3", "A4"],
-      "file": "*",
-      "rule": "PROCESS-NAME,*",
+      "file": "ProxyGFW.list",
+      "rule": "DOMAIN-SUFFIX,amazonaws.com",
       "preventive": true,
-      "reason": "PROCESS-NAME 大小写变体是跨平台覆盖，禁止去重"
+      "reason": "AWS 兜底刻意放在最宽一层，具体子域由前位表分层承接"
+    }
+  ],
+  "forbidden": [
+    {
+      "pattern": "USER-AGENT,*",
+      "reason": "D7 裁决：全库零 USER-AGENT——全域生效会跨境错分流，且 Clash 派生剔除该类型造成双端分叉"
     }
   ]
 }
@@ -198,10 +208,14 @@ P3 风格建议。
 - `file` / `rule` 支持 `*` `?` 通配；还可以用 `by` / `by_file` 指定「遮蔽方」来缩小豁免面。
 - `preventive: true` 表示这是防回归条目 —— 当前配置本来就不该命中它，没命中不会被算成
   「无用豁免」。
+- `forbidden` 段**不吃豁免**：命中即 P0，`exemptions` 里写什么都盖不住它。
 
-当前表里 27 条，覆盖：PROCESS-NAME 大小写变体、`amazonaws.com` 的兜底与分层、
-`Reject.list` 未被引用（文件保留但 conf 里注释停用）、以及 00-context 那张上游合并排除表。
-基线是 2026-08-25 的一次全量审计（A1=0、A4=0，所以本表以防回归为主）。
+当前 `exemptions` 30 条，覆盖：`amazonaws.com` 的兜底与分层、大厂自有 AI 归各自生态、
+AI 组里的通用第三方组件、DownloadCDN 的保留类、机器层（ChinaDomain / ChinaIP）不可手改
+导致的重复，以及上游合并排除表在被误合并回来时的降噪。
+`forbidden` 18 条，覆盖：`USER-AGENT` / `PROCESS-NAME` / `URL-REGEX` 三类全类型禁令、
+D11 上游合并排除项（`DOMAIN-KEYWORD,google`、`akadns.net`、`ms` ccTLD 等），
+以及 2026-08-31 审计删掉的品牌关键词（paypal 与 ChinaDomain 尾部 9 条）。
 
 ---
 
@@ -245,8 +259,8 @@ python3 runsuite.py --list-known-broken      # 只列当前的待修清单
 runsuite 会把它们单独统计成「待修清单」而不是测试失败——这样 CI 才有绿灯可言，
 同时待办也不会被忘掉。修好一条就把标记删掉。
 
-当前基线（2026-08-30）：90 场景 / 500 请求 / 930 断言，失败 0，已知待修 0 条；
-351 条 DNS 泄漏断言全通过，说明「零本地 DNS 解析」这条约束目前是成立的
+当前基线（2026-08-31）：147 场景 / 969 请求 / 1731 断言，失败 0，已知待修 0 条；
+674 条 DNS 泄漏断言全通过，说明「零本地 DNS 解析」这条约束目前是成立的
 （L4 的 `realworld.py --dns` 已用实网抽样二次确认，见下文）。
 
 ---
@@ -600,10 +614,11 @@ ARIN 的 RDAP 对家宽客户网段经常不返回 ASN（`originAS` 为空），
 - YouTube 全量归流媒体组、且排在 Google 之前 —— 与 Google 组分离是刻意的。
 - 大厂自有 AI 归各自生态：Gemini → Google.list，Grok/x.ai → Twitter.list，
   Meta AI → Meta.list。conf 里 Google/Twitter/Meta 都排在 AI.list 之前。
-- `PROCESS-NAME` 的大小写变体（`Claude` / `claude` / `Claude.exe`）是跨平台覆盖，禁止去重。
+- 全库零 `USER-AGENT` / `PROCESS-NAME` / `URL-REGEX`（D7 裁决）：这三类已登记在
+  `allowlist.json` 的 `forbidden` 段，由 A8 把守，出现即 P0 回流。
 - `DOMAIN-SUFFIX,amazonaws.com` 在 ProxyGFW 是 AWS 兜底，具体 CDN 子域在 DownloadCDN
   分层处理，这是刻意分层。
-- `Reject.list` 在 conf 里注释停用但文件保留。
+- `Reject.list` 已在 conf 区 1 启用（REJECT，全链最前的拦截层）。
 
 **11. `AI.list` 那行带 `extended-matching`**
 意味着它对 SNI 和 HTTP Host 都会匹配，比其它 RULE-SET 更「贪」一点。看到 AI 组抓到了

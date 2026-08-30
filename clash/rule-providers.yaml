@@ -243,13 +243,14 @@ rule-providers:
     path: ./rule-sets/surge-rules/YouTube.list
     interval: 86400
 
-# ─── rules 参考序列（按 Surge.conf 优先级；取消注释并替换为你的策略组名）───
-# Surge 内置 SYSTEM/LAN 集在 Clash 端的等价前置规则：
+# ─── rules 参考序列（与 Surge.conf [Rule] 区逐行同序；取消注释并替换为你的策略组名）───
+# Surge 内置 SYSTEM 集无 Clash 等价物（近似：本机常见系统域自行按需补充）；
+# LAN 集的近似前置规则（置于最前）：
 #  - GEOIP,lan,DIRECT,no-resolve
 # rules:
-#  - RULE-SET,Reject,REJECT   # 与 Surge.conf 同步启用（须置于放行规则之前）
 #  - RULE-SET,PrivateLAN,DIRECT
 #  - RULE-SET,PKU,DIRECT
+#  - RULE-SET,Reject,REJECT
 #  - RULE-SET,GameDownloadCN,DIRECT
 #  - RULE-SET,ModelDownloadCDN,下载
 #  - RULE-SET,YouTube,流媒体

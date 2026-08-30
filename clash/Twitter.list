@@ -1,16 +1,12 @@
 # AUTO-GENERATED — Clash(Mihomo) classical 规则，由 ../lists/Twitter.list 派生
 # 勿手工编辑；修改 Surge 源后运行 python3 tools/surge2clash.py 重新生成
 
-# Twitter — X/Twitter 生态，含 xAI（Grok/x.ai）与 Cursor 全家——Grok Bot 后端实测为 cursor 基建、品牌属 xAI，同表以保证会话链同出口
+# Twitter — X/Twitter 生态，含 xAI（Grok/x.ai）；Cursor/Anysphere 为独立公司，2026-08-31 审计更正后归 AI.list
+# twitter 精确后缀集对撞自上游 blackmatrix7 Twitter 表；2026-08-31 审计删除宽 DOMAIN-KEYWORD,twitter
 # 排序：规则类型分区，区内字母序
 
-DOMAIN-SUFFIX,anysphere.co
+DOMAIN-SUFFIX,ads-twitter.com
 DOMAIN-SUFFIX,cms-twdigitalassets.com
-DOMAIN-SUFFIX,cursor-cdn.com
-DOMAIN-SUFFIX,cursor.com
-DOMAIN-SUFFIX,cursor.sh
-DOMAIN-SUFFIX,cursorapi.com
-DOMAIN-SUFFIX,cursorvm.com
 DOMAIN-SUFFIX,grok.com
 DOMAIN-SUFFIX,grokipedia.com
 DOMAIN-SUFFIX,periscope.tv
@@ -22,6 +18,14 @@ DOMAIN-SUFFIX,twimg.co
 DOMAIN-SUFFIX,twimg.com
 DOMAIN-SUFFIX,twimg.org
 DOMAIN-SUFFIX,twitpic.com
+DOMAIN-SUFFIX,twitter.biz
+DOMAIN-SUFFIX,twitter.com
+DOMAIN-SUFFIX,twitter.jp
+DOMAIN-SUFFIX,twittercommunity.com
+DOMAIN-SUFFIX,twitterflightschool.com
+DOMAIN-SUFFIX,twitterinc.com
+DOMAIN-SUFFIX,twitteroauth.com
+DOMAIN-SUFFIX,twitterstat.us
 DOMAIN-SUFFIX,twtrdns.net
 DOMAIN-SUFFIX,twttr.com
 DOMAIN-SUFFIX,twttr.net
@@ -29,8 +33,6 @@ DOMAIN-SUFFIX,twvid.com
 DOMAIN-SUFFIX,vine.co
 DOMAIN-SUFFIX,x.ai
 DOMAIN-SUFFIX,x.com
-
-DOMAIN-KEYWORD,twitter
 
 IP-CIDR,69.195.160.0/19,no-resolve
 IP-CIDR,104.244.40.0/21,no-resolve

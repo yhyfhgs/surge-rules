@@ -1,0 +1,544 @@
+[
+  {
+    "name": "kw_youtube_precise_suffixes",
+    "desc": "YouTube 宽 DOMAIN-KEYWORD,youtube 删除：先自上游 blackmatrix7 YouTube 表恢复 165 条缺失精确后缀（youtube.com 及各 ccTLD、youtubekids/withyoutube/youtubego 等）与 2 条 YouTube 专属 l.google.com 负载均衡名，核心播放会话仍落流媒体组；含 youtube 子串的第三方站不再被吸入",
+    "requests": [
+      {
+        "host": "www.youtube.com",
+        "note": "网页主链"
+      },
+      {
+        "host": "m.youtube.com",
+        "note": "移动端"
+      },
+      {
+        "host": "music.youtube.com",
+        "note": "YouTube Music"
+      },
+      {
+        "host": "youtube.co.uk",
+        "note": "ccTLD 跳转域"
+      },
+      {
+        "host": "youtubekids.com",
+        "note": "YouTube Kids"
+      },
+      {
+        "host": "withyoutube.com",
+        "note": "创作者门面"
+      },
+      {
+        "host": "youtubeeducation.com",
+        "note": "上游确认的官方教育域"
+      },
+      {
+        "host": "rr1---sn-abc.googlevideo.com",
+        "note": "视频数据面（既有后缀）"
+      },
+      {
+        "host": "i.ytimg.com",
+        "note": "缩略图（既有后缀）"
+      },
+      {
+        "host": "wide-youtube.l.google.com",
+        "note": "YouTube 专属 LB 名，恢复后不再退化到 Google 组"
+      },
+      {
+        "host": "youtube-dubbing.com",
+        "note": "负例：上游归国内表的第三方配音站"
+      },
+      {
+        "host": "ssyoutube.com",
+        "note": "负例：第三方下载站"
+      },
+      {
+        "host": "youtubeconverter.io",
+        "note": "负例：第三方转码站"
+      },
+      {
+        "host": "youtubei.googleapis.com",
+        "note": "App 主 API 端点，YouTube 专属 googleapis 子域"
+      }
+    ],
+    "assert": {
+      "no_dns_leak": true,
+      "per_request": [
+        {
+          "host": "www.youtube.com",
+          "policy": "流媒体"
+        },
+        {
+          "host": "m.youtube.com",
+          "policy": "流媒体"
+        },
+        {
+          "host": "music.youtube.com",
+          "policy": "流媒体"
+        },
+        {
+          "host": "youtube.co.uk",
+          "policy": "流媒体"
+        },
+        {
+          "host": "youtubekids.com",
+          "policy": "流媒体"
+        },
+        {
+          "host": "withyoutube.com",
+          "policy": "流媒体"
+        },
+        {
+          "host": "youtubeeducation.com",
+          "policy": "流媒体"
+        },
+        {
+          "host": "rr1---sn-abc.googlevideo.com",
+          "policy": "流媒体"
+        },
+        {
+          "host": "i.ytimg.com",
+          "policy": "流媒体"
+        },
+        {
+          "host": "wide-youtube.l.google.com",
+          "policy": "流媒体",
+          "reason": "YouTube 专属 LB 名精确恢复，位次先于 Google.list 的 google.com"
+        },
+        {
+          "host": "youtube-dubbing.com",
+          "policy": "Final",
+          "reason": "删 keyword 后不再被品牌子串吸入流媒体组"
+        },
+        {
+          "host": "ssyoutube.com",
+          "policy": "Final"
+        },
+        {
+          "host": "youtubeconverter.io",
+          "policy": "Final"
+        },
+        {
+          "host": "youtubei.googleapis.com",
+          "policy": "流媒体",
+          "reason": "2026-08-31 裁决：YouTube 专属 googleapis 子域随 YouTube 会话，不落 Google 组"
+        }
+      ]
+    }
+  },
+  {
+    "name": "kw_google_blogspot_gmail_recaptcha",
+    "desc": "Google 三条宽关键词（blogspot/gmail/recaptcha）删除：自上游 Google 表恢复 73 条 blogspot ccTLD 后缀 + gmail.com + recaptcha.net/recaptcha-cn.net；报告实证的 qingmail.com / suningmail.com 误捕获消除",
+    "requests": [
+      {
+        "host": "gmail.com"
+      },
+      {
+        "host": "mail.google.com",
+        "note": "由既有 google.com 后缀承接"
+      },
+      {
+        "host": "googlemail.com"
+      },
+      {
+        "host": "blogspot.com"
+      },
+      {
+        "host": "someblog.blogspot.com",
+        "note": "用户博客子域"
+      },
+      {
+        "host": "blogspot.co.uk",
+        "note": "ccTLD 后缀"
+      },
+      {
+        "host": "www.recaptcha.net",
+        "note": "reCAPTCHA 全球可达端点"
+      },
+      {
+        "host": "recaptcha-cn.net",
+        "note": "reCAPTCHA 中国可达端点"
+      },
+      {
+        "host": "qingmail.com",
+        "note": "负例：报告实证的 gmail 关键词误捕获"
+      },
+      {
+        "host": "suningmail.com",
+        "note": "负例：报告实证的 gmail 关键词误捕获"
+      },
+      {
+        "host": "blogspotter.net",
+        "note": "负例：含 blogspot 子串的第三方域"
+      },
+      {
+        "host": "recaptcha-solver.io",
+        "note": "负例：含 recaptcha 子串的第三方域"
+      }
+    ],
+    "assert": {
+      "no_dns_leak": true,
+      "per_request": [
+        {
+          "host": "gmail.com",
+          "policy": "Google-X-Meta-MS"
+        },
+        {
+          "host": "mail.google.com",
+          "policy": "Google-X-Meta-MS"
+        },
+        {
+          "host": "googlemail.com",
+          "policy": "Google-X-Meta-MS"
+        },
+        {
+          "host": "blogspot.com",
+          "policy": "Google-X-Meta-MS"
+        },
+        {
+          "host": "someblog.blogspot.com",
+          "policy": "Google-X-Meta-MS"
+        },
+        {
+          "host": "blogspot.co.uk",
+          "policy": "Google-X-Meta-MS"
+        },
+        {
+          "host": "www.recaptcha.net",
+          "policy": "Google-X-Meta-MS"
+        },
+        {
+          "host": "recaptcha-cn.net",
+          "policy": "Google-X-Meta-MS"
+        },
+        {
+          "host": "qingmail.com",
+          "policy": "Final",
+          "reason": "不再被 DOMAIN-KEYWORD,gmail 误捕获"
+        },
+        {
+          "host": "suningmail.com",
+          "policy": "Final",
+          "reason": "不再被 DOMAIN-KEYWORD,gmail 误捕获"
+        },
+        {
+          "host": "blogspotter.net",
+          "policy": "Final"
+        },
+        {
+          "host": "recaptcha-solver.io",
+          "policy": "Final"
+        }
+      ]
+    }
+  },
+  {
+    "name": "kw_twitter_official_suffixes",
+    "desc": "Twitter 宽 DOMAIN-KEYWORD,twitter 删除：自上游 Twitter 表恢复 9 条含品牌词的官方后缀（twitter.com/.biz/.jp、ads-twitter.com、twitterstat.us 等）；第三方客户端与工具站不再默认归 X 生态",
+    "requests": [
+      {
+        "host": "twitter.com"
+      },
+      {
+        "host": "api.twitter.com",
+        "note": "API 面"
+      },
+      {
+        "host": "ads-twitter.com",
+        "note": "广告转化像素"
+      },
+      {
+        "host": "twitterstat.us",
+        "note": "状态页"
+      },
+      {
+        "host": "x.com",
+        "note": "既有后缀"
+      },
+      {
+        "host": "pbs.twimg.com",
+        "note": "媒体 CDN（既有后缀）"
+      },
+      {
+        "host": "twitterrific.com",
+        "note": "负例：第三方客户端厂商站"
+      },
+      {
+        "host": "twitterdownloader.cc",
+        "note": "负例：第三方下载站"
+      }
+    ],
+    "assert": {
+      "no_dns_leak": true,
+      "per_request": [
+        {
+          "host": "twitter.com",
+          "policy": "Google-X-Meta-MS"
+        },
+        {
+          "host": "api.twitter.com",
+          "policy": "Google-X-Meta-MS"
+        },
+        {
+          "host": "ads-twitter.com",
+          "policy": "Google-X-Meta-MS"
+        },
+        {
+          "host": "twitterstat.us",
+          "policy": "Google-X-Meta-MS"
+        },
+        {
+          "host": "x.com",
+          "policy": "Google-X-Meta-MS"
+        },
+        {
+          "host": "pbs.twimg.com",
+          "policy": "Google-X-Meta-MS"
+        },
+        {
+          "host": "twitterrific.com",
+          "policy": "Final",
+          "reason": "第三方含品牌子串域不再自动归 X"
+        },
+        {
+          "host": "twitterdownloader.cc",
+          "policy": "Final"
+        }
+      ]
+    }
+  },
+  {
+    "name": "kw_meta_fbcdn_instagram_whatsapp",
+    "desc": "Meta 三条宽关键词（fbcdn/instagram/whatsapp）删除：只恢复 Meta 自营运行域与官方门面（fbcdn.net/.com、fbcdn-a.akamaihd.net、cdninstagram.com、instagram.com、whatsapp.com/.net 等 18 条）；上游 Facebook 表夹带的品牌抢注/刷粉/破解站与第三方魔改客户端 whatsapp-plus.* 刻意不恢复，落 Final",
+    "requests": [
+      {
+        "host": "www.instagram.com"
+      },
+      {
+        "host": "scontent-lax3-1.cdninstagram.com",
+        "note": "IG 图片/视频数据面"
+      },
+      {
+        "host": "web.whatsapp.com"
+      },
+      {
+        "host": "g.whatsapp.net",
+        "note": "WhatsApp 消息数据面"
+      },
+      {
+        "host": "static.xx.fbcdn.net",
+        "note": "FB/IG 静态资源 CDN"
+      },
+      {
+        "host": "fbcdn-a.akamaihd.net",
+        "note": "Akamai 前置的旧 fbcdn，恢复后不退化到 ProxyGFW"
+      },
+      {
+        "host": "whatsapp-plus.net",
+        "note": "负例：第三方魔改客户端"
+      },
+      {
+        "host": "theinstagramhack.com",
+        "note": "负例：上游夹带的破解站"
+      },
+      {
+        "host": "onlineinstagram.com",
+        "note": "负例：第三方 IG 浏览器"
+      },
+      {
+        "host": "instagramdownloader.tools",
+        "note": "负例：第三方下载站"
+      }
+    ],
+    "assert": {
+      "no_dns_leak": true,
+      "per_request": [
+        {
+          "host": "www.instagram.com",
+          "policy": "Google-X-Meta-MS"
+        },
+        {
+          "host": "scontent-lax3-1.cdninstagram.com",
+          "policy": "Google-X-Meta-MS"
+        },
+        {
+          "host": "web.whatsapp.com",
+          "policy": "Google-X-Meta-MS"
+        },
+        {
+          "host": "g.whatsapp.net",
+          "policy": "Google-X-Meta-MS"
+        },
+        {
+          "host": "static.xx.fbcdn.net",
+          "policy": "Google-X-Meta-MS"
+        },
+        {
+          "host": "fbcdn-a.akamaihd.net",
+          "policy": "Google-X-Meta-MS",
+          "reason": "Meta.list 位次先于 ProxyGFW 的 akamaihd.net"
+        },
+        {
+          "host": "whatsapp-plus.net",
+          "policy": "Final",
+          "reason": "第三方魔改客户端不属 Meta 会话"
+        },
+        {
+          "host": "theinstagramhack.com",
+          "policy": "Final"
+        },
+        {
+          "host": "onlineinstagram.com",
+          "policy": "Final"
+        },
+        {
+          "host": "instagramdownloader.tools",
+          "policy": "Final"
+        }
+      ]
+    }
+  },
+  {
+    "name": "kw_telegram_official_and_clients",
+    "desc": "Telegram 两条宽关键词（telegram/nicegram）删除：自上游 Telegram 表恢复 telegram.org/.me/.dog/.space、cdn-telegram.org、telegram-cdn.org、telegramdownload.com，自上游 Global 表恢复 nicegram.app/.cloud；含品牌子串的第三方群组站/镜像站不再强制归 Telegram 独立组",
+    "requests": [
+      {
+        "host": "web.telegram.org"
+      },
+      {
+        "host": "api.telegram.org",
+        "note": "Bot API"
+      },
+      {
+        "host": "telegram.me",
+        "note": "旧短链域"
+      },
+      {
+        "host": "t.me",
+        "note": "既有后缀"
+      },
+      {
+        "host": "telegra.ph",
+        "note": "既有后缀"
+      },
+      {
+        "host": "nicegram.app",
+        "note": "第三方客户端（本表既有 swiftgram.app 等同类先例）"
+      },
+      {
+        "host": "telegramgroups.io",
+        "note": "负例：第三方群组目录站"
+      },
+      {
+        "host": "telegram-cn.net",
+        "note": "负例：含品牌子串的第三方域"
+      },
+      {
+        "host": "mytelegram-mirror.top",
+        "note": "负例：第三方镜像形态"
+      }
+    ],
+    "assert": {
+      "no_dns_leak": true,
+      "per_request": [
+        {
+          "host": "web.telegram.org",
+          "policy": "Telegram"
+        },
+        {
+          "host": "api.telegram.org",
+          "policy": "Telegram"
+        },
+        {
+          "host": "telegram.me",
+          "policy": "Telegram"
+        },
+        {
+          "host": "t.me",
+          "policy": "Telegram"
+        },
+        {
+          "host": "telegra.ph",
+          "policy": "Telegram"
+        },
+        {
+          "host": "nicegram.app",
+          "policy": "Telegram"
+        },
+        {
+          "host": "telegramgroups.io",
+          "policy": "Final",
+          "reason": "删 keyword 后第三方站落 Final"
+        },
+        {
+          "host": "telegram-cn.net",
+          "policy": "Final"
+        },
+        {
+          "host": "mytelegram-mirror.top",
+          "policy": "Final"
+        }
+      ]
+    }
+  },
+  {
+    "name": "kw_ai_azure_host_wildcards",
+    "desc": "AI 两条 Azure 主机命名关键词改双向锚定 DOMAIN-WILDCARD：结构由 reference/wool_scripts/Loon/rule/AI.list 的 AND 规则与上游 OpenAI 表样本 openaicom-api-bdcpf8c6d2e9atf6.z01.azurefd.net 共同确认；旋转哈希/区域名仍命中，品牌子串脱离 Azure 域后不再命中",
+    "requests": [
+      {
+        "host": "chatgpt-async-webps-prod-eastus-1.webpubsub.azure.com",
+        "note": "ChatGPT 异步 WebPubSub"
+      },
+      {
+        "host": "chatgpt-async-webps-prod-southcentralus-2.webpubsub.azure.com",
+        "note": "换区域仍命中"
+      },
+      {
+        "host": "openaicom-api-bdcpf8c6d2e9atf6.z01.azurefd.net",
+        "note": "上游实证样本，Azure Front Door"
+      },
+      {
+        "host": "chatgpt-async-webps-prod.notazure.net",
+        "note": "负例：前缀相同但不在 webpubsub.azure.com 下"
+      },
+      {
+        "host": "openaicom-api.mirror.top",
+        "note": "负例：缺尾缀锚点且无 azurefd.net"
+      },
+      {
+        "host": "foo.webpubsub.azure.com",
+        "note": "负例：同一 Azure 服务的他人实例，不属 OpenAI"
+      }
+    ],
+    "assert": {
+      "no_dns_leak": true,
+      "per_request": [
+        {
+          "host": "chatgpt-async-webps-prod-eastus-1.webpubsub.azure.com",
+          "policy": "AI"
+        },
+        {
+          "host": "chatgpt-async-webps-prod-southcentralus-2.webpubsub.azure.com",
+          "policy": "AI"
+        },
+        {
+          "host": "openaicom-api-bdcpf8c6d2e9atf6.z01.azurefd.net",
+          "policy": "AI"
+        },
+        {
+          "host": "chatgpt-async-webps-prod.notazure.net",
+          "policy": "Final",
+          "reason": "右锚定生效，品牌前缀脱离 Azure 域不再命中"
+        },
+        {
+          "host": "openaicom-api.mirror.top",
+          "policy": "Final"
+        },
+        {
+          "host": "foo.webpubsub.azure.com",
+          "policy": "Final",
+          "reason": "他人 WebPubSub 实例走 ProxyGFW 的 azure.com 兜底"
+        }
+      ]
+    }
+  }
+]

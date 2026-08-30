@@ -21,6 +21,7 @@ DOMAIN-SUFFIX,api-priconne-redive.cygames.jp
 DOMAIN-SUFFIX,avatargarenanow-a.akamaihd.net
 DOMAIN-SUFFIX,awayoutgame.com
 DOMAIN-SUFFIX,ayudanintendo.com
+DOMAIN-SUFFIX,bandainamcoid.com
 DOMAIN-SUFFIX,battle.net
 DOMAIN-SUFFIX,battlebreakers.com
 DOMAIN-SUFFIX,battlefield.com
@@ -64,6 +65,7 @@ DOMAIN-SUFFIX,camelotherald.net
 DOMAIN-SUFFIX,capitalgames.com
 DOMAIN-SUFFIX,cdngarenanow-a.akamaihd.net
 DOMAIN-SUFFIX,cdp.cloud.unity3d.com
+DOMAIN-SUFFIX,cfx.re
 DOMAIN-SUFFIX,championshipseriesleague.com
 DOMAIN-SUFFIX,chillingo.com
 DOMAIN-SUFFIX,cloudsync-prod.s3.amazonaws.com
@@ -123,6 +125,8 @@ DOMAIN-SUFFIX,easyanticheat.net
 DOMAIN-SUFFIX,edge.steam-dns.top.comcast.net
 DOMAIN-SUFFIX,electronicarts.com
 DOMAIN-SUFFIX,electronicarts.fr
+DOMAIN-SUFFIX,epicgames.com
+DOMAIN-SUFFIX,epicgames.dev
 DOMAIN-SUFFIX,excitebots.com
 DOMAIN-SUFFIX,f3b7q2p3.ssl.hwcdn.net
 DOMAIN-SUFFIX,fanatical.com
@@ -131,6 +135,7 @@ DOMAIN-SUFFIX,fifastreet3.com
 DOMAIN-SUFFIX,fire-emblem-heroes.com
 DOMAIN-SUFFIX,fireemblemawakening.com
 DOMAIN-SUFFIX,firesidegatherings.com
+DOMAIN-SUFFIX,fivem.net
 DOMAIN-SUFFIX,flipnotestudio.com
 DOMAIN-SUFFIX,fortnite.com
 DOMAIN-SUFFIX,forzamotorsport.net
@@ -372,7 +377,6 @@ DOMAIN-SUFFIX,shadowcomplex.com
 DOMAIN-SUFFIX,simcity-buildit.com
 DOMAIN-SUFFIX,simcity.com
 DOMAIN-SUFFIX,skate2.com
-DOMAIN-SUFFIX,sony.com
 DOMAIN-SUFFIX,sonyentertainmentnetwork.com
 DOMAIN-SUFFIX,spearhead.kr
 DOMAIN-SUFFIX,speedhunters.com
@@ -396,6 +400,7 @@ DOMAIN-SUFFIX,steam.cdn.orcon.net.nz
 DOMAIN-SUFFIX,steam.cdn.slingshot.co.nz
 DOMAIN-SUFFIX,steam.cdn.webra.ru
 DOMAIN-SUFFIX,steam.tv
+DOMAIN-SUFFIX,steambroadcast.akamaized.net
 DOMAIN-SUFFIX,steamcdn-a.akamaihd.net
 DOMAIN-SUFFIX,steamcommunity-a.akamaihd.net
 DOMAIN-SUFFIX,steamcommunity.com
@@ -409,7 +414,9 @@ DOMAIN-SUFFIX,steampipe-partner.akamaized.net
 DOMAIN-SUFFIX,steampowered.com
 DOMAIN-SUFFIX,steamstat.us
 DOMAIN-SUFFIX,steamstatic.com
+DOMAIN-SUFFIX,steamstore-a.akamaihd.net
 DOMAIN-SUFFIX,steamunlocked.net
+DOMAIN-SUFFIX,steamuserimages-a.akamaihd.net
 DOMAIN-SUFFIX,steamvideo-a.akamaihd.net
 DOMAIN-SUFFIX,supermario.com
 DOMAIN-SUFFIX,supermario3dworld.com
@@ -490,11 +497,6 @@ DOMAIN-SUFFIX,xn--mts47c3w9b1qr.net
 DOMAIN-SUFFIX,yogify.com
 DOMAIN-SUFFIX,yoshisnewisland.com
 
-DOMAIN-KEYWORD,epicgames
-DOMAIN-KEYWORD,steambroadcast
-DOMAIN-KEYWORD,steamstore
-DOMAIN-KEYWORD,steamuserimages
-
 IP-CIDR,3.1.80.68/32,no-resolve
 IP-CIDR,3.25.190.152/32,no-resolve
 IP-CIDR,3.82.147.36/32,no-resolve
@@ -510,7 +512,6 @@ IP-CIDR,24.105.30.129/32,no-resolve
 IP-CIDR,24.105.62.129/32,no-resolve
 IP-CIDR,35.72.32.125/32,no-resolve
 IP-CIDR,35.154.64.7/32,no-resolve
-IP-CIDR,35.192.0.0/12,no-resolve
 IP-CIDR,54.94.196.47/32,no-resolve
 IP-CIDR,54.207.104.145/32,no-resolve
 IP-CIDR,54.207.107.12/32,no-resolve

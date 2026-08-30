@@ -29,16 +29,20 @@ flowchart TD
     Q1 -->|是| Z1["区 1:Reject"]
     Q1 -->|否| Q2{"是国服游戏下载 CDN?"}
     Q2 -->|是| Z2["区 2:GameDownloadCN"]
-    Q2 -->|否| Q3{"属于某个大生态?<br/>Google / X / Meta / 微软国际<br/>/ AI 服务 / YouTube"}
-    Q3 -->|是| Z34["区 3–4:YouTube / Google / Twitter<br/>/ Meta / Microsoft / AI"]
+    Q2 -->|否| Q2b{"是模型权重 / 须先于生态表的<br/>大流量下载端点?"}
+    Q2b -->|是| Z3["区 3:ModelDownloadCDN"]
+    Q2b -->|否| Q3{"属于某个大生态?<br/>Google / X / Meta / 微软国际<br/>/ AI 服务 / YouTube"}
+    Q3 -->|是| Z45["区 4–5:YouTube / Google / Twitter<br/>/ Meta / Microsoft / AI"]
     Q3 -->|否| Q4{"是可归类的服务?<br/>社交 / 流媒体 / 游戏 / 下载 / Telegram"}
-    Q4 -->|是| Z4["区 4 分类层:TikTok / SocialOthers<br/>/ Streaming / Games / DownloadCDN / Telegram"]
-    Q4 -->|否| Q5{"是 Apple / 微软的<br/>国内可直连面?"}
-    Q5 -->|是| Z5["区 5:AppleCN / MicrosoftCN"]
+    Q4 -->|是| Z5c["区 5 分类层:TikTok / SocialOthers<br/>/ Streaming / Games / DownloadCDN / Telegram"]
+    Q4 -->|否| Q4b{"是国际支付渠道?<br/>收单 / 钱包 / 卡组织"}
+    Q4b -->|是| Z6p["区 6:Payment"]
+    Q4b -->|否| Q5{"是 Apple / 微软的<br/>国内可直连面?"}
+    Q5 -->|是| Z7a["区 7:AppleCN / MicrosoftCN"]
     Q5 -->|否| Q6{"是国内服务?"}
-    Q6 -->|否,被墙| Z6["区 6:ProxyGFW"]
-    Q6 -->|否,有明确地区归属| Z7["区 7:Japan / UK / Europe / US"]
-    Q6 -->|是| L["区 8:进国内三层决策"]
+    Q6 -->|否,被墙| Z8["区 8:ProxyGFW"]
+    Q6 -->|否,有明确地区归属| Z9["区 9:Japan / UK / Europe / US"]
+    Q6 -->|是| L["区 10:进国内三层决策"]
     L --> LQ1{"属于某大厂生态?"}
     LQ1 -->|是| LB["第二层:ChinaMedia / TencentCN<br/>/ AlibabaCN / ByteDanceCN<br/>/ BaiduCN / NetEaseCN"]
     LQ1 -->|否| LA["第一层:Domestic"]
@@ -48,9 +52,9 @@ flowchart TD
 
 ### 1.2 两步定位
 
-**第一步 —— 按 0–8 九区定位「区」**:见上图,也见 [ARCHITECTURE.md §2](ARCHITECTURE.md) 的完整规则序表。判断依据是**语义归属**,不是"哪张表看起来顺手"。
+**第一步 —— 按 0–10 十一区定位「区」**:见上图,也见 [ARCHITECTURE.md §2](ARCHITECTURE.md) 的完整规则序表。判断依据是**语义归属**,不是"哪张表看起来顺手"。
 
-**第二步 —— 若落在区 8,再按三层定位「层」**:
+**第二步 —— 若落在区 10,再按三层定位「层」**:
 
 | 情况 | 去处 |
 |---|---|
@@ -75,8 +79,8 @@ grep -rn "example.com" lists/
 ### 1.4 写规则时的硬性要求
 
 - **IP 类规则(`IP-CIDR` / `IP-CIDR6` / `GEOIP` / `IP-ASN`)必须带 `no-resolve`。** 没有例外。原理见 [ARCHITECTURE.md §4](ARCHITECTURE.md)。
-- **PROCESS-NAME 保留大小写变体。** `Claude` 和 `claude` 都要在,那是刻意的跨平台覆盖,不是重复。
-- 关键词类规则慎用。合并排除表里的那几个(`DOMAIN-KEYWORD,google`、`akadns.net`、`stripe`、`ms` ccTLD、porn / facebook 等)是踩过坑的,别再往里加同量级的宽口径关键词。
+- **全类型 `USER-AGENT` / `PROCESS-NAME` / `URL-REGEX` 一律禁止**(D7,纯域名+IP 架构)。已由 `tests/allowlist.json` 顶层 forbidden 段 + audit **A8** 机器强制:出现即 P0 且不可豁免。历史上的 PROCESS-NAME 大小写变体、宽 UA 均已全库移除,勿以任何理由带回。
+- 关键词类规则慎用。已删除的关键词(`google` / `facebook` / `porn` / `akadns.net` / `ms` ccTLD / `paypal` / ChinaDomain 尾部 9 条品牌词)全部登记在 forbidden 段,回流即 P0。新增 DOMAIN-KEYWORD 必须有标签边界——优先改用 DOMAIN-WILDCARD 锚定(如 `*-ad.a.yximgs.com`、`dnserror.*`),别再加无边界的宽口径子串。
 - **宽 `USER-AGENT` 一律不收。** UA 规则是全域生效的:它不看域名,只看 User-Agent,一条宽 UA 就能把该 app 访问的**任何**域按本表策略处理 —— 境外域被打直连、国内域被打代理。2026-08-30 审计已把 `Microsoft*`、`hide*`、`TeamViewer*`、`QQ*`、`TIM*` 五条从 `ChinaDomain.list` 删除并写进 D11 合并排除表,**再生 ChinaDomain 时必须过滤**(见 [ARCHITECTURE.md §6 D11 附](ARCHITECTURE.md))。同理删掉了 `TencentCN.list` 的 `MicroMessenger*` / `WeChat*`。
   别用「在更早的表加一条对冲 UA」来救 —— 任何位置的对冲都会误伤别的表,这条路已经论证死了。
 
@@ -90,7 +94,7 @@ grep -rn "example.com" lists/
 python3 tests/runsuite.py
 ```
 
-跑 `tests/scenarios/*.json` 里的 **103 个真实场景**、**1044 条断言**,其中 **333 条是 DNS 泄漏断言**。
+跑 `tests/scenarios/*.json` 里的 **147 个真实场景**、**1731 条断言**,其中 **674 条是 DNS 泄漏断言**。
 
 **输出怎么读**:每条断言失败时会告诉你三件事 —— 哪个场景、期望落到哪个策略、实际落到了哪个策略。定位方法:
 
@@ -108,7 +112,7 @@ python3 tests/runsuite.py
 python3 tests/audit.py --check all
 ```
 
-跑 A1–A7 七项结构性检查(判据清单见 [ARCHITECTURE.md §7](ARCHITECTURE.md))。发布闸门用的是更严格的形式:
+跑 A1–A8 八项结构性检查(判据清单见 [ARCHITECTURE.md §7](ARCHITECTURE.md);A8 为 forbidden 回流门禁,命中即 P0 且不可豁免)。发布闸门用的是更严格的形式:
 
 ```bash
 python3 tests/audit.py --check all --fail-on P1
@@ -140,13 +144,17 @@ python3 tests/live_check.py
 
 | 步 | 动作 | 失败会怎样 |
 |---|---|---|
+| 0 | **分支守卫** —— 只允许在 `main` 上发布 | 非 main 立即退出,不产生任何提交 |
+| 0.5 | **ChinaIP 折叠漂移检查** —— `tools/collapse_cidr.py lists/ChinaIP.list --check` | 上游再生后未折叠 → 中止(先跑无参折叠再发布) |
 | 1 | **闸门 A** —— `tests/audit.py --check all --fail-on P1` | 中止,不 commit |
 | 2 | **闸门 B** —— `tests/runsuite.py` | 中止,不 commit |
-| 3 | **clash 再生** —— `tools/surge2clash.py` 由 `lists/` 全量重建 `clash/*.list` 与 `clash/rule-providers.yaml` | 遇未知规则类型 fail-fast 中止 |
+| 3 | **clash 再生** —— `tools/surge2clash.py` 事务式重建:全量解析校验 → 临时目录生成 → 逐文件原子换入 | 未知规则类型**先报全清单再中止**,正式 `clash/` 零触碰(全有或全无);另有 `--check` 只比对不写入,0=一致/1=漂移/2=输入违规 |
 | 4 | **commit** —— 带上你传入的 message | — |
-| 5 | **push** —— 推到 `origin/main` | 网络/鉴权问题,重试即可 |
-| 6 | **purge** —— **增量**调用 jsDelivr purge 接口:只处理本次 push 实际变更的分发文件,且 purge 前先比对 CDN md5,已一致的直接跳过(全量候选集 **69 个**:`lists/` 34 + `clash/` 34 + `clash/rule-providers.yaml`) | 见 §5.2 |
-| 7 | **md5 复验** —— 只复验本轮真正发出过 purge 的文件 | 报出未刷新的文件,见 §5.2 |
+| 5 | **push `HEAD:main` + 远端 SHA 校验** —— push 后 fetch 并比对 `origin/main == HEAD` | push 失败或校验不过 → exit 1,**不刷 CDN**(防把未发布内容刷上边缘) |
+| 6 | **purge** —— **增量**调用 jsDelivr purge 接口:只处理本次 push 实际变更的分发文件,purge 前先比对 CDN md5,已一致的直接跳过;diff 中的**删除项**同样发 purge(全量候选集 **69 个**:`lists/` 34 + `clash/` 34 + `clash/rule-providers.yaml`) | 见 §5.2 |
+| 7 | **md5 复验 + 三态收尾** —— 只复验本轮真正发出过 purge 的文件,收尾打印 `STATUS:` 行 | 存在限流 / purge 失败 / 拉取失败 / 复验不一致 → `PUBLISHED_BUT_UNVERIFIED`,**exit 1**,按提示补刷 |
+
+**三态语义**:`VALIDATED_NOT_PUBLISHED`(无分发变更)与 `PUBLISHED_AND_VERIFIED` 退出码为 0;`PUBLISHED_BUT_UNVERIFIED` 一律 exit 1 —— 退出码即结论,别只看输出里有没有"完成"字样。
 
 **双闸门的意义**:任何一个闸门不过,流程在 commit 之前就中止。这保证了仓库里不会出现"提交了但没通过验证"的状态,`main` 永远是可发布的。
 
@@ -185,7 +193,6 @@ jsDelivr 对 `@main` 分支路径有边缘缓存,**push 不等于生效**:
 
 - **"这条规则明明写了却不生效"** → 九成是被前面的表抢跑。`grep -rn "<域名>" lists/`,看它是不是在更靠前的表里也出现过。
 - **"审计报了问题,但那是故意的"** → 对照 [ARCHITECTURE.md §6](ARCHITECTURE.md) 的设计裁决表;属于既定裁决的,确认 `tests/allowlist.json` 里有豁免,不要改规则。
-- **"我只是把大小写统一了一下"** → PROCESS-NAME 的大小写变体是刻意的,统一即破坏跨平台覆盖,断言会红。
 
 ### 5.2 CDN 内容不一致(md5 校验报未刷新)
 
@@ -206,7 +213,7 @@ conf 没开 http-api。这是前置条件,不是脚本故障。
 `tools/surge2clash.py` 与 `tests/engine.py` 都需要正确指向 `lists/`。如果报"找不到规则文件":
 
 - `surge2clash.py` 的规则目录应指向 `../lists`(相对脚本自身,即仓库根下的 `lists/`)。
-- `engine.py` 由 conf 路径推导 `rules_dir` = `<conf 同级>/rules/lists/`。这里硬编码了「仓库目录名必须叫 `rules`、且与 `Surge.conf` 同级」的约定 —— 目录改名或另置时,`audit.py` / `runsuite.py` 需用 `--rules` 参数显式指定。
+- `engine.py` 由 conf 路径推导 `rules_dir` = `<conf 同级>/rules/lists/`。这里硬编码了「仓库目录名必须叫 `rules`、且与 `Surge.conf` 同级」的约定 —— 目录改名或另置时,`audit.py` 用 `--rules` 显式指定规则目录;`runsuite.py` 没有 `--rules` 参数,用 `--conf` 指定 conf 路径让引擎重新推导。
 - `engine.py` 对 `ChinaIP.list` 的硬引用(用作 `GEOIP,CN` 近似)经由 `rules_dir` 拼接,目录指对了即自动跟随,无需单独适配。
 
 ---
@@ -218,8 +225,8 @@ conf 没开 http-api。这是前置条件,不是脚本故障。
 | # | 红线 | 后果 |
 |---|---|---|
 | 1 | **勿手工编辑 `clash/`** | 下次 `update.sh` 全量覆盖,改动无声消失 |
-| 2 | **勿去重 PROCESS-NAME 大小写变体**(`Claude` / `claude` 等) | 破坏刻意的跨平台覆盖,一半平台上规则失效 |
-| 3 | **勿引入无 `no-resolve` 的 IP 规则** | DNS 泄漏 + 延迟惩罚 + 错误分流,333 条断言就是为它设的 |
+| 2 | **勿引入任何 USER-AGENT / PROCESS-NAME / URL-REGEX 规则**(D7,forbidden 段机器强制) | audit A8 直接 P0 拦发布;绕过则 UA/进程规则全域生效错分流、Clash 派生剔除造成双端分叉 |
+| 3 | **勿引入无 `no-resolve` 的 IP 规则** | DNS 泄漏 + 延迟惩罚 + 错误分流,674 条断言就是为它设的 |
 | 4 | **勿往 conf 写 MITM 的 `enable` 键** | Surge 规范化时会把它移除,反复写只是白费功夫。MITM 开关在 GUI 运行态,conf 只保留 `h2=true` |
 | 5 | **手工条目勿加 ChinaDomain** | 该表整表机器刷新,手写条目会被无声抹掉。要加就加进 Domestic 或对应厂商细分表 |
 | 6 | **勿 `git add` `reference/`** | 它是本地参考库,已在 `.gitignore` 中,不入库 |
@@ -231,12 +238,14 @@ conf 没开 http-api。这是前置条件,不是脚本故障。
 
 ### 7.1 已有备份点
 
-| 路径 | 对应状态 |
-|---|---|
-| `Profiles/Backup/pre-blackmatrix7-merge-20260825/` | blackmatrix7 大合并**之前**的规则快照 |
-| `Profiles/Backup/pre-audit-fix-20260825/` | 审计整改**之前**的规则快照 |
+| 备份点 | 形式 | 对应状态 |
+|---|---|---|
+| `pre-restructure-20260829` | git tag | 2026-08-29 目录重构**之前**的仓库快照(落后当前 HEAD 多个提交) |
+| `Profiles/Backup/DMIT.conf` | 文件 | 历史 conf 备份(仅 conf,不含规则) |
 
-做重大合并或结构调整之前,先照这个命名习惯打一个快照:`Profiles/Backup/pre-<变更名>-<YYYYMMDD>/`。
+> 2026-08-31 核对:此前登记的 `pre-blackmatrix7-merge-20260825/`、`pre-audit-fix-20260825/` 两个快照目录已随 2026-08-30 的备份清理删除,不再存在——用户裁决为本地不留敏感备份。规则内容的回滚依赖 git 历史(见 7.2),目录快照只是可选加速手段。
+
+做重大合并或结构调整之前,优先打 git tag(`git tag pre-<变更名>-<YYYYMMDD>`);如需目录快照,命名 `Profiles/Backup/pre-<变更名>-<YYYYMMDD>/`,用完即清。注意:目录快照只覆盖规则文件,而转换器/测试/文档也可能随版本变化,完整回滚以 git 提交为准。
 
 ### 7.2 回滚
 
@@ -258,7 +267,7 @@ conf 侧出问题时,用 `Profiles/Backup/` 下对应的备份替换,Surge GUI �
 |---|---|
 | AI | AI 站分档收录:A / B 档收(自研模型、自有推理面、主流 agent 与工具链),**C · D 档一律不收**。`bolt.com` 是支付公司(与 bolt.new 无关),明确禁收 |
 | AI | AI 应用的更新 / 分发包(如 `releases.warp.dev`)随应用留 AI 组,**不拆去下载组** —— 已成先例,勿再按「下载域归 DownloadCDN」搬走 |
-| AI | `aws.dev` / `console.aws.a2z.com` 留 AI.list;`awsapps.com` / `awsstatic.com` / `sso.amazonaws.com` 属通用 AWS 客户域,归 ProxyGFW |
+| AI | `aws.dev` / `console.aws.a2z.com` 留 AI.list;`awsapps.com` / `awsstatic.com` / `sso.amazonaws.com` 属通用 AWS 客户域,归 ProxyGFW —— 其中 `sso.amazonaws.com` 由 ProxyGFW 的 `amazonaws.com` 宽兜底承接,**勿单列**(单列即同表死条目,2026-08-31 已删) |
 | ChinaDomain | 整表再生后须重新过滤 **17 条已删域**:`123du.cc` `23us.so` `biyuwu.cc` `emsec.hk` `hanfan.cc` `hostloc.me` `locvps.com` `mht.la` `mojie.app` `mojie.co` `nt.app` `xs7.la` `yiruan.la` `zzzzzz.me`(已转 ProxyGFW)+ `mojie.kim` `mojieai.com` `springerlink.com`(仅删除,落 FINAL)—— 国内 DNS 已被投毒或站点境外托管,直连必超时 |
 | ChinaIP | 数据源必须用 blackmatrix7 `ChinaIPs`(IPv4 + IPv6 全量)。曾用的不完整源 IPv4 覆盖率仅 78.6%,缺 `59.192.0.0/10`、`43.0.0.0/10`、`175.64.0.0/11` 等已核实的 CN 大段,**不可回退换源** |
 | Domestic | CA 吊销 / AIA 端点集中收在本表直连(TLS 握手关键路径,soft-fail)。但 `ocsp.usertrust.com` / `ocsp.entrust.net` **刻意不收** —— ProxyGFW 的 `usertrust.com` / `entrust.net` 后缀位次更前,收了也只是死条目;走代理 → Final 在 soft-fail 下无害 |
@@ -277,6 +286,28 @@ conf 侧出问题时,用 `Profiles/Backup/` 下对应的备份替换,Surge GUI �
 | Reject | 上游那 42 条**无注解的劫持 IP** 不收 —— 条目陈旧,且部分落在中国 IP 段,收进来会误伤;本表 IP 区只留 HTTPDNS 服务 IP |
 | SocialOthers | Discord 只收实际在用的功能域;上游那批防御性注册域不收 |
 | US | 银行 / 券商 / 征信域(chase / citi / wellsfargo / schwab / equifax 等)留 US.list —— **不算支付渠道**,勿并入 Payment |
+| 全库 | 「必须持续不存在」的规则(全类型 USER-AGENT / PROCESS-NAME / URL-REGEX、D11 上游排除项、已删品牌关键词)登记进 `tests/allowlist.json` 顶层 **forbidden 段**,由 audit A8 强制(命中即 P0 且不可豁免)。**勿再用 preventive exemption 表达「命中即删」语义**——exemption 只表达「允许存在」(2026-08-31 语义拆分) |
+| Twitter | **Cursor/Anysphere 全家归 AI.list**(2026-08-31 更正 08-30 旧裁决):Cursor ToS 主体是 Anysphere, Inc.,独立公司;「Grok Bot 后端曾用 cursor 基建」推不出所有权,勿再并回 Twitter.list。`x.ai` / `grok.com` 仍属 xAI 留 Twitter |
+| AI | `static.cloudflareinsights.com` **禁收**(2026-08-31 更正 08-30 B2 裁决):它是 Cloudflare Web Analytics 性能 beacon,与 Turnstile 验证码无关,「同出口降验证码率」不成立,落 FINAL;`challenges.cloudflare.com`(真 Turnstile,ChatGPT/Claude 登录链)继续留 AI |
+| TikTok | `snapkit.com` 全域(Snap Kit,Snap 官方资产;曾散落 `api.snapkit.com`@TikTok 与 `sdk.snapkit.com`@DownloadCDN)与 `cocacola.co.jp`(日本可口可乐)**勿再收**——Snap 域删除后与 Snap 生态同落 Final,后者已迁 Japan.list;`courses.snapsolve.com`(字节历史教育产品)列观察项,无命中证据时下轮清理 |
+| Domestic | `qwenlm.ai` 归 AI.list(跳转 `chat.qwen.ai`,国内厂商国际站统一代理),勿收回直连层;`digicert.com` 整域自 AppleCN 迁入本表 CA 段(CA 所有权不登记在厂商表),`hnagroup.com` 为 ChinaDomain 删 `hnagroup` 关键词的精确承接 |
+| ChinaDomain | 整表再生后须重新过滤**尾部 9 条品牌关键词**:`.tmall.com` `alicdn` `alipay` `aliyun` `baidu` `hnagroup` `officecdn` `taobao` `weibo` —— 已入 allowlist forbidden 段由 A8 机器强制,核心域由厂商表精确后缀承接 |
+| Payment | PayPal 只收官方精确后缀(`paypal.com` / `paypal.me` / `paypalobjects.com` / `paypal.cn` / `paypalcorp.com`);`DOMAIN-KEYWORD,paypal` 已入 forbidden 段,**勿再用品牌子串收支付渠道** |
+| Games | `sony.com` 勿收(集团总域,覆盖相机/影视/半导体,非游戏会话面;PlayStation/SIE 域已单列);GCP `35.192.0.0/12` 一类**共享云客户段勿收**——云平台所有权≠业务所有权 |
+| Meta | AWS `18.194.0.0/15` 勿收(AWS eu-central-1 共享客户段,非 Meta 专网;Meta 自有 AS32934 网段不受影响) |
+| Google | `IP-ASN,396982` 勿收(Google Cloud 通告**客户**前缀所用 ASN,代表 GCP 租户不代表 Google 第一方产品;第一方 fallback 已有 AS15169 等) |
+| Reject | DOMAIN-KEYWORD 必须有边界:结构化片段用 DOMAIN-WILDCARD 锚定(如 `*-ad.a.yximgs.com`、`dnserror.*`、`hostingcloud.*`),**勿新增无边界子串**;剩余 6 条特异词(`adsyndication` `adtarget.` `advertmarket` `nimiqpool` `packetsdk` `pangolin-sdk-toutiao`)为观察项,有命中/误杀证据后改精确后缀或删除 |
+| MicrosoftCN | ~~`1drv` / `onedrive` / `skydrive` 观察~~ 2026-08-31 二轮已完成迁移:上游 OneDrive 表对撞恢复精确后缀(`1drv.com/.ms`、`onedrive.com`、`skydrive.wns.windows.com`)后删除,已入 forbidden;防御性注册域(`onedrive.co/.eu` 等)刻意不收 |
+| 全库 | **二轮关键词迁移完成(104→8)**:所有删除的宽关键词已入 forbidden 段(A8 强制)。仅存 8 条为登记在案的观察项——Reject 6 条特异词、AppleCN `smp-device`(候命中样本)、ProxyGFW `sci-hub`(品牌镜像语义暂留);其去留凭命中/误杀证据裁决,勿默认续期 |
+| DownloadCDN | `unpkg.com` **保留**(2026-08-31 裁决):与 jsDelivr/cdnjs 同为单一注册者的包内容 CDN,无租户子域形态,不属多租户平台清理范围;三者同出口由场景锁定 |
+| DownloadCDN | 多租户托管/对象存储平台宽后缀 13 条(github.io/vercel.app/pages.dev/cloudfront.net/blob.core.windows.net/s3.amazonaws.com 等)**永久禁收**,已入 forbidden;平台上的具体第一方资产用精确 host 收进对应生态表 |
+| 全库 | 通用 SaaS 组件域(Trustpilot/Algolia/Zendesk/Optimizely/Braze/AdobeDTM/Kochava/OneTrust/CookieLaw/conductrics)**不归任何业务表**,与调用方站点解耦落 FINAL;云区域通用后缀(`us-west-2.amazonaws.com`/`execute-api.*` 等)同理,第一方网关只收实证精确 host(如 HBO GO Asia 的 `44wilhpljf.execute-api…`) |
+| Games | FiveM/Cfx(`fivem.net`/`cfx.re`)与万代账号(`bandainamcoid.com`)整族归 Games(游戏平台/账号链语义),勿再散落下载表;Epic/Steam 关键词已改上游对撞的精确资产(`epicgames.com/.dev`、`steambroadcast.akamaized.net`、`steamstore-a`/`steamuserimages-a.akamaihd.net`) |
+| YouTube | `youtubei` / `youtube` / `youtubeembeddedplayer` 三个 **YouTube 专属 googleapis 子域归 YouTube.list**(App 主 API 端点,会话完整性;位次先于 Google 无冲突);通用 `googleapis.com` 面仍归 Google,勿扩 |
+| AppleCN | Akamai/akadns CNAME 调度域(`apple.com.edgekey.net` 等 4 条)用 **DOMAIN-SUFFIX**(点边界,同表 `itunes.com.edgekey.net` 先例),勿用 keyword 或无边界 wildcard;`testflight` 面由 `apple.com` 宽后缀承接勿单列 |
+| Streaming | Abema 的 akamaized 精确 host(`abematv`/`linear-abematv`/`vod-abematv.akamaized.net`)与 `abematv.co.jp` 归本表,与既有 `ds-vod-abematv` 同链;`akamaized.net`/`akamaihd.net` 宽后缀仍禁收 |
+| ChinaDomain | **再生回收清单**(2026-08-31 二轮,删宽关键词的连带):`kkgithub.com`/`hellogithub.com`/`githubim.com`/`githubshare.com`、bilibili 系杂域、qiyi 系杂域、`eqoavtbu.com`/`51drv.com` 等约 26 域曾被宽关键词级联去重挤出本表,现落 FINAL(走代理可用,无功能损失)。**下次上游再生时它们会自然回收为 DIRECT,属预期,勿当回归**;也勿手工补进 Domestic 污染手工层 |
+| Streaming | `nowtv100`/`jooxweb-api` 已改锚定 wildcard 但无上游 host 样本、TikTok 5 条尾点 CNAME 展平 wildcard(`musical.ly.*` 等)命中率存疑——均凭命中统计决定去留,零命中 90 天可删 |
 
 ---
 

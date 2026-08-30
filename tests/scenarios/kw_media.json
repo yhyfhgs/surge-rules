@@ -1,0 +1,585 @@
+[
+  {
+    "name": "streaming_spotify_exact_assets",
+    "desc": "Spotify 由 DOMAIN-KEYWORD,spotify 改为上游对撞恢复的精确后缀集（本库此前只剩 scdn.co/pscdn.co/spoti.fi/spotilocal.com，其余 20 条精确资产被宽关键词级联去重吃掉）：官方域与专属 CDN 仍走流媒体；含 spotify 子串的第三方/破解站不再被吸入流媒体出口",
+    "requests": [
+      {
+        "host": "open.spotify.com",
+        "note": "Web Player 主链"
+      },
+      {
+        "host": "api.spotify.com",
+        "note": "目录/播放授权 API"
+      },
+      {
+        "host": "audio-ak-spotify-com.akamaized.net",
+        "note": "音频内容面"
+      },
+      {
+        "host": "spotify.map.fastly.net",
+        "note": "Fastly CNAME 形态精确 host"
+      },
+      {
+        "host": "scdn.co",
+        "note": "既有专属 CDN，行为不变参照"
+      },
+      {
+        "host": "tospotify.com"
+      },
+      {
+        "host": "myspotify-downloader.com",
+        "note": "负例：品牌子串第三方"
+      },
+      {
+        "host": "spotify-mod-apk.net",
+        "note": "负例：破解分发站"
+      }
+    ],
+    "assert": {
+      "no_dns_leak": true,
+      "per_request": [
+        {
+          "host": "open.spotify.com",
+          "policy": "流媒体"
+        },
+        {
+          "host": "api.spotify.com",
+          "policy": "流媒体"
+        },
+        {
+          "host": "audio-ak-spotify-com.akamaized.net",
+          "policy": "流媒体"
+        },
+        {
+          "host": "spotify.map.fastly.net",
+          "policy": "流媒体"
+        },
+        {
+          "host": "scdn.co",
+          "policy": "流媒体"
+        },
+        {
+          "host": "tospotify.com",
+          "policy": "流媒体"
+        },
+        {
+          "host": "myspotify-downloader.com",
+          "policy": "Final",
+          "reason": "删 keyword 后无规则命中，不再被品牌子串吸走"
+        },
+        {
+          "host": "spotify-mod-apk.net",
+          "policy": "Final"
+        }
+      ]
+    }
+  },
+  {
+    "name": "streaming_bbc_uk_live_exact",
+    "desc": "BBC iPlayer 的 uk-live/bbcfmt 两条关键词改精确资产：9 个 *-uk-live.akamaized.net 播放/字幕/缩略图 host 与 bbcfmt.s.llnwi.net 恢复为精确条目；uk-live 这种通用词不再对任意含串域生效",
+    "requests": [
+      {
+        "host": "vod-hls-uk-live.akamaized.net",
+        "note": "点播 HLS"
+      },
+      {
+        "host": "aod-dash-uk-live.akamaized.net",
+        "note": "音频点播 DASH"
+      },
+      {
+        "host": "vs-cmaf-push-uk-live.akamaized.net",
+        "note": "直播 CMAF"
+      },
+      {
+        "host": "vod-dash-ww-live.akamaized.net",
+        "note": "既有精确条目，行为不变参照"
+      },
+      {
+        "host": "bbcfmt.s.llnwi.net",
+        "note": "Limelight 内容面"
+      },
+      {
+        "host": "my-uk-live-tv.example.com",
+        "note": "负例：含 uk-live 通用串的无关域"
+      },
+      {
+        "host": "sports-uk-live.example.net",
+        "note": "负例：同上"
+      }
+    ],
+    "assert": {
+      "no_dns_leak": true,
+      "per_request": [
+        {
+          "host": "vod-hls-uk-live.akamaized.net",
+          "policy": "流媒体"
+        },
+        {
+          "host": "aod-dash-uk-live.akamaized.net",
+          "policy": "流媒体"
+        },
+        {
+          "host": "vs-cmaf-push-uk-live.akamaized.net",
+          "policy": "流媒体"
+        },
+        {
+          "host": "vod-dash-ww-live.akamaized.net",
+          "policy": "流媒体"
+        },
+        {
+          "host": "bbcfmt.s.llnwi.net",
+          "policy": "流媒体"
+        },
+        {
+          "host": "my-uk-live-tv.example.com",
+          "policy": "Final",
+          "reason": "通用词 uk-live 删除后不再误捕获"
+        },
+        {
+          "host": "sports-uk-live.example.net",
+          "policy": "Final"
+        }
+      ]
+    }
+  },
+  {
+    "name": "streaming_brand_keyword_to_suffix",
+    "desc": "HBO GO Asia / TVB Anywhere / Twitch(ttvnw) / Netflix DNS 测试域 / RTHK / DAZN VOD 六组品牌关键词改精确 suffix 或精确 host：核心资产落点不变，含品牌子串的第三方域回落原归属",
+    "requests": [
+      {
+        "host": "www.hbogoasia.sg",
+        "note": "HBO GO Asia 新加坡站"
+      },
+      {
+        "host": "api.hbogoasia.tw",
+        "note": "台湾站 API"
+      },
+      {
+        "host": "www.tvbanywhere.com"
+      },
+      {
+        "host": "tvbanywhere.com.sg"
+      },
+      {
+        "host": "video-edge-1a2b3c.lhr03.abs.hls.ttvnw.net",
+        "note": "Twitch 视频边缘节点"
+      },
+      {
+        "host": "netflixdnstest3.com",
+        "note": "Netflix DNS 测试域"
+      },
+      {
+        "host": "rthklive2-lh.akamaihd.net",
+        "note": "RTHK 直播"
+      },
+      {
+        "host": "dca-ll-voddazn-dznvodjp.s.llnwi.net",
+        "note": "DAZN 日本点播"
+      },
+      {
+        "host": "hbogoasia-fanclub.example.com",
+        "note": "负例：品牌子串第三方"
+      },
+      {
+        "host": "myttvnw-mirror.com",
+        "note": "负例：品牌子串第三方"
+      }
+    ],
+    "assert": {
+      "no_dns_leak": true,
+      "per_request": [
+        {
+          "host": "www.hbogoasia.sg",
+          "policy": "流媒体"
+        },
+        {
+          "host": "api.hbogoasia.tw",
+          "policy": "流媒体"
+        },
+        {
+          "host": "www.tvbanywhere.com",
+          "policy": "流媒体"
+        },
+        {
+          "host": "tvbanywhere.com.sg",
+          "policy": "流媒体"
+        },
+        {
+          "host": "video-edge-1a2b3c.lhr03.abs.hls.ttvnw.net",
+          "policy": "流媒体"
+        },
+        {
+          "host": "netflixdnstest3.com",
+          "policy": "流媒体"
+        },
+        {
+          "host": "rthklive2-lh.akamaihd.net",
+          "policy": "流媒体",
+          "reason": "精确 host 前置于 ProxyGFW 的 akamaihd.net 宽后缀"
+        },
+        {
+          "host": "dca-ll-voddazn-dznvodjp.s.llnwi.net",
+          "policy": "流媒体"
+        },
+        {
+          "host": "hbogoasia-fanclub.example.com",
+          "policy": "Final"
+        },
+        {
+          "host": "myttvnw-mirror.com",
+          "policy": "Final"
+        }
+      ]
+    }
+  },
+  {
+    "name": "streaming_grey_media_exact_and_tencent_release",
+    "desc": "japonx/japronx/nivod 三条灰站关键词改精确后缀（上游 Japonx/GlobalMedia 对撞）；nivod 此前把腾讯持有的 univod.cn 一起抓进流媒体代理（子串 u-nivod-.cn），删关键词后该域回落国内直连",
+    "requests": [
+      {
+        "host": "japonx.tv"
+      },
+      {
+        "host": "www.japonx.vip"
+      },
+      {
+        "host": "japronx.vip"
+      },
+      {
+        "host": "nivod.tv"
+      },
+      {
+        "host": "nivodz.com"
+      },
+      {
+        "host": "univod.cn",
+        "note": "负例：腾讯持有域，被 nivod 子串误捕获"
+      },
+      {
+        "host": "univod.example.com",
+        "note": "负例：同一子串形态的无关域"
+      }
+    ],
+    "assert": {
+      "no_dns_leak": true,
+      "per_request": [
+        {
+          "host": "japonx.tv",
+          "policy": "流媒体"
+        },
+        {
+          "host": "www.japonx.vip",
+          "policy": "流媒体"
+        },
+        {
+          "host": "japronx.vip",
+          "policy": "流媒体"
+        },
+        {
+          "host": "nivod.tv",
+          "policy": "流媒体"
+        },
+        {
+          "host": "nivodz.com",
+          "policy": "流媒体"
+        },
+        {
+          "host": "univod.cn",
+          "policy": "DIRECT",
+          "reason": "不再被 nivod 关键词抢走，回落国内直连"
+        },
+        {
+          "host": "univod.example.com",
+          "policy": "Final"
+        }
+      ]
+    }
+  },
+  {
+    "name": "streaming_elb_cname_wildcard",
+    "desc": "Netflix 设备 API 的 ELB/NLB 与 PrimeVideo AVOD DASH、NowTV 三类结构化命名由 DOMAIN-KEYWORD 改左锚定/右标签边界 DOMAIN-WILDCARD：结构内 host 落点不变，结构外的同子串域不再命中",
+    "requests": [
+      {
+        "host": "apiproxy-device-prod-nlb-abc.elb.ap-northeast-1.amazonaws.com",
+        "note": "Netflix 设备 API NLB"
+      },
+      {
+        "host": "dualstack.apiproxy-device-prod-nlb-x.elb.eu-west-1.amazonaws.com",
+        "note": "双栈形态"
+      },
+      {
+        "host": "dualstack.ichnaea-web-1.elb.sa-east-1.amazonaws.com",
+        "note": "Netflix ichnaea 遥测 ELB"
+      },
+      {
+        "host": "avoddashs3ww-a.akamaihd.net",
+        "note": "AVOD DASH 内容面（与既有 avodmp4s3ww-a 同族）"
+      },
+      {
+        "host": "nowtv100.akamaized.net"
+      },
+      {
+        "host": "xnowtv1001.example.com",
+        "note": "负例：无标签边界的子串扩展"
+      },
+      {
+        "host": "mynowtv100x.net",
+        "note": "负例：同上"
+      }
+    ],
+    "assert": {
+      "no_dns_leak": true,
+      "per_request": [
+        {
+          "host": "apiproxy-device-prod-nlb-abc.elb.ap-northeast-1.amazonaws.com",
+          "policy": "流媒体"
+        },
+        {
+          "host": "dualstack.apiproxy-device-prod-nlb-x.elb.eu-west-1.amazonaws.com",
+          "policy": "流媒体"
+        },
+        {
+          "host": "dualstack.ichnaea-web-1.elb.sa-east-1.amazonaws.com",
+          "policy": "流媒体"
+        },
+        {
+          "host": "avoddashs3ww-a.akamaihd.net",
+          "policy": "流媒体"
+        },
+        {
+          "host": "nowtv100.akamaized.net",
+          "policy": "流媒体"
+        },
+        {
+          "host": "xnowtv1001.example.com",
+          "policy": "Final",
+          "reason": "改 wildcard 后要求右侧标签边界"
+        },
+        {
+          "host": "mynowtv100x.net",
+          "policy": "Final"
+        }
+      ]
+    }
+  },
+  {
+    "name": "streaming_shared_components_unbound",
+    "desc": "P1-03 确定级：Adobe DTM / Braze / Kochava / OneTrust·CookieLaw / Optimizely 是多租户共享组件，AWS 区域 execute-api 是云厂商通用网关后缀——都不代表流媒体身份，自 Streaming 移除；HBO GO Asia 的精确 API host 保留在流媒体",
+    "requests": [
+      {
+        "host": "assets.adobedtm.com",
+        "note": "Adobe 标签管理器"
+      },
+      {
+        "host": "sdk.iad-01.braze.com",
+        "note": "Braze 消息 SDK"
+      },
+      {
+        "host": "control.kochava.com",
+        "note": "Kochava 归因"
+      },
+      {
+        "host": "cdn.cookielaw.org",
+        "note": "OneTrust 同意横幅"
+      },
+      {
+        "host": "www.onetrust.com"
+      },
+      {
+        "host": "cdn.optimizely.com",
+        "note": "Optimizely A/B"
+      },
+      {
+        "host": "abcd1234.execute-api.us-east-1.amazonaws.com",
+        "note": "任意租户的 AWS API Gateway"
+      },
+      {
+        "host": "44wilhpljf.execute-api.ap-southeast-1.amazonaws.com",
+        "note": "正例：HBO GO Asia 精确网关 host 保留"
+      }
+    ],
+    "assert": {
+      "no_dns_leak": true,
+      "per_request": [
+        {
+          "host": "assets.adobedtm.com",
+          "policy": "Final",
+          "reason": "共享组件回中性出口"
+        },
+        {
+          "host": "sdk.iad-01.braze.com",
+          "policy": "Final"
+        },
+        {
+          "host": "control.kochava.com",
+          "policy": "Final"
+        },
+        {
+          "host": "cdn.cookielaw.org",
+          "policy": "Final"
+        },
+        {
+          "host": "www.onetrust.com",
+          "policy": "Final"
+        },
+        {
+          "host": "cdn.optimizely.com",
+          "reason": "共享 A/B SaaS 与流媒体/下载均无归属，DownloadCDN 的 optimizely.com 已同批移除",
+          "policy": "Final"
+        },
+        {
+          "host": "abcd1234.execute-api.us-east-1.amazonaws.com",
+          "policy": "Final",
+          "reason": "落 ProxyGFW 的 amazonaws.com 刻意兜底"
+        },
+        {
+          "host": "44wilhpljf.execute-api.ap-southeast-1.amazonaws.com",
+          "policy": "流媒体"
+        }
+      ]
+    }
+  },
+  {
+    "name": "tiktok_cdn_keyword_to_exact",
+    "desc": "TikTok 的 tiktokcdn-/ttcdn-tos. 两条关键词：前者改精确 suffix（tiktokcdn-us.com / tiktokcdn-eu.com 是可注册域，实际 host 为 v16m.tiktokcdn-us.com 形态，左锚定 wildcard 会漏）；后者删除——其唯一第一方资产由 ipstatp.com 后缀承接，剩下命中全是字节国内广告 CDN 与第三方碰撞域",
+    "requests": [
+      {
+        "host": "v16m.tiktokcdn-us.com",
+        "note": "美区视频面"
+      },
+      {
+        "host": "p19-sign.tiktokcdn-us.com",
+        "note": "美区签名图片面"
+      },
+      {
+        "host": "lf16-gecko.tiktokcdn-eu.com",
+        "note": "欧区资源面"
+      },
+      {
+        "host": "p16-tiktokcdn-com.akamaized.net",
+        "note": "上游精确 host"
+      },
+      {
+        "host": "sf16-ttcdn-tos.ipstatp.com",
+        "note": "正例：由 ipstatp.com 后缀继续承接"
+      },
+      {
+        "host": "ttcdn-tos.kkimg.cc",
+        "note": "负例：上游 Direct 明确直连的第三方图床"
+      },
+      {
+        "host": "sf1-ttcdn-tos.pstatp.com",
+        "note": "负例：字节国内广告 CDN，应归 ByteDanceCN 直连"
+      }
+    ],
+    "assert": {
+      "no_dns_leak": true,
+      "per_request": [
+        {
+          "host": "v16m.tiktokcdn-us.com",
+          "policy": "社交媒体"
+        },
+        {
+          "host": "p19-sign.tiktokcdn-us.com",
+          "policy": "社交媒体"
+        },
+        {
+          "host": "lf16-gecko.tiktokcdn-eu.com",
+          "policy": "社交媒体"
+        },
+        {
+          "host": "p16-tiktokcdn-com.akamaized.net",
+          "policy": "社交媒体"
+        },
+        {
+          "host": "sf16-ttcdn-tos.ipstatp.com",
+          "policy": "社交媒体"
+        },
+        {
+          "host": "ttcdn-tos.kkimg.cc",
+          "policy": "Final",
+          "reason": "不再被 TikTok 抢走；本库未收 kkimg.cc 故落 FINAL"
+        },
+        {
+          "host": "sf1-ttcdn-tos.pstatp.com",
+          "policy": "DIRECT",
+          "reason": "归还 ByteDanceCN 的 pstatp.com 直连"
+        }
+      ]
+    }
+  },
+  {
+    "name": "tiktok_cname_wildcard_boundary",
+    "desc": "bytedance.map. / musical.ly. / tiktokcdn.com. / tiktokv.com. / ttlivecdn.com. 五条尾点关键词是 CNAME 展平形态，改「左锚定 + 带左标签边界」两条 DOMAIN-WILDCARD：展平 host 落点不变，缺标签边界的同子串域不再命中",
+    "requests": [
+      {
+        "host": "bytedance.map.fastly.net",
+        "note": "Fastly service map"
+      },
+      {
+        "host": "musical.ly.edgekey.net",
+        "note": "Akamai 展平（裸形态）"
+      },
+      {
+        "host": "www.musical.ly.edgekey.net",
+        "note": "Akamai 展平（带子域）"
+      },
+      {
+        "host": "p16-sign-va.tiktokcdn.com.edgekey.net"
+      },
+      {
+        "host": "mon-va.tiktokv.com.akamaized.net"
+      },
+      {
+        "host": "pull-flv.ttlivecdn.com.edgesuite.net"
+      },
+      {
+        "host": "notmusical.lyrics.com",
+        "note": "负例：无左标签边界的子串"
+      },
+      {
+        "host": "mytiktokcdn.com.cn",
+        "note": "负例：含 tiktokcdn.com. 子串的国内域"
+      }
+    ],
+    "assert": {
+      "no_dns_leak": true,
+      "per_request": [
+        {
+          "host": "bytedance.map.fastly.net",
+          "policy": "社交媒体"
+        },
+        {
+          "host": "musical.ly.edgekey.net",
+          "policy": "社交媒体"
+        },
+        {
+          "host": "www.musical.ly.edgekey.net",
+          "policy": "社交媒体"
+        },
+        {
+          "host": "p16-sign-va.tiktokcdn.com.edgekey.net",
+          "policy": "社交媒体"
+        },
+        {
+          "host": "mon-va.tiktokv.com.akamaized.net",
+          "policy": "社交媒体"
+        },
+        {
+          "host": "pull-flv.ttlivecdn.com.edgesuite.net",
+          "policy": "社交媒体"
+        },
+        {
+          "host": "notmusical.lyrics.com",
+          "policy": "Final",
+          "reason": "改 wildcard 后要求左侧标签边界"
+        },
+        {
+          "host": "mytiktokcdn.com.cn",
+          "policy": "DIRECT",
+          "reason": "回落国内直连，不再被 TikTok 关键词抢走"
+        }
+      ]
+    }
+  }
+]

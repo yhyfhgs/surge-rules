@@ -1,8 +1,7 @@
 # TikTok — TikTok 国际版与字节海外域（上游 blackmatrix7 TikTok）；字节国内域归 ByteDanceCN.list / Domestic.list
 # 排序：规则类型分区，区内字母序
+# CNAME 展平形态用 DOMAIN-WILDCARD 带标签边界收敛，不用无边界 DOMAIN-KEYWORD
 
-DOMAIN,api.snapkit.com
-DOMAIN,cocacola.co.jp
 DOMAIN,courses.snapsolve.com
 DOMAIN,lf16-campaign.ttlstatic.com
 DOMAIN,lf16-csp.oecstatic.com
@@ -16,6 +15,7 @@ DOMAIN,musically-alternate.app.link
 DOMAIN,musically.app.link
 DOMAIN,p1-tt-ipv6.byteimg.com
 DOMAIN,p1-tt.byteimg.com
+DOMAIN,p16-tiktokcdn-com.akamaized.net
 DOMAIN,p26-tt.byteimg.com
 DOMAIN,p3-tt-ipv6.byteimg.com
 DOMAIN,p9-tt.byteimg.com
@@ -52,6 +52,8 @@ DOMAIN-SUFFIX,tik-tokapi.com
 DOMAIN-SUFFIX,tiktok-usts.net
 DOMAIN-SUFFIX,tiktok.com
 DOMAIN-SUFFIX,tiktok.in
+DOMAIN-SUFFIX,tiktokcdn-eu.com
+DOMAIN-SUFFIX,tiktokcdn-us.com
 DOMAIN-SUFFIX,tiktokcdn.com
 DOMAIN-SUFFIX,tiktokcdn.net
 DOMAIN-SUFFIX,tiktokd.net
@@ -79,13 +81,16 @@ DOMAIN-SUFFIX,ttwebview.com
 DOMAIN-SUFFIX,ttwstatic.com
 DOMAIN-SUFFIX,tzvbfs.com
 
-DOMAIN-KEYWORD,bytedance.map.
-DOMAIN-KEYWORD,musical.ly.
-DOMAIN-KEYWORD,tiktokcdn-
-DOMAIN-KEYWORD,tiktokcdn.com.
-DOMAIN-KEYWORD,tiktokv.com.
-DOMAIN-KEYWORD,ttcdn-tos.
-DOMAIN-KEYWORD,ttlivecdn.com.
+DOMAIN-WILDCARD,*.bytedance.map.*
+DOMAIN-WILDCARD,*.musical.ly.*
+DOMAIN-WILDCARD,*.tiktokcdn.com.*
+DOMAIN-WILDCARD,*.tiktokv.com.*
+DOMAIN-WILDCARD,*.ttlivecdn.com.*
+DOMAIN-WILDCARD,bytedance.map.*
+DOMAIN-WILDCARD,musical.ly.*
+DOMAIN-WILDCARD,tiktokcdn.com.*
+DOMAIN-WILDCARD,tiktokv.com.*
+DOMAIN-WILDCARD,ttlivecdn.com.*
 
 IP-ASN,11983,no-resolve
 IP-ASN,138699,no-resolve

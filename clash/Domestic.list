@@ -113,7 +113,6 @@ DOMAIN-SUFFIX,bosszhipin.com
 DOMAIN-SUFFIX,byteacctimg.com
 DOMAIN-SUFFIX,c-ctrip.com
 DOMAIN-SUFFIX,c-t.work
-DOMAIN-SUFFIX,cacerts.digicert.com
 DOMAIN-SUFFIX,cacerts.rapidssl.com
 DOMAIN-SUFFIX,cailianpress.com
 DOMAIN-SUFFIX,caiyunapp.com
@@ -172,7 +171,6 @@ DOMAIN-SUFFIX,cozesdk.com
 DOMAIN-SUFFIX,cqcbank.com
 DOMAIN-SUFFIX,crl.globalsign.com
 DOMAIN-SUFFIX,crl.verisign.com
-DOMAIN-SUFFIX,crl3.digicert.com
 DOMAIN-SUFFIX,crt.sectigo.com
 DOMAIN-SUFFIX,csdn.com
 DOMAIN-SUFFIX,csdn.net
@@ -200,6 +198,7 @@ DOMAIN-SUFFIX,didichuxing.com
 DOMAIN-SUFFIX,didiglobal.com
 DOMAIN-SUFFIX,didistatic.com
 DOMAIN-SUFFIX,digicert.cn
+DOMAIN-SUFFIX,digicert.com
 DOMAIN-SUFFIX,dizzylab.net
 DOMAIN-SUFFIX,dl.bscstorage.net
 DOMAIN-SUFFIX,dl.eccdnx.com
@@ -274,6 +273,7 @@ DOMAIN-SUFFIX,hihonor.com
 DOMAIN-SUFFIX,hihonorcdn.com
 DOMAIN-SUFFIX,hihonorcloud.com
 DOMAIN-SUFFIX,hisense.com
+DOMAIN-SUFFIX,hnagroup.com
 DOMAIN-SUFFIX,honor.cn
 DOMAIN-SUFFIX,honor.com
 DOMAIN-SUFFIX,huanqiu.com
@@ -405,7 +405,6 @@ DOMAIN-SUFFIX,nlark.com
 DOMAIN-SUFFIX,nmc.cn
 DOMAIN-SUFFIX,nubia.cn
 DOMAIN-SUFFIX,nubia.com
-DOMAIN-SUFFIX,ocsp.digicert.com
 DOMAIN-SUFFIX,ocsp.sectigo.com
 DOMAIN-SUFFIX,officewebapps.cn
 DOMAIN-SUFFIX,okr.com
@@ -467,7 +466,6 @@ DOMAIN-SUFFIX,qiniu.com
 DOMAIN-SUFFIX,qixin.com
 DOMAIN-SUFFIX,qiyou.cn
 DOMAIN-SUFFIX,qoder.cn
-DOMAIN-SUFFIX,qwenlm.ai
 DOMAIN-SUFFIX,qyer.com
 DOMAIN-SUFFIX,qyerstatic.com
 DOMAIN-SUFFIX,realme.com
@@ -616,8 +614,8 @@ DOMAIN-SUFFIX,zol.com
 DOMAIN-SUFFIX,zui.com
 DOMAIN-SUFFIX,zuimeitianqi.com
 
-DOMAIN-REGEX,^.*\.qhimgs.\.com$
-DOMAIN-REGEX,^ocsp\..*\.amazontrust\.com$
+DOMAIN-WILDCARD,*.qhimgs?.com
+DOMAIN-WILDCARD,ocsp.*.amazontrust.com
 
 IP-CIDR,140.205.1.0/24,no-resolve
 IP-CIDR,162.14.0.0/18,no-resolve

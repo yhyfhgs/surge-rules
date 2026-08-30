@@ -1,0 +1,423 @@
+[
+  {
+    "name": "cursor_anysphere_ownership",
+    "desc": "2026-08-31 审计更正：Cursor/Anysphere 是独立公司（Cursor ToS 主体 Anysphere, Inc.），不能由「Grok Bot 后端曾用 cursor 基建」推导出全生态属 X——全家自 Twitter.list 迁 AI.list；x.ai/grok.com 仍属 xAI 留 Twitter.list",
+    "requests": [
+      {
+        "host": "cursor.com"
+      },
+      {
+        "host": "www.cursor.com"
+      },
+      {
+        "host": "api2.cursor.sh",
+        "note": "推理/补全后端"
+      },
+      {
+        "host": "cursor-cdn.com",
+        "note": "更新包 CDN"
+      },
+      {
+        "host": "anysphere.co"
+      },
+      {
+        "host": "x.ai"
+      },
+      {
+        "host": "grok.com"
+      }
+    ],
+    "assert": {
+      "no_dns_leak": true,
+      "per_request": [
+        {
+          "host": "cursor.com",
+          "policy": "AI"
+        },
+        {
+          "host": "www.cursor.com",
+          "policy": "AI"
+        },
+        {
+          "host": "api2.cursor.sh",
+          "policy": "AI"
+        },
+        {
+          "host": "cursor-cdn.com",
+          "policy": "AI"
+        },
+        {
+          "host": "anysphere.co",
+          "policy": "AI"
+        },
+        {
+          "host": "x.ai",
+          "policy": "Google-X-Meta-MS",
+          "reason": "xAI 品牌资产留 X 生态"
+        },
+        {
+          "host": "grok.com",
+          "policy": "Google-X-Meta-MS"
+        }
+      ]
+    }
+  },
+  {
+    "name": "qwen_intl_unified",
+    "desc": "qwenlm.ai 跳转 chat.qwen.ai（同一国际入口）：国内厂商国际站统一走 AI 组，首跳与落地页同出口，不再 Domestic/AI 分裂",
+    "requests": [
+      {
+        "host": "qwenlm.ai",
+        "note": "首跳"
+      },
+      {
+        "host": "qwen.ai"
+      },
+      {
+        "host": "chat.qwen.ai",
+        "note": "跳转落地"
+      }
+    ],
+    "assert": {
+      "same_policy": true,
+      "policy": "AI",
+      "no_dns_leak": true
+    }
+  },
+  {
+    "name": "paypal_official_only",
+    "desc": "PayPal 由 DOMAIN-KEYWORD 改为官方精确后缀：官方域固定 Payment 出口；含 paypal 子串的仿冒域/第三方域不得再被吸入支付组（改前 keyword 会把它们一并送进固定出口）",
+    "requests": [
+      {
+        "host": "www.paypal.com",
+        "note": "checkout/3DS 主链"
+      },
+      {
+        "host": "paypal.me",
+        "note": "收款链接"
+      },
+      {
+        "host": "www.paypalobjects.com",
+        "note": "静态资源"
+      },
+      {
+        "host": "paypal-verify-account.com",
+        "note": "仿冒形态负例"
+      },
+      {
+        "host": "mypaypal-checkout.com",
+        "note": "品牌子串第三方负例"
+      }
+    ],
+    "assert": {
+      "no_dns_leak": true,
+      "per_request": [
+        {
+          "host": "www.paypal.com",
+          "policy": "Payment"
+        },
+        {
+          "host": "paypal.me",
+          "policy": "Payment"
+        },
+        {
+          "host": "www.paypalobjects.com",
+          "policy": "Payment"
+        },
+        {
+          "host": "paypal-verify-account.com",
+          "policy": "Final",
+          "reason": "无规则命中落 FINAL，不再被品牌关键词吸走"
+        },
+        {
+          "host": "mypaypal-checkout.com",
+          "policy": "Final"
+        }
+      ]
+    }
+  },
+  {
+    "name": "tiktok_foreign_assets_removed",
+    "desc": "Snap Kit 域（api.snapkit.com@TikTok、sdk.snapkit.com@DownloadCDN）属 Snap 官方资产，cocacola.co.jp 属日本可口可乐——移除后 Snap 域与 snapchat.com（ProxyGFW）同落 Final 出口，可口可乐迁 Japan.list 走日本出口",
+    "requests": [
+      {
+        "host": "api.snapkit.com"
+      },
+      {
+        "host": "sdk.snapkit.com"
+      },
+      {
+        "host": "snapchat.com",
+        "note": "Snap 生态参照"
+      },
+      {
+        "host": "cocacola.co.jp"
+      }
+    ],
+    "assert": {
+      "no_dns_leak": true,
+      "per_request": [
+        {
+          "host": "api.snapkit.com",
+          "policy": "Final",
+          "reason": "与 Snap 生态同出口，不再随 TikTok 走社交媒体组"
+        },
+        {
+          "host": "sdk.snapkit.com",
+          "policy": "Final"
+        },
+        {
+          "host": "snapchat.com",
+          "policy": "Final"
+        },
+        {
+          "host": "cocacola.co.jp",
+          "policy": "🇯🇵日本节点"
+        }
+      ]
+    }
+  },
+  {
+    "name": "chinadomain_keyword_removed",
+    "desc": "ChinaDomain 尾部 9 条品牌关键词删除（已入 allowlist forbidden 段防再生回流）：核心域由厂商表精确后缀承接不变；含品牌子串的未收录域不再被强制 DIRECT（防投毒/仿冒域直连）",
+    "requests": [
+      {
+        "host": "www.taobao.com"
+      },
+      {
+        "host": "www.baidu.com"
+      },
+      {
+        "host": "hnagroup.com",
+        "note": "keyword 删除后由 Domestic 新增精确后缀承接"
+      },
+      {
+        "host": "officecdn.microsoft.com",
+        "note": "由 MicrosoftCN 既有精确后缀承接"
+      },
+      {
+        "host": "taobao-promo2026.com",
+        "note": "品牌子串仿冒形态负例"
+      },
+      {
+        "host": "fakebaidu-login.com",
+        "note": "品牌子串仿冒形态负例"
+      }
+    ],
+    "assert": {
+      "no_dns_leak": true,
+      "per_request": [
+        {
+          "host": "www.taobao.com",
+          "policy": "DIRECT"
+        },
+        {
+          "host": "www.baidu.com",
+          "policy": "DIRECT"
+        },
+        {
+          "host": "hnagroup.com",
+          "policy": "DIRECT"
+        },
+        {
+          "host": "officecdn.microsoft.com",
+          "policy": "DIRECT"
+        },
+        {
+          "host": "taobao-promo2026.com",
+          "policy": "Final",
+          "reason": "不再被 DOMAIN-KEYWORD,taobao 强制直连"
+        },
+        {
+          "host": "fakebaidu-login.com",
+          "policy": "Final"
+        }
+      ]
+    }
+  },
+  {
+    "name": "ca_endpoints_direct",
+    "desc": "CA 所有权归位：digicert.com 整域自 AppleCN（Apple 表登记 CA 属所有权错误）迁 Domestic 的 CA 集中登记段，吊销/AIA 端点直连行为不变",
+    "requests": [
+      {
+        "host": "ocsp.digicert.com"
+      },
+      {
+        "host": "crl3.digicert.com"
+      },
+      {
+        "host": "cacerts.digicert.com"
+      },
+      {
+        "host": "www.digicert.com"
+      }
+    ],
+    "assert": {
+      "same_policy": true,
+      "policy": "DIRECT",
+      "no_dns_leak": true
+    }
+  },
+  {
+    "name": "sony_group_not_games",
+    "desc": "sony.com 是集团总域（相机/影视/半导体/企业站），非游戏会话依赖，自 Games 移除落 FINAL；PlayStation/SIE 业务域保持游戏组",
+    "requests": [
+      {
+        "host": "www.sony.com"
+      },
+      {
+        "host": "www.playstation.com"
+      },
+      {
+        "host": "sonyentertainmentnetwork.com"
+      }
+    ],
+    "assert": {
+      "no_dns_leak": true,
+      "per_request": [
+        {
+          "host": "www.sony.com",
+          "policy": "Final"
+        },
+        {
+          "host": "www.playstation.com",
+          "policy": "游戏"
+        },
+        {
+          "host": "sonyentertainmentnetwork.com",
+          "policy": "游戏"
+        }
+      ]
+    }
+  },
+  {
+    "name": "cf_insights_neutral",
+    "desc": "裁决更正（2026-08-31）：static.cloudflareinsights.com 是 Cloudflare Web Analytics 性能 beacon，与 Turnstile 验证码无关，「降低验证码率」理由不成立——移出 AI 组落 FINAL；challenges.cloudflare.com（真 Turnstile，ChatGPT/Claude 登录链）仍留 AI",
+    "requests": [
+      {
+        "host": "static.cloudflareinsights.com"
+      },
+      {
+        "host": "challenges.cloudflare.com"
+      }
+    ],
+    "assert": {
+      "no_dns_leak": true,
+      "per_request": [
+        {
+          "host": "static.cloudflareinsights.com",
+          "policy": "Final",
+          "reason": "通用遥测组件回中性出口"
+        },
+        {
+          "host": "challenges.cloudflare.com",
+          "policy": "AI"
+        }
+      ]
+    }
+  },
+  {
+    "name": "reject_keyword_boundary",
+    "desc": "Reject 关键词边界化：8 条右锚定片段与 dnserror/hostingcloud 改 DOMAIN-WILDCARD——拦截意图保持（广告 CDN 形态/劫持页/挖矿域族照拦），标签边界外的子串不再有第一优先级误杀面",
+    "requests": [
+      {
+        "host": "js-ad.a.yximgs.com",
+        "note": "快手广告 CDN 形态，*-ad.a.yximgs.com 应拦"
+      },
+      {
+        "host": "tx2-rtb.gravite.net",
+        "note": "*-rtb.gravite.net 应拦"
+      },
+      {
+        "host": "cool-adnow.com",
+        "note": "*-adnow.com 应拦"
+      },
+      {
+        "host": "dnserror.wo.com.cn",
+        "note": "运营商 DNS 劫持页，dnserror.* 应拦"
+      },
+      {
+        "host": "hostingcloud.racing",
+        "note": "挖矿域族，hostingcloud.* 应拦"
+      },
+      {
+        "host": "cdnserror-page.com",
+        "note": "负例：含 dnserror 子串但非劫持页形态"
+      },
+      {
+        "host": "myhostingcloudapp.com",
+        "note": "负例：含 hostingcloud 子串的普通应用域"
+      }
+    ],
+    "assert": {
+      "no_dns_leak": true,
+      "per_request": [
+        {
+          "host": "js-ad.a.yximgs.com",
+          "policy": "REJECT"
+        },
+        {
+          "host": "tx2-rtb.gravite.net",
+          "policy": "REJECT"
+        },
+        {
+          "host": "cool-adnow.com",
+          "policy": "REJECT"
+        },
+        {
+          "host": "dnserror.wo.com.cn",
+          "policy": "REJECT"
+        },
+        {
+          "host": "hostingcloud.racing",
+          "policy": "REJECT"
+        },
+        {
+          "host": "cdnserror-page.com",
+          "policy": "Final",
+          "reason": "改 wildcard 后不再误杀"
+        },
+        {
+          "host": "myhostingcloudapp.com",
+          "policy": "Final"
+        }
+      ]
+    }
+  },
+  {
+    "name": "shared_cloud_ip_removed",
+    "desc": "共享云段不代表业务身份：Games 的 GCP 35.192.0.0/12（约百万地址客户段）、Meta 的 AWS 18.194.0.0/15、Google 的 IP-ASN,396982（Google Cloud 客户前缀 ASN）删除后，云客户 IP 落 FINAL；Meta 自有专网段保持",
+    "requests": [
+      {
+        "ip": "35.192.0.1",
+        "note": "GCP us-central1 客户段样本"
+      },
+      {
+        "ip": "18.194.0.1",
+        "note": "AWS eu-central-1 客户段样本"
+      },
+      {
+        "ip": "31.13.24.1",
+        "note": "Meta 专网 31.13.24.0/21，AS32934"
+      }
+    ],
+    "assert": {
+      "per_request": [
+        {
+          "ip": "35.192.0.1",
+          "policy": "Final",
+          "reason": "不再被业务表云段抢走"
+        },
+        {
+          "ip": "18.194.0.1",
+          "policy": "Final"
+        },
+        {
+          "ip": "31.13.24.1",
+          "policy": "Google-X-Meta-MS",
+          "reason": "第一方专网保留"
+        }
+      ]
+    }
+  }
+]

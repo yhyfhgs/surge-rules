@@ -1,10 +1,18 @@
 # Streaming — 国际流媒体聚合（Netflix/Disney/HBO/PrimeVideo/Hulu/Spotify/BBC/巴哈姆特/AbemaTV/Apple TV·Music·News，含 B 站国际版 bstar/biliintl）；国内流媒体归 ChinaMedia.list
 # 排序：规则类型分区，区内字母序
+# 不收：多租户共享组件（同意/AB/归因/标签管理）与云厂商通用区域后缀（execute-api 等）——只收第一方与专属 CDN 精确资产
 
+DOMAIN,44wilhpljf.execute-api.ap-southeast-1.amazonaws.com
 DOMAIN,4gtvfreepcvod-cds.cdn.hinet.net
+DOMAIN,abematv.akamaized.net
 DOMAIN,ana.video.friday.tw
+DOMAIN,aod-dash-uk-live.akamaized.net
+DOMAIN,aod-hls-uk-live.akamaized.net
 DOMAIN,api.okzy.tv
+DOMAIN,as-dash-uk-live.akamaized.net
+DOMAIN,as-hls-uk-live.akamaized.net
 DOMAIN,athome.fandango.com
+DOMAIN,audio4-ak-spotify-com.akamaized.net
 DOMAIN,bahamut.akamaized.net
 DOMAIN,bbc.mp-pxcdn.com
 DOMAIN,bcbolt446c5271-a.akamaihd.net
@@ -32,21 +40,34 @@ DOMAIN,gamer-cds.cdn.hinet.net
 DOMAIN,gamer2-cds.cdn.hinet.net
 DOMAIN,h-netflix.online-metrix.net
 DOMAIN,hamifans.emome.net
+DOMAIN,heads-ak-spotify-com.akamaized.net
 DOMAIN,hulu.map.fastly.net
 DOMAIN,itvpnpmobile-a.akamaihd.net
 DOMAIN,ktpx.amazon.com
+DOMAIN,linear-abematv.akamaized.net
 DOMAIN,live-mediashield-ava-hulustream-com.akamaized.net
 DOMAIN,news-client-search.apple.com
 DOMAIN,ocvideo.apple.com
 DOMAIN,prod-api.crackle.com
 DOMAIN,rpg.pic-imges.com
+DOMAIN,rthklive1-lh.akamaihd.net
+DOMAIN,rthklive2-lh.akamaihd.net
+DOMAIN,spotify.com.edgesuite.net
+DOMAIN,spotify.map.fastly.net
+DOMAIN,spotify.map.fastlylb.net
 DOMAIN,staticasiafox.akamaized.net
 DOMAIN,tubi.tv
 DOMAIN,upos-bstar-mirrorakam.akamaized.net
 DOMAIN,upos-bstar1-mirrorakam.akamaized.net
 DOMAIN,video.friday.tw
+DOMAIN,vod-abematv.akamaized.net
+DOMAIN,vod-dash-uk-live.akamaized.net
 DOMAIN,vod-dash-ww-live.akamaized.net
+DOMAIN,vod-hls-uk-live.akamaized.net
+DOMAIN,vod-sub-uk-live.akamaized.net
+DOMAIN,vod-thumb-uk-live.akamaized.net
 DOMAIN,vod-thumb-ww-live.akamaized.net
+DOMAIN,vs-cmaf-push-uk-live.akamaized.net
 DOMAIN,www.amazon.com
 DOMAIN,www.tubi.tv
 
@@ -63,7 +84,7 @@ DOMAIN-SUFFIX,abcnews.edgesuite.net
 DOMAIN-SUFFIX,abema-tv.com
 DOMAIN-SUFFIX,abema.io
 DOMAIN-SUFFIX,abema.tv
-DOMAIN-SUFFIX,adobedtm.com
+DOMAIN-SUFFIX,abematv.co.jp
 DOMAIN-SUFFIX,adventuresbydisney.com
 DOMAIN-SUFFIX,adx.promo
 DOMAIN-SUFFIX,afewmomentswith.com
@@ -73,7 +94,6 @@ DOMAIN-SUFFIX,ai.azure.com
 DOMAIN-SUFFIX,aiv-cdn.net
 DOMAIN-SUFFIX,aiv-delivery.net
 DOMAIN-SUFFIX,amazon.jobs
-DOMAIN-SUFFIX,amazonaws.co.uk
 DOMAIN-SUFFIX,amazonprimevideos.com
 DOMAIN-SUFFIX,amazontools.com
 DOMAIN-SUFFIX,amazontours.com
@@ -128,6 +148,7 @@ DOMAIN-SUFFIX,atv-ps-eu.amazon.com
 DOMAIN-SUFFIX,atv-ps-fe.amazon.co.jp
 DOMAIN-SUFFIX,atv-ps-fe.amazon.com
 DOMAIN-SUFFIX,atv-ps.amazon.com
+DOMAIN-SUFFIX,audio-ak-spotify-com.akamaized.net
 DOMAIN-SUFFIX,avod-dash-ww-live.akamaized.net
 DOMAIN-SUFFIX,avodmp4s3ww-a.akamaihd.net
 DOMAIN-SUFFIX,babble.com
@@ -141,6 +162,7 @@ DOMAIN-SUFFIX,bbc.co
 DOMAIN-SUFFIX,bbc.co.uk
 DOMAIN-SUFFIX,bbc.in
 DOMAIN-SUFFIX,bbc.net.uk
+DOMAIN-SUFFIX,bbcfmt.s.llnwi.net
 DOMAIN-SUFFIX,bbci.co
 DOMAIN-SUFFIX,bbci.co.uk
 DOMAIN-SUFFIX,bbcpersian.com
@@ -158,9 +180,9 @@ DOMAIN-SUFFIX,biliintl.co
 DOMAIN-SUFFIX,biliintl.com
 DOMAIN-SUFFIX,blobstore.apple.com
 DOMAIN-SUFFIX,bravotv.com
-DOMAIN-SUFFIX,braze.com
 DOMAIN-SUFFIX,bstarstatic.com
 DOMAIN-SUFFIX,bucketeer.jp
+DOMAIN-SUFFIX,byspotify.com
 DOMAIN-SUFFIX,c4assets.com
 DOMAIN-SUFFIX,cabletv.com.hk
 DOMAIN-SUFFIX,callhulu.com
@@ -183,7 +205,6 @@ DOMAIN-SUFFIX,cbsstatic.com
 DOMAIN-SUFFIX,cbsstore.com
 DOMAIN-SUFFIX,cbssvideo.com
 DOMAIN-SUFFIX,cbstelevisioncity.com
-DOMAIN-SUFFIX,cdn.optimizely.com
 DOMAIN-SUFFIX,cf-images.ap-southeast-1.prod.boltdns.net
 DOMAIN-SUFFIX,channel4.com
 DOMAIN-SUFFIX,channel5.com
@@ -196,9 +217,7 @@ DOMAIN-SUFFIX,cnnmoney.ch
 DOMAIN-SUFFIX,cobeuz.fr
 DOMAIN-SUFFIX,cobuz.fr
 DOMAIN-SUFFIX,cobuzz.fr
-DOMAIN-SUFFIX,control.kochava.com
 DOMAIN-SUFFIX,conviva.com
-DOMAIN-SUFFIX,cookielaw.org
 DOMAIN-SUFFIX,coronavirusnow.com
 DOMAIN-SUFFIX,crunchyroll.com
 DOMAIN-SUFFIX,cstatic.net
@@ -224,6 +243,7 @@ DOMAIN-SUFFIX,daznservices.com
 DOMAIN-SUFFIX,dc1-lm-live2dazn.secure.footprint.net
 DOMAIN-SUFFIX,dc2-vodhls-perform.secure.footprint.net
 DOMAIN-SUFFIX,dca-ll-livedazn-dznlivejp.s.llnwi.net
+DOMAIN-SUFFIX,dca-ll-voddazn-dznvodjp.s.llnwi.net
 DOMAIN-SUFFIX,dcalivedazn.akamaized.net
 DOMAIN-SUFFIX,dcblivedazn.akamaized.net
 DOMAIN-SUFFIX,deezer.com
@@ -362,8 +382,6 @@ DOMAIN-SUFFIX,espn.net
 DOMAIN-SUFFIX,espncdn.com
 DOMAIN-SUFFIX,espndotcom.tt.omtrdc.net
 DOMAIN-SUFFIX,espnqa.com
-DOMAIN-SUFFIX,execute-api.ap-southeast-1.amazonaws.com
-DOMAIN-SUFFIX,execute-api.us-east-1.amazonaws.com
 DOMAIN-SUFFIX,ext-twitch.tv
 DOMAIN-SUFFIX,f1esports.com
 DOMAIN-SUFFIX,f1manager.com
@@ -583,6 +601,13 @@ DOMAIN-SUFFIX,hbogeo.cust.footprint.net
 DOMAIN-SUFFIX,hbogo.co.th
 DOMAIN-SUFFIX,hbogo.com
 DOMAIN-SUFFIX,hbogo.eu
+DOMAIN-SUFFIX,hbogoasia.com
+DOMAIN-SUFFIX,hbogoasia.hk
+DOMAIN-SUFFIX,hbogoasia.id
+DOMAIN-SUFFIX,hbogoasia.my
+DOMAIN-SUFFIX,hbogoasia.ph
+DOMAIN-SUFFIX,hbogoasia.sg
+DOMAIN-SUFFIX,hbogoasia.tw
 DOMAIN-SUFFIX,hbogoprod-vod.akamaized.net
 DOMAIN-SUFFIX,hbolb.onwardsmg.com
 DOMAIN-SUFFIX,hbomax.com
@@ -590,6 +615,7 @@ DOMAIN-SUFFIX,hbomaxcdn.com
 DOMAIN-SUFFIX,hbomaxdash.s.llnwi.net
 DOMAIN-SUFFIX,hbonow.com
 DOMAIN-SUFFIX,hbounify-prod.evergent.com
+DOMAIN-SUFFIX,heads4-ak-spotify-com.akamaized.net
 DOMAIN-SUFFIX,hentaiverse.org
 DOMAIN-SUFFIX,himalaya.com
 DOMAIN-SUFFIX,hooloo.tv
@@ -679,6 +705,14 @@ DOMAIN-SUFFIX,iq.com
 DOMAIN-SUFFIX,italkbb.com
 DOMAIN-SUFFIX,italkbbtv.com
 DOMAIN-SUFFIX,itv.com
+DOMAIN-SUFFIX,japonx.com
+DOMAIN-SUFFIX,japonx.net
+DOMAIN-SUFFIX,japonx.tv
+DOMAIN-SUFFIX,japonx.vip
+DOMAIN-SUFFIX,japronx.com
+DOMAIN-SUFFIX,japronx.net
+DOMAIN-SUFFIX,japronx.tv
+DOMAIN-SUFFIX,japronx.vip
 DOMAIN-SUFFIX,joeswall.com
 DOMAIN-SUFFIX,joinmaidez.com
 DOMAIN-SUFFIX,joox.com
@@ -704,7 +738,6 @@ DOMAIN-SUFFIX,linetv.tw
 DOMAIN-SUFFIX,litix.io
 DOMAIN-SUFFIX,llnwd.net
 DOMAIN-SUFFIX,location-plus.nhk.jp
-DOMAIN-SUFFIX,logx.optimizely.com
 DOMAIN-SUFFIX,londonreal.tv
 DOMAIN-SUFFIX,m-content-viki.s.llnwi.net
 DOMAIN-SUFFIX,mangafox.me
@@ -785,6 +818,17 @@ DOMAIN-SUFFIX,netflix.com
 DOMAIN-SUFFIX,netflix.com.au
 DOMAIN-SUFFIX,netflix.com.edgesuite.net
 DOMAIN-SUFFIX,netflix.net
+DOMAIN-SUFFIX,netflixdnstest0.com
+DOMAIN-SUFFIX,netflixdnstest1.com
+DOMAIN-SUFFIX,netflixdnstest10.com
+DOMAIN-SUFFIX,netflixdnstest2.com
+DOMAIN-SUFFIX,netflixdnstest3.com
+DOMAIN-SUFFIX,netflixdnstest4.com
+DOMAIN-SUFFIX,netflixdnstest5.com
+DOMAIN-SUFFIX,netflixdnstest6.com
+DOMAIN-SUFFIX,netflixdnstest7.com
+DOMAIN-SUFFIX,netflixdnstest8.com
+DOMAIN-SUFFIX,netflixdnstest9.com
 DOMAIN-SUFFIX,netflixinvestor.com
 DOMAIN-SUFFIX,netflixstudios.com
 DOMAIN-SUFFIX,netflixtechblog.com
@@ -809,6 +853,9 @@ DOMAIN-SUFFIX,nicoseiga.jp
 DOMAIN-SUFFIX,nicovideo.jp
 DOMAIN-SUFFIX,nikkei.co.jp
 DOMAIN-SUFFIX,nikkei.jp
+DOMAIN-SUFFIX,nivod.tv
+DOMAIN-SUFFIX,nivodi.tv
+DOMAIN-SUFFIX,nivodz.com
 DOMAIN-SUFFIX,nomadlandmovie.ch
 DOMAIN-SUFFIX,now-ashare.com
 DOMAIN-SUFFIX,now-tv.com
@@ -827,7 +874,6 @@ DOMAIN-SUFFIX,olehd.com
 DOMAIN-SUFFIX,olevod.io
 DOMAIN-SUFFIX,olevod.tv
 DOMAIN-SUFFIX,olevodtv.com
-DOMAIN-SUFFIX,onetrust.com
 DOMAIN-SUFFIX,originalhulu.com
 DOMAIN-SUFFIX,orlandohurricane.com
 DOMAIN-SUFFIX,overcast.fm
@@ -929,6 +975,18 @@ DOMAIN-SUFFIX,speedfantasybid.com
 DOMAIN-SUFFIX,speedracegear.com
 DOMAIN-SUFFIX,speedxtra.com
 DOMAIN-SUFFIX,spoti.fi
+DOMAIN-SUFFIX,spotify-com.akamaized.net
+DOMAIN-SUFFIX,spotify-everywhere.com
+DOMAIN-SUFFIX,spotify.app.link
+DOMAIN-SUFFIX,spotify.com
+DOMAIN-SUFFIX,spotify.design
+DOMAIN-SUFFIX,spotifycdn.com
+DOMAIN-SUFFIX,spotifycdn.net
+DOMAIN-SUFFIX,spotifycharts.com
+DOMAIN-SUFFIX,spotifycodes.com
+DOMAIN-SUFFIX,spotifyforbrands.com
+DOMAIN-SUFFIX,spotifyjobs.com
+DOMAIN-SUFFIX,spotifynewsroom.jp
 DOMAIN-SUFFIX,spotilocal.com
 DOMAIN-SUFFIX,star-brasil.com
 DOMAIN-SUFFIX,star-latam.com
@@ -959,12 +1017,16 @@ DOMAIN-SUFFIX,tidalhifi.com
 DOMAIN-SUFFIX,tiktok.us
 DOMAIN-SUFFIX,tiktokw.com
 DOMAIN-SUFFIX,timestalks.com
+DOMAIN-SUFFIX,tospotify.com
+DOMAIN-SUFFIX,ttvnw.net
 DOMAIN-SUFFIX,tubitv.com
 DOMAIN-SUFFIX,tv.apple.com
 DOMAIN-SUFFIX,tv.apple.com.edgekey.net
 DOMAIN-SUFFIX,tv.naver.com
 DOMAIN-SUFFIX,tvb.com
 DOMAIN-SUFFIX,tvb.com.au
+DOMAIN-SUFFIX,tvbanywhere.com
+DOMAIN-SUFFIX,tvbanywhere.com.sg
 DOMAIN-SUFFIX,tvbeventpower.com.hk
 DOMAIN-SUFFIX,tvbusa.com
 DOMAIN-SUFFIX,tvbweekly.com
@@ -982,7 +1044,6 @@ DOMAIN-SUFFIX,uplynk.com
 DOMAIN-SUFFIX,upos-sz-mirroralibstar1.bilivideo.com
 DOMAIN-SUFFIX,upos-sz-mirrorcosbstar1.bilivideo.com
 DOMAIN-SUFFIX,urduvoa.com
-DOMAIN-SUFFIX,us-west-2.amazonaws.com
 DOMAIN-SUFFIX,usanetwork.com
 DOMAIN-SUFFIX,v.smtcdns.com
 DOMAIN-SUFFIX,v.smtcdns.net
@@ -1072,24 +1133,12 @@ DOMAIN-SUFFIX,zeeuk.com
 DOMAIN-SUFFIX,zeriamerikes.com
 DOMAIN-SUFFIX,zype.com
 
-DOMAIN-KEYWORD,apiproxy-device-prod-nlb-
-DOMAIN-KEYWORD,avoddashs
-DOMAIN-KEYWORD,bbcfmt
-DOMAIN-KEYWORD,dualstack.apiproxy-
-DOMAIN-KEYWORD,dualstack.ichnaea-web-
-DOMAIN-KEYWORD,hbogoasia
-DOMAIN-KEYWORD,japonx
-DOMAIN-KEYWORD,japronx
-DOMAIN-KEYWORD,jooxweb-api
-DOMAIN-KEYWORD,netflixdnstest
-DOMAIN-KEYWORD,nivod
-DOMAIN-KEYWORD,nowtv100
-DOMAIN-KEYWORD,rthklive
-DOMAIN-KEYWORD,spotify
-DOMAIN-KEYWORD,ttvnw
-DOMAIN-KEYWORD,tvbanywhere
-DOMAIN-KEYWORD,uk-live
-DOMAIN-KEYWORD,voddazn
+DOMAIN-WILDCARD,*nowtv100.*
+DOMAIN-WILDCARD,apiproxy-device-prod-nlb-*
+DOMAIN-WILDCARD,avoddashs*
+DOMAIN-WILDCARD,dualstack.apiproxy-*
+DOMAIN-WILDCARD,dualstack.ichnaea-web-*
+DOMAIN-WILDCARD,jooxweb-api.*
 
 IP-CIDR,1.37.35.6/32,no-resolve
 IP-CIDR,1.201.0.0/24,no-resolve

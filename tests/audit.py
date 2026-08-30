@@ -3,7 +3,7 @@
 """
 audit.py — Surge 规则体系静态审计器（分流测试套件 L1 层）
 
-复用 engine.py 的解析器（同一张按 conf 顺序展开的全局规则表），做 6 项可回归检查：
+复用 engine.py 的解析器（同一张按 conf 顺序展开的全局规则表），做 8 项可回归检查：
 
   A1  全 list IP 类规则 no-resolve 缺失（含 conf RULE-SET 行级修饰豁免逻辑）
   A2  跨 list 精确重复（(type,value) 相同出现多处 → 报后位死条目）
@@ -11,6 +11,8 @@ audit.py — Surge 规则体系静态审计器（分流测试套件 L1 层）
   A4  跨 list 遮蔽（后位条目被前位更宽规则完全覆盖；直连区被代理区遮蔽标 P0）
   A5  conf 引用完整性（引用的 list 存在；存在的 list 被引用或在 allowlist）
   A6  DOMAIN-KEYWORD 审查表（列出供人工复核，不判错）
+  A7  规则行格式 lint（无类型前缀的裸行 → P1）
+  A8  禁止回流（allowlist.json `forbidden` 段登记的模式出现即 P0，不可豁免）
 
 输出（--out DIR）：
   findings.jsonl      —— 每行一个 finding（00-context.md 约定 schema + source/check）
@@ -45,7 +47,7 @@ REJECT_POLICIES = frozenset(("REJECT", "REJECT-DROP", "REJECT-TINYGIF",
 DEFAULT_ALLOWLIST = os.path.join(os.path.dirname(os.path.abspath(__file__)),
                                  "allowlist.json")
 
-ALL_CHECKS = ("A1", "A2", "A3", "A4", "A5", "A6", "A7")
+ALL_CHECKS = ("A1", "A2", "A3", "A4", "A5", "A6", "A7", "A8")
 
 
 #: 形如 IPv4 前缀的关键词（A6 启发式提示用，例如 "101.91.69." / "1.2.3.4"）
@@ -75,16 +77,22 @@ class Allowlist(object):
       by_file  —— 遮蔽/胜出方所在 list，如 "YouTube.list"
     另有 preventive=true：表示这是「防回归」的前置豁免（当前配置本就不该命中），
     未命中时不计入「未使用豁免」告警。file / rule / by / by_file 均支持 fnmatch 通配。
+
+    与 exemptions 语义相反的顶层 `forbidden` 段：登记「按架构裁决必须持续不存在」
+    的规则模式（如 D7 的 USER-AGENT/PROCESS-NAME、D11 上游合并排除表项）。
+    由 A8 扫描源文件强制执行：命中即 P0，且不经过 exemptions 豁免。
     """
 
     def __init__(self, path=None):
         self.path = path
         self.entries = []
+        self.forbidden = []
         self.hits = defaultdict(int)
         if path and os.path.isfile(path):
             with open(path, "r", encoding="utf-8") as fh:
                 data = json.load(fh)
             self.entries = data.get("exemptions", [])
+            self.forbidden = data.get("forbidden", [])
 
     @staticmethod
     def _check_match(entry, check):
@@ -152,13 +160,16 @@ class Auditor(object):
     # -- finding 构造 ------------------------------------------------------
 
     def _add(self, check, severity, kind, file_name, rule_str, evidence,
-             impact, fix, confidence="high", by=None, by_file=None):
-        ex = self.al.match(check, file_name, rule_str, by=by, by_file=by_file)
-        if ex is not None:
-            self.exempted.append({"check": check, "file": file_name,
-                                  "rule": rule_str,
-                                  "reason": ex.get("reason", "")})
-            return None
+             impact, fix, confidence="high", by=None, by_file=None,
+             exemptable=True):
+        if exemptable:
+            ex = self.al.match(check, file_name, rule_str, by=by,
+                               by_file=by_file)
+            if ex is not None:
+                self.exempted.append({"check": check, "file": file_name,
+                                      "rule": rule_str,
+                                      "reason": ex.get("reason", "")})
+                return None
         self._seq += 1
         f = OrderedDict()
         f["id"] = "W6-%03d" % self._seq
@@ -609,6 +620,70 @@ class Auditor(object):
                               "high")
         return n
 
+    # -- A8 ---------------------------------------------------------------
+
+    def check_a8(self):
+        """A8：禁止回流（forbidden / expected-absent）。
+
+        allowlist.json 顶层 `forbidden` 段登记「按架构裁决必须持续不存在」的
+        规则模式（fnmatch 全串匹配，对整行与去修饰符的 `TYPE,VALUE` 头两段各试
+        一次）。与 exemptions 相反：命中即 P0，且**不经过豁免**——把 D7（全库
+        零 USER-AGENT/PROCESS-NAME）、D11（上游合并排除表）等自然语言裁决升级
+        为机器门禁，防止上游再生/误合并把已删规则静默带回。
+        直接扫源文件文本而非 engine 规则表，确保 engine 不解析的类型也逃不掉。"""
+        n = 0
+        forb = [e for e in getattr(self.al, "forbidden", [])
+                if e.get("pattern")]
+        if not forb:
+            return 0
+        # 性能：无通配符的模式进 dict 做 O(1) 精确查，含通配符的才逐条 fnmatch
+        exact = {}
+        globs = []
+        for entry in forb:
+            pat = entry["pattern"]
+            if any(ch in pat for ch in "*?["):
+                globs.append(entry)
+            else:
+                exact.setdefault(pat, entry)
+        for fname in sorted(os.listdir(self.e.rules_dir)):
+            if not fname.endswith(".list"):
+                continue
+            path = os.path.join(self.e.rules_dir, fname)
+            with open(path, "r", encoding="utf-8") as fh:
+                for lineno, raw in enumerate(fh, 1):
+                    t = raw.strip()
+                    if not t or t.startswith("#"):
+                        continue
+                    head = ",".join(t.split(",")[:2])
+                    hits = []
+                    e = exact.get(t) or exact.get(head)
+                    if e is not None:
+                        hits.append(e)
+                    else:
+                        for entry in globs:
+                            pat = entry["pattern"]
+                            if (fnmatch.fnmatch(t, pat)
+                                    or fnmatch.fnmatch(head, pat)):
+                                hits.append(entry)
+                                break
+                    for entry in hits:
+                        pat = entry["pattern"]
+                        n += 1
+                        self._add(
+                            "A8", "P0", "forbidden", fname, t[:80],
+                            "%s:%d 命中 forbidden 模式 `%s`：%s —— 登记理由：%s"
+                            % (fname, lineno, pat, t[:80],
+                               entry.get("reason", "（未写 reason）")),
+                            "该规则按架构裁决必须持续不存在（已删除/已排除），"
+                            "此次出现说明上游再生或人工合并把它带了回来；"
+                            "带回即恢复当初删除它所要消除的危害。",
+                            "删除该行本身。禁止改为豁免——forbidden 模式不接受"
+                            " exemption；若裁决确已变更，先更新 allowlist.json"
+                            " 的 forbidden 段与 docs/MAINTENANCE.md 裁决登记。",
+                            "high", exemptable=False)
+                        break
+        return n
+
     # -- 运行 --------------------------------------------------------------
 
     def run(self, checks):
@@ -627,6 +702,8 @@ class Auditor(object):
             stats["A6"] = self.check_a6()
         if "A7" in checks:
             stats["A7"] = self.check_a7()
+        if "A8" in checks:
+            stats["A8"] = self.check_a8()
         self.findings.sort(key=lambda f: (SEVERITY_ORDER[f["severity"]],
                                           f["check"], f["id"]))
         return stats
@@ -644,6 +721,7 @@ CHECK_TITLE = {
     "A5": "A5 conf 引用完整性",
     "A6": "A6 DOMAIN-KEYWORD 审查表（不判错）",
     "A7": "A7 规则行格式 lint（裸行/未知前缀 → P1）",
+    "A8": "A8 禁止回流（forbidden 模式出现 → P0，不可豁免）",
 }
 
 SEV_TITLE = {
@@ -782,7 +860,7 @@ def write_details(outdir, aud):
 
 
 # ---------------------------------------------------------------------------
-# 自检：合成一份「植入了已知缺陷」的配置，验证 A1–A6 确实会触发
+# 自检：合成一份「植入了已知缺陷」的配置，验证 A1–A8 确实会触发
 # ---------------------------------------------------------------------------
 
 SELFTEST_CONF = u"""\
@@ -813,6 +891,7 @@ DOMAIN-SUFFIX,a.inner.example.net
 DOMAIN-SUFFIX,x-swallowme-y.example.io
 DOMAIN-KEYWORD,swallowme
 PROCESS-NAME,Claude
+bare-line-without-type.example.invalid
 """,
     "Leak.list": u"""\
 IP-CIDR,198.51.100.0/24
@@ -920,6 +999,17 @@ def run_audit_selftest(verbose=True):
               [(f["severity"], f["kind"]) for f in pick("A6")],
               [("P3", "structure")])
 
+        # A7：无类型前缀的裸行必须被捕获（正向 fixture）
+        a7 = pick("A7")
+        check("S28 A7 命中 1 条裸行", stats["A7"], 1)
+        check("S29 A7 定位到 Front.list 的裸行且判 P1",
+              [(f["file"], f["severity"],
+                f["rule"].startswith("bare-line-without-type")) for f in a7],
+              [("Front.list", "P1", True)])
+
+        # A8：无 forbidden 段时不产生任何 finding
+        check("S30 A8 无 forbidden 段时为 0", stats["A8"], 0)
+
         # 豁免表生效
         al_path = os.path.join(tmpdir, "allow.json")
         with open(al_path, "w", encoding="utf-8") as fh:
@@ -928,6 +1018,11 @@ def run_audit_selftest(verbose=True):
                  "rule": "DOMAIN-SUFFIX,sub.shadow.example.com",
                  "by": "DOMAIN-SUFFIX,shadow.example.com", "reason": "自检用"},
                 {"check": ["A5"], "file": "Unused.list", "reason": "自检用"},
+                {"check": "A8", "file": "*", "rule": "PROCESS-NAME,*",
+                 "reason": "自检用：试图豁免 forbidden，必须无效"},
+            ], "forbidden": [
+                {"pattern": "PROCESS-NAME,*",
+                 "reason": "自检用：D7 全库零进程规则"},
             ]}, fh)
         aud2 = Auditor(engine_mod.Engine(conf, rules_dir), Allowlist(al_path))
         aud2.run(list(ALL_CHECKS))
@@ -939,7 +1034,16 @@ def run_audit_selftest(verbose=True):
         check("S23 豁免计数正确", len(aud2.exempted), 2)
         check("S24 未被豁免的 P0 仍然保留",
               sorted(set(f["check"] for f in aud2.findings
-                         if f["severity"] == "P0")), ["A2", "A5"])
+                         if f["severity"] == "P0")), ["A2", "A5", "A8"])
+
+        # A8：forbidden 命中 P0，且 exemptions 无法豁免
+        a8 = [f for f in aud2.findings if f["check"] == "A8"]
+        check("S31 A8 抓到全部 PROCESS-NAME 回流行", len(a8), 2)
+        check("S32 A8 判 P0/forbidden 且无视同名 exemption",
+              sorted(set((f["severity"], f["kind"]) for f in a8)),
+              [("P0", "forbidden")])
+        check("S33 A8 命中的文件集合正确",
+              sorted(f["file"] for f in a8), ["Direct.list", "Front.list"])
 
         # findings schema 完整性（00-context.md 约定）
         need = ["id", "severity", "kind", "file", "rule", "evidence",
@@ -974,7 +1078,7 @@ def run_audit_selftest(verbose=True):
 
 def main(argv=None):
     ap = argparse.ArgumentParser(
-        prog="audit.py", description="Surge 规则体系静态审计器（A1–A6）")
+        prog="audit.py", description="Surge 规则体系静态审计器（A1–A8）")
     ap.add_argument("--conf", help="Surge.conf 路径（默认自动定位）")
     ap.add_argument("--rules", help=".list 所在目录（默认 conf 同级 rules/lists/）")
     ap.add_argument("--allowlist", default=DEFAULT_ALLOWLIST,
@@ -990,7 +1094,7 @@ def main(argv=None):
     ap.add_argument("--fail-on", default="P1", choices=["P0", "P1", "P2", "P3"],
                     help="严重度达到该级别即以退出码 1 失败（默认 P1）")
     ap.add_argument("--selftest", action="store_true",
-                    help="用植入已知缺陷的合成配置验证 A1–A6 与豁免表")
+                    help="用植入已知缺陷的合成配置验证 A1–A8 与豁免表")
     args = ap.parse_args(argv)
 
     if args.selftest:

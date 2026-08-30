@@ -46,6 +46,11 @@ DOMAIN-SUFFIX,onfastspring.com
 DOMAIN-SUFFIX,paddle.com
 DOMAIN-SUFFIX,paddleapi.com
 DOMAIN-SUFFIX,payoneer.com
+DOMAIN-SUFFIX,paypal.cn
+DOMAIN-SUFFIX,paypal.com
+DOMAIN-SUFFIX,paypal.me
+DOMAIN-SUFFIX,paypalcorp.com
+DOMAIN-SUFFIX,paypalobjects.com
 DOMAIN-SUFFIX,paysafe.com
 DOMAIN-SUFFIX,plaid.com
 DOMAIN-SUFFIX,recurly.com
@@ -65,5 +70,3 @@ DOMAIN-SUFFIX,visa.com
 DOMAIN-SUFFIX,wise.com
 DOMAIN-SUFFIX,worldpay.com
 DOMAIN-SUFFIX,xoom.com
-
-DOMAIN-KEYWORD,paypal

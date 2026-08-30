@@ -1,6 +1,6 @@
 # Google — Google 全家桶（含 .google/.goog gTLD、搜索 ccTLD、Gemini/AI Studio/DeepMind/NotebookLM）；YouTube 全量在前表匹配
-# 排序：规则类型分区，区内字母序
-# .google/.goog 后缀已兜底各 AI 门面（deepmind.google / labs.google / ai.google 等），无需单列
+# blogspot/gmail/recaptcha 精确后缀集对撞自上游 blackmatrix7 Google 表；2026-08-31 审计删除同名宽 DOMAIN-KEYWORD
+# 排序：规则类型分区，区内字母序；.google/.goog 后缀已兜底各 AI 门面（deepmind.google / labs.google / ai.google 等）
 
 DOMAIN-SUFFIX,0emm.com
 DOMAIN-SUFFIX,1e100.net
@@ -58,6 +58,79 @@ DOMAIN-SUFFIX,beatthatquote.com
 DOMAIN-SUFFIX,blink.org
 DOMAIN-SUFFIX,blogblog.com
 DOMAIN-SUFFIX,blogger.com
+DOMAIN-SUFFIX,blogspot.ae
+DOMAIN-SUFFIX,blogspot.al
+DOMAIN-SUFFIX,blogspot.am
+DOMAIN-SUFFIX,blogspot.ba
+DOMAIN-SUFFIX,blogspot.be
+DOMAIN-SUFFIX,blogspot.bg
+DOMAIN-SUFFIX,blogspot.bj
+DOMAIN-SUFFIX,blogspot.ca
+DOMAIN-SUFFIX,blogspot.cf
+DOMAIN-SUFFIX,blogspot.ch
+DOMAIN-SUFFIX,blogspot.cl
+DOMAIN-SUFFIX,blogspot.co.at
+DOMAIN-SUFFIX,blogspot.co.id
+DOMAIN-SUFFIX,blogspot.co.il
+DOMAIN-SUFFIX,blogspot.co.ke
+DOMAIN-SUFFIX,blogspot.co.nz
+DOMAIN-SUFFIX,blogspot.co.uk
+DOMAIN-SUFFIX,blogspot.co.za
+DOMAIN-SUFFIX,blogspot.com
+DOMAIN-SUFFIX,blogspot.com.ar
+DOMAIN-SUFFIX,blogspot.com.au
+DOMAIN-SUFFIX,blogspot.com.br
+DOMAIN-SUFFIX,blogspot.com.by
+DOMAIN-SUFFIX,blogspot.com.co
+DOMAIN-SUFFIX,blogspot.com.cy
+DOMAIN-SUFFIX,blogspot.com.ee
+DOMAIN-SUFFIX,blogspot.com.eg
+DOMAIN-SUFFIX,blogspot.com.es
+DOMAIN-SUFFIX,blogspot.com.mt
+DOMAIN-SUFFIX,blogspot.com.ng
+DOMAIN-SUFFIX,blogspot.com.tr
+DOMAIN-SUFFIX,blogspot.com.uy
+DOMAIN-SUFFIX,blogspot.cv
+DOMAIN-SUFFIX,blogspot.cz
+DOMAIN-SUFFIX,blogspot.de
+DOMAIN-SUFFIX,blogspot.dk
+DOMAIN-SUFFIX,blogspot.fi
+DOMAIN-SUFFIX,blogspot.fr
+DOMAIN-SUFFIX,blogspot.gr
+DOMAIN-SUFFIX,blogspot.hk
+DOMAIN-SUFFIX,blogspot.hr
+DOMAIN-SUFFIX,blogspot.hu
+DOMAIN-SUFFIX,blogspot.ie
+DOMAIN-SUFFIX,blogspot.in
+DOMAIN-SUFFIX,blogspot.is
+DOMAIN-SUFFIX,blogspot.it
+DOMAIN-SUFFIX,blogspot.jp
+DOMAIN-SUFFIX,blogspot.kr
+DOMAIN-SUFFIX,blogspot.li
+DOMAIN-SUFFIX,blogspot.lt
+DOMAIN-SUFFIX,blogspot.lu
+DOMAIN-SUFFIX,blogspot.md
+DOMAIN-SUFFIX,blogspot.mk
+DOMAIN-SUFFIX,blogspot.mx
+DOMAIN-SUFFIX,blogspot.my
+DOMAIN-SUFFIX,blogspot.nl
+DOMAIN-SUFFIX,blogspot.no
+DOMAIN-SUFFIX,blogspot.pe
+DOMAIN-SUFFIX,blogspot.pt
+DOMAIN-SUFFIX,blogspot.qa
+DOMAIN-SUFFIX,blogspot.re
+DOMAIN-SUFFIX,blogspot.ro
+DOMAIN-SUFFIX,blogspot.rs
+DOMAIN-SUFFIX,blogspot.ru
+DOMAIN-SUFFIX,blogspot.se
+DOMAIN-SUFFIX,blogspot.sg
+DOMAIN-SUFFIX,blogspot.si
+DOMAIN-SUFFIX,blogspot.sk
+DOMAIN-SUFFIX,blogspot.sn
+DOMAIN-SUFFIX,blogspot.td
+DOMAIN-SUFFIX,blogspot.tw
+DOMAIN-SUFFIX,blogspot.ug
+DOMAIN-SUFFIX,blogspot.vn
 DOMAIN-SUFFIX,brocaproject.com
 DOMAIN-SUFFIX,brotli.org
 DOMAIN-SUFFIX,bumpshare.com
@@ -157,6 +230,7 @@ DOMAIN-SUFFIX,ggoogle.com
 DOMAIN-SUFFIX,ggpht.com
 DOMAIN-SUFFIX,gipscorp.com
 DOMAIN-SUFFIX,globaledu.org
+DOMAIN-SUFFIX,gmail.com
 DOMAIN-SUFFIX,gmodules.com
 DOMAIN-SUFFIX,go-lang.com
 DOMAIN-SUFFIX,go-lang.net
@@ -533,6 +607,8 @@ DOMAIN-SUFFIX,qpx.googleflights.net
 DOMAIN-SUFFIX,questvisual.com
 DOMAIN-SUFFIX,quickoffice.com
 DOMAIN-SUFFIX,quiksee.com
+DOMAIN-SUFFIX,recaptcha-cn.net
+DOMAIN-SUFFIX,recaptcha.net
 DOMAIN-SUFFIX,redhotlabs.com
 DOMAIN-SUFFIX,revolv.com
 DOMAIN-SUFFIX,ridepenguin.com
@@ -615,10 +691,6 @@ DOMAIN-SUFFIX,xplr.co
 DOMAIN-SUFFIX,zukunftswerkstatt.de
 DOMAIN-SUFFIX,zynamics.com
 
-DOMAIN-KEYWORD,blogspot
-DOMAIN-KEYWORD,gmail
-DOMAIN-KEYWORD,recaptcha
-
 IP-CIDR,8.8.4.4/32,no-resolve
 IP-CIDR,8.8.8.8/32,no-resolve
 IP-CIDR,74.125.0.0/16,no-resolve
@@ -631,4 +703,3 @@ IP-ASN,15169,no-resolve
 IP-ASN,19527,no-resolve
 IP-ASN,36040,no-resolve
 IP-ASN,43515,no-resolve
-IP-ASN,396982,no-resolve

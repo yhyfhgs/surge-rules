@@ -333,23 +333,23 @@ DOMAIN-SUFFIX,zryydi.com
 DOMAIN-SUFFIX,zunmi.cn
 DOMAIN-SUFFIX,zzd6.com
 
+DOMAIN-WILDCARD,*-ad.a.yximgs.com
+DOMAIN-WILDCARD,*-ad.ixigua.com
+DOMAIN-WILDCARD,*-ad.sm.cn
+DOMAIN-WILDCARD,*-ad.video.yximgs.com
+DOMAIN-WILDCARD,*-ad.wtzw.com
+DOMAIN-WILDCARD,*-adnow.com
+DOMAIN-WILDCARD,*-ads.realmemobile.com
+DOMAIN-WILDCARD,*-rtb.gravite.net
 DOMAIN-WILDCARD,*.ad.*.prod.hosts.ooklaserver.net
 DOMAIN-WILDCARD,ads-*.tiktok.com
 DOMAIN-WILDCARD,ads-*.xhscdn.com
+DOMAIN-WILDCARD,dnserror.*
+DOMAIN-WILDCARD,hostingcloud.*
 
-DOMAIN-KEYWORD,-ad.a.yximgs.com
-DOMAIN-KEYWORD,-ad.ixigua.com
-DOMAIN-KEYWORD,-ad.sm.cn
-DOMAIN-KEYWORD,-ad.video.yximgs.com
-DOMAIN-KEYWORD,-ad.wtzw.com
-DOMAIN-KEYWORD,-adnow.com
-DOMAIN-KEYWORD,-ads.realmemobile.com
-DOMAIN-KEYWORD,-rtb.gravite.net
 DOMAIN-KEYWORD,adsyndication
 DOMAIN-KEYWORD,adtarget.
 DOMAIN-KEYWORD,advertmarket
-DOMAIN-KEYWORD,dnserror
-DOMAIN-KEYWORD,hostingcloud
 DOMAIN-KEYWORD,nimiqpool
 DOMAIN-KEYWORD,packetsdk
 DOMAIN-KEYWORD,pangolin-sdk-toutiao

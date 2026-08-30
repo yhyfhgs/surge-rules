@@ -46,8 +46,21 @@
   },
   {
     "name": "openai_desktop_app",
-    "desc": "macOS/Windows ChatGPT 桌面应用（PROCESS-NAME 覆盖 + 常规域名）",
-    "requests": [],
+    "desc": "macOS/Windows ChatGPT 桌面应用域名链（2026-08-31 重建：原 PROCESS-NAME 请求随 D7 移除后场景被掏空）",
+    "requests": [
+      {
+        "host": "chatgpt.com"
+      },
+      {
+        "host": "auth.openai.com"
+      },
+      {
+        "host": "cdn.oaistatic.com"
+      },
+      {
+        "host": "oaiusercontent.com"
+      }
+    ],
     "assert": {
       "same_policy": true,
       "policy": "AI",
@@ -122,8 +135,21 @@
   },
   {
     "name": "anthropic_claude_code_cli",
-    "desc": "Claude Code CLI：模型调用 + 特性开关 + 崩溃上报（PROCESS-NAME 大小写变体）",
-    "requests": [],
+    "desc": "Claude Code CLI：模型调用 + 特性开关 + 崩溃上报（2026-08-31 重建：原 PROCESS-NAME 请求随 D7 移除后场景被掏空）",
+    "requests": [
+      {
+        "host": "api.anthropic.com",
+        "note": "模型调用"
+      },
+      {
+        "host": "statsig.anthropic.com",
+        "note": "特性开关"
+      },
+      {
+        "host": "o1158394.ingest.sentry.io",
+        "note": "崩溃上报（sentry 随 AI 组，B2 裁决）"
+      }
+    ],
     "assert": {
       "same_policy": true,
       "policy": "AI",
@@ -236,7 +262,7 @@
   },
   {
     "name": "cursor_ide_session",
-    "desc": "Cursor 编辑器：登录 → 补全/Composer → 自动更新（含 PROCESS-NAME）。2026-08-30 用户裁决：Cursor/Grok Bot 全家归 Twitter.list（xAI 生态，Grok Bot 后端即 cursor 基建），整链走 Google-X-Meta-MS",
+    "desc": "Cursor 编辑器：登录 → 补全/Composer → 自动更新。2026-08-31 审计更正：Cursor/Anysphere 是独立公司（非 X 资产），全家自 Twitter.list 迁 AI.list，整链走 AI 组",
     "requests": [
       {
         "host": "cursor.com"
@@ -261,7 +287,7 @@
     ],
     "assert": {
       "same_policy": true,
-      "policy": "Google-X-Meta-MS",
+      "policy": "AI",
       "no_dns_leak": true
     }
   },

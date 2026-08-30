@@ -3,3 +3,5 @@ __pycache__/
 reference/
 tests/live_check_local.json
 tests/expected_asn.json
+live_report.md
+tests/live_report.md

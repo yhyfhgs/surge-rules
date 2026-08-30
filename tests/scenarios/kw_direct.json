@@ -1,0 +1,214 @@
+[
+  {
+    "name": "kw_direct_applecn_cname_wildcard",
+    "desc": "2026-08-31 审计整改（P1-04）：AppleCN 的 4 条 Akamai CNAME 片段关键词改右锚定 DOMAIN-WILDCARD——只认「以该串结尾」的 CNAME 形态域，不再按任意子串命中",
+    "requests": [
+      {"host": "www.apple.com.edgekey.net", "note": "www.apple.com 的 edgekey CNAME 形态"},
+      {"host": "support.apple.com.akadns.net", "note": "support 面 akadns 调度形态"},
+      {"host": "apple-support.akadns.net", "note": "裸串本身，DOMAIN-SUFFIX 含 apex"},
+      {"host": "www.icloud.com.akadns.net"},
+      {"host": "apple.com.akadns.net.phishing-cdn.com", "note": "负例：品牌串在中段的仿冒域"},
+      {"host": "apple.com.edgekey.net.globalredir.akadns.net", "note": "负例：右锚定后不再命中的 Akamai globalredir 链形态"}
+    ],
+    "assert": {
+      "no_dns_leak": true,
+      "per_request": [
+        {"host": "www.apple.com.edgekey.net", "policy": "DIRECT", "reason": "DOMAIN-SUFFIX,apple.com.edgekey.net"},
+        {"host": "support.apple.com.akadns.net", "policy": "DIRECT", "reason": "DOMAIN-SUFFIX,apple.com.akadns.net"},
+        {"host": "apple-support.akadns.net", "policy": "DIRECT", "reason": "DOMAIN-SUFFIX,apple-support.akadns.net"},
+        {"host": "www.icloud.com.akadns.net", "policy": "DIRECT", "reason": "DOMAIN-SUFFIX,icloud.com.akadns.net"},
+        {"host": "apple.com.akadns.net.phishing-cdn.com", "policy": "Final", "reason": "原 DOMAIN-KEYWORD 会把它误判 DIRECT；右锚定后落 Final"},
+        {"host": "apple.com.edgekey.net.globalredir.akadns.net", "policy": "Final", "reason": "刻意收窄的代价：globalredir 链形态改由代理走，登记为观察项"}
+      ]
+    }
+  },
+  {
+    "name": "kw_direct_applecn_testflight_removed",
+    "desc": "AppleCN 删 DOMAIN-KEYWORD,testflight：官方 TestFlight 域本就由同表 DOMAIN-SUFFIX,apple.com 承接，删除只切掉第三方含 testflight 子串的误捕获",
+    "requests": [
+      {"host": "testflight.apple.com", "note": "上游 TestFlight 表两条精确域之一"},
+      {"host": "beta.apple.com", "note": "上游 TestFlight 表两条精确域之二"},
+      {"host": "mytestflight.io", "note": "负例：第三方含品牌子串"},
+      {"host": "testflight-tracker.sample-analytics.com", "note": "负例：第三方追踪域含品牌子串"}
+    ],
+    "assert": {
+      "no_dns_leak": true,
+      "per_request": [
+        {"host": "testflight.apple.com", "policy": "DIRECT", "reason": "DOMAIN-SUFFIX,apple.com，删 keyword 前后不变"},
+        {"host": "beta.apple.com", "policy": "DIRECT", "reason": "DOMAIN-SUFFIX,apple.com，删 keyword 前后不变"},
+        {"host": "mytestflight.io", "policy": "Final", "reason": "原被 keyword 强制 DIRECT"},
+        {"host": "testflight-tracker.sample-analytics.com", "policy": "Final", "reason": "原被 keyword 强制 DIRECT"}
+      ]
+    }
+  },
+  {
+    "name": "kw_direct_microsoftcn_onedrive_exact",
+    "desc": "MicrosoftCN 删 1drv/onedrive/skydrive 三条关键词，改上游 OneDrive 表精确后缀；OneDrive 数据面 files.1drv.com 归 DownloadCDN 的既有未决裁决保持不动",
+    "requests": [
+      {"host": "1drv.ms", "note": "OneDrive 短链"},
+      {"host": "1drv.com"},
+      {"host": "by3301-a.1drv.com", "note": "区域数据面主机名"},
+      {"host": "api.onedrive.com"},
+      {"host": "onedrive.live.com", "note": "由同表 DOMAIN-SUFFIX,live.com 承接"},
+      {"host": "skydrive.wns.windows.com", "note": "WNS 推送端点"},
+      {"host": "files.1drv.com", "note": "既有未决裁决：数据面在 DownloadCDN（前位）"},
+      {"host": "firestonedrivestore.com", "note": "负例：上游 Global 表域，串中含 onedrive"},
+      {"host": "51drv.com", "note": "负例：上游 ChinaMax 表域，串中含 1drv"}
+    ],
+    "assert": {
+      "no_dns_leak": true,
+      "per_request": [
+        {"host": "1drv.ms", "policy": "DIRECT", "reason": "DOMAIN-SUFFIX,1drv.ms（新增）"},
+        {"host": "1drv.com", "policy": "DIRECT", "reason": "DOMAIN-SUFFIX,1drv.com（新增）"},
+        {"host": "by3301-a.1drv.com", "policy": "DIRECT", "reason": "DOMAIN-SUFFIX,1drv.com（新增）"},
+        {"host": "api.onedrive.com", "policy": "DIRECT", "reason": "DOMAIN-SUFFIX,onedrive.com（新增）"},
+        {"host": "onedrive.live.com", "policy": "DIRECT", "reason": "DOMAIN-SUFFIX,live.com，与 keyword 无关"},
+        {"host": "skydrive.wns.windows.com", "policy": "DIRECT", "reason": "DOMAIN-SUFFIX,skydrive.wns.windows.com（新增）"},
+        {"host": "files.1drv.com", "policy": "下载", "reason": "DownloadCDN 前位认领，本次不动"},
+        {"host": "firestonedrivestore.com", "policy": "Final", "reason": "原被 onedrive keyword 强制 DIRECT，属跨境误分流"},
+        {"host": "51drv.com", "policy": "Final", "reason": "原被 1drv keyword 强制 DIRECT；待 ChinaDomain 再生回收为 DIRECT"}
+      ]
+    }
+  },
+  {
+    "name": "kw_direct_chinamedia_bilibili_exact",
+    "desc": "ChinaMedia 删 DOMAIN-KEYWORD,bilibili，恢复上游 BiliBili 表 10 条被级联去重吃掉的精确后缀；国际域 bilibili.tv 仍归 Streaming（前位）",
+    "requests": [
+      {"host": "www.bilibili.com"},
+      {"host": "api.bilibili.com"},
+      {"host": "bilibili.cn"},
+      {"host": "bilibilipay.com"},
+      {"host": "hdslb.com", "note": "对照：非 keyword 覆盖面，本就有精确后缀"},
+      {"host": "bilibili.tv", "note": "国际版，Streaming 前位认领"},
+      {"host": "blbilibili.com", "note": "负例：第三方站，串中含 bilibili"},
+      {"host": "bilibilihelper.com", "note": "负例：第三方工具站"}
+    ],
+    "assert": {
+      "no_dns_leak": true,
+      "per_request": [
+        {"host": "www.bilibili.com", "policy": "DIRECT", "reason": "DOMAIN-SUFFIX,bilibili.com（新增）"},
+        {"host": "api.bilibili.com", "policy": "DIRECT", "reason": "DOMAIN-SUFFIX,bilibili.com（新增）"},
+        {"host": "bilibili.cn", "policy": "DIRECT", "reason": "DOMAIN-SUFFIX,bilibili.cn（新增）"},
+        {"host": "bilibilipay.com", "policy": "DIRECT", "reason": "DOMAIN-SUFFIX,bilibilipay.com（新增）"},
+        {"host": "hdslb.com", "policy": "DIRECT", "reason": "既有 DOMAIN-SUFFIX,hdslb.com"},
+        {"host": "bilibili.tv", "policy": "流媒体", "reason": "Streaming 前位，唯一归属不变"},
+        {"host": "blbilibili.com", "policy": "Final", "reason": "原被 keyword 强制 DIRECT；待 ChinaDomain 再生回收"},
+        {"host": "bilibilihelper.com", "policy": "Final", "reason": "原被 keyword 强制 DIRECT；待 ChinaDomain 再生回收"}
+      ]
+    }
+  },
+  {
+    "name": "kw_direct_chinamedia_qiyi_exact",
+    "desc": "ChinaMedia 删 DOMAIN-KEYWORD,qiyi，恢复上游 iQIYI 表 10 条精确后缀；负例覆盖上游 Advertising / 成人仿冒域——原先被品牌子串一并强制 DIRECT",
+    "requests": [
+      {"host": "www.iqiyi.com"},
+      {"host": "qiyi.com"},
+      {"host": "qiyipic.com"},
+      {"host": "iqiyipic.com"},
+      {"host": "aiqiyicloud.com"},
+      {"host": "intl.iqiyi.com", "note": "国际版，Streaming 前位认领"},
+      {"host": "doh.iqiyi.com", "note": "对照：私有 DoH，Reject 全链最前"},
+      {"host": "qiyikeji.com", "note": "负例：无关国内企业域（企业科技）"},
+      {"host": "iqiyi.space", "note": "负例：上游 Advertising 表域"},
+      {"host": "xxiqiyiavxx.buzz", "note": "负例：上游 Global 表成人仿冒域"}
+    ],
+    "assert": {
+      "no_dns_leak": true,
+      "per_request": [
+        {"host": "www.iqiyi.com", "policy": "DIRECT", "reason": "DOMAIN-SUFFIX,iqiyi.com（新增）"},
+        {"host": "qiyi.com", "policy": "DIRECT", "reason": "DOMAIN-SUFFIX,qiyi.com（新增）"},
+        {"host": "qiyipic.com", "policy": "DIRECT", "reason": "DOMAIN-SUFFIX,qiyipic.com（新增）"},
+        {"host": "iqiyipic.com", "policy": "DIRECT", "reason": "DOMAIN-SUFFIX,iqiyipic.com（新增）"},
+        {"host": "aiqiyicloud.com", "policy": "DIRECT", "reason": "DOMAIN-SUFFIX,aiqiyicloud.com（新增）"},
+        {"host": "intl.iqiyi.com", "policy": "流媒体", "reason": "Streaming 前位，唯一归属不变"},
+        {"host": "doh.iqiyi.com", "policy": "REJECT", "reason": "Reject.list 区 1，删 keyword 前后不变"},
+        {"host": "qiyikeji.com", "policy": "Final", "reason": "原被 keyword 强制 DIRECT；待 ChinaDomain 再生回收"},
+        {"host": "iqiyi.space", "policy": "Final", "reason": "广告域原被品牌子串强制 DIRECT，属误放行"},
+        {"host": "xxiqiyiavxx.buzz", "policy": "Final", "reason": "仿冒域原被品牌子串强制 DIRECT，属误放行"}
+      ]
+    }
+  },
+  {
+    "name": "kw_direct_proxygfw_brand_exact_restore",
+    "desc": "ProxyGFW 的 abema/appledaily/beetalk/dlercloud/dropbox 五条品牌关键词改精确后缀：本表策略与 FINAL 同为 Final，故落点不变，但资产从此显式可审",
+    "requests": [
+      {"host": "www.dropbox.com"},
+      {"host": "api.dropboxapi.com"},
+      {"host": "getdropbox.com"},
+      {"host": "dropboxusercontent.com"},
+      {"host": "dl.dropboxusercontent.com", "note": "DownloadCDN 前位认领，不动"},
+      {"host": "dropboxstatic.com", "note": "DownloadCDN 前位认领，不动"},
+      {"host": "appledaily.com.hk"},
+      {"host": "beetalk.com"},
+      {"host": "dlercloud.com"},
+      {"host": "abema.tv", "note": "Abema 资产归 Streaming（前位），删 keyword 不影响"},
+      {"host": "dropbox-download.com", "note": "负例：上游 Advertising 表仿冒域"},
+      {"host": "a8.abemashopping.jp", "note": "负例：与 AbemaTV 无关的日本电商域"}
+    ],
+    "assert": {
+      "no_dns_leak": true,
+      "per_request": [
+        {"host": "www.dropbox.com", "policy": "Final", "reason": "DOMAIN-SUFFIX,dropbox.com（新增）"},
+        {"host": "api.dropboxapi.com", "policy": "Final", "reason": "DOMAIN-SUFFIX,dropboxapi.com（新增）"},
+        {"host": "getdropbox.com", "policy": "Final", "reason": "DOMAIN-SUFFIX,getdropbox.com（新增）"},
+        {"host": "dropboxusercontent.com", "policy": "Final", "reason": "DOMAIN-SUFFIX,dropboxusercontent.com（新增）"},
+        {"host": "dl.dropboxusercontent.com", "policy": "下载", "reason": "DownloadCDN 前位，唯一归属不变"},
+        {"host": "dropboxstatic.com", "policy": "下载", "reason": "DownloadCDN 前位，唯一归属不变"},
+        {"host": "appledaily.com.hk", "policy": "Final", "reason": "DOMAIN-SUFFIX,appledaily.com.hk（新增）"},
+        {"host": "beetalk.com", "policy": "Final", "reason": "DOMAIN-SUFFIX,beetalk.com（新增，上游无精确行，按品牌主域恢复）"},
+        {"host": "dlercloud.com", "policy": "Final", "reason": "DOMAIN-SUFFIX,dlercloud.com（新增）"},
+        {"host": "abema.tv", "policy": "流媒体", "reason": "Streaming 前位，唯一归属不变"},
+        {"host": "dropbox-download.com", "policy": "Final", "reason": "不再由 ProxyGFW keyword 显式认领，落 FINAL 兜底"},
+        {"host": "a8.abemashopping.jp", "policy": "Final", "reason": "不再由 ProxyGFW keyword 显式认领，落 FINAL 兜底"}
+      ]
+    }
+  },
+  {
+    "name": "kw_direct_proxygfw_github_1e100_removed",
+    "desc": "ProxyGFW 删 github/1e100 两条关键词：两条主链早已被前位表（Microsoft / Google）认领，关键词只在制造国内域误判——kkgithub/hellogithub 等不再被钉在代理侧",
+    "requests": [
+      {"host": "github.com", "note": "Microsoft.list 前位认领"},
+      {"host": "githubusercontent.com", "note": "Microsoft.list 前位认领"},
+      {"host": "api.githubcopilot.com", "note": "Microsoft.list 前位认领"},
+      {"host": "1e100.net", "note": "Google.list 前位认领，故不向 ProxyGFW 重复添加"},
+      {"host": "yx-in-f108.1e100.net", "note": "Google.list 前位认领"},
+      {"host": "kkgithub.com", "note": "负例：报告 P1-04 点名的国内镜像站"},
+      {"host": "hellogithub.com", "note": "负例：报告 P1-04 点名的国内社区站"},
+      {"host": "githubim.com", "note": "负例：报告 P1-04 点名"},
+      {"host": "githubshare.com", "note": "负例：报告 P1-04 点名"}
+    ],
+    "assert": {
+      "no_dns_leak": true,
+      "per_request": [
+        {"host": "github.com", "policy": "Google-X-Meta-MS", "reason": "Microsoft.list，删 keyword 前后不变"},
+        {"host": "githubusercontent.com", "policy": "Google-X-Meta-MS", "reason": "Microsoft.list，删 keyword 前后不变"},
+        {"host": "api.githubcopilot.com", "policy": "Google-X-Meta-MS", "reason": "Microsoft.list，删 keyword 前后不变"},
+        {"host": "1e100.net", "policy": "Google-X-Meta-MS", "reason": "Google.list，删 keyword 前后不变"},
+        {"host": "yx-in-f108.1e100.net", "policy": "Google-X-Meta-MS", "reason": "Google.list，删 keyword 前后不变"},
+        {"host": "kkgithub.com", "policy": "Final", "reason": "不再被 ProxyGFW 钉住；待 ChinaDomain 再生回收为 DIRECT"},
+        {"host": "hellogithub.com", "policy": "Final", "reason": "不再被 ProxyGFW 钉住；待 ChinaDomain 再生回收为 DIRECT"},
+        {"host": "githubim.com", "policy": "Final", "reason": "不再被 ProxyGFW 钉住；待 ChinaDomain 再生回收为 DIRECT"},
+        {"host": "githubshare.com", "policy": "Final", "reason": "不再被 ProxyGFW 钉住；待 ChinaDomain 再生回收为 DIRECT"}
+      ]
+    }
+  },
+  {
+    "name": "kw_direct_proxygfw_avtb_wildcard",
+    "desc": "ProxyGFW 的 avtb 关键词改左锚定 DOMAIN-WILDCARD,avtb*：只收以 avtb 起头的成人站族，不再吞中段含该串的域（报告实证的快手上游域 eqoavtbu.com）",
+    "requests": [
+      {"host": "avtb123.com", "note": "正例：左锚定命中"},
+      {"host": "avtb.net", "note": "正例：左锚定命中"},
+      {"host": "eqoavtbu.com", "note": "负例：上游 KuaiShou/ChinaMax 域，串在中段"},
+      {"host": "dnavtbt.com", "note": "负例：上游 Advertising 域，串在中段"}
+    ],
+    "assert": {
+      "no_dns_leak": true,
+      "per_request": [
+        {"host": "avtb123.com", "policy": "Final", "reason": "DOMAIN-WILDCARD,avtb*"},
+        {"host": "avtb.net", "policy": "Final", "reason": "DOMAIN-WILDCARD,avtb*"},
+        {"host": "eqoavtbu.com", "policy": "Final", "reason": "不再被 ProxyGFW 钉住；待 ChinaDomain 再生回收为 DIRECT"},
+        {"host": "dnavtbt.com", "policy": "Final", "reason": "不再被 ProxyGFW 钉住；广告域应由 Reject 层裁决"}
+      ]
+    }
+  }
+]
