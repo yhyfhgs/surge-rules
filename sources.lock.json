@@ -1,0 +1,98 @@
+{
+  "schema_version": 1,
+  "_readme": [
+    "sources.lock.json — 机器管理层的「可重建性锁」（审计 V2 R3-1 / R3-8 S5）。",
+    "",
+    "本文件的唯一职责：把『某张 lists/ 表是从哪个上游、哪个 revision、经哪串确定性变换',",
+    "'得到的』写成机器可执行的形式，使任何人都能独立重放并逐位复核。",
+    "",
+    "读它的两个脚本：",
+    "  tools/fetch_locked.py  按 revision 取上游 → 校验 sha256 → 落 build/upstream/；不匹配 exit 1",
+    "  tools/rebuild.py       读 lock → 顺序执行 transform → 与 expect 及本地表比对 → 打印 diff",
+    "",
+    "刻意的设计约束：",
+    "  1. 诚实优先。provenance 是枚举而不是布尔，允许『这张表今天锁不住』被如实表达，",
+    "     而不是塞一个假 pin 进来充数。只有 provenance=pinned 的条目才承诺可重建。",
+    "  2. 只登记今天真的成立的事。ChinaDomain 相对同一 pin 有 534 条无法解释的缺失",
+    "     （审计 §3.7 / W6 §3.2），在再生过滤器（tools/regen_chinadomain.py）跑完两轮",
+    "     影子运行前不写进来 —— 否则 expect 锁的是一个自己都解释不了的产物。",
+    "  3. 禁止『git pull 后直接覆盖』。上游同步必须走 fetch_locked.py，",
+    "     由它证明拿到的字节就是 lock 声明的那份。"
+  ],
+  "_provenance_enum": {
+    "pinned": "revision + 上游 sha256 + transform 链齐全，rebuild.py 可逐位重建，diff 必须为 0",
+    "observed": "只记录了『本地当前状态的哈希』，上游 pin 缺失或不可重放；能检出漂移，不能重建",
+    "unpinned": "手工维护层，无上游；登记在案仅为让 lock 覆盖面可穷举"
+  },
+  "sources": [
+    {
+      "id": "blackmatrix7_china_ip",
+      "provenance": "pinned",
+      "repository": "https://github.com/blackmatrix7/ios_rule_script",
+      "revision": "65e8adff06ea66c81bc61ed64329dae4fbfa7438",
+      "revision_short": "65e8adf",
+      "revision_date": "2026-08-28",
+      "path": "rule/Surge/ChinaIPs/ChinaIPs.list",
+      "url": "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/{revision}/{path}",
+      "local_mirror": "reference/ios_rule_script",
+      "sha256": "75004937d3683535892fb0c7a0cc17d4965f1b47e6d08733d80d04d500860046",
+      "size": 799748,
+      "license": "GPL-2.0",
+      "targets": ["ChinaIP.list"],
+      "upstream_counts": {"IP-CIDR": 17265, "IP-CIDR6": 5153, "total": 22418},
+      "transform": [
+        {"op": "require_types", "types": ["IP-CIDR", "IP-CIDR6"]},
+        {"op": "require_param", "param": "no-resolve"},
+        {"op": "collapse_cidr", "tool": "tools/collapse_cidr.py"}
+      ],
+      "expect": {
+        "rules": 11090,
+        "per_type": {"IP-CIDR": 7165, "IP-CIDR6": 3925},
+        "set_sha256": {
+          "IP-CIDR": "c6f4d115c40add9ef964cff1af927923715ac81fae2e27ec77fe387ec0037fdd",
+          "IP-CIDR6": "47d5ecf01a4ed44194e32d7710076c8a9bf8b5080a4c1dfe81d7317c22588199"
+        }
+      },
+      "verified": {
+        "at": "2026-08-31",
+        "by": "tools/rebuild.py",
+        "result": "diff = 0（上游 pin 折叠后与 lists/ChinaIP.list 地址集合逐位相同）",
+        "note": [
+          "set_sha256 的定义 = tools/collapse_cidr.py:set_digest()：对 collapse_addresses()",
+          "规范化后的网段逐行文本（末尾带换行）取 SHA-256。审计 §3.7 正文里另一组摘要",
+          "（v4 88e05292… / v6 9ae07b0f…）出自 W6 当时的另一套口径，与本文件不可互比；",
+          "以本文件 + collapse_cidr --verify 的输出为准（两者今天逐位一致）。"
+        ]
+      },
+      "notes": [
+        "上游同步待办（审计 R2-2）：当前上游相对本 pin 多 v4 59 段 / v6 540 段。",
+        "同步流程：fetch_locked.py 换 revision 取新版 → rebuild.py --write →",
+        "collapse_cidr.py --verify --against <旧快照> 证明只增不减 → 更新本文件的",
+        "revision / sha256 / expect 三处 → 重跑 runsuite。"
+      ]
+    }
+  ],
+  "not_locked": [
+    {
+      "target": "ChinaDomain.list",
+      "provenance": "observed",
+      "reason": [
+        "同一上游 repo 的 rule/Surge/ChinaMaxNoIP/ChinaMaxNoIP_All.list @ 65e8adf 相对本地表",
+        "少 5,237 条，其中 4,686 条可由归属去重解释、12 条由已删宽关键词解释，",
+        "534 条无任何已登记规则可解释且在当前上游仍然存在（审计 §3.7、W6 §3.2、观察项 O-7）。",
+        "在这 534 条被 tools/regen_chinadomain.py 的两轮影子运行消化掉之前写 expect，",
+        "锁住的会是一个无人能解释的产物 —— 那比不锁更糟。"
+      ],
+      "unblocked_by": "tools/regen_chinadomain.py --shadow 连续两轮，删除项报告齐全且 P1–P10 零触发",
+      "observed_state": {
+        "at": "2026-08-31",
+        "note": "本轮未对 ChinaDomain 落任何哈希：它正处于 R3-2/R3-4 的改动窗口内，此刻记的状态哈希在收尾批次就会失效。"
+      }
+    },
+    {
+      "target": "手工维护层全部 .list",
+      "provenance": "unpinned",
+      "reason": ["无上游，逐条人工裁决；可重建性由 git 历史 + tests/ 断言保证，不属 lock 的职责范围。"]
+    }
+  ]
+}

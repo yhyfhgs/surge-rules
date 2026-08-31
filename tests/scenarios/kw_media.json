@@ -76,27 +76,31 @@
   },
   {
     "name": "streaming_bbc_uk_live_exact",
-    "desc": "BBC iPlayer 的 uk-live/bbcfmt 两条关键词改精确资产：9 个 *-uk-live.akamaized.net 播放/字幕/缩略图 host 与 bbcfmt.s.llnwi.net 恢复为精确条目；uk-live 这种通用词不再对任意含串域生效",
+    "desc": "BBC 播放面的两条边界一起钉住。①（原断言）uk-live/bbcfmt 两条关键词已改精确资产，uk-live 这种通用词不再对任意含串域生效；②（2026-08-31 审计裁决 6）BBC 专属形态随品牌迁 UK.list —— 9 条 *-uk-live.akamaized.net 与 bbc.mp-pxcdn.com 期望 🇬🇧英国节点（iPlayer 属地锁，「流媒体」组无任何英国出口），而 *-ww-live（worldwide，非属地锁）与多租户 bbcfmt.s.llnwi.net（同注册域另住 DAZN/HBO Max/Viki）留在流媒体。**迁移线画在「主机名是否 BBC 专属」而不是「注册域是否多租户」上**，改这条线必须同时改 tests/scenarios/fix_regions_v2.json 的 fix_r2_9_bbc_thirdparty_cdn_stays_streaming",
     "requests": [
       {
         "host": "vod-hls-uk-live.akamaized.net",
-        "note": "点播 HLS"
+        "note": "点播 HLS —— 已迁 UK"
       },
       {
         "host": "aod-dash-uk-live.akamaized.net",
-        "note": "音频点播 DASH"
+        "note": "音频点播 DASH —— 已迁 UK"
       },
       {
         "host": "vs-cmaf-push-uk-live.akamaized.net",
-        "note": "直播 CMAF"
+        "note": "直播 CMAF —— 已迁 UK"
+      },
+      {
+        "host": "bbc.mp-pxcdn.com",
+        "note": "Piksel 多租户 CDN 上的 BBC 专属租户前缀 —— 已迁 UK"
       },
       {
         "host": "vod-dash-ww-live.akamaized.net",
-        "note": "既有精确条目，行为不变参照"
+        "note": "留守参照：ww = worldwide，非属地锁面，仍走流媒体"
       },
       {
         "host": "bbcfmt.s.llnwi.net",
-        "note": "Limelight 内容面"
+        "note": "留守参照：Limelight 租户前缀，同注册域另住 DAZN/HBO Max/Viki，整段处置须一致"
       },
       {
         "host": "my-uk-live-tv.example.com",
@@ -112,23 +116,31 @@
       "per_request": [
         {
           "host": "vod-hls-uk-live.akamaized.net",
-          "policy": "流媒体"
+          "policy": "🇬🇧英国节点",
+          "reason": "裁决 6：BBC 专属播放面随品牌迁 UK.list，取回英国出口"
         },
         {
           "host": "aod-dash-uk-live.akamaized.net",
-          "policy": "流媒体"
+          "policy": "🇬🇧英国节点"
         },
         {
           "host": "vs-cmaf-push-uk-live.akamaized.net",
-          "policy": "流媒体"
+          "policy": "🇬🇧英国节点"
+        },
+        {
+          "host": "bbc.mp-pxcdn.com",
+          "policy": "🇬🇧英国节点",
+          "reason": "主机名是 BBC 专属；多租户的是注册域 mp-pxcdn.com，不是这个 host"
         },
         {
           "host": "vod-dash-ww-live.akamaized.net",
-          "policy": "流媒体"
+          "policy": "流媒体",
+          "reason": "ww-live 是 worldwide 面，不受属地锁约束，留 Streaming"
         },
         {
           "host": "bbcfmt.s.llnwi.net",
-          "policy": "流媒体"
+          "policy": "流媒体",
+          "reason": "llnwi.net 同注册域另住 DAZN/HBO Max/Viki，拆走单个租户会破坏该注册域的一致处置"
         },
         {
           "host": "my-uk-live-tv.example.com",

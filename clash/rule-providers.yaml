@@ -2,6 +2,33 @@
 # 用法：在 Clash Verge Rev 中对订阅配置使用「Merge」扩展，粘贴本文件的
 # rule-providers 段；再参照文末注释的 rules 序列接入你自己的策略组。
 # 各 provider 与 Surge 同名 .list 一一对应，优先级语义见仓库 README。
+#
+# ─── sniffer 合同（消费端必须履约）───────────────────────────────────────
+# Surge 侧有 11 张表在 conf 的 RULE-SET 行上开了 extended-matching（含 Payment /
+# AI / Telegram），让规则除域名外**同时匹配 SNI / Host 等扩展信息**，从而接住
+# 「客户端拿着字面量 IP 直连、但握手里带了域名」的连接。
+#
+# 这个开关**provider 携带不了**：它不是规则行上的参数，而是整张表的匹配语义，
+# rule-provider 只承载规则集本身，无处安放它。Clash / Mihomo 侧要取回等价行为，
+# **使用者必须在自己的 config 里显式开启 sniffer**，至少嗅探 TLS SNI 与 HTTP Host
+# （QUIC 亦建议开启，否则 HTTP/3 连接同样拿不到 hostname）。
+#
+# 不配 sniffer **不会报任何错**，只会在上述连接上静默漏匹配：hostname 丢失后，
+# 该连接会跳过全部域名规则，落到 IP 规则或最终的 MATCH 上 —— 这是本派生层最容易
+# 被忽略的一处能力差。
+#
+# 参考最小配置（放在你自己的 config 顶层，不属于本文件的 Merge 内容）：
+#   sniffer:
+#     enable: true
+#     sniff:
+#       HTTP:  { ports: [80, 8080-8880], override-destination: true }
+#       TLS:   { ports: [443, 8443] }
+#       QUIC:  { ports: [443, 8443] }
+#
+# 与它并列的已知能力差另有两条：Surge 内建 SYSTEM 集在 Clash 端无等价物；
+# 内建 LAN 集用 GEOIP,lan 近似。三条都是已知且刻意的取舍，不是 bug。
+# 合同的书面落点有两处：本注释与 docs/ARCHITECTURE.md §5.2，改一处必须同步另一处。
+# ────────────────────────────────────────────────────────────────────────
 
 rule-providers:
   AI:

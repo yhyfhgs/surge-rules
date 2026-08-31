@@ -1,6 +1,11 @@
 # Domestic — 国内服务直连手工层（含国内 AI/券商、NTP 与 captive 探测域）；上游未覆盖、需立刻生效的特例都加这里
 # 排序：规则类型分区，区内字母序
 # 兼作 CA 吊销/AIA 端点集中直连位（TLS 握手关键路径，soft-fail）；被 ProxyGFW 前位后缀遮蔽的端点收不进本表，去向见 docs/MAINTENANCE.md「裁决登记」
+# Google `-cn` 族 18 条 2026-08-31 由 Google.list 迁入（审计 R1-24）：与本表既有 `.cn` 镜像族
+#   （google.cn / googlecnapps.cn / gstatic.cn / gkecnapps.cn …）同基础设施，证书层已证实（同一张
+#   CN=*.google.cn 的 GTS 证书，SAN 同时列两族），CN 侧直连实测 0.37–0.60s 完成完整 HTTPS 往返。
+#   同批删除死条目 googleapis.cn（双侧无 A；删后仍由 ChinaDomain 的 `DOMAIN-SUFFIX,cn` 兜底 DIRECT，行为不变）。
+#   未迁入：googleadservices-cn.com（`www.` 在 CN 侧被置空）、gstatic-cn.com（存疑，留 Google.list 观察）。
 
 DOMAIN,cn.download.nvidia.com
 DOMAIN,config.ubnt.com
@@ -17,7 +22,6 @@ DOMAIN,time.windows.com
 DOMAIN,www.intel.cn
 DOMAIN,www.layuicdn.com
 
-DOMAIN-SUFFIX,01.ai
 DOMAIN-SUFFIX,10010.com
 DOMAIN-SUFFIX,10086.cn
 DOMAIN-SUFFIX,110.com
@@ -38,6 +42,7 @@ DOMAIN-SUFFIX,21cn.com
 DOMAIN-SUFFIX,22.cn
 DOMAIN-SUFFIX,2288.org
 DOMAIN-SUFFIX,263.net
+DOMAIN-SUFFIX,2mdn-cn.net
 DOMAIN-SUFFIX,3.cn
 DOMAIN-SUFFIX,3322.net
 DOMAIN-SUFFIX,3322.org
@@ -79,6 +84,7 @@ DOMAIN-SUFFIX,9xiu.com
 DOMAIN-SUFFIX,abchina.com
 DOMAIN-SUFFIX,ac.cn
 DOMAIN-SUFFIX,addlink.cn
+DOMAIN-SUFFIX,admob-cn.com
 DOMAIN-SUFFIX,aicdn.com
 DOMAIN-SUFFIX,aicoinstorge.com
 DOMAIN-SUFFIX,air-matters.com
@@ -86,6 +92,7 @@ DOMAIN-SUFFIX,air-matters.io
 DOMAIN-SUFFIX,ali213.net
 DOMAIN-SUFFIX,anjuke.com
 DOMAIN-SUFFIX,antpcdn.com
+DOMAIN-SUFFIX,app-measurement-cn.com
 DOMAIN-SUFFIX,appsimg.com
 DOMAIN-SUFFIX,aqara.cn
 DOMAIN-SUFFIX,assets.msn.cn
@@ -167,6 +174,7 @@ DOMAIN-SUFFIX,cozeide.cn
 DOMAIN-SUFFIX,cozesdk.com
 DOMAIN-SUFFIX,cqcbank.com
 DOMAIN-SUFFIX,crl.globalsign.com
+DOMAIN-SUFFIX,crl.sectigo.com
 DOMAIN-SUFFIX,crl.verisign.com
 DOMAIN-SUFFIX,crt.sectigo.com
 DOMAIN-SUFFIX,csdn.com
@@ -179,6 +187,7 @@ DOMAIN-SUFFIX,d-ctrip.com
 DOMAIN-SUFFIX,dancf.com
 DOMAIN-SUFFIX,dangdang.com
 DOMAIN-SUFFIX,daocloud.io
+DOMAIN-SUFFIX,dartsearch-cn.net
 DOMAIN-SUFFIX,dbank.com
 DOMAIN-SUFFIX,dbankcdn.cn
 DOMAIN-SUFFIX,dbankcdn.com
@@ -208,6 +217,7 @@ DOMAIN-SUFFIX,donews.com
 DOMAIN-SUFFIX,douban.com
 DOMAIN-SUFFIX,douban.fm
 DOMAIN-SUFFIX,doubanio.com
+DOMAIN-SUFFIX,doubleclick-cn.net
 DOMAIN-SUFFIX,dpfile.com
 DOMAIN-SUFFIX,duba.net
 DOMAIN-SUFFIX,duokan.com
@@ -246,9 +256,18 @@ DOMAIN-SUFFIX,gitee.io
 DOMAIN-SUFFIX,gkecnapps.cn
 DOMAIN-SUFFIX,godic.net
 DOMAIN-SUFFIX,goofish.com
+DOMAIN-SUFFIX,google-analytics-cn.com
 DOMAIN-SUFFIX,google.cn
-DOMAIN-SUFFIX,googleapis.cn
+DOMAIN-SUFFIX,googleapis-cn.com
+DOMAIN-SUFFIX,googleapps-cn.com
 DOMAIN-SUFFIX,googlecnapps.cn
+DOMAIN-SUFFIX,googleflights-cn.net
+DOMAIN-SUFFIX,googleoptimize-cn.com
+DOMAIN-SUFFIX,googlesyndication-cn.com
+DOMAIN-SUFFIX,googletagmanager-cn.com
+DOMAIN-SUFFIX,googletagservices-cn.com
+DOMAIN-SUFFIX,googletraveladservices-cn.com
+DOMAIN-SUFFIX,googlevads-cn.com
 DOMAIN-SUFFIX,gorouter.info
 DOMAIN-SUFFIX,gotokeep.com
 DOMAIN-SUFFIX,gov.cn
@@ -256,6 +275,8 @@ DOMAIN-SUFFIX,gstatic.cn
 DOMAIN-SUFFIX,gstaticcnapps.cn
 DOMAIN-SUFFIX,guancha.cn
 DOMAIN-SUFFIX,guoguo-app.com
+DOMAIN-SUFFIX,gvt1-cn.com
+DOMAIN-SUFFIX,gvt2-cn.com
 DOMAIN-SUFFIX,hailuoai.com
 DOMAIN-SUFFIX,haosou.com
 DOMAIN-SUFFIX,hc-cdn.com
@@ -403,6 +424,7 @@ DOMAIN-SUFFIX,nmc.cn
 DOMAIN-SUFFIX,nubia.cn
 DOMAIN-SUFFIX,nubia.com
 DOMAIN-SUFFIX,ocsp.sectigo.com
+DOMAIN-SUFFIX,ocsp.verisign.com
 DOMAIN-SUFFIX,officewebapps.cn
 DOMAIN-SUFFIX,okr.com
 DOMAIN-SUFFIX,oneplus.cn
@@ -468,6 +490,7 @@ DOMAIN-SUFFIX,qyerstatic.com
 DOMAIN-SUFFIX,realme.com
 DOMAIN-SUFFIX,realmebbs.com
 DOMAIN-SUFFIX,realmemobile.com
+DOMAIN-SUFFIX,recaptcha-cn.net
 DOMAIN-SUFFIX,robloxdev.cn
 DOMAIN-SUFFIX,ronghub.com
 DOMAIN-SUFFIX,rsproxy.cn
@@ -479,11 +502,11 @@ DOMAIN-SUFFIX,samsungcloudcn.com
 DOMAIN-SUFFIX,sandai.net
 DOMAIN-SUFFIX,sankuai.com
 DOMAIN-SUFFIX,saxyit.com
+DOMAIN-SUFFIX,secure.globalsign.com
 DOMAIN-SUFFIX,segmentfault.com
 DOMAIN-SUFFIX,sevencdn.com
 DOMAIN-SUFFIX,sharepoint.cn
 DOMAIN-SUFFIX,siliconflow.cn
-DOMAIN-SUFFIX,siliconflow.com
 DOMAIN-SUFFIX,sina.cn
 DOMAIN-SUFFIX,sina.com
 DOMAIN-SUFFIX,sinaapp.com
@@ -506,8 +529,6 @@ DOMAIN-SUFFIX,speedtest.cn
 DOMAIN-SUFFIX,sspai.com
 DOMAIN-SUFFIX,staticdn.net
 DOMAIN-SUFFIX,status.rapidssl.com
-DOMAIN-SUFFIX,steam.clngaa.com
-DOMAIN-SUFFIX,steam.ksyna.com
 DOMAIN-SUFFIX,stepfun.com
 DOMAIN-SUFFIX,suning.cn
 DOMAIN-SUFFIX,suning.com
@@ -613,6 +634,3 @@ DOMAIN-SUFFIX,zuimeitianqi.com
 
 DOMAIN-WILDCARD,*.qhimgs?.com
 DOMAIN-WILDCARD,ocsp.*.amazontrust.com
-
-IP-CIDR,140.205.1.0/24,no-resolve
-IP-CIDR,162.14.0.0/18,no-resolve

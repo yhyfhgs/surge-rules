@@ -12,7 +12,7 @@
 flowchart TD
     A["本地编辑<br/>lists/*.list"] --> B{"update.sh 双闸门"}
     B --> B1["tests/audit.py<br/>--check all --fail-on P1"]
-    B --> B2["tests/runsuite.py<br/>147 场景 / 1731 断言"]
+    B --> B2["tests/runsuite.py<br/>189 场景 / 2269 断言"]
     B1 -- 失败 --> A
     B2 -- 失败 --> A
     B1 -- 通过 --> C
@@ -49,8 +49,8 @@ rules/                        # git 仓库根(公开仓库)
 │   └── surge2clash.py        # Surge → Clash(Mihomo)转换器
 ├── tests/                    # 离线测试四件套
 │   ├── engine.py             # 离线规则引擎(只读解析 Surge.conf 与 lists/)
-│   ├── audit.py              # 静态审计(A1–A8)
-│   ├── runsuite.py           # 场景回归:147 场景 / 1731 断言(含 674 条 DNS 泄漏断言)
+│   ├── audit.py              # 静态审计(A1–A10)
+│   ├── runsuite.py           # 场景回归:189 场景 / 2269 断言(含 915 条 DNS 泄漏断言)
 │   ├── live_check.py         # 在线核对(需 conf 开启 http-api)
 │   ├── allowlist.json        # 审计豁免白名单(既定裁决的落点)
 │   └── scenarios/*.json      # 场景定义
@@ -66,6 +66,8 @@ rules/                        # git 仓库根(公开仓库)
 ---
 
 ## 34 个 list 总览
+
+**34 张表 / 142,708 条规则**(2026-08-31 修复批次后的守恒基线;`clash/` 派生层逐表一致,见 [docs/ARCHITECTURE.md §5.3](docs/ARCHITECTURE.md))。体量分布极不均匀 —— ChinaDomain 一张就占约 10.6 万条,其余 33 张合计约 3.6 万条。
 
 下表按 Surge.conf `[Rule]` 段的实际规则序(0–10 十一个区块)组织 —— **表格自上而下的顺序就是匹配优先级**。区的划分原理与排序依据见 [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)。
 

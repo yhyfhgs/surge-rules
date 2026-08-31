@@ -386,15 +386,15 @@
   },
   {
     "name": "shared_cloud_ip_removed",
-    "desc": "共享云段不代表业务身份：Games 的 GCP 35.192.0.0/12（约百万地址客户段）、Meta 的 AWS 18.194.0.0/15、Google 的 IP-ASN,396982（Google Cloud 客户前缀 ASN）删除后，云客户 IP 落 FINAL；Meta 自有专网段保持",
+    "desc": "共享云段不代表业务身份：Games 的 GCP 35.192.0.0/12（约百万地址客户段）、Meta 的 AWS 18.194.0.0/15、Google 的 IP-ASN,396982（Google Cloud 客户前缀 ASN）删除后，云客户 IP 不再被业务表抢走；Meta 自有专网段保持。⚠ 前两条用 policy_in 双态：离线引擎无 MaxMind 库，7 条非 CN GEOIP 恒不匹配 ⇒ 判 Final；真实 Surge 会在区 9 命中 GEOIP,US@US.list / GEOIP,DE@Europe.list。这是已登记的离线近似盲区（engine.py 非 CN GEOIP 恒不匹配），断言强度按 edge_cases «user_vps_ip_asn» 的口径对齐。",
     "requests": [
       {
         "ip": "35.192.0.1",
-        "note": "GCP us-central1 客户段样本"
+        "note": "GCP us-central1 客户段样本（ARIN NET-35-192-0-0-1 GOOGLE-CLOUD，'in use by Google Cloud customers'）"
       },
       {
         "ip": "18.194.0.1",
-        "note": "AWS eu-central-1 客户段样本"
+        "note": "AWS eu-central-1 客户段样本（RIPE AMAZON-EU 客户段）"
       },
       {
         "ip": "31.13.24.1",
@@ -405,12 +405,19 @@
       "per_request": [
         {
           "ip": "35.192.0.1",
-          "policy": "Final",
-          "reason": "不再被业务表云段抢走"
+          "reason": "不再被业务表云段抢走。离线引擎判 Final（无 MaxMind，GEOIP,US 恒不匹配）；真实 Surge 在区 9 由 US.list 的 GEOIP,US,no-resolve 接住 ⇒ 双态均为正确落点。",
+          "policy_in": [
+            "Final",
+            "🇺🇸美国节点"
+          ]
         },
         {
           "ip": "18.194.0.1",
-          "policy": "Final"
+          "policy_in": [
+            "Final",
+            "🇪🇺欧洲节点"
+          ],
+          "reason": "同上：离线引擎判 Final；真实 Surge 在区 9 由 Europe.list 的 GEOIP,DE,no-resolve 接住。"
         },
         {
           "ip": "31.13.24.1",

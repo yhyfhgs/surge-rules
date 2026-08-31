@@ -1,4 +1,4 @@
-# TencentCN — 腾讯系国内域直连（上游 blackmatrix7 Tencent + WeChat）；腾讯云海外段以 IP-CIDR + no-resolve 登记
+# TencentCN — 腾讯系国内域直连（上游 blackmatrix7 Tencent + WeChat）；纯域名表，不设 IP 区——原 14 条腾讯云海外 /24 已于 2026-08-31 (R1-17) 删除，全部被 ChinaIP.list 覆盖且同为 DIRECT
 # 排序：规则类型分区，区内字母序
 
 DOMAIN,slife.xy-asia.com
@@ -890,7 +890,6 @@ DOMAIN-SUFFIX,qcloudwzgj.cn
 DOMAIN-SUFFIX,qcloudwzgj.com
 DOMAIN-SUFFIX,qcloudzygj.cn
 DOMAIN-SUFFIX,qcloudzygj.com
-DOMAIN-SUFFIX,qcly.xyz
 DOMAIN-SUFFIX,qdcloudsolution.com
 DOMAIN-SUFFIX,qdd.gd
 DOMAIN-SUFFIX,qdd.gg
@@ -1885,7 +1884,6 @@ DOMAIN-SUFFIX,tri.cn
 DOMAIN-SUFFIX,trimg.cn
 DOMAIN-SUFFIX,trpc.center
 DOMAIN-SUFFIX,trpc.group
-DOMAIN-SUFFIX,trpc.tech
 DOMAIN-SUFFIX,trtccloud.com
 DOMAIN-SUFFIX,trtccloud.net
 DOMAIN-SUFFIX,trtcrecover.com
@@ -2253,18 +2251,3 @@ DOMAIN-SUFFIX,zw-tencentclb.net
 DOMAIN-SUFFIX,zw-tencentclb.work
 DOMAIN-SUFFIX,zxgcloud.com
 DOMAIN-SUFFIX,zxgstock.com
-
-IP-CIDR,43.156.86.0/24,no-resolve
-IP-CIDR,43.156.222.0/24,no-resolve
-IP-CIDR,101.32.104.0/24,no-resolve
-IP-CIDR,101.32.118.0/24,no-resolve
-IP-CIDR,101.32.133.0/24,no-resolve
-IP-CIDR,101.33.110.0/24,no-resolve
-IP-CIDR,129.226.3.0/24,no-resolve
-IP-CIDR,129.226.107.0/24,no-resolve
-IP-CIDR,150.109.90.0/24,no-resolve
-IP-CIDR,203.205.232.0/24,no-resolve
-IP-CIDR,203.205.234.0/24,no-resolve
-IP-CIDR,203.205.235.0/24,no-resolve
-IP-CIDR,203.205.253.0/24,no-resolve
-IP-CIDR,203.205.254.0/24,no-resolve

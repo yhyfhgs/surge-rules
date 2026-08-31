@@ -19,6 +19,9 @@
 #      clash/rule-providers.yaml）；无新提交时退化为全量候选（随后仍先验后清）。
 #   4) 先验后清 —— purge 前比对本地/CDN md5，一致即跳过，重跑不重复消耗配额。
 #      CDN 拉取失败既不算"已一致"也不算"已刷新"：计入 fetch_fail 并照常 purge（宁多勿漏）。
+#      但"先验失败 ∧ purge 成功 ∧ 复验 md5 一致"是一次完全成功的发布（新增分发表首次
+#      发布时先验必然 404），复验阶段会把它从 fetch_fail 里扣回，故仍落 exit 0。收尾文案
+#      按 404（路径未上架）与网络错/5xx 分组，两者处置不同。
 #   5) 删除项 —— diff 中已从本地删除的分发文件同样发 purge（跳过先验、不做复验，
 #      预期 404），防旧内容滞留边缘缓存；purge 请求本身的成败照常计入统计。
 #   6) 限流感知 —— 解析 purge API 的 paths.*.throttled / throttlingReset，如实报告剩余
@@ -33,6 +36,14 @@ REPO="yhyfhgs/surge-rules"
 REF="main"
 CDN_BASE="https://cdn.jsdelivr.net/gh/$REPO@$REF"
 PURGE_BASE="https://purge.jsdelivr.net/gh/$REPO@$REF"
+# 分发文件集（全量候选 69 = lists/ 34 + clash/ 34 + rule-providers.yaml）。
+# ── 待办锚点：modules/ 与 scripts/ 未纳入 ────────────────────────────────────
+# 文档把这两个目录定义为 jsDelivr CDN 资源，但它们不在 DIST_RE 内 ⇒ 永远不会被 purge，
+# 改了要等 @main 别名缓存自然过期（≤12h）。当前不构成实际故障：两目录只有 README 与
+# _template，没有生产文件。
+# **现在不要扩 DIST_RE** —— 会把模板文件纳入 purge 候选、白耗 jsDelivr 的限流配额。
+# 第一个生产 module / script 入库时再扩，并同步改三处计数：docs/DEVELOPMENT.md 的
+# 分发文件数、docs/MAINTENANCE.md §3.2/§5.2 的候选集数字、docs/ARCHITECTURE.md §1.1 图。
 DIST_RE='^(lists/[^/]+\.list|clash/([^/]+\.list|rule-providers\.yaml))$'
 COMMIT_MSG="${1:-update rules}"
 
@@ -44,12 +55,19 @@ trap cleanup EXIT
 
 # 拉取 CDN 内容并输出其 md5；失败 return 1 且不输出（调用方必须区分这两种结局）。
 # 写临时文件而非管道给 md5：命令替换会吃掉尾部换行，直接比对会假不一致。
+# 副作用：把本次最终 HTTP 状态码写进 $RUN_TMP/cdn.code 供调用方判读——本函数总在命令
+# 替换（子 shell）里被调用，变量传不回父 shell，只能落文件。curl 传输层失败时写空串。
+#   404 = 该路径 CDN 上还不存在（新增分发文件首次发布必然如此，属预期）；
+#   其余非 2xx / 空 = 网络错或 5xx（真实故障）。
+# 这里去掉 --fail 才能拿到真实状态码：--fail 会让 curl 在 4xx/5xx 直接退非零并丢弃码。
 cdn_md5() {
-  local body="$RUN_TMP/cdn.bin"
-  if curl -sS --fail --location --max-time 20 -o "$body" "$CDN_BASE/$1"; then
-    md5 -q "$body"
-    return 0
-  fi
+  local body="$RUN_TMP/cdn.bin" code=""
+  : > "$RUN_TMP/cdn.code"
+  code=$(curl -sS --location --max-time 20 -o "$body" -w '%{http_code}' "$CDN_BASE/$1") || code=""
+  printf '%s' "$code" > "$RUN_TMP/cdn.code"
+  case "$code" in
+    2??) md5 -q "$body"; return 0 ;;
+  esac
   return 1
 }
 
@@ -216,6 +234,8 @@ deleted_ok=0
 throttled_n=0;      throttled_files=""
 purge_fail_n=0;     purge_fail_files=""
 fetch_fail_pre_n=0; fetch_fail_pre_files=""
+fetch_404_pre_files=""   # 先验失败中属"CDN 上尚无此路径"的子集（用于收尾文案分组）
+resolved_pre_n=0;   resolved_pre_files=""   # 先验失败但复验一致 → 已从 problems 扣减
 max_reset=0
 
 for f in $live; do
@@ -228,9 +248,17 @@ for f in $live; do
   else
     # 拉取失败（网络错/404/5xx）：不得当成"已一致"，也不得静默当成"不一致"。
     # 计入 fetch_fail，同时把该文件当作待 purge 处理——宁多 purge 不漏。
+    # 但先验 404 对"本次新增的分发文件"是必然结果（CDN 上还没有这个路径），若它随后
+    # purge 成功且复验 md5 一致，就是一次完全成功的发布 —— §6 会把它从本计数里扣回。
     fetch_fail_pre_n=$((fetch_fail_pre_n+1))
     fetch_fail_pre_files="$fetch_fail_pre_files $f"
-    echo "  ⚠ 先验拉取失败: $f（按待刷新处理，照常 purge）"
+    pre_code=$(cat "$RUN_TMP/cdn.code" 2>/dev/null || true)
+    if [ "$pre_code" = "404" ]; then
+      fetch_404_pre_files="$fetch_404_pre_files $f"
+      echo "  ⚠ 先验 404: $f（CDN 尚无此路径，新增分发文件属预期；照常 purge，待复验裁决）"
+    else
+      echo "  ⚠ 先验拉取失败: $f（HTTP ${pre_code:-无响应}，按待刷新处理，照常 purge）"
+    fi
   fi
 
   res=$(purge_one "$f")
@@ -288,6 +316,22 @@ if [ "$purge_n" -gt 0 ]; then
     if remote_md5=$(cdn_md5 "$f"); then
       if [ "$local_md5" = "$remote_md5" ]; then
         verify_ok=$((verify_ok+1))
+        # 先验失败 ∧ 复验一致 = 该文件本轮完全成功（最常见成因：新增分发表先验必然 404）。
+        # 撤销 §5 记下的先验失败，否则一次完全成功的发布会被判 PUBLISHED_BUT_UNVERIFIED
+        # 并 exit 1，训练维护者忽略退出码。只影响这一个交集：先验失败且复验也失败/不一致
+        # 的仍然留在计数里。
+        case " $fetch_fail_pre_files " in
+          *" $f "*)
+            new_pre=""
+            for g in $fetch_fail_pre_files; do
+              if [ "$g" != "$f" ]; then new_pre="$new_pre $g"; fi
+            done
+            fetch_fail_pre_files="$new_pre"
+            fetch_fail_pre_n=$((fetch_fail_pre_n-1))
+            resolved_pre_n=$((resolved_pre_n+1))
+            resolved_pre_files="$resolved_pre_files $f"
+            ;;
+        esac
       else
         mismatch_n=$((mismatch_n+1)); mismatch_files="$mismatch_files $f"
         echo "  ⚠ 复验不一致: $f"
@@ -304,9 +348,23 @@ fi
 fetch_fail_n=$((fetch_fail_pre_n+fetch_fail_ver_n))
 problems=$((throttled_n+purge_fail_n+fetch_fail_n+mismatch_n))
 
+# 仍未了结的先验失败按成因分组：404（路径未上架）与网络错/5xx 是两类不同的处置。
+fetch_pre_404_n=0; fetch_pre_404_files=""
+fetch_pre_net_n=0; fetch_pre_net_files=""
+for f in $fetch_fail_pre_files; do
+  case " $fetch_404_pre_files " in
+    *" $f "*) fetch_pre_404_n=$((fetch_pre_404_n+1)); fetch_pre_404_files="$fetch_pre_404_files $f" ;;
+    *)        fetch_pre_net_n=$((fetch_pre_net_n+1)); fetch_pre_net_files="$fetch_pre_net_files $f" ;;
+  esac
+done
+
 echo
 if [ "$problems" -eq 0 ]; then
   echo "STATUS: PUBLISHED_AND_VERIFIED — 已推送 $(git rev-parse --short HEAD)；候选 $targets_n（先验已一致 $already ｜ purge 后复验一致 $verify_ok ｜ 删除项 $deleted_ok）"
+  if [ "$resolved_pre_n" -gt 0 ]; then
+    echo "  · 其中 $resolved_pre_n 个文件先验拉取失败（新增分发文件的 404 属预期），purge 后复验一致，已按成功计："
+    for f in $resolved_pre_files; do echo "      $f"; done
+  fi
   echo "Surge「外部资源」/Clash Verge Rev「规则」页更新即可生效"
   exit 0
 fi
@@ -318,7 +376,8 @@ echo "STATUS: PUBLISHED_BUT_UNVERIFIED — 已推送 $(git rev-parse --short HEA
 report_group "$mismatch_n"        "未验证 · 复验 md5 不一致（可能只是多 POP 最终一致性漂移）" "$mismatch_files"
 report_group "$throttled_n"       "未验证 · 被 jsDelivr 限流，本轮未刷新"                     "$throttled_files"
 report_group "$purge_fail_n"      "失败 · purge 请求未受理"                                   "$purge_fail_files"
-report_group "$fetch_fail_pre_n"  "失败 · CDN 拉取失败（先验阶段，已按待刷新处理）"           "$fetch_fail_pre_files"
+report_group "$fetch_pre_404_n"   "未验证 · 先验 404（CDN 尚无此路径；新增文件属预期，但本轮未复验一致）" "$fetch_pre_404_files"
+report_group "$fetch_pre_net_n"   "失败 · CDN 拉取失败（先验阶段，网络错/5xx，已按待刷新处理）" "$fetch_pre_net_files"
 report_group "$fetch_fail_ver_n"  "失败 · CDN 拉取失败（复验阶段）"                           "$fetch_fail_ver_files"
 echo "  处置：约 $wait_min 分钟后重跑 ./update.sh 补刷（幂等，先验后清会自动跳过已一致项）；"
 echo "        或等 @main 别名缓存 ≤12h 自然过期，届时在 Surge「外部资源」/Clash Verge Rev「规则」页手动更新。"

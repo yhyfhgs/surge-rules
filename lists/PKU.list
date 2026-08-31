@@ -1,13 +1,10 @@
 # PKU — 北大校园网/CERNET 直连
 # 排序：规则类型分区，区内字母序
 
-DOMAIN-SUFFIX,bdwm.net
 DOMAIN-SUFFIX,bjmu.edu.cn
 DOMAIN-SUFFIX,pku.cn
 DOMAIN-SUFFIX,pku.edu.cn
-DOMAIN-SUFFIX,pkuecon.cn
 DOMAIN-SUFFIX,pkufh.com
-DOMAIN-SUFFIX,pkuiot.com
 DOMAIN-SUFFIX,pkuph.cn
 DOMAIN-SUFFIX,pkusz.edu.cn
 DOMAIN-SUFFIX,puh3.net.cn
@@ -21,9 +18,6 @@ IP-CIDR,202.112.18.0/24,no-resolve
 IP-CIDR,202.112.24.0/24,no-resolve
 IP-CIDR,202.112.7.0/24,no-resolve
 IP-CIDR,202.112.8.0/24,no-resolve
-IP-CIDR,202.127.16.0/20,no-resolve
 IP-CIDR,222.29.0.0/16,no-resolve
 
 IP-CIDR6,2001:da8:201::/48,no-resolve
-
-IP-ASN,24355,no-resolve

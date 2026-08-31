@@ -4,6 +4,46 @@
 
 ---
 
+## [2026-08-31·三轮] V2 审计整改:24 项确定级修复 + A9/A10 门禁上线 + 供应链锁层开工
+
+依据 `docs/RULES_AUDIT_V2_2026-08-31.md`,分 R0(保险丝)/ R1(确定级)/ R2(门禁)/ R3(供应链)三波并行执行。**守恒基线 143,640 → 142,708 条(净 −932)**,表数 34 不变。删除面集中在多租户注册边界、S3 兼容对象存储族、死条目与信任面缺陷;迁移面在总数上互相抵消。实测得到的口径更正统一登记在审计文档的「执行勘误」节(E-1 … E-8),正文数字以该节为准。
+
+仍未处理(需 shadow / 真实流量):Streaming 的 AWS IP 段、OneDrive 数据面归属、`azureedge.net` 共享 CDN 逐条判定、`TencentCN:in.th` 泰国注册边界 —— 四项已作为「待裁决豁免」在每次 audit 运行时提示。
+
+### Fixed
+- **OneDrive 投毒止血**:`Microsoft.list` 补 `DOMAIN-SUFFIX,onedrive.live.com` —— 这是对 `MicrosoftCN` 宽后缀 `live.com` 的**刻意窄豁免**(CN 侧解析投毒导致个人版 OneDrive 直连不可用)。`office.live.com` / `view.officeapps.live.com` / `g.live.com` 仍 DIRECT,以负例断言锁死;**禁止扩宽为 `live.com`,禁止删除**。
+- **信任面清理**:`GameDownloadCN` 删 `steambroadcast.com`(2026-04-27 注册 / Registrar.eu / Cloudflare NS,真 Valve 域一律 MarkMonitor,301 跳 faceit.com —— 留在 DIRECT 白名单区等于给易主域一条绕过 Reject 的通道)与停放页死规则 `steamcontent.net`;`Twitter` 删已被第三方注册/停放的 `twimg.org` / `twimg.co` / `tellapart.com` / `twitteroauth.com`;**`PKU.list` 的 5 条非校园域清零**(`bdwm.net` 等改由常规链路判定)。
+- **幽灵规则 11 条**:`ChinaMedia` 的 `domesticmedia` / `domesticmediagame` / `domesticmediapay` 三族 —— 上游从未存在过对应实体,双侧 NXDOMAIN。已入 forbidden **全局作用域**防再生带回。
+- **死条目 / 死段清理**:`TencentCN` 删 14 条腾讯云海外 IP 段(承接方均为 `ChinaIP`,代表 IP 逐个复算落点不变),表头「海外段以 IP-CIDR 登记」这句**虚假保障**同步改写为「纯域名表,不设 IP 区」;`Google` 删 `IP-ASN,19527` / `43515` 与 10 条死条目;`Domestic` 删 `googleapis.cn`(双侧均无 A 记录)与 2 条被 ChinaIP 覆盖的 `/32`;`Japan` 删 `paravi.jp`(并入 U-NEXT,承接域已在同表);`Reject` A 组实删 38 条(原判 41 条,其中 3 条 HTTPDNS 删后落 DIRECT 不落 FINAL,按「承载集同构」保留,见勘误 E-2)。
+- **`tools/surge2clash.py` 行尾注释透传**:`convert_file()` 只跳过行首 `#`,`IP-CIDR,…,no-resolve  # last_verified=…` 会被原样带进派生文件,Mihomo 把注释当规则参数解析 —— 轻则该条失效,重则整个 provider 加载失败。新增 `strip_trailing_comment()`,剥离逻辑与 `tests/engine.py:strip_comment()` **逐字符对齐**(同为 `s.find(" #")`);刻意不放宽到制表符或裸 `#`,否则 `clash/` 与 Surge 会对同一行给出不同规则,比原 bug 更难查。
+- **`update.sh` 先验 404 误报**:首次发布(远端尚无该文件)的先验探测被当成网络失败,导致本应 `PUBLISHED_AND_VERIFIED` 的路径退出 1。桩测覆盖 11 个状态路径,修后仅目标路径由 exit 1 → exit 0,其余状态一条未变。
+- **公开文档残留**:`docs/MAINTENANCE.md` 与 `tests/live_check.py` 各 1 处未脱敏残留已打码,脱敏扫描真命中归零。
+
+### Changed
+- **Meta 防御性域名分档(520 → 92)**:域名区按 X(易主/停放)/ N(无效)/ D(防御性注册)三档处置 —— X 3 条 + N 14 条删除,**D 档 411 条迁出存档**至 `reference/`(gitignore,不入库不分发)。IP 区 41 → 15 条:删 27 条非 Meta 段(含误收的 GCP `108.177.8.0/21` 与 LINE 3 段),`129.134.0.0/17` 与 `157.240.0.0/17` 各合并为 `/16`,补 `57.144.0.0/14`。合并依据改引 ARIN 整段 NetName `THEFA-3`(原引的 AS32934 通告实测为 0 条,见勘误 E-5)。D 档挑 3 条最典型的入 forbidden 做**绊线**,上游整表回灌时立刻报警。
+- **S3 与多租户对象存储族(共 289 + 3 条)**:删 280 条 `s3[.-]*.amazonaws.com` 区域端点后缀(区域端点与已禁收的 `<bucket>.s3.amazonaws.com` 是同一 bucket 的两种寻址形式,PSL PRIVATE 段全部收录 = 官方认定为注册边界)+ 9 条同构的 Scaleway / SAKURA 端点。**审计原文的「321 条」是纯前缀 grep 的计数方法学错误**,差额 41 条中 32 条是第一方 `s3.<brand>` host(Figma / Brave / Producthunt / Envato…),删掉属过度删除 —— forbidden 签名一律锚定厂商域,**不得写成 `s3*`**(见勘误 E-1)。收尾波补删 3 条同构的 `DOMAIN-WILDCARD`(`s3.*.backblazeb2.com` / `*.s3.*.backblazeb2.com` / `s3.*.wasabisys.com`),闭合此前只兑现 6/10 的家族缺口;`f00X.backblazeb2.com` 与 `s3.brave.com` / `s3-*.figma.com` 等单租户第一方端点刻意保留。
+- **`ModelDownloadCDN` 整表重写(4 → 5 条)**:2026-08-31 `curl -sI` 复核,HF 已整体切 Xet 后端,模型 / LFS / 数据集三条 resolve 路径的 302 Location 统一落 `us.aws.cdn.hf.co`,而**旧表无任何条目覆盖它**,大文件被 `AI.list` 的 `hf.co` 接走、占用 AI 组家宽中转;`cdn-lfs.huggingface.co` 已死。补 `aws.cdn.hf.co` + `cdn-lfs.hf.co` 后权重下载回到区 3「下载」组,站点浏览与 API 仍归 AI.list。
+- **`DownloadCDN` 二次收窄(5,559 → 5,177 条)**:除 S3 族外,删 40 条多租户 / PSL 边界后缀(`vercel.dev` / `r2.dev` / `file.core.windows.net` / `bitbucket.io` / `linodeobjects.com` / IPFS 公共网关等)、19 条通用 SaaS 组件(Freshdesk 8 / Split.io 6 / **SAP CIAM 身份组件 Gigya 3** / Segment 1 / Braze EU 1 —— Gigya 尤其危险,把身份认证绑到下载出口意味着任意使用 SAP CIAM 的站点登录都走「下载」组)、23 条站点静态子域(归还各地区表,**地区表零新增行**)、以及 3 条与「大流量批量下载」定位直接冲突的认证 / 同意管理 / 资产面(`secure.telegraph.co.uk` 等)。Intercom 四个注册域此前劈成两表两出口,统一归 AI。
+- **BBC 播放面按「该 host 是否 BBC 专属」重划**:判据从「注册域是否多租户」改掉 —— 多租户的是注册域不是主机名,把 BBC 独占的主机名留在没有英国出口的策略组里,iPlayer 属地锁照样过不去。9 条 `*-uk-live.akamaized.net` + `bbc.mp-pxcdn.com` 迁 `UK.list` 取回英国出口;`*-ww-live` 与多租户承载的 `bbcfmt.s.llnwi.net` 留 `Streaming`。
+- **Google `-cn` 族按可达性矩阵处置(−20 / Domestic +18)**:18 条迁 `Domestic` 直连(证书层证实与 `.cn` 镜像族同基础设施),`googleadservices-cn.com`(www 侧 CN 权威置空)与 `qiao-cn.com`(双侧 NODATA)删除,`gstatic-cn.com` 留观察项。
+- **ThreatMetrix 入 `Payment`**:只收 `DOMAIN-SUFFIX,online-metrix.net` 这一个注册域(`.com` 与其他 TLD 归属未验证,刻意不收)。设备指纹上报必须与收单授权同出口,否则 3DS 挑战率与拒付率上升;新场景 `payment_chain.json` 用 `same_policy` 把该不变量固化。
+- **Datadog 遥测面归 AI**:补 `DOMAIN-WILDCARD,browser-intake-*-datadoghq.com` 与 `DOMAIN-SUFFIX,browser-intake-datadoghq.eu`,收回 us3 / ap1 / eu 三个此前落 Final 的现网端点;通配前缀锚定,`browser-intake-evil.example.com` 不误伤。
+- **Steam 国服 CDN**:删整族双侧 NXDOMAIN 的 `dl.steam.ksyna.com`,`dl.steam.clngaa.com` 放宽为父后缀 `steam.clngaa.com`,收回对 ChinaDomain 兜底的依赖。
+- 其它归属:`YouTube` 补 `yt3/yt4.googleusercontent.com` 与 `jnn-pa.googleapis.com`,接收 `IP-ASN,36040`;`US` 删 `espnplus.com` / `tubi.io`,`Streaming` 的 `tubi.tv` 由 `DOMAIN` 升 `DOMAIN-SUFFIX`(修同一注册域上 DOMAIN 与 SUFFIX 混用的结构缺陷);`AppleCN` 删 `DOMAIN-KEYWORD,smp-device`(该表已无 DOMAIN-KEYWORD);国内厂商国际站 `01.ai` / `siliconflow.com` 迁 AI,对应 `.cn` 保持直连;`Domestic` 补 3 条 CA 域、`MicrosoftCN` 补 `msocsp.com`。
+
+### Added
+- **audit A9 · IP 跨表包含 / 遮蔽审计**:按 conf 真实序建前缀模型,报「后位 CIDR 被前位完全包含」与「跨策略部分交叠」;同策略 P3 不阻断,**跨策略 P1**。基线实测 **145 条(144 同策略 + 1 跨策略)**,整体登记 exemption,门禁只对**新增**跨策略交叠报警。审计原文的「154 + 28」是把「完全包含」与「部分交叠」分两次计数,与实装的顺序感知口径不同 —— 已重标,见勘误 E-8。
+- **audit A10 · 单标签后缀与 PSL 注册边界**:用**入库的锁定快照**(`tests/data/public_suffix_list.dat` + `tlds-alpha-by-domain.txt`,逐字节固定 sha256)判「这条后缀是不是别人的注册边界」,ICANN 与 PRIVATE 两段均参与,`*.parent` 通配与 `!exception` 按标准算法处理,IDN 两侧做 IDNA 归一。**门禁不联网**:判据必须可复现可 review,快照更新是一次有意的提交而不是运行时下载。基线 143 条全部预登记,**首次上线 0 误报 0 漏报**;唯一真信号 `TencentCN:in.th`(认领了整个泰国 `in.th` 二级注册边界)列为待裁决。两份快照已登记进 `SOURCES.md`。
+- **A8 加作用域**:forbidden 条目支持 `file` / `not_file`,可表达「这条模式在 A 表禁收、在 B 表是承接机制」。forbidden **130 → 244 条**,exemptions **30 → 54 条**(撤销 1 / 收窄 1 / 标记 3 / 新增 25)。audit 自检 **33 → 51 条**。
+- **供应链锁层开工**:`sources.lock.json` + `tools/fetch_locked.py` + `tools/rebuild.py`。**ChinaIP 已做实** —— pinned 到 `blackmatrix7/ios_rule_script@65e8adf`,折叠后与本地文件地址集合逐位相同(`rebuild.py` diff = 0),本地镜像与公网两条取源路径 sha256 一致;其余表按 provenance 如实标为 `observed`(未锁)。`tools/regen_chinadomain.py`:ChinaDomain 再生管线过滤器(六级流水线 + P1–P10 护栏,内置 17 删域 / 9 品牌关键词 / D11 排除项 / 21 条承载集豁免),**低频有人值守操作,刻意不进 `update.sh`**。
+- **场景基线 147 → 189 场景 / 1,233 请求 / 2,269 断言 / 915 条 DNS 泄漏断言**,失败 0、已知待修 0。新增 6 个场景文件:`fix_download_v2` / `fix_domestic_v2` / `fix_ecosystem_v2` / `fix_regions_v2`(四波修复的正负例)、`ipv6_parity`(IPv4/IPv6 双栈落点一致性,每条带 `no_dns_leak`)、`payment_chain`(支付全链同出口)。`runsuite.py` 新增 `--rules` 参数,配公共脱敏 conf 使用。
+- `clash/rule-providers.yaml` 补 sniffer 合同说明(Surge 的 `extended-matching` 在 Clash 侧**无 provider 等价物**,使用者必须自行开 `sniffer`,不配不报错、只静默漏匹配)。
+- `MAINTENANCE §8` 裁决登记 **+49 条**;`§6` 红线 **7 → 9 条**。`.gitignore` 补 `build/`(`fetch_locked.py` 的默认输出目录,不排除会被 `update.sh` 的 `git add -A` 收进仓库)。
+
+> **发布前注意**:本轮守恒基线 142,708 取自 `surge2clash --check` 的转换器计数,**未做 mihomo 实载复验**(上一版 143,640 是 controller API 的 `ruleCount` 实测值)。实载复验留待下次发布前补做,补做后若不等以实载值为准。
+
+---
+
 ## [2026-08-31·二轮] 审计整改完成:关键词全量迁移(104→8) + DownloadCDN 止血 + ChinaIP 折叠减半 + 测试链加固
 
 同日第二轮,承接首轮(见下节)未尽的「无需真实流量验证即可安全完成」项;9 个并行子任务执行,advisor 统一裁决收口。仍未处理(需 shadow/实测):Streaming 的 1,089 条 AWS IP 段、Meta 防御域拆分、OneDrive 数据面归属、TencentCN 海外段、地区表 canonical owner。

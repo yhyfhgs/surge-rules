@@ -1,0 +1,36 @@
+{
+  "_readme": [
+    "tests/audit.py 的 A10（单标签后缀与 PSL 边界门禁）所依赖的**锁定快照**。",
+    "门禁不联网：判据必须可复现、可 review，快照更新是一次有意的提交而不是运行时下载。",
+    "刷新步骤：① 按下表 url 重新下载到本目录；② 重算 sha256 并更新本文件的 sha256/bytes/",
+    "  version/retrieved 四个字段；③ 跑 `python3 tests/audit.py --check A10 --fail-on P1`，",
+    "  逐条复核**新增**的命中（PSL 每次更新都会增删条目，新增命中即需要新的裁决或豁免）；",
+    "④ 跑 `python3 tests/audit.py --selftest`（S36/S44/S45/S46 直接依赖这两份快照）。",
+    "口径：PSL 的 ICANN 段与 PRIVATE 段都参与判定，`*.parent` 通配与 `!exception` 例外",
+    "  按 publicsuffix.org 标准算法处理，IDN 条目在装载与查询两侧都做 IDNA 归一。"
+  ],
+  "snapshots": [
+    {
+      "file": "public_suffix_list.dat",
+      "url": "https://publicsuffix.org/list/public_suffix_list.dat",
+      "purpose": "A10 的注册边界判据（ICANN + PRIVATE 两段）",
+      "version": "VERSION: 2026-08-29_12-33-06_UTC",
+      "retrieved": "2026-08-31",
+      "bytes": 333164,
+      "sha256": "24b79d731bb0d296171c513aed2e89c3163cb74a177b14d2b27f006e8ce00936",
+      "license": "MPL-2.0（见文件头部）",
+      "note": "与 reference/audit-v2-20260831/w6/public_suffix_list.dat 逐字节一致 —— 本轮审计 W2/W6 用的就是这一份快照，判据可直接对账。"
+    },
+    {
+      "file": "tlds-alpha-by-domain.txt",
+      "url": "https://data.iana.org/TLD/tlds-alpha-by-domain.txt",
+      "purpose": "A10 区分「单标签后缀是真 TLD」还是「拼写错误/已撤销 TLD」",
+      "version": "Version 2026083100, Last Updated Mon Aug 31 07:07:01 2026 UTC",
+      "retrieved": "2026-08-31",
+      "bytes": 9536,
+      "sha256": "09b9f7dc145257b803853ce3f72a1785744c3789d9f0494dead52c048f9435f4",
+      "license": "IANA 公开数据",
+      "note": "IDN TLD 在表中是 punycode（xn--）形态，与 lists/ 里的写法一致。"
+    }
+  ]
+}

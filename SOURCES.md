@@ -25,10 +25,13 @@
 | fmz200/wool_scripts | 开发参考 | https://github.com/fmz200/wool_scripts | `reference/wool_scripts` @ `2d95818`(2026-08-29 浅克隆) | GPL-3.0 | 模块参考:巨型去广告 module 的分片维护方式,不参与规则分发 |
 | xream/scripts | 开发参考 | https://github.com/xream/scripts | `reference/xream-scripts` @ `f902afd`(2026-08-29 浅克隆) | GPL-3.0 | 脚本参考:logger / panel / 诊断类模块,不参与规则分发 |
 | Surge 官方手册 | 文档参考 | https://manual.nssurge.com/ | 非 git;`reference/surge-docs` 为 2026-08-29 抓取的 87 页 Markdown 副本(`_fetch_surge_docs.py` 可重跑) | 未声明(版权归 Surge Networks,仅本地离线阅读,勿再分发) | 语义核对:`no-resolve` / `extended-matching` / `pre-matching` / RULE-SET 加载等官方定义,是本库两条不变量的规范依据 |
+| Public Suffix List | 门禁快照(入库) | https://publicsuffix.org/list/public_suffix_list.dat | `tests/data/public_suffix_list.dat` @ `VERSION 2026-08-29_12-33-06_UTC`;sha256 `24b79d731bb0d296171c513aed2e89c3163cb74a177b14d2b27f006e8ce00936`;333,164 B;取得 2026-08-31 | MPL-2.0(见文件头部) | **不进 `lists/`,只作判据**:`tests/audit.py` A10 的注册边界依据(ICANN + PRIVATE 两段,`*.parent` 通配与 `!exception` 按标准算法处理)。门禁不联网,快照更新是一次有意的提交。与 `reference/audit-v2-20260831/w6/` 的 W2/W6 用件**逐字节一致**,判据可直接对账;刷新步骤见 `tests/data/SNAPSHOTS.json` 的 `_readme` |
+| IANA 根区 TLD 表 | 门禁快照(入库) | https://data.iana.org/TLD/tlds-alpha-by-domain.txt | `tests/data/tlds-alpha-by-domain.txt` @ `Version 2026083100`(Last Updated Mon Aug 31 07:07:01 2026 UTC);sha256 `09b9f7dc145257b803853ce3f72a1785744c3789d9f0494dead52c048f9435f4`;9,536 B;取得 2026-08-31 | IANA 公开数据 | **不进 `lists/`,只作判据**:A10 区分「单标签后缀是真 TLD」与「拼写错误 / 已撤销 TLD」。IDN TLD 在表中为 punycode(`xn--`)形态,与 `lists/` 写法一致。刷新与 PSL 同一流程 |
 
 **关于本文件的效力范围**
 
 - 这是**现状登记**,不是构建锁。除 `ios_rule_script@65e8adf` 与 `reference/` 下各克隆的 HEAD 外,规则上游多为「按 URL 直取后人工重组」,既没有逐表原始 SHA-256,也没有可复现的转换命令与排除清单;`reference/` 又是可变的浅克隆,不适合直接充当供应链输入。
-- **逐表 revision 锁定、原始 checksum、`sources.lock.json` 与可一键重建的再生管线属 Phase 3 供应链工程**(见 docs/RULES_AUDIT_AND_OPTIMIZATION_2026-08-31.md §13.2 / §13.7 / §14.4 与 Phase 3 路线)。在那之前,不要把本文件当作「固定 revision 可逐字节重建分发物」的依据。
+- **逐表 revision 锁定、原始 checksum 与可一键重建的再生管线仍属 Phase 3 供应链工程**(见 docs/RULES_AUDIT_AND_OPTIMIZATION_2026-08-31.md §13.2 / §13.7 / §14.4 与 Phase 3 路线)。**2026-08-31 起已开工但未完工**:仓库根 `sources.lock.json` + `tools/fetch_locked.py` + `tools/rebuild.py` 落地了机器可读的锁层,其中 **ChinaIP 已做实**(pinned 到 `blackmatrix7/ios_rule_script@65e8adf`,折叠后与本地文件地址集合逐位相同,`rebuild.py` diff = 0);其余表按 provenance 如实标为 `observed`(未锁)。**在全部表转为 pinned 之前,不要把本文件或该 lock 当作「固定 revision 可逐字节重建全部分发物」的依据。**
+- 上表末两行的 PSL / IANA 快照**不是规则上游**,不参与 `lists/` 的任何内容,只作 `tests/audit.py` A10 的离线判据;它们是本仓库唯一逐字节锁定并入库的外部数据。
 - 各上游版权归原作者,遵循其各自仓库的 LICENSE。本仓库对上游内容做了裁剪、重组、去重与归属重裁,**不保证与任一上游语义等同**;上游的收录裁决与本库的偏离逐条登记在 docs/MAINTENANCE.md §8「裁决登记」。
 - 本仓库自身尚未声明 LICENSE(审计报告 §13.7 同批建议,待裁决)。

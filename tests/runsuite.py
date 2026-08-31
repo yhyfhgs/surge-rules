@@ -13,6 +13,8 @@ runsuite.py — L2 场景断言运行器（Surge 分流测试套件 / W7）
     python3 runsuite.py --filter openai       # 只跑名字/文件名含 openai 的场景
     python3 runsuite.py --json                # 机器可读输出
     python3 runsuite.py --conf /path/Surge.conf --dir scenarios --engine ./engine.py
+    python3 runsuite.py --conf tests/fixtures/Surge.test.conf --rules lists/
+                                              # 脱敏 fixture + 显式 .list 目录（CI 用）
     python3 runsuite.py --list-known-broken   # 只列当前的待修清单
     python3 runsuite.py --allow-known-broken  # 放行 known_broken（默认严格：>0 即退出码 1）
 
@@ -127,9 +129,10 @@ class EngineError(Exception):
 
 
 class Engine(object):
-    def __init__(self, path, conf=None):
+    def __init__(self, path, conf=None, rules=None):
         self.path = path
         self.conf = conf
+        self.rules = rules        # .list 目录；None = 让引擎按 conf 位置自行推导
         self.mode = None          # "module" | "instance" | "cli"
         self._mod = None
         self._inst = None
@@ -160,8 +163,15 @@ class Engine(object):
             fn = getattr(m, maker, None) if m is not None else None
             if fn is None:
                 continue
-            for call in ((lambda: fn(self.conf)) if self.conf else (lambda: fn()),
-                         (lambda: fn())):
+            # 给了 --rules 就只试「带 rules 的构造」：宁可退化成 CLI 模式（那条路
+            # 一定会传 --rules），也不能静默丢掉它去读默认 lists/ —— 那会让整套断言
+            # 跑在错误的规则目录上却全绿。
+            if self.rules:
+                cands = ((lambda: fn(self.conf, self.rules)),)
+            else:
+                cands = (((lambda: fn(self.conf)) if self.conf else (lambda: fn())),
+                         (lambda: fn()))
+            for call in cands:
                 try:
                     inst = call()
                 except Exception:                               # noqa: BLE001
@@ -226,6 +236,8 @@ class Engine(object):
             cmd += ["--ua", q["ua"]]
         if self.conf:
             cmd += ["--conf", self.conf]
+        if self.rules:
+            cmd += ["--rules", self.rules]
         try:
             out = subprocess.check_output(cmd, stderr=subprocess.DEVNULL)
         except Exception as e:                                  # noqa: BLE001
@@ -620,6 +632,9 @@ def main():
     ap.add_argument("--dir", default=DEFAULT_SCEN_DIR, help="场景目录（默认 ./scenarios）")
     ap.add_argument("--engine", default=DEFAULT_ENGINE, help="engine.py 路径（默认同目录）")
     ap.add_argument("--conf", default=None, help="Surge.conf 路径（透传给引擎）")
+    ap.add_argument("--rules", default=None,
+                    help=".list 所在目录（透传给引擎的 rules_dir；"
+                         "默认让引擎按 conf 位置推导。配公共脱敏 conf 用）")
     ap.add_argument("--filter", default=None, help="只跑名字或文件名含该子串的场景")
     ap.add_argument("--json", action="store_true", dest="as_json", help="机器可读输出")
     ap.add_argument("--list-known-broken", action="store_true",
@@ -651,7 +666,7 @@ def main():
         return list_known_broken(files, args)
 
     try:
-        engine = Engine(args.engine, args.conf)
+        engine = Engine(args.engine, args.conf, args.rules)
     except EngineError as e:
         sys.stderr.write("错误：%s\n" % e)
         return 2
@@ -685,7 +700,8 @@ def main():
     stats = summarize(all_asserts)
     if args.as_json:
         print(json.dumps({
-            "engine": {"path": args.engine, "mode": engine.mode, "conf": args.conf},
+            "engine": {"path": args.engine, "mode": engine.mode, "conf": args.conf,
+                       "rules": args.rules},
             "schema_warnings": schema_warnings,
             "allow_known_broken": args.allow_known_broken,
             "totals": stats,

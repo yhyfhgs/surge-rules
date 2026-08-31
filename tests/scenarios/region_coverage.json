@@ -123,7 +123,7 @@
   },
   {
     "name": "region_uk_node",
-    "desc": "审计 §3.3：UK.list 在 L2 无任何胜出规则。补齐域名层覆盖——广播/报刊/银行/公共服务代表域走英国出口；负例覆盖 BBC 域族的跨表拆分事实：bbc.com 属 UK，bbc.co.uk 由 conf 前位的 Streaming 表认领（iPlayer 流媒体面）",
+    "desc": "审计 §3.3：UK.list 在 L2 无任何胜出规则。补齐域名层覆盖——广播/报刊/银行/公共服务代表域走英国出口；BBC 域族 2026-08-31 由 Streaming 迁入 UK（W4-01 方案 A），bbc.com 与 bbc.co.uk 现为同一出口",
     "requests": [
       {
         "host": "www.bbc.com",
@@ -147,7 +147,7 @@
       },
       {
         "host": "bbc.co.uk",
-        "note": "负例：同品牌域被前位 Streaming 表认领，不落英国节点"
+        "note": "iPlayer 全链主域：属地锁需英国出口，2026-08-31 起归 UK.list"
       }
     ],
     "assert": {
@@ -176,8 +176,8 @@
         },
         {
           "host": "bbc.co.uk",
-          "policy": "流媒体",
-          "reason": "全库唯一归属：bbc.co.uk 在 Streaming.list，conf 顺序先于 UK.list"
+          "policy": "🇬🇧英国节点",
+          "reason": "全库唯一归属：bbc.co.uk 已迁入 UK.list；「流媒体」是全局单选组且无英国出口成员，属地锁服务的正确 owner 是地区表"
         }
       ]
     }

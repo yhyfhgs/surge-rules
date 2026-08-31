@@ -4,7 +4,6 @@
 # GameDownloadCN — 国服游戏下载 CDN 直连（上游 blackmatrix7 GameDownloadCN + SteamCN）；位次须先于 Games.list 与 DownloadCDN.list
 # 排序：规则类型分区，区内字母序
 
-DOMAIN,dl.steam.ksyna.com
 DOMAIN,epicgames-download1-1251447533.file.myqcloud.com
 DOMAIN,st.dl.pinyuncloud.com
 DOMAIN,steampipe.steamcontent.tnkjmec.com
@@ -26,7 +25,6 @@ DOMAIN-SUFFIX,csgo.wmsj.cn
 DOMAIN-SUFFIX,di.res.netease.com
 DOMAIN-SUFFIX,diablo3.nosdn.127.net
 DOMAIN-SUFFIX,dist.blizzard.com.edgesuite.net
-DOMAIN-SUFFIX,dl.steam.clngaa.com
 DOMAIN-SUFFIX,dota2.wmscdn.cn
 DOMAIN-SUFFIX,dota2.wmsj.cn
 DOMAIN-SUFFIX,download.blizzard.com
@@ -50,13 +48,12 @@ DOMAIN-SUFFIX,sc2.nosdn.127.net
 DOMAIN-SUFFIX,st.dl.bscstorage.net
 DOMAIN-SUFFIX,st.dl.eccdnx.com
 DOMAIN-SUFFIX,steam.apac.qtlglb.com
+DOMAIN-SUFFIX,steam.clngaa.com
 DOMAIN-SUFFIX,steam.eca.qtlglb.com
 DOMAIN-SUFFIX,steam.naeu.qtlglb.com
 DOMAIN-SUFFIX,steam.ru.qtlglb.com
-DOMAIN-SUFFIX,steambroadcast.com
 DOMAIN-SUFFIX,steamchina.com
 DOMAIN-SUFFIX,steamcontent.com
-DOMAIN-SUFFIX,steamcontent.net
 DOMAIN-SUFFIX,steampipe.akamaized.net
 DOMAIN-SUFFIX,steampowered.com.8686c.com
 DOMAIN-SUFFIX,steamserver.net

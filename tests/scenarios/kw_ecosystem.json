@@ -127,7 +127,7 @@
   },
   {
     "name": "kw_google_blogspot_gmail_recaptcha",
-    "desc": "Google 三条宽关键词（blogspot/gmail/recaptcha）删除：自上游 Google 表恢复 73 条 blogspot ccTLD 后缀 + gmail.com + recaptcha.net/recaptcha-cn.net；报告实证的 qingmail.com / suningmail.com 误捕获消除",
+    "desc": "Google 三条宽关键词（blogspot/gmail/recaptcha）删除：自上游 Google 表恢复 73 条 blogspot ccTLD 后缀 + gmail.com + recaptcha.net；报告实证的 qingmail.com / suningmail.com 误捕获消除。recaptcha-cn.net 自 2026-08-31（advisor 裁决 7，`-cn` 族 18 条可迁）起改由 Domestic.list 直连承接，单列 per_request",
     "requests": [
       {
         "host": "gmail.com"
@@ -156,7 +156,7 @@
       },
       {
         "host": "recaptcha-cn.net",
-        "note": "reCAPTCHA 中国可达端点"
+        "note": "reCAPTCHA 中国可达端点；2026-08-31 起归 Domestic.list 直连（CMNET 120.253/16 落点，与 .cn 族同一张 GTS 证书）"
       },
       {
         "host": "qingmail.com",
@@ -208,7 +208,8 @@
         },
         {
           "host": "recaptcha-cn.net",
-          "policy": "Google-X-Meta-MS"
+          "policy": "DIRECT",
+          "reason": "advisor 裁决 7（`-cn` 族矩阵）：该端点在 CN 侧解析到中国移动 120.253.255.x 且证书 SAN 与 `.cn` 族同源，属境内可直连的 Google 中国面 —— 已从 Google.list 迁入 Domestic.list，落 DIRECT 属预期。"
         },
         {
           "host": "qingmail.com",
@@ -308,7 +309,7 @@
   },
   {
     "name": "kw_meta_fbcdn_instagram_whatsapp",
-    "desc": "Meta 三条宽关键词（fbcdn/instagram/whatsapp）删除：只恢复 Meta 自营运行域与官方门面（fbcdn.net/.com、fbcdn-a.akamaihd.net、cdninstagram.com、instagram.com、whatsapp.com/.net 等 18 条）；上游 Facebook 表夹带的品牌抢注/刷粉/破解站与第三方魔改客户端 whatsapp-plus.* 刻意不恢复，落 Final",
+    "desc": "Meta 三条宽关键词（fbcdn/instagram/whatsapp）删除：只恢复 Meta 自营运行域与官方门面（fbcdn.net/.com、cdninstagram.com、instagram.com、whatsapp.com/.net 等 17 条）；上游 Facebook 表夹带的品牌抢注/刷粉/破解站与第三方魔改客户端 whatsapp-plus.* 刻意不恢复，落 Final；fbcdn-a.akamaihd.net 于 2026-08-31 审计判 N 档（双侧 NXDOMAIN）随 R1-06 删除，同样落 Final",
     "requests": [
       {
         "host": "www.instagram.com"
@@ -330,7 +331,7 @@
       },
       {
         "host": "fbcdn-a.akamaihd.net",
-        "note": "Akamai 前置的旧 fbcdn，恢复后不退化到 ProxyGFW"
+        "note": "Akamai 前置的旧 fbcdn，2026-08-31 已从 Meta.list 删除（N 档死域）"
       },
       {
         "host": "whatsapp-plus.net",
@@ -374,8 +375,8 @@
         },
         {
           "host": "fbcdn-a.akamaihd.net",
-          "policy": "Google-X-Meta-MS",
-          "reason": "Meta.list 位次先于 ProxyGFW 的 akamaihd.net"
+          "policy": "Final",
+          "reason": "2026-08-31 审计 N 档：CNAME 到 edgesuite.net 无 A、双侧 NXDOMAIN，已随 R1-06 从 Meta.list 删除；退化到 ProxyGFW 的 akamaihd.net（Final）属预期。"
         },
         {
           "host": "whatsapp-plus.net",

@@ -5,3 +5,12 @@ tests/live_check_local.json
 tests/expected_asn.json
 live_report.md
 tests/live_report.md
+
+# 审计 / 探测的中间产物：机器生成、体量大、含实测原始数据，不入库
+findings.jsonl
+report.md
+*.tsv
+
+# tools/fetch_locked.py 的默认输出目录（build/upstream/ 下是上游整表副本，~800KB）。
+# update.sh 走 `git add -A`，不排除就会把上游快照提交进本仓库。
+build/

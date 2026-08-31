@@ -1,0 +1,112 @@
+[
+  {
+    "name": "pku_zone0_scope_narrowed_v2",
+    "desc": "R1-05：区 0 PKU 表清理 5 条（pkuiot.com / bdwm.net / pkuecon.cn / IP-ASN,24355 / 202.127.16.0/20）。区 0 是全链最前的无条件直连位，收录即等于永久信任——三个域已非北大资产或无证据，删除后必须掉出 PKU.list。pkuecon.cn 单列：它不落 Final 而是被 ChinaDomain 的整 ccTLD 兜底 DOMAIN-SUFFIX,cn 接住，仍是 DIRECT，但归属已从「区 0 无条件信任」降为「.cn 常规直连」，这正是本项要达成的效果",
+    "requests": [
+      {"host": "bdwm.net", "note": "未名 BBS 旧域，非校方资产；删后落 Final"},
+      {"host": "www.bdwm.net", "note": "原 DOMAIN-SUFFIX 覆盖的任意子域，一并失去区 0 直连"},
+      {"host": "pkuiot.com", "note": "无北大归属证据的 .com"},
+      {"host": "pkuecon.cn", "note": "落点降级而非落 Final——见 desc"}
+    ],
+    "assert": {
+      "same_policy": true,
+      "policy": "Final",
+      "no_dns_leak": true,
+      "per_request": [
+        {"host": "pkuecon.cn", "policy": "DIRECT", "reason": "ChinaDomain.list 的 DOMAIN-SUFFIX,cn 兜底承接；不再由 PKU.list 区 0 认领"}
+      ]
+    }
+  },
+  {
+    "name": "pku_campus_core_still_direct_v2",
+    "desc": "R1-05 的边界另一侧：删 5 条不得牵连校园网真实资产。bbs.pku.edu.cn 是关键验收点——它原先与 bdwm.net 是同一服务的两个入口，bdwm.net 删除后必须仍由同表的 pku.edu.cn 后缀承接",
+    "requests": [
+      {"host": "bbs.pku.edu.cn", "note": "R1-05 验收指定：仍须 DIRECT | PKU.list | DOMAIN-SUFFIX,pku.edu.cn"},
+      {"host": "pku.edu.cn"},
+      {"host": "www.pku.edu.cn"},
+      {"host": "pkusz.edu.cn", "note": "深圳研究生院"},
+      {"host": "bjmu.edu.cn", "note": "医学部"},
+      {"host": "puh3.net.cn", "note": "北大第三医院"},
+      {"ip": "202.112.10.5", "note": "校园网 /24，未被本次删除触及"},
+      {"ip": "162.105.0.5", "note": "校园网 /16，与 ChinaIP 重叠属既有 A2 长期豁免"}
+    ],
+    "assert": {"same_policy": true, "policy": "DIRECT", "no_dns_leak": true}
+  },
+  {
+    "name": "tencent_overseas_cidr_removed_v2",
+    "desc": "R1-17：TencentCN 手工登记的 14 条腾讯云海外 /24 全部删除。前置事实：ChinaIP.list 换源后已完整覆盖这 14 段（43.156.0.0/16 与 203.205.128.0/17 为超网，其余为逐段精确同形），两侧同为 DIRECT，故删除后每一段的落点必须完全不变——本场景是 R1-17「w5_ip.py 复算 14 段落点不变」的机器化版本。撤销 allowlist A2 × TencentCN 豁免后，A2 命中数由 11 降至 4，可作为上游漂移信号",
+    "requests": [
+      {"ip": "43.156.86.5", "note": "→ ChinaIP 43.156.0.0/16 超网承接"},
+      {"ip": "43.156.222.5"},
+      {"ip": "101.32.104.5", "note": "→ ChinaIP 同形 /24"},
+      {"ip": "101.32.118.5"},
+      {"ip": "101.32.133.5"},
+      {"ip": "101.33.110.5"},
+      {"ip": "129.226.3.5"},
+      {"ip": "129.226.107.5"},
+      {"ip": "150.109.90.5"},
+      {"ip": "203.205.232.5", "note": "→ ChinaIP 203.205.128.0/17 超网承接"},
+      {"ip": "203.205.234.5"},
+      {"ip": "203.205.235.5"},
+      {"ip": "203.205.253.5"},
+      {"ip": "203.205.254.5"}
+    ],
+    "assert": {"same_policy": true, "policy": "DIRECT", "no_dns_leak": true}
+  },
+  {
+    "name": "domestic_dead_cidr_removed_v2",
+    "desc": "R1-18：Domestic 手工层最后 2 条 IP 死条目删除（140.205.1.0/24 阿里、162.14.0.0/18 腾讯），两段均被 ChinaIP 的更宽超网覆盖，落点不变。Domestic 自此成为纯域名 + 通配表",
+    "requests": [
+      {"ip": "140.205.1.5", "note": "→ ChinaIP 140.205.0.0/16"},
+      {"ip": "162.14.0.5", "note": "→ ChinaIP 162.14.0.0/16"}
+    ],
+    "assert": {"same_policy": true, "policy": "DIRECT", "no_dns_leak": true}
+  },
+  {
+    "name": "applecn_smp_device_keyword_removed_v2",
+    "desc": "R1-19：删 AppleCN 最后一条无边界 DOMAIN-KEYWORD,smp-device，并从 §8 观察项清单划掉（8→7）。该关键词会把任意第三方域名里出现的 smp-device 子串判成 Apple 直连——典型的无边界关键词信任面缺陷。删后 AppleCN 表内已无 DOMAIN-KEYWORD",
+    "requests": [
+      {"host": "smp-device.example.com", "note": "R1-19 验收指定负例：不得落 DIRECT"},
+      {"host": "smp-device-unrelated.example.com", "note": "§8 负例模板形态"},
+      {"host": "smp-device.apple.com", "note": "对照：真 Apple 子域仍由 DOMAIN-SUFFIX,apple.com 承接，不受删除影响"},
+      {"host": "gs-loc.apple.com", "note": "对照：Apple 定位服务"},
+      {"host": "init.itunes.apple.com", "note": "对照：iTunes 初始化"}
+    ],
+    "assert": {
+      "same_policy": true,
+      "policy": "Final",
+      "no_dns_leak": true,
+      "per_request": [
+        {"host": "smp-device.apple.com", "policy": "DIRECT", "reason": "DOMAIN-SUFFIX,apple.com（AppleCN），与被删关键词无关"},
+        {"host": "gs-loc.apple.com", "policy": "DIRECT"},
+        {"host": "init.itunes.apple.com", "policy": "DIRECT"}
+      ]
+    }
+  },
+  {
+    "name": "ca_revocation_endpoints_r1_24_v2",
+    "desc": "R1-24 的 CA 补全：TLS 握手关键路径上的吊销/AIA 端点必须直连（soft-fail 语义下走代理会拖长握手甚至静默降级）。Domestic 补 3 条（crl.sectigo.com / secure.globalsign.com / ocsp.verisign.com，加前已 grep 确认无 ProxyGFW 宽后缀遮蔽），MicrosoftCN 补 msocsp.com（微软自家 CA 端点归 MicrosoftCN 的既有裁决——Domestic 位次在 ProxyGFW 的 microsoft.com 后缀之后，接不住）",
+    "requests": [
+      {"host": "crl.sectigo.com", "note": "新增；同厂已有 ocsp.sectigo.com / crt.sectigo.com"},
+      {"host": "secure.globalsign.com", "note": "新增（AIA）；同厂已有 ocsp/ocsp2/crl.globalsign.com"},
+      {"host": "ocsp.verisign.com", "note": "新增；同厂已有 crl.verisign.com"},
+      {"host": "msocsp.com", "note": "新增于 MicrosoftCN"},
+      {"host": "ocsp.msocsp.com", "note": "Azure/O365 证书链常用端点，由新增后缀承接"},
+      {"host": "oneocsp.microsoft.com", "note": "对照：MicrosoftCN 既有微软 CA 端点"},
+      {"host": "ocsp.digicert.com", "note": "对照：Domestic CA 集中段既有条目"}
+    ],
+    "assert": {"same_policy": true, "policy": "DIRECT", "no_dns_leak": true}
+  },
+  {
+    "name": "steam_cn_cdn_g03_domestic_side_removed_v2",
+    "desc": "G-03 双写消解（Domestic 侧）：删 Domestic 的 steam.clngaa.com / steam.ksyna.com 两条父后缀，Steam 国服 CDN 的归属收归区 2 GameDownloadCN。实测前提：整个 steam.ksyna.com 族（含 dl.）双侧 NXDOMAIN，steam.clngaa.com apex 亦 NXDOMAIN，唯一存活主机是 dl.steam.clngaa.com（GameDownloadCN 精确覆盖，位次更前）。故删除对真实流量零影响；未来新子域由 ChinaDomain 的 clngaa.com / ksyna.com 兜底，仍 DIRECT。R2-10 应把 GameDownloadCN:26 放宽为父后缀 steam.clngaa.com 以收回该兜底依赖",
+    "requests": [
+      {"host": "dl.steam.clngaa.com", "note": "唯一存活主机；GameDownloadCN 区 2 精确后缀，落点不变"},
+      {"host": "steam.clngaa.com", "note": "apex NXDOMAIN；删后由 ChinaDomain clngaa.com 兜底"},
+      {"host": "cdn.steam.clngaa.com", "note": "假想新子域；证明兜底路径仍 DIRECT，不会掉进 Final 走代理"},
+      {"host": "dl.steam.ksyna.com", "note": "NXDOMAIN；GameDownloadCN 仍有精确 DOMAIN 条目（该条应在 R2-10 一并删除）"},
+      {"host": "steam.ksyna.com", "note": "NXDOMAIN；删后由 ChinaDomain ksyna.com 兜底"}
+    ],
+    "assert": {"same_policy": true, "policy": "DIRECT", "no_dns_leak": true}
+  }
+]

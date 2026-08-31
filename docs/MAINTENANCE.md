@@ -94,7 +94,7 @@ grep -rn "example.com" lists/
 python3 tests/runsuite.py
 ```
 
-跑 `tests/scenarios/*.json` 里的 **147 个真实场景**、**1731 条断言**,其中 **674 条是 DNS 泄漏断言**。
+跑 `tests/scenarios/*.json` 里的 **189 个真实场景**、**2269 条断言**,其中 **915 条是 DNS 泄漏断言**。
 
 **输出怎么读**:每条断言失败时会告诉你三件事 —— 哪个场景、期望落到哪个策略、实际落到了哪个策略。定位方法:
 
@@ -112,7 +112,7 @@ python3 tests/runsuite.py
 python3 tests/audit.py --check all
 ```
 
-跑 A1–A8 八项结构性检查(判据清单见 [ARCHITECTURE.md §7](ARCHITECTURE.md);A8 为 forbidden 回流门禁,命中即 P0 且不可豁免)。发布闸门用的是更严格的形式:
+跑 A1–A10 十项结构性检查(判据清单见 [ARCHITECTURE.md §7](ARCHITECTURE.md);A8 为 forbidden 回流门禁,命中即 P0 且不可豁免)。发布闸门用的是更严格的形式:
 
 ```bash
 python3 tests/audit.py --check all --fail-on P1
@@ -226,11 +226,13 @@ conf 没开 http-api。这是前置条件,不是脚本故障。
 |---|---|---|
 | 1 | **勿手工编辑 `clash/`** | 下次 `update.sh` 全量覆盖,改动无声消失 |
 | 2 | **勿引入任何 USER-AGENT / PROCESS-NAME / URL-REGEX 规则**(D7,forbidden 段机器强制) | audit A8 直接 P0 拦发布;绕过则 UA/进程规则全域生效错分流、Clash 派生剔除造成双端分叉 |
-| 3 | **勿引入无 `no-resolve` 的 IP 规则** | DNS 泄漏 + 延迟惩罚 + 错误分流,674 条断言就是为它设的 |
+| 3 | **勿引入无 `no-resolve` 的 IP 规则** | DNS 泄漏 + 延迟惩罚 + 错误分流,915 条断言就是为它设的 |
 | 4 | **勿往 conf 写 MITM 的 `enable` 键** | Surge 规范化时会把它移除,反复写只是白费功夫。MITM 开关在 GUI 运行态,conf 只保留 `h2=true` |
 | 5 | **手工条目勿加 ChinaDomain** | 该表整表机器刷新,手写条目会被无声抹掉。要加就加进 Domestic 或对应厂商细分表 |
 | 6 | **勿 `git add` `reference/`** | 它是本地参考库,已在 `.gitignore` 中,不入库 |
 | 7 | **勿把 `Surge.conf` 的节点段 / MitM 段具体内容写进本仓库任何文件** | 这是**公开仓库**。节点地址、预共享密钥、CA 证书及其口令一旦提交,历史里就永久存在了。文档中提到 conf 只讲结构与 `[Rule]` 区 |
+| 8 | **勿开 `use-local-host-item-for-proxy`**(conf 已显式写死 `= false`) | 一旦为 true,目标域只要存在本地 DNS mapping,Surge 就会**用 IP 而不是域名**建立代理连接;与本 conf 的 `read-etc-hosts = true` 叠加,恰好制造出零本地解析架构禁止的行为。**915 条断言看不见这个键**(它们只检 IP 规则的 `no-resolve`),只能靠显式写死 + 本条红线守。同理 `allow-dns-svcb` 保持缺省 false,见 [ARCHITECTURE.md §4.5](ARCHITECTURE.md) |
+| 9 | **勿在 `lists/` 的任何一行上引入 `extended-matching`** | 官方语义:set 文件里**任意一行**域名规则带它,**整张表**的域名规则都会打开扩展匹配。一行就能改掉最大 10.6 万条那张表的匹配语义,而这是上游合并极易带进来的。开关面只有 conf 的 RULE-SET 行(现 11 处),`lists/` 行级必须恒为 0;该开在哪几张表见 [ARCHITECTURE.md §2「判据 R」](ARCHITECTURE.md) |
 
 ---
 
@@ -241,7 +243,7 @@ conf 没开 http-api。这是前置条件,不是脚本故障。
 | 备份点 | 形式 | 对应状态 |
 |---|---|---|
 | `pre-restructure-20260829` | git tag | 2026-08-29 目录重构**之前**的仓库快照(落后当前 HEAD 多个提交) |
-| `Profiles/Backup/DMIT.conf` | 文件 | 历史 conf 备份(仅 conf,不含规则) |
+| `Profiles/Backup/` 下的 1 个历史 conf 备份 | 文件 | 仅 conf,不含规则;文件名带厂商标识,按 [ARCHITECTURE.md](ARCHITECTURE.md) D9 既不入库也不在文档中具名 |
 
 > 2026-08-31 核对:此前登记的 `pre-blackmatrix7-merge-20260825/`、`pre-audit-fix-20260825/` 两个快照目录已随 2026-08-30 的备份清理删除,不再存在——用户裁决为本地不留敏感备份。规则内容的回滚依赖 git 历史(见 7.2),目录快照只是可选加速手段。
 
@@ -308,6 +310,55 @@ conf 侧出问题时,用 `Profiles/Backup/` 下对应的备份替换,Surge GUI �
 | Streaming | Abema 的 akamaized 精确 host(`abematv`/`linear-abematv`/`vod-abematv.akamaized.net`)与 `abematv.co.jp` 归本表,与既有 `ds-vod-abematv` 同链;`akamaized.net`/`akamaihd.net` 宽后缀仍禁收 |
 | ChinaDomain | **再生回收清单**(2026-08-31 二轮,删宽关键词的连带):`kkgithub.com`/`hellogithub.com`/`githubim.com`/`githubshare.com`、bilibili 系杂域、qiyi 系杂域、`eqoavtbu.com`/`51drv.com` 等约 26 域曾被宽关键词级联去重挤出本表,现落 FINAL(走代理可用,无功能损失)。**下次上游再生时它们会自然回收为 DIRECT,属预期,勿当回归**;也勿手工补进 Domestic 污染手工层 |
 | Streaming | `nowtv100`/`jooxweb-api` 已改锚定 wildcard 但无上游 host 样本、TikTok 5 条尾点 CNAME 展平 wildcard(`musical.ly.*` 等)命中率存疑——均凭命中统计决定去留,零命中 90 天可删 |
+| PrivateLAN / PKU | **区 0 表禁收未注册域**:区 0 优先级高于 Reject,一条未注册域被抢注即等于一条免疫全库拦截层的 DIRECT 白名单(`pkuiot.com` whois `No match`、`bdwm.net` 已是 GoDaddy 停放页,2026-08-31 均已删)。新增前须确认 whois 有主体、NS / 起源 ASN 属预期机构 |
+| PrivateLAN | 与 Surge 内建 `LAN` 的重叠是**必要的**,勿当冗余删:①位次决定一切(本表在区 0 第 2 条,内建 `LAN` 在 ChinaIP 之后);②`198.18.0.0/15` 是 fake-IP 段,必须在区 0 判 DIRECT,否则 fake-IP 回环被后续规则接管;③覆盖面更广(`0.0.0.0/8`、CGNAT、TEST-NET、多播,内建集不含) |
+| Reject | A 组 3 条 HTTPDNS(`dnspod.meituan.httpdns.start.qcloud.com` / `httpdns.qcloud.com` / `httpdns-v6.gslb.yy.com`)**必留**:删除后落点实测是 **DIRECT** 而非 FINAL(被 `TencentCN` 的 `qcloud.com`、`Domestic` 的 `yy.com` 宽后缀接住),不满足 A 组「删后落 FINAL」的定义前提;两个厂商域是长期持有的**活**域,端点随时可重开 → 静默变直连并绕过整套域名分流。**A 组实删 38 条,不是审计写的 41 条** |
+| Reject | B 组 20 条 `.cn` 死域**必留**(`4336wang.cn` `58mingri.cn` `9s6q.cn` `dv8c1t.cn` `kualianyingxiao.cn` `ltheanine.cn` `minisplat.cn` `nbkbgd.cn` `sg536.cn` `sifubo.cn` `sifuce.cn` `sifuda.cn` `sifufu.cn` `sifuge.cn` `sifuji.cn` `sifuka.cn` `tt3sm4.cn` `urlaw.cn` `urlet.cn` `yihuifu.cn`):ChinaDomain 末位是整条 `DOMAIN-SUFFIX,cn`,删掉一条已 NXDOMAIN 的 `.cn` Reject 条目后,该域一旦被重新注册,落点由 `REJECT` 直接翻成 `DIRECT` —— 比留着死条目更危险。解除条件只有「`.cn` 整 ccTLD 兜底被收窄或移除」,在此之前下轮审计不得重提删除 |
+| Meta | 防御 / 库存**停放域**一律不收。停放签名 = NS `a-d.ns.facebook.com` / `ns.instagram.com` / `ns.whatsapp.net`(或注册商 `RegistrarSEC LLC`)+ A 落 `57.144.0.0/14` **且主机号以 `.141` 结尾**(不止 `220.141` / `221.141`,CN 侧另见 `.64.141` / `.216.141`,签名写成定值会漏掉一半)+ HTTPS 无证书 + HTTP 301 回自身。原文存 `reference/`,不入库不分发 |
+| Meta | O 档 28 条 Meta 开源项目站**刻意保留在本表**:归属确属 Meta,虽托管在 GitHub Pages / Cloudflare、与 AS32934 无关。保留是为避免下轮反复,不视为定位失真 |
+| Meta | IP 区只收第一方段:共享云(AWS / SoftLayer / DigitalOcean)、他司段(LY Corp / LINE)、Google 段一律不收,即使上游带来。`129.134.0.0/16` / `157.240.0.0/16` 合并的依据是 **ARIN 整段 NetName `THEFA-3`**,不是「AS32934 在 `129.134.128.0/17` 内有子前缀通告」(实测 0 条) |
+| MicrosoftCN | `onedrive.live.com` 是对同表宽后缀 `live.com` 的**刻意窄豁免**(成因:CN 侧解析投毒致个人版 OneDrive 直连不可用)。禁止扩宽为 `live.com`,禁止删除;`office.live.com` / `view.officeapps.live.com` / `g.live.com` 必须仍 DIRECT |
+| MicrosoftCN | `msocsp.com` 属「**预置位**」而非热路径:apex 由微软 Azure DNS 自持(无重注册劫持风险),`ocsp.` / `oneocsp.` / `ocsp2.` / `www.` 四个子域现均双侧 NXDOMAIN(微软已迁 `oneocsp.microsoft.com`),但旧证书的 AIA / CRL URL 仍指向该域,一旦回流必须走 DIRECT(它不在 `microsoft.com` 之下,无规则即落 Final 走代理)。**零命中不作为删除理由** |
+| Google | `IP-ASN,19527` / `IP-ASN,43515` 勿收:通告空间 98% 以上是 GCP **客户**段,与已登记的「`IP-ASN,396982` 勿收」同判据;第一方 fallback 由 `IP-ASN,15169` + 4 条 IP-CIDR 承接 |
+| Google | `-cn` 族与 `.cn` 族**同源已在证书层证实**(同一张 `CN=*.google.cn` GTS 证书、81 个 SAN 同时覆盖两族);迁移按 `-cn` 可达性矩阵的 A/B/C/D 四组分批,**不可整族一次改** |
+| Google | `www.googleadservices-cn.com` 在 CN 侧被置空(AliDNS `0.0.0.0` / 114DNS `127.0.0.1`,国际侧正常):该族若迁 DIRECT 必须单独排除这个 host,否则直连必然失败且**不会回退代理** |
+| Google | `gstatic-cn.com` 的 apex 不是可用端点(证书 SAN 只有 `*.gstatic-cn.com`、无裸域,CN 与国际侧 apex 均 TLS 校验失败):该域的验收断言必须用真实子域,不得用 apex |
+| YouTube | `IP-ASN,36040` 归本表:AS36040 零 GCP,全部是承载 YouTube 视频的 ISP 内嵌 GGC 缓存段,与「YouTube 专属资产归 YouTube.list」同源 |
+| YouTube | 会话资产用 `DOMAIN` 精确形认领(`yt3` / `yt4.googleusercontent.com`、`jnn-pa.googleapis.com`),**不动 Google.list 的宽后缀**以保持唯一归属;由此产生的遮蔽信号由 allowlist exemption 承接 |
+| Telegram | 两条第三方 `/32`(`139.59.210.98` = DigitalOcean 共享云、`196.55.216.167` = AfriNIC 无 RDAP 数据)按**观察制**保留,带 `last_verified=2026-08-31`,90 天零命中即删 |
+| TikTok | `courses.snapsolve.com` 观察项**结案**:2026-08-31 取到停放硬证据(SOA `ns1.sedoparking.com`、A `64.190.63.222`)已删,从观察清单划掉 |
+| ByteDanceCN | `bytedance.net` 已删(解析出 RFC1918 `10.8.6.210`,任何策略组都处理不了);同批备案:`musical.ly` / `ttoversea.net` / `tlivecdn.com` / `tlivepush.com` 的 apex 已被字节**主动置空**(`127.0.0.1` / `0.0.0.1`),下轮勿重复调查 |
+| ModelDownloadCDN | 收录判据 = 「`curl -sI` 实测 302 Location 命中的 CDN host 族」,站点浏览与 API 归 AI.list。2026-08-31 复核:HF 已整体切 Xet 后端,现网落点是 `aws.cdn.hf.co` 族,`cdn-lfs.huggingface.co` 已死 |
+| ModelDownloadCDN | `xethub.hf.co` 保留:apex 无 A 但 SOA / NS 活(Route53)且 `transfer.` / `cas-server.` / `cas-bridge.` 三子域在用,属**子域型域**,与 `Japan simg.jp` 同判据,勿按死条目删 |
+| 全库 | **S3 族判别式**:`<bucket>.s3.<region>.amazonaws.com` 与 `<bucket>.s3.amazonaws.com` 是同一 bucket 的两种寻址形式,PSL PRIVATE 段收录全部该形态 ⇒ 注册边界,**任何表都不得以 `DOMAIN-SUFFIX` 收录**;第一方 bucket 只以精确 `DOMAIN` 收进对应生态表(样板:`AI.list` 的 `ppl-ai-file-upload.s3.amazonaws.com`) |
+| 全库 | S3 的 forbidden 签名必须**锚定 `amazonaws.com`**(`s3.*.amazonaws.com` / `s3-*.amazonaws.com`),**不得写成 `s3*`** —— 全库另有 32 条第一方 `s3.<brand>` host(Figma / Brave / Producthunt / Envato / documentcloud…),它们不是租户边界。审计的「321 条」是纯前缀 grep 的**计数方法学错误**,真实 AWS 锚定族是 **280 条**;验收用判定签名,不用计数 |
+| DownloadCDN | 多租户 S3 **兼容**端点同样禁收(与已删的 `linodeobjects.com` / `vultrobjects.com` 完全同构,只是厂商没给 PSL 提交条目):Backblaze ×5、Wasabi ×2、`s3.filebase.com`、`s3-website.cloud.ru`、`s3.yandex.net` 共 10 条已删。判据是**通配 bucket DNS 实测**(`dig zzprobe9x.<host>` 能解析 ⇒ virtual-hosted-style 多租户端点);对照的 22 条第一方 host 通配全部 NXDOMAIN,故保留 |
+| Games | `steambroadcast.com` 禁收:2026-04-27 注册 / Registrar.eu / 注册人组织 Dynadot / Cloudflare NS,301 跳 `faceit.com` —— 真 Valve 域一律 MarkMonitor。真直播资产是 `steambroadcast.akamaized.net` |
+| GameDownloadCN | Steam 国服 CDN 归属**收归本表**:`Domestic` 的 `steam.clngaa.com` / `steam.ksyna.com` 两条父后缀已删;本表对应把 `:26` 放宽为 `DOMAIN-SUFFIX,steam.clngaa.com`、把 `:4`(`DOMAIN,dl.steam.ksyna.com`,整族双侧 NXDOMAIN)直接删除,以收回当前对 ChinaDomain `clngaa.com` / `ksyna.com` 兜底的依赖 |
+| AI | Intercom 四域(`intercom.io` / `intercomcdn.com` / `intercomassets.com` / `intercomcdn.io`)**统一归 AI**:消息通道与资产面同会话,必须同出口,勿再跨表分裂 |
+| AI | `chatgpt.site` 保留:PSL PRIVATE 段收录,但条目由 OpenAI 自行提交(`security@openai.com`),注册者唯一,与 `oaiusercontent.com` 同源同理;A10 上线须为它预登记豁免,否则会被误报成多租户边界 |
+| ProxyGFW | Mixpanel 以 `DOMAIN-SUFFIX,mixpanel.com` 一条**统一覆盖**全部区域端点(`api.` / `api-eu.` …);原窄条 `api.mixpanel.com` 已被其遮蔽,故一并替换而非并存 |
+| DownloadCDN | Gigya 属**身份认证组件**而非下载面,已移出:绑到下载出口意味着任意使用 SAP CIAM 的站点登录都走「下载」组。与「参与支付风控决策链的指纹组件归 Payment」是同一把尺子的两端 |
+| Payment | ThreatMetrix 只收 `DOMAIN-SUFFIX,online-metrix.net` **一个注册域**:`online-metrix.com` 与其他 TLD 归属未验证、刻意不收,`myonline-metrix.net` 一类由标签边界天然排除。理由是设备指纹上报必须与收单授权同出口(出口漂移正是它的检测信号)。**边界口径:参与支付风控决策链的指纹 / 反欺诈组件归 Payment,其余通用 SaaS 组件仍落 FINAL** |
+| Domestic | CA 段补 `crl.sectigo.com` / `secure.globalsign.com` / `ocsp.verisign.com` 三条(TLS 握手关键路径,soft-fail 下走代理会拖长握手甚至静默降级);加前已确认 ProxyGFW 无 `sectigo` / `globalsign` / `verisign` 宽后缀遮蔽,形态沿用同表既有 `crl.globalsign.com` / `ocsp.sectigo.com` 的约定 |
+| UK | **BBC 属地锁归本表**:BBC 品牌注册域全族(`bbc` gTLD / `bbc.co` / `bbc.co.uk` / `bbc.com` / `bbc.in` / `bbc.net.uk` / `bbci.co` / `bbci.co.uk` / `bbcmedia.co.uk` / `bbcpersian.com` / `bbcverticals.com`)的 owner 是 `UK.list` 而非 `Streaming.list` —— iPlayer 是英国属地锁,而「流媒体」是全局单选组且**无任何英国出口成员**,策略层表达不了「本服务需要某国出口」,故属地锁广播的正确 owner 是地区表 |
+| UK | `DOMAIN-SUFFIX,bbc` 随品牌归本表:`.bbc` 是 BBC 独占的品牌 gTLD(注册局 NS `*.nic.bbc`),单租户无误伤面;留在 Streaming 只会成为唯一一条仍落美国出口的 BBC 名字。A10 做「单标签后缀一次性登记」时,这一条的 `file` 必须写 `lists/UK.list` |
+| Streaming | BBC 挂在**第三方多租户 CDN** 上的精确 host(`bbcfmt.s.llnwi.net`、`bbc.mp-pxcdn.com`、9 条 `*-uk-live` 与 2 条 `*-ww-live.akamaized.net`)**刻意留本表**,不随品牌域迁 UK —— 它们的注册域属 Limelight / Piksel / Akamai(同 `llnwi.net` 下还住着 DAZN JP ×2、HBO Max、Viki),拆单个租户前缀会破坏该注册域的一致处置。此边界若要推翻,必须**整体迁移这 12 条**并同步改 `kw_media.json` 与 `fix_regions_v2.json` 的对应断言,不得再单拆一条 |
+| Streaming | `tubi.tv` 由 `DOMAIN,tubi.tv` + `DOMAIN,www.tubi.tv` 合并为 `DOMAIN-SUFFIX,tubi.tv`:原两条精确形让其他 `*.tubi.tv`(如 `api.tubi.tv`)无人认领落 FINAL,是**覆盖空洞**;`tubi.tv` 为 Tubi 独占注册域、非多租户,由 DOMAIN 升 SUFFIX 扩大的捕获面全部属于该服务本身,不触碰「宽后缀禁收」红线 |
+| US | `tubi.io` 已删:顶域 `@8.8.8.8` 无 A 记录、`curl` 000,`@223.5.5.5` 返回**投毒地址**(指纹会漂移,勿按具体 IP 复核);唯一已知活体 host `production-public.tubi.io` 已由 Streaming 认领 |
+| Japan | `paravi.jp` 的删除依据是「**品牌终止后的跳转壳**」,**不是**审计原文的「服务已下线、curl 无响应、规则永不命中」—— 2026-08-31 复测 301 → `www.paravi.jp` 200(Vercel 托管的 `/internal-redirect` 壳页),域名活着;Paravi 2023 并入 U-NEXT,承接域 `unext.jp` / `nxtv.jp` 已在同表,壳本身无日本属地锁,保留无收益。**边界**:`happyon.jp` / `tvnow.de` / `npostart.nl` 一类是**活服务的跳转域**(目标域在同表且服务仍在运营,跳转本身也须走对出口)→ 保留,勿当死条目删。两者不可混为一谈 |
+| Streaming | `espnplus.com` 已删,同上判据:`www.` 302 → `plus.espn.com`、apex 无 HTTP 响应,跳转目标已被同表 `espn.com` 后缀认领,保留只会让一次用户导航中途换出口 |
+| Europe | GEOIP 层与域名层**刻意不对齐**:`GEOIP` 只对裸 IP 会话生效,当前只覆盖 **CH / DE / FR / NL**(有出口的国家);域名层按实体枚举,含 BE / LU 与跨国实体。两层口径不同**不是缺陷**,勿为「对齐」而增删 GEOIP 行;要改 GEOIP 本身须先开 http-api(离线引擎无 MaxMind,判不了非 CN 的 GEOIP) |
+| TencentCN | 自 2026-08-31 起是**纯域名表,不设 IP 区**:原 14 条腾讯云海外 `/24` 已删,全部由 `ChinaIP.list` 覆盖且同为 DIRECT,表头声明已同步。勿再回填 IP 段 |
+| AppleCN | `smp-device` 观察项**结案**(已删):关键词观察项清单由 8 条降为 7 条,负例断言已固化 |
+| ProxyGFW | 本表是**全库最宽的代理兜底层、策略即 `Final`**,多租户宽度在此层是设计而非缺陷 ⇒ A10(PSL 边界)按**整表**登记一条 `{"check":"A10","file":"ProxyGFW.list","rule":"*"}` 豁免,**不逐条登记那 37 条 PSL 后缀**(`herokuapp.com` / `duckdns.org` / `notion.site` / `azurewebsites.net` …);与「ChinaIP / ChinaDomain 机器层零手改整表豁免」是同一处理范式 |
+| ProxyGFW | 再生与维护的验收基准是 **18 条承载集**,不按行数、不按与上游对齐判定;惰性部分的增减不作为回归。存活过滤器**必须给承载集开豁免** —— 它与 769 条死域清单的交集恰好 3 条(`666pool.cn` / `hasi.wang` / `bbs.tuitui.info`),这三条正因为后位有更宽兜底(`cn` / `wang` / `tuitui.info`)才成为承载条目。存在理由见 [ARCHITECTURE.md §2「区 8 的重定位」](ARCHITECTURE.md) |
+| ChinaDomain | `kw_direct.json` 里 6 条再生回收域(`51drv.com` / `eqoavtbu.com` / `githubim.com` / `githubshare.com` / `hellogithub.com` / `kkgithub.com`)已改 `policy_in` **双态**:整表再生把它们收回 DIRECT 属预期,**不得当回归**,也不得为了让断言变绿把它们手工钉进 ProxyGFW |
+| ChinaDomain | 同表 `blbilibili.com` / `bilibilihelper.com` / `qiyikeji.com` **不双态**:上游当前版本与 pin `65e8adf` 均无此域,再生不会回收,断言保持单态 `Final`;将来上游若引入,须先补实测再改双态,不得直接放宽 |
+| 全库 | **D9 打码边界延伸到文件名**:带厂商标识的备份 conf **文件名**、线路商**网段名示例**同样受 D9 约束,公开文档与代码注释里一律用中性描述或 `EXAMPLE-…` 占位符 |
+| 全库 | A8 有**作用域缺口**:`forbidden` 段没有 `file` / `not_file`,「必须只存在于某表」类裁决(Intercom / Mixpanel / Datadog 的跨表分裂)当前**无法机器强制** —— 需先扩展 `audit.py` 再登记,别把这类裁决当成已被守住 |
+| 发布链 | `update.sh` 退出码契约补丁:「先验拉取失败 ∧ purge 成功 ∧ 复验 md5 一致」判定为发布成功,从 `fetch_fail_pre_n` 扣减后落 `PUBLISHED_AND_VERIFIED` / exit 0。**新增分发表首次发布的先验 404 走的就是这条路径,不再打红**;收尾文案按 404 与网络错 / 5xx 分组 |
+| Surge.conf | **本轮不动 `[Proxy]` / `[Proxy Group]`**(用户待决)。四项已确诊未处置,下轮勿当新发现重报:①孤儿节点 —— 1 条链式条目既非任何组成员也非任何条目的 `underlying-proxy` 目标,而 22 个组全写 `include-all-proxies=0` ⇒ 永不可选;②9 处 `persistent` 全惰性 —— 官方只在 `load-balance` 组下定义该键,`select` / `smart` 写了无效,危害是**认知错误**(以为已有「按站点粘出口」能力);③`policy-priority` 未加引号 —— 今天可解析,加第二对且用逗号分隔时会被静默切分丢弃;④`Final` 组默认成员是家宽,与区 3「大文件走下载组不占家宽」方向相反 |
 
 ---
 

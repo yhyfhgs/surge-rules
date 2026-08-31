@@ -8,7 +8,7 @@
 | --- | ---------------- | ---------- | ----------------------------------------------------- | -------- |
 | L0  | `engine.py`      | 否         | 这个域名会命中哪条规则、走哪个组、从哪个出口出去？    | < 1 秒   |
 | L1  | `audit.py`       | 否         | 规则表本身有没有毛病（DNS 泄漏面、重复、遮蔽、失联）？| ~5 秒    |
-| L2  | `runsuite.py`    | 否         | 147 个真实使用场景的 969 条请求，分流结果符合预期吗？ | ~10 秒   |
+| L2  | `runsuite.py`    | 否         | 189 个真实使用场景的 1233 条请求，分流结果符合预期吗？ | ~10 秒   |
 | L3  | `live_check.py`  | **是**     | 真实网络里实际发生的，跟离线推演的一样吗？出口 IP 对吗？| 1–5 分钟 |
 | L4  | `realworld.py`   | 部分       | 真实浏览器/App 发出去会怎样？DNS、WebRTC、TUN、UA 分流真的生效吗？| 3–5 分钟 |
 
@@ -45,14 +45,14 @@ Surge HTTP API，见下方[开启 Surge HTTP API](#开启-surge-http-api)。
 ```
 rules/tests/
 ├── engine.py            L0 规则语义引擎（解析 conf + 34 个 list（Reject 已启用），离线模拟匹配）
-├── audit.py             L1 静态审计器（A1–A8 八项检查）
+├── audit.py             L1 静态审计器（A1–A10 十项检查）
 ├── runsuite.py          L2 场景断言运行器
 ├── live_check.py        L3 在线实测（Surge HTTP API + 真实请求）
 ├── realworld.py         L4 真实客户端 / 网络栈实测（surge-cli + curl + 系统命令）
 ├── realworld_targets.json  L4 的数据驱动配置（各组代表域 / 客户端画像 / STUN / UA 用例）
 ├── live_check_local.json   私有出口映射覆盖档（**已 gitignore**，勿入库；见下）
 ├── allowlist.json       审计豁免表（把「刻意设计」标出来，免得每次都报）
-├── scenarios/           场景数据集，16 个 .json，共 147 场景 / 969 请求
+├── scenarios/           场景数据集，22 个 .json，共 189 场景 / 1233 请求
 │   ├── ai_overseas.json      海外独立 AI（OpenAI / Anthropic / Perplexity …）
 │   ├── ai_ecosystem.json     大厂 AI 生态一致性（Gemini / Copilot / Grok …）
 │   ├── ai_domestic.json      国内 AI 直连（DeepSeek / Kimi / 通义 …）
@@ -63,6 +63,17 @@ rules/tests/
 │   ├── edge_cases.json       边界（OCSP / NTP / captive / 纯 IP / 遥测域）
 │   ├── reject_layer.json     Reject 拦截层（广告投放 / HTTPDNS / 钓鱼恶意，及刻意放行的埋点域）
 │   ├── ownership_fix.json    2026-08-31 审计整改：归属修正与关键词边界化的正/负例断言
+│   ├── download_cleanup.json DownloadCDN 收窄：剥离的站点静态域落回主站所在组
+│   ├── region_coverage.json  地区表（Japan / UK / Europe / US）与 NetEaseCN 的正负覆盖
+│   ├── kw_direct.json        关键词边界化后的直连面回归
+│   ├── kw_ecosystem.json     关键词边界化后的生态归属回归
+│   ├── kw_media.json         关键词边界化后的媒体面回归（含 BBC 播放面归属边界）
+│   ├── payment_chain.json    支付链路同出口（风控 / 3DS / 拒付）
+│   ├── ipv6_parity.json      IPv4 / IPv6 双栈落点一致性，每条带 no_dns_leak
+│   ├── fix_download_v2.json  2026-08-31 修复批次：下载面（HF / S3 族 / 多租户后缀）正负例
+│   ├── fix_domestic_v2.json  同批次：国内直连面
+│   ├── fix_ecosystem_v2.json 同批次：生态归属面
+│   ├── fix_regions_v2.json   同批次：地区表面
 │   └── dns_leak.json         DNS 泄漏专项
 ├── expected_asn.json     可选，给 live_check --exit-map 做 ASN 断言（默认没有 = 只报告）
 └── README.md             本文件
@@ -121,7 +132,7 @@ python3 engine.py match chatgpt.com --json           # 机器可读
 python3 engine.py match claude.ai --process Claude   # 带进程名
 python3 engine.py match 1.1.1.1                      # 纯 IP 查询
 python3 engine.py dump-index                         # 导出展开后的全规则表
-python3 engine.py --selftest                         # 内置自检（≥20 条手工断言）
+python3 engine.py --selftest                         # 内置自检（65 条手工断言）
 ```
 
 输出字段：
@@ -159,10 +170,10 @@ python3 audit.py                                  # 终端摘要
 python3 audit.py --out ~/Desktop/surge-audit      # 同时写 report.md / findings.jsonl / *.tsv
 python3 audit.py --check A1,A4                    # 只跑指定检查项
 python3 audit.py --fail-on P0                     # 只有 P0 才算失败（默认 P1）
-python3 audit.py --selftest                       # 用植入已知缺陷的合成配置自检
+python3 audit.py --selftest                       # 用植入已知缺陷的合成配置自检（51 条）
 ```
 
-八项检查：
+十项检查：
 
 | 编号 | 查什么                                   | 为什么重要                                       |
 | ---- | ---------------------------------------- | ------------------------------------------------ |
@@ -174,6 +185,8 @@ python3 audit.py --selftest                       # 用植入已知缺陷的合�
 | A6   | `DOMAIN-KEYWORD` 清单                    | 只列出来给人复核，不判对错                       |
 | A7   | 规则行格式 lint                          | 无类型前缀的裸行会被静默忽略 = 死规则，判 P1     |
 | A8   | 禁止回流                                 | `forbidden` 段登记的模式一出现即 P0，**不可豁免** |
+| A9   | IP 跨表包含 / 遮蔽                       | 按 conf 真实序判「后位 CIDR 被前位覆盖」；同策略 P3，**跨策略 P1** |
+| A10  | 单标签后缀与 PSL 注册边界                | 用入库的 PSL + IANA 快照判「这条后缀是不是别人的注册边界」，离线不联网 |
 
 严重度：P0 功能损坏或明确错误分流 / P1 IP 一致性与 DNS 泄漏风险 / P2 冗余遮蔽但无直接伤害 /
 P3 风格建议。
@@ -210,12 +223,25 @@ P3 风格建议。
   「无用豁免」。
 - `forbidden` 段**不吃豁免**：命中即 P0，`exemptions` 里写什么都盖不住它。
 
-当前 `exemptions` 30 条，覆盖：`amazonaws.com` 的兜底与分层、大厂自有 AI 归各自生态、
-AI 组里的通用第三方组件、DownloadCDN 的保留类、机器层（ChinaDomain / ChinaIP）不可手改
-导致的重复，以及上游合并排除表在被误合并回来时的降噪。
-`forbidden` 18 条，覆盖：`USER-AGENT` / `PROCESS-NAME` / `URL-REGEX` 三类全类型禁令、
-D11 上游合并排除项（`DOMAIN-KEYWORD,google`、`akadns.net`、`ms` ccTLD 等），
-以及 2026-08-31 审计删掉的品牌关键词（paypal 与 ChinaDomain 尾部 9 条）。
+`exemptions` 覆盖：`amazonaws.com` 的兜底与分层、大厂自有 AI 归各自生态、AI 组里的通用
+第三方组件、DownloadCDN 的保留类、机器层（ChinaDomain / ChinaIP）不可手改导致的重复、
+按整表登记的结构性豁免（同一范式也用于 ProxyGFW 的 PSL 边界），以及上游合并排除表在被
+误合并回来时的降噪。
+
+`forbidden` 覆盖四类：
+① `USER-AGENT` / `PROCESS-NAME` / `URL-REGEX` 三类**全类型**禁令（D7）；
+② D11 上游合并排除项（`DOMAIN-KEYWORD,google`、`akadns.net`、`ms` ccTLD 等）；
+③ 历次审计删掉的品牌关键词（paypal、ChinaDomain 尾部 9 条、OneDrive 精确后缀恢复后的
+   `1drv` / `onedrive` / `skydrive` 等）；
+④ 多租户托管 / 对象存储平台的宽后缀签名（github.io / vercel.app / pages.dev /
+   cloudfront.net / `s3.*.amazonaws.com` 等）——**签名必须锚定注册域**，例如 S3 族写成
+   `s3.*.amazonaws.com` / `s3-*.amazonaws.com` 而不是 `s3*`，否则会误伤 32 条第一方
+   `s3.<brand>` host。
+
+> **两段的条数刻意不写进正文。** 它们是每轮审计都会增长的量，写死就是下一处文档漂移
+> ——历史教训：本段一度把 `forbidden` 写成两位数，而实际已是三位数，差了近 7 倍。
+> 当轮数字见 `CHANGELOG.md`，真值以 `tests/allowlist.json` 为准，由 audit 的文档漂移
+> 检查直接读取比对。
 
 ---
 
@@ -259,8 +285,8 @@ python3 runsuite.py --list-known-broken      # 只列当前的待修清单
 runsuite 会把它们单独统计成「待修清单」而不是测试失败——这样 CI 才有绿灯可言，
 同时待办也不会被忘掉。修好一条就把标记删掉。
 
-当前基线（2026-08-31）：147 场景 / 969 请求 / 1731 断言，失败 0，已知待修 0 条；
-674 条 DNS 泄漏断言全通过，说明「零本地 DNS 解析」这条约束目前是成立的
+当前基线（2026-08-31 修复批次后）：189 场景 / 1233 请求 / 2269 断言，失败 0，已知待修 0 条；
+915 条 DNS 泄漏断言全通过，说明「零本地 DNS 解析」这条约束目前是成立的
 （L4 的 `realworld.py --dns` 已用实网抽样二次确认，见下文）。
 
 ---

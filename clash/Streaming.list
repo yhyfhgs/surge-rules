@@ -1,23 +1,26 @@
 # AUTO-GENERATED — Clash(Mihomo) classical 规则，由 ../lists/Streaming.list 派生
 # 勿手工编辑；修改 Surge 源后运行 python3 tools/surge2clash.py 重新生成
 
-# Streaming — 国际流媒体聚合（Netflix/Disney/HBO/PrimeVideo/Hulu/Spotify/BBC/巴哈姆特/AbemaTV/Apple TV·Music·News，含 B 站国际版 bstar/biliintl）；国内流媒体归 ChinaMedia.list
+# Streaming — 国际流媒体聚合（Netflix/Disney/HBO/PrimeVideo/Hulu/Spotify/巴哈姆特/AbemaTV/Apple TV·Music·News，含 B 站国际版 bstar/biliintl）；国内流媒体归 ChinaMedia.list
 # 排序：规则类型分区，区内字母序
 # 不收：多租户共享组件（同意/AB/归因/标签管理）与云厂商通用区域后缀（execute-api 等）——只收第一方与专属 CDN 精确资产
+# BBC 品牌注册域（bbc / bbc.co / bbc.co.uk / bbc.in / bbc.net.uk / bbci.co / bbci.co.uk / bbcpersian.com / bbcverticals.com）
+#   2026-08-31 迁 UK.list：iPlayer 是英国属地锁，而本表策略组「流媒体」无任何英国出口成员（审计 W4-01 方案 A）。
+#   播放面 2026-08-31 二次收敛（审计裁决 6）：BBC **专属形态**随品牌迁 UK.list —— 9 条
+#   *-uk-live.akamaized.net（uk-live = 英国本土播放/字幕/缩略图面，命名即属地）与
+#   bbc.mp-pxcdn.com（Piksel CDN 上的 BBC 专属租户前缀）。
+#   本表只留**非属地锁 / 真多租户**两类：*-ww-live.akamaized.net（ww = worldwide，全局出口即可，
+#   现 2 条 DOMAIN + avod-dash-ww-live 后缀）与 bbcfmt.s.llnwi.net（Limelight 租户前缀，
+#   同注册域另住 DAZN / HBO Max / Viki，整段处置必须一致 —— 拆走单个租户会破坏该注册域的一致性）。
 
 DOMAIN,44wilhpljf.execute-api.ap-southeast-1.amazonaws.com
 DOMAIN,4gtvfreepcvod-cds.cdn.hinet.net
 DOMAIN,abematv.akamaized.net
 DOMAIN,ana.video.friday.tw
-DOMAIN,aod-dash-uk-live.akamaized.net
-DOMAIN,aod-hls-uk-live.akamaized.net
 DOMAIN,api.okzy.tv
-DOMAIN,as-dash-uk-live.akamaized.net
-DOMAIN,as-hls-uk-live.akamaized.net
 DOMAIN,athome.fandango.com
 DOMAIN,audio4-ak-spotify-com.akamaized.net
 DOMAIN,bahamut.akamaized.net
-DOMAIN,bbc.mp-pxcdn.com
 DOMAIN,bcbolt446c5271-a.akamaihd.net
 DOMAIN,d151l6v8er5bdm.cloudfront.net
 DOMAIN,d184dfn36gombl.cloudfront.net
@@ -59,20 +62,13 @@ DOMAIN,spotify.com.edgesuite.net
 DOMAIN,spotify.map.fastly.net
 DOMAIN,spotify.map.fastlylb.net
 DOMAIN,staticasiafox.akamaized.net
-DOMAIN,tubi.tv
 DOMAIN,upos-bstar-mirrorakam.akamaized.net
 DOMAIN,upos-bstar1-mirrorakam.akamaized.net
 DOMAIN,video.friday.tw
 DOMAIN,vod-abematv.akamaized.net
-DOMAIN,vod-dash-uk-live.akamaized.net
 DOMAIN,vod-dash-ww-live.akamaized.net
-DOMAIN,vod-hls-uk-live.akamaized.net
-DOMAIN,vod-sub-uk-live.akamaized.net
-DOMAIN,vod-thumb-uk-live.akamaized.net
 DOMAIN,vod-thumb-ww-live.akamaized.net
-DOMAIN,vs-cmaf-push-uk-live.akamaized.net
 DOMAIN,www.amazon.com
-DOMAIN,www.tubi.tv
 
 DOMAIN-SUFFIX,112263.com
 DOMAIN-SUFFIX,20thcenturystudios.com.au
@@ -160,16 +156,7 @@ DOMAIN-SUFFIX,bahamut.com.tw
 DOMAIN-SUFFIX,bam.nr-data.net
 DOMAIN-SUFFIX,bam.nr-date.net
 DOMAIN-SUFFIX,bamgrid.com
-DOMAIN-SUFFIX,bbc
-DOMAIN-SUFFIX,bbc.co
-DOMAIN-SUFFIX,bbc.co.uk
-DOMAIN-SUFFIX,bbc.in
-DOMAIN-SUFFIX,bbc.net.uk
 DOMAIN-SUFFIX,bbcfmt.s.llnwi.net
-DOMAIN-SUFFIX,bbci.co
-DOMAIN-SUFFIX,bbci.co.uk
-DOMAIN-SUFFIX,bbcpersian.com
-DOMAIN-SUFFIX,bbcverticals.com
 DOMAIN-SUFFIX,bbg.gov
 DOMAIN-SUFFIX,bcbolthboa-a.akamaihd.net
 DOMAIN-SUFFIX,beautyandthebeastmusical.co.uk
@@ -1022,6 +1009,7 @@ DOMAIN-SUFFIX,tiktokw.com
 DOMAIN-SUFFIX,timestalks.com
 DOMAIN-SUFFIX,tospotify.com
 DOMAIN-SUFFIX,ttvnw.net
+DOMAIN-SUFFIX,tubi.tv
 DOMAIN-SUFFIX,tubitv.com
 DOMAIN-SUFFIX,tv.apple.com
 DOMAIN-SUFFIX,tv.apple.com.edgekey.net

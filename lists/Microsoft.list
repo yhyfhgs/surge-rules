@@ -1,11 +1,11 @@
 # Microsoft — 微软海外服务与 AI（Copilot/Bing/MSN/GitHub 平台/国际登录面），走 Google-X-Meta-MS 组；国内可直连面归 MicrosoftCN.list
 # 排序：规则类型分区，区内字母序
 # 红线：勿把 DOMAIN-SUFFIX,microsoft.com 整条搬入——会遮蔽 MicrosoftCN 的 45 条直连域；cloud.microsoft 整 gTLD 同理不收，只收精确子域
+# onedrive.live.com 是对 MicrosoftCN 宽后缀 live.com 的刻意窄豁免（本表位次在前）：CN 侧解析被投毒导致个人版 OneDrive 直连不可用，2026-08-31 审计 R1-01。勿删、勿扩宽为 live.com
 
 DOMAIN,api.msn.com
 DOMAIN,copilot.cloud.microsoft
 DOMAIN,copilotprodattachments.blob.core.windows.net
-DOMAIN,gateway.bingviz.microsoft.net
 DOMAIN,location.microsoft.com
 DOMAIN,login.live.com
 DOMAIN,login.microsoftonline.com
@@ -41,4 +41,5 @@ DOMAIN-SUFFIX,m365copilot.com
 DOMAIN-SUFFIX,microsoftapp.net
 DOMAIN-SUFFIX,msauth.net
 DOMAIN-SUFFIX,msftauth.net
+DOMAIN-SUFFIX,onedrive.live.com
 DOMAIN-SUFFIX,prod-streaming-video-msn-com.akamaized.net

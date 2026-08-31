@@ -418,7 +418,7 @@
   },
   {
     "name": "campus_and_gov_direct",
-    "desc": "校园网与政务：北大 CERNET（域名 + IP 段）与 gov.cn，必须直连",
+    "desc": "校园网与政务：北大 CERNET（域名 + IP 段）与 gov.cn，必须直连；bdwm.net 自 R1-05（2026-08-31）起不再由 PKU.list 区 0 认领，单列 per_request",
     "requests": [
       {
         "host": "www.pku.edu.cn"
@@ -431,7 +431,7 @@
       },
       {
         "host": "bdwm.net",
-        "note": "未名 BBS"
+        "note": "未名 BBS；R1-05 起不再由 PKU.list 区 0 认领——旧域已非校方资产（双侧 NOERROR 但解析到 AWS Global Accelerator 76.223.67.189 / 13.248.213.45，非 CERNET）"
       },
       {
         "ip": "162.105.129.16",
@@ -456,7 +456,14 @@
     ],
     "assert": {
       "same_policy": true,
-      "policy": "DIRECT"
+      "policy": "DIRECT",
+      "per_request": [
+        {
+          "host": "bdwm.net",
+          "policy": "Final",
+          "reason": "R1-05：PKU 区 0 收窄，落 FINAL 走代理属预期（区 0 是无条件永久信任，前提已不成立）。"
+        }
+      ]
     }
   }
 ]

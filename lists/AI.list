@@ -22,6 +22,7 @@ DOMAIN,ppl-ai-file-upload.s3.amazonaws.com
 DOMAIN,production-openaicom-storage.azureedge.net
 DOMAIN,q-developer-integration.us-east-1.api.aws
 
+DOMAIN-SUFFIX,01.ai
 DOMAIN-SUFFIX,abacus.ai
 DOMAIN-SUFFIX,agent-plugins.org
 DOMAIN-SUFFIX,ai.cloudflare.com
@@ -54,6 +55,7 @@ DOMAIN-SUFFIX,blackforestlabs.ai
 DOMAIN-SUFFIX,bolt.new
 DOMAIN-SUFFIX,boltai.com
 DOMAIN-SUFFIX,browser-intake-datadoghq.com
+DOMAIN-SUFFIX,browser-intake-datadoghq.eu
 DOMAIN-SUFFIX,browser-intake-us5-datadoghq.com
 DOMAIN-SUFFIX,browser-use.com
 DOMAIN-SUFFIX,browserbase.com
@@ -170,7 +172,6 @@ DOMAIN-SUFFIX,harpa.ai
 DOMAIN-SUFFIX,hedra.com
 DOMAIN-SUFFIX,heygen.com
 DOMAIN-SUFFIX,hf.co
-DOMAIN-SUFFIX,hf.space
 DOMAIN-SUFFIX,higgsfield.ai
 DOMAIN-SUFFIX,huggingface.co
 DOMAIN-SUFFIX,hume.ai
@@ -180,7 +181,9 @@ DOMAIN-SUFFIX,ideogram.ai
 DOMAIN-SUFFIX,inference.net
 DOMAIN-SUFFIX,inflection.ai
 DOMAIN-SUFFIX,intercom.io
+DOMAIN-SUFFIX,intercomassets.com
 DOMAIN-SUFFIX,intercomcdn.com
+DOMAIN-SUFFIX,intercomcdn.io
 DOMAIN-SUFFIX,interface.feedback
 DOMAIN-SUFFIX,jan.ai
 DOMAIN-SUFFIX,jasper.ai
@@ -294,15 +297,12 @@ DOMAIN-SUFFIX,recraft.ai
 DOMAIN-SUFFIX,refact.ai
 DOMAIN-SUFFIX,reflection.ai
 DOMAIN-SUFFIX,reka.ai
-DOMAIN-SUFFIX,repl.co
 DOMAIN-SUFFIX,repl.it
 DOMAIN-SUFFIX,replicate.com
 DOMAIN-SUFFIX,replicate.delivery
 DOMAIN-SUFFIX,replika.ai
 DOMAIN-SUFFIX,replika.com
-DOMAIN-SUFFIX,replit.app
 DOMAIN-SUFFIX,replit.com
-DOMAIN-SUFFIX,replit.dev
 DOMAIN-SUFFIX,reve.com
 DOMAIN-SUFFIX,rewind.ai
 DOMAIN-SUFFIX,roo-code.com
@@ -318,6 +318,7 @@ DOMAIN-SUFFIX,sentry.io
 DOMAIN-SUFFIX,servd-anthropic-website.b-cdn.net
 DOMAIN-SUFFIX,sider.ai
 DOMAIN-SUFFIX,sift.com
+DOMAIN-SUFFIX,siliconflow.com
 DOMAIN-SUFFIX,sillylittleguy.org
 DOMAIN-SUFFIX,skywork.ai
 DOMAIN-SUFFIX,smithery.ai
@@ -367,7 +368,6 @@ DOMAIN-SUFFIX,wandb.com
 DOMAIN-SUFFIX,warp.dev
 DOMAIN-SUFFIX,weaviate.io
 DOMAIN-SUFFIX,windsurf.ai
-DOMAIN-SUFFIX,windsurf.build
 DOMAIN-SUFFIX,windsurf.com
 DOMAIN-SUFFIX,wisprflow.ai
 DOMAIN-SUFFIX,worldlabs.ai
@@ -380,6 +380,7 @@ DOMAIN-SUFFIX,z.ai
 DOMAIN-SUFFIX,zed.dev
 DOMAIN-SUFFIX,zilliz.com
 
+DOMAIN-WILDCARD,browser-intake-*-datadoghq.com
 DOMAIN-WILDCARD,chatgpt-async-webps-prod-*.webpubsub.azure.com
 DOMAIN-WILDCARD,openaicom-api-*.azurefd.net
 

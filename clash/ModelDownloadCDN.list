@@ -5,7 +5,8 @@
 # 排序：规则类型分区，区内字母序
 # HF 站点浏览与 API 仍归 AI.list；日后同类「须先于生态表的大流量下载域」（如容器镜像层）也归本表
 
+DOMAIN-SUFFIX,aws.cdn.hf.co
 DOMAIN-SUFFIX,cdn-lfs-eu-1.hf.co
 DOMAIN-SUFFIX,cdn-lfs-us-1.hf.co
-DOMAIN-SUFFIX,cdn-lfs.huggingface.co
+DOMAIN-SUFFIX,cdn-lfs.hf.co
 DOMAIN-SUFFIX,xethub.hf.co

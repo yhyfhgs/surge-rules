@@ -67,7 +67,7 @@
       {"host": "www.notion.so"},
       {"host": "notion.so"},
       {"host": "notion-static.com"},
-      {"host": "s3-us-west-2.amazonaws.com", "note": "Notion 附件所在 S3 区域桶"}
+      {"host": "s3-us-west-2.amazonaws.com", "note": "Notion 附件所在 S3 区域桶；2026-08-31 起不再由 DownloadCDN 单列"}
     ],
     "assert": {
       "same_policy": true,
@@ -75,7 +75,7 @@
       "no_dns_leak": true,
       "per_request": [
         {"host": "notion-static.com", "policy": "下载", "reason": "刻意保留：独立注册域，不在 FIX-D7 作用域内。"},
-        {"host": "s3-us-west-2.amazonaws.com", "policy": "下载", "reason": "刻意保留：S3 区域桶属 amazonaws.com 分层（00-context 既有刻意设计）。"}
+        {"host": "s3-us-west-2.amazonaws.com", "policy": "Final", "reason": "R1-12（2026-08-31 审计）推翻旧裁决：<bucket>.s3.<region>.amazonaws.com 是 PSL PRIVATE 注册边界，任何表都不得以 DOMAIN-SUFFIX 收录；280 条 S3 族已从 DownloadCDN.list 删除，退化到 ProxyGFW 的 amazonaws.com 兜底（Final）属预期。"}
       ]
     }
   },

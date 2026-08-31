@@ -202,7 +202,9 @@ https://cdn.jsdelivr.net/gh/yhyfhgs/surge-rules@main/modules/<name>.sgmodule
 https://cdn.jsdelivr.net/gh/yhyfhgs/surge-rules@main/scripts/<name>.js
 ```
 
-> **待办**:当前 `update.sh` 的 purge / md5 集合是 65 个文件,只覆盖 `lists/` 与 `clash/`。第一个生产模块入库时,需要决定是否把 `modules/` 与 `scripts/` 一并纳入该集合 —— 否则模块和脚本会受 jsDelivr 缓存影响,改了不能立刻生效。
+> **待办**:`update.sh` 的 purge / md5 集合由 `DIST_RE` 定义,当前**只覆盖 `lists/` 与 `clash/`**(全量候选 = `lists/` 34 + `clash/` 34 + `rule-providers.yaml` = **69 个文件**;该数字随规则表增减而变,以 `DIST_RE` 实际匹配为准)。`modules/` 与 `scripts/` **不在集合内** ⇒ 它们改了不会被 purge,要等 `@main` 别名缓存自然过期(≤12h)。
+>
+> 当前不构成实际故障 —— 两目录只有 README 与 `_template`,没有生产文件。**现在也不要扩 `DIST_RE`**:会把模板文件纳入 purge 候选、白耗 jsDelivr 的限流配额。第一个生产模块 / 脚本入库时再扩,`update.sh` 的 `DIST_RE` 旁已留待办锚点,同批需一并更新本节与 [MAINTENANCE.md §3.2 / §5.2](MAINTENANCE.md) 的候选集数字。
 
 ---
 

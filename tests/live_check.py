@@ -1355,7 +1355,7 @@ def cmd_exit_map(api, proxy, log, result, expected_map):
             asn_txt = "%s(%s)" % (asn_txt, KNOWN_ASN[asn_txt].split("(")[0].strip())
         org_txt = info.get("org") or ""
         net_txt = info.get("netname") or ""
-        # 机构名常是 "Private Customer" 这类占位, 此时网段名(如 ATT-NET-…)才是有效信息
+        # 机构名常是 "Private Customer" 这类占位, 此时网段名(如 EXAMPLE-NET-…)才是有效信息
         who = net_txt if (not org_txt or org_txt.lower().startswith("private")) and net_txt else org_txt
         # 只有「两边都是 IP 字面量」才谈得上一致性; DIRECT 的推导值是 "DIRECT" 不参与比较
         comparable = bool(ip) and bool(IPV4_RE.match(derived_ip or "") or IPV6_RE.match(derived_ip or ""))

@@ -25,6 +25,14 @@
              / IP-CIDR6 / GEOIP / IP-ASN / PROCESS-NAME（含 no-resolve 等尾参；
              Mihomo ≥1.19 原生支持 DOMAIN-WILDCARD 且 */? 语义与 Surge 一致，
              2026-08-31 起不再改写为 DOMAIN-REGEX——正则方言差异与可审计性都更差）
+  行尾注释   剥离（2026-08-31 修复）：`DOMAIN,x  # last_verified=…` 只输出 `DOMAIN,x`。
+             此前只跳过**行首** `#`，行尾注释被原样带进派生文件 —— Mihomo 会把
+             `# last_verified=…` 当成规则的第 3 个逗号后参数/负载解析，轻则该条失效、
+             重则整个 provider 加载失败。剥离逻辑与 tests/engine.py:strip_comment()
+             **逐字符对齐**（同为 `s.find(" #")`，即只认「空格 + #」这一种分隔形态），
+             刻意不放宽到制表符或裸 `#`：语义引擎与派生层必须对同一行给出同一条规则，
+             任何一侧单独放宽都会让 clash/ 与 Surge 的落点静默分叉。
+             行首注释行仍原样保留（派生文件保留表头与分区注释）。
   剔除       USER-AGENT / URL-REGEX（Clash/Mihomo 无 UA/URL 匹配层），文件头汇总计数
   未知类型   报全清单后中止 —— 防止上游出现新类型时被静默丢弃
 
@@ -59,6 +67,22 @@ PASSTHROUGH = {
     "IP-CIDR", "IP-CIDR6", "GEOIP", "IP-ASN", "PROCESS-NAME",
 }
 DROP = {"USER-AGENT", "URL-REGEX"}
+
+
+def strip_trailing_comment(s):
+    """剥掉行尾注释，返回规则本体（已 strip）。
+
+    与 tests/engine.py:strip_comment() 的行尾分支逐字符相同：只认 `" #"`
+    （空格 + 井号）这一种分隔形态。不放宽到裸 `#` 是必需的 —— `#` 可以合法出现在
+    URL-REGEX 与某些 PROCESS-NAME 里；不放宽到制表符则是为了与语义引擎保持一位不差，
+    否则同一行会在 Surge 侧与 clash/ 侧解析成两条不同的规则。
+
+    调用方只对 PASSTHROUGH 类型用它；URL-REGEX 走 DROP 分支，永远到不了这里。
+    """
+    idx = s.find(" #")
+    if idx >= 0:
+        s = s[:idx]
+    return s.strip()
 
 # Surge.conf [Rule] 区的完整引用顺序（规则顺序即优先级），用于生成 rules 参考序列。
 # (文件名, Surge 策略名)；SYSTEM/LAN 为 Surge 内置集，Clash 端以注释说明等价物。
@@ -123,7 +147,9 @@ def convert_file(name):
                 continue
             rtype = stripped.split(",", 1)[0].strip().upper()
             if rtype in PASSTHROUGH:
-                body.append(stripped)
+                # 行尾注释（如 `,no-resolve  # last_verified=2026-08-31`）必须在这里
+                # 剥掉：Mihomo 不识别行尾注释，会连注释一起当规则参数解析。
+                body.append(strip_trailing_comment(stripped))
                 kept += 1
             elif rtype in DROP:
                 dropped[rtype] = dropped.get(rtype, 0) + 1
@@ -151,6 +177,33 @@ def render_providers(names):
         "# 用法：在 Clash Verge Rev 中对订阅配置使用「Merge」扩展，粘贴本文件的",
         "# rule-providers 段；再参照文末注释的 rules 序列接入你自己的策略组。",
         "# 各 provider 与 Surge 同名 .list 一一对应，优先级语义见仓库 README。",
+        "#",
+        "# ─── sniffer 合同（消费端必须履约）───────────────────────────────────────",
+        "# Surge 侧有 11 张表在 conf 的 RULE-SET 行上开了 extended-matching（含 Payment /",
+        "# AI / Telegram），让规则除域名外**同时匹配 SNI / Host 等扩展信息**，从而接住",
+        "# 「客户端拿着字面量 IP 直连、但握手里带了域名」的连接。",
+        "#",
+        "# 这个开关**provider 携带不了**：它不是规则行上的参数，而是整张表的匹配语义，",
+        "# rule-provider 只承载规则集本身，无处安放它。Clash / Mihomo 侧要取回等价行为，",
+        "# **使用者必须在自己的 config 里显式开启 sniffer**，至少嗅探 TLS SNI 与 HTTP Host",
+        "# （QUIC 亦建议开启，否则 HTTP/3 连接同样拿不到 hostname）。",
+        "#",
+        "# 不配 sniffer **不会报任何错**，只会在上述连接上静默漏匹配：hostname 丢失后，",
+        "# 该连接会跳过全部域名规则，落到 IP 规则或最终的 MATCH 上 —— 这是本派生层最容易",
+        "# 被忽略的一处能力差。",
+        "#",
+        "# 参考最小配置（放在你自己的 config 顶层，不属于本文件的 Merge 内容）：",
+        "#   sniffer:",
+        "#     enable: true",
+        "#     sniff:",
+        "#       HTTP:  { ports: [80, 8080-8880], override-destination: true }",
+        "#       TLS:   { ports: [443, 8443] }",
+        "#       QUIC:  { ports: [443, 8443] }",
+        "#",
+        "# 与它并列的已知能力差另有两条：Surge 内建 SYSTEM 集在 Clash 端无等价物；",
+        "# 内建 LAN 集用 GEOIP,lan 近似。三条都是已知且刻意的取舍，不是 bug。",
+        "# 合同的书面落点有两处：本注释与 docs/ARCHITECTURE.md §5.2，改一处必须同步另一处。",
+        "# ────────────────────────────────────────────────────────────────────────",
         "",
         "rule-providers:",
     ]

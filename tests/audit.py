@@ -3,7 +3,7 @@
 """
 audit.py — Surge 规则体系静态审计器（分流测试套件 L1 层）
 
-复用 engine.py 的解析器（同一张按 conf 顺序展开的全局规则表），做 8 项可回归检查：
+复用 engine.py 的解析器（同一张按 conf 顺序展开的全局规则表），做 10 项可回归检查：
 
   A1  全 list IP 类规则 no-resolve 缺失（含 conf RULE-SET 行级修饰豁免逻辑）
   A2  跨 list 精确重复（(type,value) 相同出现多处 → 报后位死条目）
@@ -11,14 +11,17 @@ audit.py — Surge 规则体系静态审计器（分流测试套件 L1 层）
   A4  跨 list 遮蔽（后位条目被前位更宽规则完全覆盖；直连区被代理区遮蔽标 P0）
   A5  conf 引用完整性（引用的 list 存在；存在的 list 被引用或在 allowlist）
   A6  DOMAIN-KEYWORD 审查表（列出供人工复核，不判错）
-  A7  规则行格式 lint（无类型前缀的裸行 → P1）
+  A7  规则行格式 lint（无类型前缀的裸行 → P1；小写类型段 → P1/case）
   A8  禁止回流（allowlist.json `forbidden` 段登记的模式出现即 P0，不可豁免）
+  A9  IP 跨表包含/遮蔽（**顺序感知**：只报「后位 CIDR 被前位 CIDR 完全包含」）
+  A10 单标签后缀与 PSL 边界门禁（+ 同一逐行循环内的 arity / 严格 CIDR /
+      modifier 白名单 / 类型段大小写归一）
 
 输出（--out DIR）：
   findings.jsonl      —— 每行一个 finding（00-context.md 约定 schema + source/check）
   report.md           —— 中文审计报告
   keyword_review.tsv  —— A6 全量关键词表
-  a2/a3/a4_details.tsv—— 聚合前的逐条明细（findings 做了分组与截断，明细不截断）
+  a2/a3/a4/a9_details.tsv —— 聚合前的逐条明细（findings 做了分组与截断，明细不截断）
 
 退出码：存在严重度 ≥ --fail-on（默认 P1）的未豁免 finding 时返回 1。
 python3 标准库 only；全程只读，不写 Surge Profiles 目录。
@@ -28,6 +31,8 @@ from __future__ import annotations
 
 import argparse
 import fnmatch
+import hashlib
+import ipaddress
 import json
 import os
 import re
@@ -44,10 +49,27 @@ DIRECT_POLICIES = frozenset(("DIRECT",))
 REJECT_POLICIES = frozenset(("REJECT", "REJECT-DROP", "REJECT-TINYGIF",
                              "REJECT-NO-DROP"))
 
-DEFAULT_ALLOWLIST = os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                                 "allowlist.json")
+HERE = os.path.dirname(os.path.abspath(__file__))
+DEFAULT_ALLOWLIST = os.path.join(HERE, "allowlist.json")
+#: A10 用的锁定快照目录（PSL + IANA TLD 表；哈希见 data/SNAPSHOTS.json）
+DEFAULT_DATA_DIR = os.path.join(HERE, "data")
 
-ALL_CHECKS = ("A1", "A2", "A3", "A4", "A5", "A6", "A7", "A8")
+ALL_CHECKS = ("A1", "A2", "A3", "A4", "A5", "A6", "A7", "A8", "A9", "A10")
+
+#: A10 modifier 白名单（本仓库行格式约定：list 内只允许 no-resolve）
+ALLOWED_MODIFIERS = frozenset(("no-resolve",))
+#: no-resolve 只对 IP 类规则有意义
+IP_CLASS_TYPES = frozenset(("IP-CIDR", "IP-CIDR6", "IP-ASN", "GEOIP"))
+
+#: RFC6761 / RFC6762 / RFC7686 / RFC8375 特殊用途名 + ICANN 保留的私用 TLD。
+#: 这些不在 IANA 根区表里，但单标签形态是**正确**的（PrivateLAN.list 的 8 条）。
+SPECIAL_USE_TLDS = frozenset((
+    "example", "invalid", "local", "localhost", "test",        # RFC6761/6762
+    "onion",                                                    # RFC7686
+    "internal",                                                 # ICANN 保留私用
+    "alt",                                                      # RFC9476
+    "corp", "home", "intranet", "lan", "localdomain", "private",  # 事实私用
+))
 
 
 #: 形如 IPv4 前缀的关键词（A6 启发式提示用，例如 "101.91.69." / "1.2.3.4"）
@@ -72,15 +94,27 @@ def norm_raw(rule):
 class Allowlist(object):
     """按 (check_id, file, rule) 豁免。
 
-    三元组之外提供两个**可选**限定键（不改变基础 schema，只是缩小豁免面）：
+    三元组之外提供三个**可选**限定键（不改变基础 schema，只是缩小豁免面）：
       by       —— 遮蔽/胜出方的规则串，如 "DOMAIN-SUFFIX,amazonaws.com"
       by_file  —— 遮蔽/胜出方所在 list，如 "YouTube.list"
-    另有 preventive=true：表示这是「防回归」的前置豁免（当前配置本就不该命中），
-    未命中时不计入「未使用豁免」告警。file / rule / by / by_file 均支持 fnmatch 通配。
+      kind     —— finding 的 kind 字段，如 "psl-private"（A10 的子检查名）；
+                  用于在同一 check 内只豁免某一类子检查，避免整表豁免把
+                  arity / 严格 CIDR 这类真缺陷一并静音
+    另有两个布尔键：
+      preventive=true      —— 「防回归」前置豁免（当前配置本就不该命中），
+                              未命中时不计入「未使用豁免」告警。
+      pending_decision=true —— 「本轮未裁决、保留原状待用户决策」。与 preventive
+                              不同：它**必须**每次运行都被单独打印出来，否则待裁决
+                              事项会被伪装成永久豁免（W7-T09）。
+    file / rule / by / by_file / kind 均支持 fnmatch 通配。
 
     与 exemptions 语义相反的顶层 `forbidden` 段：登记「按架构裁决必须持续不存在」
     的规则模式（如 D7 的 USER-AGENT/PROCESS-NAME、D11 上游合并排除表项）。
     由 A8 扫描源文件强制执行：命中即 P0，且不经过 exemptions 豁免。
+    forbidden 条目支持两个**可选**作用域键（缺省 = 全库语义，向后兼容）：
+      file      —— 只在匹配该 fnmatch 的 list 内视为禁令（「勿搬进 X.list」）
+      not_file  —— 只在**不**匹配该 fnmatch 的 list 内视为禁令（「勿回 X.list 之外」，
+                   即「必须只存在于 X.list」这类唯一归属守卫）
     """
 
     def __init__(self, path=None):
@@ -103,7 +137,7 @@ class Allowlist(object):
             return check in want
         return want == check
 
-    def match(self, check, file_name, rule_str, by=None, by_file=None):
+    def match(self, check, file_name, rule_str, by=None, by_file=None, kind=None):
         for i, e in enumerate(self.entries):
             if not self._check_match(e, check):
                 continue
@@ -116,9 +150,22 @@ class Allowlist(object):
             if "by_file" in e and (by_file is None
                                    or not fnmatch.fnmatch(by_file, e["by_file"])):
                 continue
+            if "kind" in e and (kind is None
+                                or not fnmatch.fnmatch(kind, e["kind"])):
+                continue
             self.hits[i] += 1
             return e
         return None
+
+    def forbidden_scope_ok(self, entry, file_name):
+        """forbidden 条目的可选作用域：file（只在该表内禁）/ not_file（该表之外禁）。"""
+        f = entry.get("file")
+        if f is not None and not fnmatch.fnmatch(file_name or "", f):
+            return False
+        nf = entry.get("not_file")
+        if nf is not None and fnmatch.fnmatch(file_name or "", nf):
+            return False
+        return True
 
     def unused(self, ran_checks=None):
         """未命中的豁免条目：排除 preventive 防回归条目与本次未执行的检查项。"""
@@ -135,6 +182,186 @@ class Allowlist(object):
             out.append(e)
         return out
 
+    def pending(self, ran_checks=None):
+        """带 pending_decision 的豁免条目：待用户裁决，必须每次运行都单独提示。"""
+        out = []
+        for i, e in enumerate(self.entries):
+            if not e.get("pending_decision"):
+                continue
+            if ran_checks is not None:
+                want = e.get("check", "*")
+                names = ([want] if isinstance(want, str) else (want or ["*"]))
+                if "*" not in names and not (set(names) & set(ran_checks)):
+                    continue
+            out.append((e, self.hits[i]))
+        return out
+
+
+# ---------------------------------------------------------------------------
+# A10 用的锁定快照：PSL + IANA 根区 TLD 表
+# ---------------------------------------------------------------------------
+
+def _idna_label(label):
+    """把单个标签归一到 ASCII（punycode）小写形态；失败则原样小写返回。"""
+    if all(ord(c) < 128 for c in label):
+        return label.lower()
+    try:
+        return label.encode("idna").decode("ascii").lower()
+    except Exception:
+        return label.lower()
+
+
+def idna_domain(dom):
+    return ".".join(_idna_label(x) for x in
+                    (dom or "").strip().strip(".").split("."))
+
+
+class PublicSuffixList(object):
+    """锁定 PSL 快照 + IANA 根区 TLD 表。
+
+    `lookup(domain)` 实现 publicsuffix.org 的标准算法：
+      · 规则按标签从右往左比对，`*` 匹配任意单个标签；
+      · 任一 **exception**（`!foo.bar`）规则命中 → 该域是可注册域，**不是**公共后缀；
+      · 否则取标签数最多的匹配规则；
+      · 无规则命中时隐含规则为 `*`（即 TLD 本身是公共后缀）。
+    IDN 条目在装载与查询两侧都做 IDNA 归一，故 `xn--fiqs8s` 与 `中国` 等价。
+
+    `is_boundary(value)` 是 A10 真正用的判据，命中两种形态之一即算「注册边界」：
+      (a) value 自身就是公共后缀（例：`ac.uk` / `claude.app`）；
+      (b) PSL 里存在 `*.value` 通配规则（例：`*.oaiusercontent.com`）——此时
+          value 的**每一个**子域都是公共后缀，`DOMAIN-SUFFIX,value` 等于把整个
+          多租户命名空间一次性收进来，比 (a) 更宽。这就是规格里的「正确处理
+          `*.parent`」。
+    """
+
+    def __init__(self, psl_path=None, tld_path=None):
+        self.psl_path = psl_path
+        self.tld_path = tld_path
+        self.by_len = defaultdict(list)      # 标签数 -> [(labels, is_exception, section)]
+        self.wild_parents = {}               # "oaiusercontent.com" -> section
+        self.tlds = set()
+        self.rule_count = 0
+        self.sha256 = {}
+        self.available = False
+        if psl_path and os.path.isfile(psl_path):
+            self._load_psl(psl_path)
+        if tld_path and os.path.isfile(tld_path):
+            self._load_tlds(tld_path)
+        self.available = bool(self.by_len) and bool(self.tlds)
+
+    @staticmethod
+    def _sha256(path):
+        h = hashlib.sha256()
+        with open(path, "rb") as fh:
+            for chunk in iter(lambda: fh.read(1 << 16), b""):
+                h.update(chunk)
+        return h.hexdigest()
+
+    def _load_psl(self, path):
+        self.sha256["psl"] = self._sha256(path)
+        section = None
+        with open(path, "r", encoding="utf-8") as fh:
+            for raw in fh:
+                s = raw.strip()
+                if s.startswith("//"):
+                    if "BEGIN ICANN DOMAINS" in s:
+                        section = "icann"
+                    elif "END ICANN DOMAINS" in s:
+                        section = None
+                    elif "BEGIN PRIVATE DOMAINS" in s:
+                        section = "private"
+                    elif "END PRIVATE DOMAINS" in s:
+                        section = None
+                    continue
+                if not s:
+                    continue
+                exc = s.startswith("!")
+                body = s[1:] if exc else s
+                labels = tuple(_idna_label(x) for x in body.split("."))
+                self.by_len[len(labels)].append((labels, exc, section or "icann"))
+                self.rule_count += 1
+                if not exc and labels[0] == "*":
+                    self.wild_parents[".".join(labels[1:])] = section or "icann"
+
+    def _load_tlds(self, path):
+        self.sha256["tld"] = self._sha256(path)
+        with open(path, "r", encoding="utf-8") as fh:
+            for raw in fh:
+                s = raw.strip()
+                if not s or s.startswith("#"):
+                    continue
+                self.tlds.add(_idna_label(s))
+
+    def lookup(self, domain):
+        """返回 (is_public_suffix, section, prevailing_rule)。"""
+        labels = idna_domain(domain).split(".")
+        n = len(labels)
+        matches = []
+        for k in range(1, n + 1):
+            tail = labels[n - k:]
+            for rl, exc, sect in self.by_len.get(k, ()):
+                ok = True
+                for i, rlab in enumerate(rl):
+                    if rlab != "*" and rlab != tail[i]:
+                        ok = False
+                        break
+                if ok:
+                    matches.append((k, rl, exc, sect))
+        exceptions = [m for m in matches if m[2]]
+        if exceptions:
+            k, rl, _exc, sect = max(exceptions, key=lambda m: m[0])
+            return (False, sect, "!" + ".".join(rl))
+        if not matches:
+            return (n == 1, None, "*（隐含规则）")
+        k, rl, _exc, sect = max(matches, key=lambda m: m[0])
+        return (k == n, sect, ".".join(rl))
+
+    def is_boundary(self, value):
+        """返回 (hit, section, prevailing_rule, how)；how ∈ {"self","wildcard-parent"}。"""
+        is_ps, sect, rule = self.lookup(value)
+        if is_ps:
+            return (True, sect, rule, "self")
+        norm = idna_domain(value)
+        if norm in self.wild_parents:
+            return (True, self.wild_parents[norm], "*." + norm, "wildcard-parent")
+        return (False, sect, rule, None)
+
+    def is_iana_tld(self, label):
+        return _idna_label(label) in self.tlds
+
+
+# ---------------------------------------------------------------------------
+# 逐行源文件扫描（A7 / A8 / A10 共用同一遍解析）
+# ---------------------------------------------------------------------------
+
+class SourceLine(object):
+    """一条 .list 里的非注释行的规范化视图。"""
+
+    __slots__ = ("file", "line", "raw", "text", "body", "type_raw", "type",
+                 "value", "mods", "norm", "head", "known")
+
+    def __init__(self, file_name, lineno, raw, known_types):
+        self.file = file_name
+        self.line = lineno
+        self.raw = raw
+        self.text = raw.strip()
+        # 行尾注释（" #" 之后）不属于规则本体；engine.strip_comment 同口径
+        body = self.text
+        if not body.startswith("URL-REGEX"):
+            i = body.find(" #")
+            if i >= 0:
+                body = body[:i].strip()
+        self.body = body
+        parts = [p.strip() for p in body.split(",")]
+        self.type_raw = parts[0]
+        self.type = parts[0].upper()
+        self.known = self.type in known_types
+        self.value = parts[1] if len(parts) > 1 else None
+        self.mods = [m for m in parts[2:]]
+        norm_parts = [self.type] + parts[1:]
+        self.norm = ",".join(norm_parts)
+        self.head = ",".join(norm_parts[:2])
+
 
 # ---------------------------------------------------------------------------
 # 审计器
@@ -142,20 +369,43 @@ class Allowlist(object):
 
 class Auditor(object):
 
-    def __init__(self, eng, allowlist, max_findings=200, samples=6):
+    def __init__(self, eng, allowlist, max_findings=200, samples=6, psl=None):
         self.e = eng
         self.al = allowlist
         self.max_findings = max_findings
         self.samples = samples
+        self.psl = psl
         self.findings = []
-        self.details = {"A2": [], "A3": [], "A4": []}
+        self.details = {"A2": [], "A3": [], "A4": [], "A9": []}
         self.keywords = []
         self.exempted = []
         self._seq = 0
+        self._lines = None
         # 只对「域名类」规则做覆盖/遮蔽分析
         self.domain_rules = [r for r in self.e.rules
                              if r.type in ("DOMAIN", "DOMAIN-SUFFIX",
                                            "DOMAIN-KEYWORD")]
+
+    # -- 源文件逐行视图（A7 / A8 / A10 共用一遍解析）------------------------
+
+    # KNOWN_TYPES 在类体后段由 A7_PREFIXES 派生（见 check_a7 上方）
+
+    def source_lines(self):
+        if self._lines is not None:
+            return self._lines
+        out = []
+        for fname in sorted(os.listdir(self.e.rules_dir)):
+            if not fname.endswith(".list"):
+                continue
+            path = os.path.join(self.e.rules_dir, fname)
+            with open(path, "r", encoding="utf-8") as fh:
+                for lineno, raw in enumerate(fh, 1):
+                    t = raw.strip()
+                    if not t or t.startswith("#"):
+                        continue
+                    out.append(SourceLine(fname, lineno, raw, self.KNOWN_TYPES))
+        self._lines = out
+        return out
 
     # -- finding 构造 ------------------------------------------------------
 
@@ -164,7 +414,7 @@ class Auditor(object):
              exemptable=True):
         if exemptable:
             ex = self.al.match(check, file_name, rule_str, by=by,
-                               by_file=by_file)
+                               by_file=by_file, kind=kind)
             if ex is not None:
                 self.exempted.append({"check": check, "file": file_name,
                                       "rule": rule_str,
@@ -593,31 +843,45 @@ class Auditor(object):
                    "USER-AGENT,", "PROCESS-NAME,", "URL-REGEX,",
                    "IP-CIDR,", "IP-CIDR6,", "IP-ASN,", "GEOIP,",
                    "AND,", "OR,", "NOT,")
+    #: A7/A8/A10 共用的已知类型集合（与 A7_PREFIXES 同源，保证三者口径一致）
+    KNOWN_TYPES = frozenset(p.rstrip(",") for p in A7_PREFIXES)
 
     def check_a7(self):
-        """A7：规则行格式 lint。无类型前缀的裸行会被 Surge 与本套引擎静默忽略——
-        表面上已收录、实际不存在，且任何落点测试都不会替它报错
-        （2026-08-30 迁移脚本踩坑后固化为发布闸门）。"""
+        """A7：规则行格式 lint。两类：
+
+        · **真·裸行**（无任何已知类型前缀）—— Surge 与本套引擎都会静默忽略：
+          表面上已收录、实际不存在，且任何落点测试都不会替它报错
+          （2026-08-30 迁移脚本踩坑后固化为发布闸门）。判 P1/format。
+        · **小写类型段**（`user-agent,X` / `process-name,Y`）—— engine.py:510 与
+          surge2clash.py:124 都做 `.upper()` 后当作真规则解析/剔除，而旧版 A7 把它
+          误判成「裸行」、A8 完全看不见它（W7-T03）。现在归一后 A8 能抓到它并判
+          P0/forbidden，A7 只保留一条 P1/case 的行格式告警。
+        """
         n = 0
-        for fname in sorted(os.listdir(self.e.rules_dir)):
-            if not fname.endswith(".list"):
+        for sl in self.source_lines():
+            if sl.type in self.KNOWN_TYPES:
+                if sl.type_raw == sl.type:
+                    continue
+                n += 1
+                self._add("A7", "P1", "case", sl.file, sl.text[:80],
+                          "%s:%d 规则类型段非全大写：`%s` —— engine.py 与 "
+                          "surge2clash.py 都会 .upper() 后当作 %s 解析，"
+                          "而本仓库的行格式约定是类型段全大写。"
+                          % (sl.file, sl.line, sl.type_raw, sl.type),
+                          "类型段大小写不一致会让「按字面 grep 找规则」「按行首前缀分区」"
+                          "这类维护动作全部失效；历史上还导致 A8 禁令门禁被绕过"
+                          "（本轮已在 A8/A10 侧做归一，此处只保留格式告警）。",
+                          "把类型段改成全大写（%s,…）。" % sl.type,
+                          "high")
                 continue
-            path = os.path.join(self.e.rules_dir, fname)
-            with open(path, "r", encoding="utf-8") as fh:
-                for lineno, raw in enumerate(fh, 1):
-                    t = raw.strip()
-                    if not t or t.startswith("#"):
-                        continue
-                    if any(t.startswith(p) for p in self.A7_PREFIXES):
-                        continue
-                    n += 1
-                    self._add("A7", "P1", "format", fname, t[:80],
-                              "%s:%d 无已知规则类型前缀：%s —— Surge 与离线引擎都会静默忽略此行。"
-                              % (fname, lineno, t[:80]),
-                              "规则看似已收录、实际不生效：目标域/进程落到后位表或 FINAL，"
-                              "且所有测试都不会替它报错，属于最隐蔽的一类失效。",
-                              "补上正确的类型前缀（如 DOMAIN-SUFFIX,），或删除该行。",
-                              "high")
+            n += 1
+            self._add("A7", "P1", "format", sl.file, sl.text[:80],
+                      "%s:%d 无已知规则类型前缀：%s —— Surge 与离线引擎都会静默忽略此行。"
+                      % (sl.file, sl.line, sl.text[:80]),
+                      "规则看似已收录、实际不生效：目标域/进程落到后位表或 FINAL，"
+                      "且所有测试都不会替它报错，属于最隐蔽的一类失效。",
+                      "补上正确的类型前缀（如 DOMAIN-SUFFIX,），或删除该行。",
+                      "high")
         return n
 
     # -- A8 ---------------------------------------------------------------
@@ -626,62 +890,355 @@ class Auditor(object):
         """A8：禁止回流（forbidden / expected-absent）。
 
         allowlist.json 顶层 `forbidden` 段登记「按架构裁决必须持续不存在」的
-        规则模式（fnmatch 全串匹配，对整行与去修饰符的 `TYPE,VALUE` 头两段各试
-        一次）。与 exemptions 相反：命中即 P0，且**不经过豁免**——把 D7（全库
-        零 USER-AGENT/PROCESS-NAME）、D11（上游合并排除表）等自然语言裁决升级
-        为机器门禁，防止上游再生/误合并把已删规则静默带回。
-        直接扫源文件文本而非 engine 规则表，确保 engine 不解析的类型也逃不掉。"""
+        规则模式（fnmatch 全串匹配，对整行、去行尾注释的本体、以及去修饰符的
+        `TYPE,VALUE` 头两段各试一次，且类型段统一大写后再试一遍）。与 exemptions
+        相反：命中即 P0，且**不经过豁免**——把 D7（全库零 USER-AGENT/PROCESS-NAME）、
+        D11（上游合并排除表）等自然语言裁决升级为机器门禁，防止上游再生/误合并
+        把已删规则静默带回。
+        直接扫源文件文本而非 engine 规则表，确保 engine 不解析的类型也逃不掉。
+
+        作用域（R2-4）：条目可带 `file`（只在该表内禁）或 `not_file`（该表之外禁，
+        即「必须只存在于该表」的唯一归属守卫）。缺省 = 全库语义，向后兼容。"""
         n = 0
         forb = [e for e in getattr(self.al, "forbidden", [])
                 if e.get("pattern")]
         if not forb:
             return 0
-        # 性能：无通配符的模式进 dict 做 O(1) 精确查，含通配符的才逐条 fnmatch
-        exact = {}
+        # 性能：无通配符的模式进 dict 做 O(1) 精确查，含通配符的才逐条 fnmatch。
+        # 同一 pattern 可能有多条不同作用域的登记，故 exact 存列表。
+        exact = defaultdict(list)
         globs = []
         for entry in forb:
             pat = entry["pattern"]
             if any(ch in pat for ch in "*?["):
                 globs.append(entry)
             else:
-                exact.setdefault(pat, entry)
-        for fname in sorted(os.listdir(self.e.rules_dir)):
-            if not fname.endswith(".list"):
-                continue
-            path = os.path.join(self.e.rules_dir, fname)
-            with open(path, "r", encoding="utf-8") as fh:
-                for lineno, raw in enumerate(fh, 1):
-                    t = raw.strip()
-                    if not t or t.startswith("#"):
-                        continue
-                    head = ",".join(t.split(",")[:2])
-                    hits = []
-                    e = exact.get(t) or exact.get(head)
-                    if e is not None:
-                        hits.append(e)
-                    else:
-                        for entry in globs:
-                            pat = entry["pattern"]
-                            if (fnmatch.fnmatch(t, pat)
-                                    or fnmatch.fnmatch(head, pat)):
-                                hits.append(entry)
-                                break
-                    for entry in hits:
-                        pat = entry["pattern"]
-                        n += 1
-                        self._add(
-                            "A8", "P0", "forbidden", fname, t[:80],
-                            "%s:%d 命中 forbidden 模式 `%s`：%s —— 登记理由：%s"
-                            % (fname, lineno, pat, t[:80],
-                               entry.get("reason", "（未写 reason）")),
-                            "该规则按架构裁决必须持续不存在（已删除/已排除），"
-                            "此次出现说明上游再生或人工合并把它带了回来；"
-                            "带回即恢复当初删除它所要消除的危害。",
-                            "删除该行本身。禁止改为豁免——forbidden 模式不接受"
-                            " exemption；若裁决确已变更，先更新 allowlist.json"
-                            " 的 forbidden 段与 docs/MAINTENANCE.md 裁决登记。",
-                            "high", exemptable=False)
+                exact[pat].append(entry)
+        for sl in self.source_lines():
+            # 四种候选串：原始整行 / 去行尾注释的本体 / 类型段归一后的整条 / 归一后的头两段
+            cands = []
+            for c in (sl.text, sl.body, sl.norm, sl.head):
+                if c and c not in cands:
+                    cands.append(c)
+            entry = None
+            for c in cands:
+                for e in exact.get(c, ()):
+                    if self.al.forbidden_scope_ok(e, sl.file):
+                        entry = e
                         break
+                if entry is not None:
+                    break
+            if entry is None:
+                for e in globs:
+                    pat = e["pattern"]
+                    if not any(fnmatch.fnmatch(c, pat) for c in cands):
+                        continue
+                    if not self.al.forbidden_scope_ok(e, sl.file):
+                        continue
+                    entry = e
+                    break
+            if entry is None:
+                continue
+            pat = entry["pattern"]
+            scope = ""
+            if entry.get("file"):
+                scope = "（作用域 file=%s）" % entry["file"]
+            elif entry.get("not_file"):
+                scope = "（作用域 not_file=%s，即该模式只允许存在于 %s）" % (
+                    entry["not_file"], entry["not_file"])
+            n += 1
+            self._add(
+                "A8", "P0", "forbidden", sl.file, sl.text[:80],
+                "%s:%d 命中 forbidden 模式 `%s`%s：%s —— 登记理由：%s"
+                % (sl.file, sl.line, pat, scope, sl.text[:80],
+                   entry.get("reason", "（未写 reason）")),
+                "该规则按架构裁决必须持续不存在（已删除/已排除/只允许存在于别的表），"
+                "此次出现说明上游再生或人工合并把它带了回来；"
+                "带回即恢复当初删除它所要消除的危害。",
+                "删除该行本身（若是 not_file 作用域，则把它搬回被指定的那张表）。"
+                "禁止改为豁免——forbidden 模式不接受 exemption；若裁决确已变更，"
+                "先更新 allowlist.json 的 forbidden 段与 docs/MAINTENANCE.md 裁决登记。",
+                "high", exemptable=False)
+        return n
+
+    # -- A9 ---------------------------------------------------------------
+
+    def check_a9(self):
+        """A9：IP 跨表包含/遮蔽审计（**顺序感知**）。
+
+        判据：按 conf 真实序扫描全部 IP-CIDR / IP-CIDR6，只报「后位 CIDR 被**前位**
+        更宽的 CIDR 完全包含」——即后位那条是死条目。反向（narrow 在前、broad 在后）
+        是**正确**的精确覆盖，不报。若按无序包含计数，当前仓库会报 31 条跨策略，
+        其中 30 条行为正确，会把唯一真信号淹掉（advisor 裁决 8 / WB 交付 §3.5）。
+
+        分级：
+          · 同策略        → P3（不阻断，纯冗余）
+          · 跨策略        → P1（同一段分裂到两个出口）
+          · 被包含方 DIRECT 且包含方是代理 → P0（沿用 A2/A4 的直连被抢跑惯例）
+
+        与 A2 的分界：完全相同的 (type,value) 归 A2，本项只报**真包含**。
+        与 A3/A4 的分界：本项只看 IP 面，域名面归 A3/A4。
+
+        **已知盲区（离线不可判）**：`IP-ASN` 与 `GEOIP` 无法在离线侧展开成前缀集合，
+        因此「某条 CIDR 是否被前位的 IP-ASN/GEOIP 抢跑」判不了。本项会把这个盲区
+        的规模（前位 ASN/GEOIP 条数 × 后位 CIDR 条数）单独报成一条 P3，便于跟踪，
+        判定本身仍只基于 CIDR×CIDR。
+        """
+        nets = []
+        for r in self.e.rules:
+            if r.type not in ("IP-CIDR", "IP-CIDR6"):
+                continue
+            if r.source in ("SYSTEM", "LAN"):
+                continue
+            try:
+                net = ipaddress.ip_network(r.value, strict=False)
+            except ValueError:
+                continue          # 非法 CIDR 由 A10 的严格解析报
+            nets.append((net, r))
+
+        seen = {}                 # (version, prefixlen, netaddr) -> Rule（首次出现）
+        buckets = OrderedDict()
+        total = 0
+        for net, r in nets:
+            best = None
+            for plen in range(0, net.prefixlen + 1):
+                sup = net.supernet(new_prefix=plen)
+                got = seen.get((net.version, plen, int(sup.network_address)))
+                if got is None or got.idx >= r.idx:
+                    continue
+                if plen == net.prefixlen and got.value == r.value:
+                    continue      # (type,value) 完全相同 = A2 的地盘
+                if best is None or got.idx < best.idx:
+                    best = got
+            key = (net.version, net.prefixlen, int(net.network_address))
+            if key not in seen:
+                seen[key] = r
+            if best is None:
+                continue
+            total += 1
+            self.details["A9"].append(
+                (r.source, r.line, r.rule_str(), r.policy,
+                 best.source, best.line, best.rule_str(), best.policy))
+            bkey = (best.source, best.rule_str(), best.policy, r.source, r.policy)
+            buckets.setdefault(bkey, []).append((best, r))
+
+        items = sorted(buckets.items(), key=lambda kv: -len(kv[1]))
+        emitted, skipped = 0, 0
+        for (cf, cstr, cpol, rf, rpol), pairs in items:
+            if cpol == rpol:
+                sev, kind, conf = "P3", "redundant", "high"
+                impact = ("前位 %s 的 %s 已完全包含这些网段且策略相同（%s），"
+                          "后位条目永不生效，属纯冗余；不影响分流。" % (cf, cstr, cpol))
+                fix = ("可删除 %s 中这 %d 条被包含的网段；若该表是机器生成层"
+                       "（ChinaIP/ChinaDomain，约定零手改），在 allowlist.json 登记 "
+                       "A9 豁免即可。" % (rf, len(pairs)))
+            elif rpol in DIRECT_POLICIES and cpol not in DIRECT_POLICIES:
+                sev, kind, conf = "P0", "misroute", "high"
+                impact = ("直连意图的网段被**前位**代理段完全包含：这些 IP 实际走 %s 组"
+                          "而非直连，用户可感知为国内地址绕道海外、延迟升高甚至触发风控。"
+                          % cpol)
+                fix = ("确认这些网段应直连后：把 %s 收窄，或把这些网段提前到 %s 之前的"
+                       "直连表。若落点本就是期望值（如国内 IDC 里的境外厂商自有段），"
+                       "在 allowlist.json 登记 A9 豁免并写清判据。" % (cstr, cf))
+            elif cpol in DIRECT_POLICIES and rpol not in DIRECT_POLICIES:
+                sev, kind, conf = "P1", "misroute", "medium"
+                impact = ("代理意图的网段被前位直连段完全包含：这些 IP 实际直连；"
+                          "若属被墙服务会连接失败，也可能是刻意的国内分流设计。")
+                fix = ("二选一：把 %s 收窄，或删除 %s 中永不生效的网段并确认 %s "
+                       "才是期望策略。" % (cstr, rf, cpol))
+            else:
+                sev, kind, conf = "P1", "shadowed", "high"
+                impact = ("跨策略组的 IP 包含：实际生效 %s，%s 期望的 %s 永不生效，"
+                          "同一业务的 IP 面可能分裂到两个出口。" % (cpol, rf, rpol))
+                fix = ("二选一：把 %s 收窄以放行这些网段，或删除 %s 中永不生效的条目。"
+                       % (cstr, rf))
+            if emitted >= self.max_findings:
+                skipped += len(pairs)
+                continue
+            sample = [r.rule_str() for _c, r in pairs[:self.samples]]
+            ev = ("%s(%s) 中 %d 条 CIDR 被**前位** %s:%d 的 %s(%s) 完全包含"
+                  "（按 conf 真实序，只报后位被前位吞掉的方向）。样例：%s%s"
+                  % (rf, rpol, len(pairs), cf, pairs[0][0].line, cstr, cpol,
+                     ", ".join(sample),
+                     "" if len(pairs) <= self.samples else " …等"))
+            if self._add("A9", sev, kind, rf, pairs[0][1].rule_str(), ev,
+                         impact, fix, conf, by=cstr, by_file=cf) is not None:
+                emitted += 1
+        if skipped:
+            self._add("A9", "P3", "structure", "-", "-",
+                      "A9 聚合后仍有 %d 条包含关系未单列（超出 --max-findings=%d）。"
+                      % (skipped, self.max_findings),
+                      "仅影响报告篇幅。", "查看 a9_details.tsv 获取全量明细。", "high")
+
+        # 盲区登记：IP-ASN / GEOIP 无法离线展开成前缀集合
+        asn_geo = [r for r in self.e.rules
+                   if r.type in ("IP-ASN", "GEOIP") and r.source not in ("SYSTEM", "LAN")]
+        if asn_geo and nets:
+            first = min(r.idx for r in asn_geo)
+            after = sum(1 for _n, r in nets if r.idx > first)
+            self._add("A9", "P3", "blindspot", "-", "IP-ASN/GEOIP × IP-CIDR",
+                      "本项只做 CIDR×CIDR 的包含判定。全库另有 %d 条 IP-ASN/GEOIP"
+                      "（%s），它们无法在离线侧展开成前缀集合；位于其后的 %d 条 CIDR "
+                      "是否会被它们抢跑，A9 判不了。"
+                      % (len(asn_geo),
+                         ", ".join(sorted(set("%s:%s" % (r.source, r.rule_str())
+                                              for r in asn_geo))[:6]) +
+                         (" …等" if len(set(r.rule_str() for r in asn_geo)) > 6 else ""),
+                         after),
+                      "真实 Surge 会用 MaxMind/ASN 库判定，可能把某些 CIDR 提前抢走，"
+                      "造成离线断言与真机落点不一致（scenarios 里已用 policy_in 双态"
+                      "表达这类盲区）。",
+                      "需要真机验证的用 realworld.py --crosscheck；场景断言一律用 "
+                      "policy_in 双态而非硬断言。本条为登记项，不代表存在缺陷。",
+                      "high")
+        return total
+
+    # -- A10 --------------------------------------------------------------
+
+    def check_a10(self):
+        """A10：单标签后缀与 PSL 边界门禁（+ 同一逐行循环内的行格式硬校验）。
+
+        六个子检查，各自一个 kind（allowlist 可用 `kind` 键分别豁免，避免整表豁免
+        把真缺陷一并静音）：
+
+          single-label-tld      单标签 DOMAIN-SUFFIX，且在锁定的 IANA 根区表内
+                                （= 认领整个 TLD，必须显式登记）
+          single-label-special  单标签，且属 RFC6761/6762/7686/8375 特殊用途名
+          single-label-unknown  单标签，两张表都不在 —— 通常是拼写错误或已撤销的 TLD
+          psl-icann / psl-private
+                                DOMAIN-SUFFIX 命中 PSL 注册边界（含 `*.parent` 与
+                                `!exception` 的正确处理）= 把整个多租户命名空间收进来
+          arity                 `TYPE,VALUE` 缺 VALUE
+          strict-cidr           IP-CIDR/IP-CIDR6 带主机位（ip_network(strict=True) 失败）
+          modifier              修饰符不在白名单内，或 no-resolve 挂在非 IP 类规则上
+
+        判据数据源是**锁定快照**（tests/data/，哈希记录在 data/SNAPSHOTS.json）：
+        门禁不联网，快照更新是一次有意的、可 review 的提交。
+        """
+        n = 0
+        psl = self.psl
+        if psl is None or not psl.available:
+            self._add("A10", "P1", "stale", "-", "tests/data/",
+                      "A10 需要锁定的 PSL 快照与 IANA TLD 表，但 %s 下缺少 "
+                      "public_suffix_list.dat / tlds-alpha-by-domain.txt。"
+                      % DEFAULT_DATA_DIR,
+                      "单标签后缀与 PSL 边界门禁整体失效——这正是 R1-13 那批"
+                      "多租户宽后缀能进库的原因。",
+                      "按 tests/data/SNAPSHOTS.json 记录的 URL 重新下载快照，"
+                      "校验 sha256 后放回 tests/data/。",
+                      "high", exemptable=False)
+            return 1
+
+        for sl in self.source_lines():
+            if not sl.known:
+                continue          # 真·裸行归 A7
+            # --- arity ---
+            if not sl.value:
+                n += 1
+                self._add("A10", "P1", "arity", sl.file, sl.text[:80],
+                          "%s:%d 只有类型段、没有值：%s"
+                          % (sl.file, sl.line, sl.text[:80]),
+                          "无值规则会被引擎与 Surge 静默丢弃或匹配空串，"
+                          "属于「看似收录、实际不存在」的一类。",
+                          "补上值，或删除该行。", "high")
+                continue
+            # --- modifier 白名单 ---
+            for m in sl.mods:
+                if not m:
+                    continue
+                low = m.lower()
+                if low not in ALLOWED_MODIFIERS:
+                    n += 1
+                    self._add("A10", "P1", "modifier", sl.file, sl.text[:80],
+                              "%s:%d 的修饰符 `%s` 不在白名单 %s 内。"
+                              % (sl.file, sl.line, m, sorted(ALLOWED_MODIFIERS)),
+                              "未知修饰符在 Surge 侧行为未定义；在 Clash 派生层"
+                              "（classical provider 按逗号切分）会让整条规则或整个 "
+                              "provider 加载失败。",
+                              "删除该修饰符，或先确认 Surge 支持后再把它加进 "
+                              "audit.py 的 ALLOWED_MODIFIERS 并在 DEVELOPMENT.md "
+                              "登记行格式约定。", "high")
+                elif low == "no-resolve" and sl.type not in IP_CLASS_TYPES:
+                    n += 1
+                    self._add("A10", "P1", "modifier", sl.file, sl.text[:80],
+                              "%s:%d 在非 IP 类规则（%s）上挂了 no-resolve：%s"
+                              % (sl.file, sl.line, sl.type, sl.text[:80]),
+                              "no-resolve 只对 IP 类规则有意义；挂在域名类规则上"
+                              "说明这一行的类型或意图写错了。",
+                              "删掉 no-resolve，或把类型改成 IP-CIDR/IP-CIDR6/"
+                              "IP-ASN/GEOIP。", "high")
+            # --- 严格 CIDR ---
+            if sl.type in ("IP-CIDR", "IP-CIDR6"):
+                try:
+                    ipaddress.ip_network(sl.value, strict=True)
+                except ValueError as exc:
+                    n += 1
+                    self._add("A10", "P1", "strict-cidr", sl.file, sl.text[:80],
+                              "%s:%d 的 CIDR 非规范形（严格解析失败）：%s —— %s"
+                              % (sl.file, sl.line, sl.value, exc),
+                              "带主机位的 CIDR（如 1.2.3.4/24）在不同实现里可能被"
+                              "静默取整、也可能被整条丢弃；两种行为差一个 /24 的覆盖面。",
+                              "改写成网络地址形（把主机位清零），或改用 /32、/128 "
+                              "表达单个地址。", "high")
+                continue
+            # --- 单标签后缀 / PSL 边界 ---
+            if sl.type != "DOMAIN-SUFFIX":
+                continue
+            v = sl.value.strip(".").lower()
+            if not v:
+                continue
+            if "." not in v:
+                if psl.is_iana_tld(v):
+                    kind = "single-label-tld"
+                    ev = ("%s:%d 的 `DOMAIN-SUFFIX,%s` 是**单标签后缀**，认领整个 TLD"
+                          "（该串在锁定的 IANA 根区表中确实存在）。"
+                          % (sl.file, sl.line, v))
+                    impact = ("整个 TLD 下的任何域名都会被这一条接走。品牌 gTLD"
+                              "（如 .google）通常正确，通用 gTLD（如 .wang）则会把"
+                              "无关注册人的域名一并带走。")
+                elif v in SPECIAL_USE_TLDS:
+                    kind = "single-label-special"
+                    ev = ("%s:%d 的 `DOMAIN-SUFFIX,%s` 是**单标签后缀**，属 "
+                          "RFC6761/6762/7686/8375 特殊用途名或 ICANN 保留私用名。"
+                          % (sl.file, sl.line, v))
+                    impact = ("特殊用途名不进入公共 DNS；把它们钉在直连/内网表是"
+                              "正确做法，但仍须显式登记以防被误当成真 TLD 处理。")
+                else:
+                    kind = "single-label-unknown"
+                    ev = ("%s:%d 的 `DOMAIN-SUFFIX,%s` 是**单标签后缀**，但它"
+                          "**既不在**锁定的 IANA 根区表里，**也不是**已知特殊用途名。"
+                          % (sl.file, sl.line, v))
+                    impact = ("多半是拼写错误、被撤销的 gTLD，或把二级域误写成了"
+                              "单标签；这条规则永远不会命中任何真实请求。")
+                n += 1
+                self._add("A10", "P1", kind, sl.file, sl.norm, ev, impact,
+                          "确属刻意认领整个 TLD 的，在 allowlist.json 用 "
+                          "{\"check\":\"A10\",\"kind\":\"%s\",…} 登记并写清判据；"
+                          "否则收窄成具体注册域或删除。" % kind,
+                          "high")
+                continue
+            hit, sect, rule, how = psl.is_boundary(v)
+            if not hit:
+                continue
+            kind = "psl-private" if sect == "private" else "psl-icann"
+            if how == "wildcard-parent":
+                why = ("PSL 里存在通配规则 `%s` —— 即 `%s` 的**每一个**子域都是"
+                       "独立的公共后缀，本条等于把整个多租户命名空间一次收进来"
+                       "（比后缀自身命中更宽）。" % (rule, v))
+            else:
+                why = "PSL 判定 `%s` 自身就是公共后缀（生效规则 `%s`）。" % (v, rule)
+            n += 1
+            self._add("A10", "P1", kind, sl.file, sl.norm,
+                      "%s:%d 的 `DOMAIN-SUFFIX,%s` 命中 PSL **%s** 段：%s"
+                      % (sl.file, sl.line, v, sect.upper() if sect else "?", why),
+                      "公共后缀 = 注册边界：该后缀之下的每个标签属于**不同注册人**。"
+                      "用 DOMAIN-SUFFIX 收录它，等于把该平台所有租户的流量一并"
+                      "绑到同一个出口（R1-13 删掉的 40+ 条就是这一类）。",
+                      "收窄成具体的注册域（`<tenant>.%s` 用 DOMAIN 精确形），"
+                      "或——若这是第一方自持命名空间/刻意的兜底分层——在 "
+                      "allowlist.json 用 {\"check\":\"A10\",\"kind\":\"%s\",…} "
+                      "登记并写清判据。" % (v, kind),
+                      "high")
         return n
 
     # -- 运行 --------------------------------------------------------------
@@ -704,6 +1261,10 @@ class Auditor(object):
             stats["A7"] = self.check_a7()
         if "A8" in checks:
             stats["A8"] = self.check_a8()
+        if "A9" in checks:
+            stats["A9"] = self.check_a9()
+        if "A10" in checks:
+            stats["A10"] = self.check_a10()
         self.findings.sort(key=lambda f: (SEVERITY_ORDER[f["severity"]],
                                           f["check"], f["id"]))
         return stats
@@ -720,8 +1281,10 @@ CHECK_TITLE = {
     "A4": "A4 跨 list 遮蔽",
     "A5": "A5 conf 引用完整性",
     "A6": "A6 DOMAIN-KEYWORD 审查表（不判错）",
-    "A7": "A7 规则行格式 lint（裸行/未知前缀 → P1）",
-    "A8": "A8 禁止回流（forbidden 模式出现 → P0，不可豁免）",
+    "A7": "A7 规则行格式 lint（裸行/未知前缀 → P1；小写类型段 → P1/case）",
+    "A8": "A8 禁止回流（forbidden 模式出现 → P0，不可豁免；支持 file/not_file 作用域）",
+    "A9": "A9 IP 跨表包含/遮蔽（顺序感知：只报后位被前位吞掉）",
+    "A10": "A10 单标签后缀与 PSL 边界门禁（+ arity / 严格 CIDR / modifier 白名单）",
 }
 
 SEV_TITLE = {
@@ -752,9 +1315,18 @@ def write_report(path, aud, stats, checks, args):
     a("- 豁免表：`%s`（%d 条规则，命中 %d 次，未命中 %d 条）"
       % (aud.al.path, len(aud.al.entries), sum(aud.al.hits.values()),
          len(aud.al.unused(checks))))
-    a("- 未豁免 finding：**%d** 条（P0=%d, P1=%d, P2=%d, P3=%d）；被豁免 %d 条\n"
+    a("- 未豁免 finding：**%d** 条（P0=%d, P1=%d, P2=%d, P3=%d）；被豁免 %d 条"
       % (len(aud.findings), sev_count["P0"], sev_count["P1"],
          sev_count["P2"], sev_count["P3"], len(aud.exempted)))
+    if aud.psl is not None and aud.psl.available:
+        a("- A10 锁定快照：`%s`（PSL %d 条规则，sha256 `%s…`）、`%s`（IANA TLD %d 条，"
+          "sha256 `%s…`）\n"
+          % (os.path.basename(aud.psl.psl_path), aud.psl.rule_count,
+             aud.psl.sha256.get("psl", "")[:16],
+             os.path.basename(aud.psl.tld_path or "-"), len(aud.psl.tlds),
+             aud.psl.sha256.get("tld", "")[:16]))
+    else:
+        a("")
 
     a("### 各检查项原始命中量（聚合前）\n")
     a("| 检查项 | 说明 | 原始命中 | 输出 finding |")
@@ -811,6 +1383,22 @@ def write_report(path, aud, stats, checks, args):
                      u.get("reason", "")))
             a("")
 
+    pending = aud.al.pending(checks)
+    if pending:
+        a("## 待用户裁决的豁免（`pending_decision: true`）\n")
+        a("这些条目的 reason 明写「本轮未裁决、保留原状待用户决策」。它们**不影响退出码**，"
+          "但每次运行都单独列出——否则待裁决事项会被 `preventive` 伪装成永久豁免"
+          "（审计 W7-T09）。逐条结案后请删除该键。\n")
+        a("| 检查项 | 文件 | 规则 | 本次命中 | 待裁决内容 |")
+        a("| --- | --- | --- | ---: | --- |")
+        for e, hits in pending:
+            want = e.get("check", "*")
+            a("| %s | %s | `%s` | %d | %s |"
+              % (want if isinstance(want, str) else ",".join(want),
+                 e.get("file", "*"), e.get("rule", "*"), hits,
+                 e.get("reason", "")))
+        a("")
+
     if "A6" in checks and aud.keywords:
         a("## A6 DOMAIN-KEYWORD 审查表（不判错，供人工复核）\n")
         a("全量 %d 条见 `keyword_review.tsv`；下表按 conf 生效顺序列出前 120 条。\n"
@@ -841,6 +1429,8 @@ def write_details(outdir, aud):
                "winner_file", "winner_line", "winner_policy"],
         "A3": ["file", "line", "rule", "how", "cover_line", "cover_rule"],
         "A4": ["file", "line", "rule", "policy",
+               "cover_file", "cover_line", "cover_rule", "cover_policy"],
+        "A9": ["file", "line", "rule", "policy",
                "cover_file", "cover_line", "cover_rule", "cover_policy"],
     }
     for key, rows in aud.details.items():
@@ -908,6 +1498,85 @@ PROCESS-NAME,claude
     "Unused.list": u"""\
 DOMAIN-SUFFIX,never-referenced.example
 """,
+}
+
+
+# --- 第二份合成配置：A9 / A10 / A8 作用域与大小写归一（S34–S46）--------------
+# 独立于第一份，避免新样本扰动 S01–S33 的精确计数。
+SELFTEST2_CONF = u"""\
+[Proxy]
+PhysA = snell, 1.2.3.4, 63001
+
+[Proxy Group]
+Proxy = select, PhysA
+Final = select, PhysA, DIRECT
+
+[Rule]
+RULE-SET,https://cdn.example/gh/x/y@main/Broad.list,Proxy
+RULE-SET,https://cdn.example/gh/x/y@main/Narrow.list,DIRECT
+RULE-SET,https://cdn.example/gh/x/y@main/Same.list,Proxy
+RULE-SET,https://cdn.example/gh/x/y@main/Lint.list,Proxy
+RULE-SET,https://cdn.example/gh/x/y@main/Scope.list,Proxy
+RULE-SET,https://cdn.example/gh/x/y@main/Other.list,Proxy
+FINAL,Final
+"""
+
+SELFTEST2_LISTS = {
+    # 前位的三条「宽」网段（策略 Proxy）
+    "Broad.list": u"""\
+IP-CIDR,203.0.113.0/24,no-resolve
+IP-CIDR,198.18.0.0/15,no-resolve
+IP-CIDR6,2001:db8:aaaa::/48,no-resolve
+""",
+    # 后位、DIRECT：203.0.113.128/25 被前位代理段吞掉 → A9 P0
+    # 192.0.2.0/24 是「顺序感知」哨兵：它在前，Same.list 的 /16 在后，必须**不报**
+    "Narrow.list": u"""\
+IP-CIDR,203.0.113.128/25,no-resolve
+IP-CIDR,192.0.2.0/24,no-resolve
+""",
+    # 后位、同策略：两条被前位同策略段吞掉 → A9 P3；192.0.0.0/16 是反向哨兵
+    "Same.list": u"""\
+IP-CIDR,198.18.32.0/20,no-resolve
+IP-CIDR6,2001:db8:aaaa:1::/64,no-resolve
+IP-CIDR,192.0.0.0/16,no-resolve
+""",
+    # A10 的正负样本 + A7/A8 大小写归一样本
+    "Lint.list": u"""\
+DOMAIN-SUFFIX,museum
+DOMAIN-SUFFIX,localhost
+DOMAIN-SUFFIX,zzznotatld
+DOMAIN-SUFFIX,ac.uk
+DOMAIN-SUFFIX,blogspot.com
+DOMAIN-SUFFIX,oaiusercontent.com
+DOMAIN-SUFFIX,xn--gmqw5a.xn--j6w193g
+DOMAIN-SUFFIX,city.kobe.jp
+DOMAIN-SUFFIX,plain.example.com
+IP-CIDR,100.64.0.1/26,no-resolve
+IP-CIDR,100.65.0.0/16,no-resolve,force-remote-dns
+DOMAIN-SUFFIX,
+user-agent,LowerCaseUA*
+""",
+    "Scope.list": u"""\
+DOMAIN-SUFFIX,scoped.example
+DOMAIN-SUFFIX,only-here.example
+""",
+    "Other.list": u"""\
+DOMAIN-SUFFIX,scoped.example
+DOMAIN-SUFFIX,only-here.example
+""",
+}
+
+SELFTEST2_ALLOW = {
+    "version": 1,
+    "exemptions": [],
+    "forbidden": [
+        {"pattern": "DOMAIN-SUFFIX,scoped.example", "file": "Scope.list",
+         "reason": "自检用：file 作用域 —— 只在 Scope.list 内是禁令"},
+        {"pattern": "DOMAIN-SUFFIX,only-here.example", "not_file": "Scope.list",
+         "reason": "自检用：not_file 作用域 —— 只允许存在于 Scope.list"},
+        {"pattern": "USER-AGENT,*",
+         "reason": "自检用：D7 全库零 UA（小写行必须也被抓到）"},
+    ],
 }
 
 
@@ -1055,6 +1724,131 @@ def run_audit_selftest(verbose=True):
         check("S27 severity 取值合法",
               sorted(set(f["severity"] for f in F)) ==
               sorted(set(f["severity"] for f in F) & set(SEVERITY_ORDER)), True)
+
+        # ------------------------------------------------------------------
+        # 第二份合成配置：A9 / A10 / A8 作用域与大小写归一（S34–S46）
+        # ------------------------------------------------------------------
+        rules2 = os.path.join(tmpdir, "rules2")
+        os.makedirs(rules2)
+        conf2 = os.path.join(tmpdir, "Surge2.conf")
+        with open(conf2, "w", encoding="utf-8") as fh:
+            fh.write(SELFTEST2_CONF)
+        for name, body in SELFTEST2_LISTS.items():
+            with open(os.path.join(rules2, name), "w", encoding="utf-8") as fh:
+                fh.write(body)
+        al2_path = os.path.join(tmpdir, "allow2.json")
+        with open(al2_path, "w", encoding="utf-8") as fh:
+            json.dump(SELFTEST2_ALLOW, fh, ensure_ascii=False)
+
+        psl = PublicSuffixList(
+            os.path.join(DEFAULT_DATA_DIR, "public_suffix_list.dat"),
+            os.path.join(DEFAULT_DATA_DIR, "tlds-alpha-by-domain.txt"))
+        check("S36 A10 锁定快照可用（PSL + IANA TLD 表已入库）", psl.available, True)
+
+        aud3 = Auditor(engine_mod.Engine(conf2, rules2), Allowlist(al2_path),
+                       psl=psl)
+        aud3.run(list(ALL_CHECKS))
+        G = aud3.findings
+
+        def pick3(check_id, **kw):
+            return [f for f in G if f["check"] == check_id
+                    and all(f.get(k) == v for k, v in kw.items())]
+
+        # --- A8 作用域 ---
+        a8 = pick3("A8")
+        check("S34 A8 file 作用域：同一 pattern 只在指定表内命中",
+              sorted((f["file"], f["rule"]) for f in a8
+                     if "scoped.example" in f["rule"]),
+              [("Scope.list", "DOMAIN-SUFFIX,scoped.example")])
+        check("S35 A8 not_file 作用域：只在指定表**之外**命中",
+              sorted((f["file"], f["rule"]) for f in a8
+                     if "only-here.example" in f["rule"]),
+              [("Other.list", "DOMAIN-SUFFIX,only-here.example")])
+        check("S37 A8 抓到小写类型段的 UA 行并判 P0（W7-T03 大小写绕过已封）",
+              sorted((f["severity"], f["file"]) for f in a8
+                     if f["rule"].lower().startswith("user-agent")),
+              [("P0", "Lint.list")])
+        check("S38 A8 合计 3 条（file 1 + not_file 1 + 小写 UA 1）", len(a8), 3)
+
+        # --- A7 大小写分流 ---
+        a7 = pick3("A7")
+        check("S39 A7 把小写已知类型判 case 而非 format",
+              sorted((f["kind"], f["severity"], f["file"]) for f in a7),
+              [("case", "P1", "Lint.list")])
+
+        # --- A9 顺序感知 ---
+        a9 = pick3("A9")
+        check("S40 A9 原始命中 3 条（跨策略 1 + 同策略 2）",
+              len(aud3.details["A9"]), 3)
+        check("S41 A9 跨策略且被包含方 DIRECT → P0/misroute",
+              sorted((f["severity"], f["kind"], f["file"], f["rule"])
+                     for f in a9 if f["file"] == "Narrow.list"),
+              [("P0", "misroute", "Narrow.list", "IP-CIDR,203.0.113.128/25")])
+        check("S42 A9 同策略 → P3/redundant（v4 与 v6 各一条）",
+              sorted((f["severity"], f["rule"]) for f in a9
+                     if f["file"] == "Same.list"),
+              [("P3", "IP-CIDR,198.18.32.0/20"),
+               ("P3", "IP-CIDR6,2001:db8:aaaa:1::/64")])
+        check("S43 A9 顺序感知：narrow 在前、broad 在后**不报**"
+              "（192.0.0.0/16 ⊃ 192.0.2.0/24）",
+              [f for f in a9 if "192.0" in f["rule"]], [])
+
+        # --- A10 ---
+        a10 = pick3("A10")
+        a10_map = dict((f["rule"], f["kind"]) for f in a10)
+        check("S44 A10 单标签三分类正确（IANA TLD / 特殊用途名 / 未知串）",
+              [a10_map.get("DOMAIN-SUFFIX,museum"),
+               a10_map.get("DOMAIN-SUFFIX,localhost"),
+               a10_map.get("DOMAIN-SUFFIX,zzznotatld")],
+              ["single-label-tld", "single-label-special", "single-label-unknown"])
+        check("S45 A10 PSL：ICANN / PRIVATE / *.parent / IDNA 四种形态全部命中",
+              [a10_map.get("DOMAIN-SUFFIX,ac.uk"),
+               a10_map.get("DOMAIN-SUFFIX,blogspot.com"),
+               a10_map.get("DOMAIN-SUFFIX,oaiusercontent.com"),
+               a10_map.get("DOMAIN-SUFFIX,xn--gmqw5a.xn--j6w193g")],
+              ["psl-icann", "psl-private", "psl-private", "psl-icann"])
+        check("S46 A10 零误报：PSL !exception（city.kobe.jp）与普通注册域不报",
+              sorted(r for r in a10_map
+                     if "kobe" in r or "plain.example.com" in r), [])
+        check("S47 A10 arity / strict-cidr / modifier 各命中 1",
+              sorted(f["kind"] for f in a10
+                     if f["kind"] in ("arity", "strict-cidr", "modifier")),
+              ["arity", "modifier", "strict-cidr"])
+        check("S48 A10 全部判 P1",
+              sorted(set(f["severity"] for f in a10)), ["P1"])
+
+        # --- A10 的 kind 作用域豁免：只静音一类子检查 ---
+        al4_path = os.path.join(tmpdir, "allow4.json")
+        with open(al4_path, "w", encoding="utf-8") as fh:
+            json.dump({"version": 1, "forbidden": SELFTEST2_ALLOW["forbidden"],
+                       "exemptions": [
+                           {"check": "A10", "file": "Lint.list",
+                            "kind": "psl-private", "rule": "*",
+                            "reason": "自检用：只豁免 psl-private 子检查"}]}, fh,
+                      ensure_ascii=False)
+        aud4 = Auditor(engine_mod.Engine(conf2, rules2), Allowlist(al4_path),
+                       psl=psl)
+        aud4.run(list(ALL_CHECKS))
+        k4 = sorted(set(f["kind"] for f in aud4.findings if f["check"] == "A10"))
+        check("S49 exemptions 的 kind 键只静音指定子检查，其余照报",
+              k4, ["arity", "modifier", "psl-icann", "single-label-special",
+                   "single-label-tld", "single-label-unknown", "strict-cidr"])
+
+        # --- pending_decision ---
+        al5_path = os.path.join(tmpdir, "allow5.json")
+        with open(al5_path, "w", encoding="utf-8") as fh:
+            json.dump({"version": 1, "forbidden": [], "exemptions": [
+                {"check": "A10", "file": "Lint.list", "kind": "psl-private",
+                 "rule": "*", "preventive": True, "pending_decision": True,
+                 "reason": "自检用：待裁决"}]}, fh, ensure_ascii=False)
+        al5 = Allowlist(al5_path)
+        aud5 = Auditor(engine_mod.Engine(conf2, rules2), al5, psl=psl)
+        aud5.run(list(ALL_CHECKS))
+        check("S50 pending_decision 条目即使 preventive 也必须被单独列出",
+              [(e.get("file"), h) for e, h in al5.pending(list(ALL_CHECKS))],
+              [("Lint.list", 2)])
+        check("S51 pending_decision 不改变 unused 语义（preventive 仍免告警）",
+              al5.unused(list(ALL_CHECKS)), [])
     finally:
         shutil.rmtree(tmpdir, ignore_errors=True)
 
@@ -1083,6 +1877,8 @@ def main(argv=None):
     ap.add_argument("--rules", help=".list 所在目录（默认 conf 同级 rules/lists/）")
     ap.add_argument("--allowlist", default=DEFAULT_ALLOWLIST,
                     help="豁免表路径（默认同目录 allowlist.json）")
+    ap.add_argument("--data-dir", default=DEFAULT_DATA_DIR,
+                    help="A10 锁定快照目录（PSL + IANA TLD 表；默认 tests/data/）")
     ap.add_argument("--check", default="all",
                     help="逗号分隔的检查项，如 A1,A4；默认 all")
     ap.add_argument("--out", help="输出目录（写 findings.jsonl / report.md / *.tsv）")
@@ -1111,7 +1907,11 @@ def main(argv=None):
 
     eng = engine_mod.build_engine(args.conf, args.rules)
     al = Allowlist(args.allowlist)
-    aud = Auditor(eng, al, max_findings=args.max_findings, samples=args.samples)
+    psl = PublicSuffixList(
+        os.path.join(args.data_dir, "public_suffix_list.dat"),
+        os.path.join(args.data_dir, "tlds-alpha-by-domain.txt"))
+    aud = Auditor(eng, al, max_findings=args.max_findings,
+                  samples=args.samples, psl=psl)
     stats = aud.run(checks)
 
     sev_count = defaultdict(int)
@@ -1142,6 +1942,17 @@ def main(argv=None):
                            for c in checks}
     summary["exempted"] = len(aud.exempted)
     summary["allowlist_unused"] = len(al.unused(checks))
+    summary["allowlist_pending"] = [
+        {"check": e.get("check"), "file": e.get("file", "*"),
+         "rule": e.get("rule", "*"), "hits": h, "reason": e.get("reason", "")}
+        for e, h in al.pending(checks)]
+    summary["exemptions_total"] = len(al.entries)
+    summary["forbidden_total"] = len(al.forbidden)
+    if psl.available:
+        summary["snapshots"] = {"psl_sha256": psl.sha256.get("psl"),
+                                "psl_rules": psl.rule_count,
+                                "tld_sha256": psl.sha256.get("tld"),
+                                "tlds": len(psl.tlds)}
     summary["fail_on"] = args.fail_on
     summary["failing"] = failing
     summary["out"] = args.out
@@ -1158,6 +1969,14 @@ def main(argv=None):
                  sev_count["P2"], sev_count["P3"]))
         print("已豁免      : %d 条；豁免表未命中 %d 条"
               % (len(aud.exempted), len(al.unused(checks))))
+        pending = al.pending(checks)
+        if pending:
+            print("待裁决豁免  : %d 条（不影响退出码，但每次运行都提示）" % len(pending))
+            for e, h in pending:
+                reason = e.get("reason", "")
+                print("  · %-16s %-34s 命中 %d —— %s"
+                      % (e.get("file", "*"), e.get("rule", "*"), h,
+                         reason[:88] + ("…" if len(reason) > 88 else "")))
         if args.out:
             print("输出目录    : %s" % args.out)
         print("退出判定    : fail-on=%s → 失败 %d 条" % (args.fail_on, failing))

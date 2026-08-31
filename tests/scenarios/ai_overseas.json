@@ -429,14 +429,14 @@
   },
   {
     "name": "huggingface_hub",
-    "desc": "HuggingFace：模型页浏览 → 大文件 LFS 下载 → Spaces 运行",
+    "desc": "HuggingFace：模型页浏览 → 大文件 LFS 下载 → Spaces 运行（2026-08-31 R1-02/R1-13：HF 已整体切 Xet 后端，ModelDownloadCDN 改锚 aws.cdn.hf.co 族；cdn-lfs.huggingface.co 已死、hf.space 属 PSL PRIVATE 多租户边界已删）",
     "requests": [
       {
         "host": "huggingface.co"
       },
       {
         "host": "cdn-lfs.huggingface.co",
-        "note": "LFS 权重下载"
+        "note": "旧 LFS 权重下载端点；2026-08-31 实测死域（国际侧 EMPTY、CN 侧 SoftLayer 陈旧记录）"
       },
       {
         "host": "cdn-lfs-us-1.hf.co"
@@ -446,7 +446,7 @@
       },
       {
         "host": "hf.space",
-        "note": "Spaces 运行域"
+        "note": "Spaces 运行域（PSL PRIVATE 多租户边界，已从 AI.list 删除）"
       }
     ],
     "assert": {
@@ -459,8 +459,8 @@
         },
         {
           "host": "cdn-lfs.huggingface.co",
-          "policy": "下载",
-          "reason": "2026-08-30 起 ModelDownloadCDN.list 先于 AI 接管大文件端点"
+          "policy": "AI",
+          "reason": "R1-02（2026-08-31）：该 host 已死（双侧无有效 A），随 ModelDownloadCDN 重写删除；现由 AI.list 的 DOMAIN-SUFFIX,huggingface.co 兜底，落 AI 属预期。现网大文件端点是 aws.cdn.hf.co 族（见 cdn-lfs-us-1.hf.co 一条）。"
         },
         {
           "host": "cdn-lfs-us-1.hf.co",
@@ -473,7 +473,8 @@
         },
         {
           "host": "hf.space",
-          "policy": "AI"
+          "policy": "Final",
+          "reason": "R1-13（2026-08-31）：hf.space 是 PSL PRIVATE 多租户边界（任意用户的 Space 共用该后缀），已从 AI.list 删除；落 FINAL 属预期。"
         }
       ]
     }

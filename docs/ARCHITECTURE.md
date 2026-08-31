@@ -13,8 +13,8 @@
 flowchart TD
     subgraph L["本地"]
         A["lists/*.list<br/>34 个 Surge 规则集<br/>唯一编辑源"]
-        G1["tests/audit.py<br/>静态审计 A1–A8<br/>--fail-on P1"]
-        G2["tests/runsuite.py<br/>147 场景 / 1731 断言<br/>含 674 条 DNS 泄漏断言"]
+        G1["tests/audit.py<br/>静态审计 A1–A10<br/>--fail-on P1"]
+        G2["tests/runsuite.py<br/>189 场景 / 2269 断言<br/>含 915 条 DNS 泄漏断言"]
         T["tools/surge2clash.py<br/>全量再生 clash/"]
         A --> G1
         A --> G2
@@ -38,8 +38,8 @@ flowchart TD
 | 环节 | 位置 | 职责 | 不做什么 |
 |---|---|---|---|
 | 编辑源 | `lists/*.list` | 唯一手工编辑入口。所有规则变更从这里开始 | 不生成、不派生任何东西 |
-| 静态闸门 | `tests/audit.py` | 结构性审计(A1–A8),`--fail-on P1` 时 P1 级问题直接阻断发布 | 不模拟真实请求 |
-| 场景闸门 | `tests/runsuite.py` | 用离线引擎跑 147 个真实场景,校验落点策略与 DNS 行为 | 不联网、不依赖运行中的 Surge |
+| 静态闸门 | `tests/audit.py` | 结构性审计(A1–A10),`--fail-on P1` 时 P1 级问题直接阻断发布 | 不模拟真实请求 |
+| 场景闸门 | `tests/runsuite.py` | 用离线引擎跑 189 个真实场景,校验落点策略与 DNS 行为 | 不联网、不依赖运行中的 Surge |
 | 派生 | `tools/surge2clash.py` | 由 `lists/` 全量再生 `clash/` 与 `rule-providers.yaml` | 不做增量更新,不容忍未知规则类型 |
 | 发布 | `update.sh` | 串起闸门→派生→commit→push→purge→md5 的全流程;仅限 main 分支发布,push 后校验远端 SHA,结果分 `VALIDATED_NOT_PUBLISHED` / `PUBLISHED_AND_VERIFIED`(退出 0) / `PUBLISHED_BUT_UNVERIFIED`(退出 1)三态 | 闸门未过一律中止,不发半成品;复验不一致时不谎报成功 |
 | CDN | jsDelivr | 边缘缓存分发 | 不主动感知 GitHub 更新,必须显式 purge |
@@ -69,7 +69,7 @@ Surge 的 `[Rule]` 段是**自上而下首次命中即停**。因此规则序就
 | **5** | DownloadCDN | 下载 | 分类层最后。定位是「大流量批量下载域」,不是站点静态资源 |
 | **6** | Payment(`extended-matching`) | Payment | 国际支付渠道必须固定同一出口,跨出口易触发 3DS/风控/拒付。置于 DownloadCDN 之后,下载域不被吸走 |
 | **7** | AppleCN / MicrosoftCN | DIRECT | **先于 GFW 防抢跑**。ProxyGFW 中的宽泛后缀/关键词可能吃掉 Apple、微软的国内可直连面,导致本可直连的国内 CDN 被推去走代理 |
-| **8** | ProxyGFW | Final | 被墙域名的兜底表。放在生态表与 Apple/微软之后,只捡前面没人认领的被墙域 |
+| **8** | ProxyGFW | Final | 被墙域名的兜底表。放在生态表与 Apple/微软之后,只捡前面没人认领的被墙域。**它的策略与收尾 `FINAL` 同为 `Final` 组** —— 这决定了本表的真实作用,见下方「区 8 的重定位」 |
 | **9** | Japan / UK / Europe / US | 对应地区节点组 | **域名 + GEOIP/IP-ASN 同表自包含**,整体置于 Apple/微软/GFW **之后**、国内区**之前**。之后:地区表自带的 GEOIP 会遮蔽 Apple 17/8 与 ProxyGFW 的 IP 规则,前置就会抢跑;之前:地区表是明确归属,必须先于国内长尾兜底(ChinaDomain)与 `GEOIP,CN` 兜底命中 |
 | **10** | Domestic | DIRECT | 国内直连第一层,手工杂项,国内区内最高优先 |
 | **10** | ChinaMedia / TencentCN / AlibabaCN / ByteDanceCN / BaiduCN / NetEaseCN | DIRECT | 国内直连第二层,厂商生态细分 |
@@ -82,6 +82,40 @@ Surge 的 `[Rule]` 段是**自上而下首次命中即停**。因此规则序就
 ### 一条口诀
 
 > **越精确越靠前,越兜底越靠后;拦截 > 直连特例 > 生态 > 分类 > 被墙兜底 > 地区 > 国内三层 > FINAL。**
+
+### 区 8 的重定位:ProxyGFW 是**保险层**,不是必需层
+
+ProxyGFW 的策略是 `Final`,而 conf 收尾 `FINAL,Final,dns-failed` 的策略**也是 `Final`**(同一个 select 组);又因为全库 IP 类规则一律 `no-resolve`,域名请求在整条规则链上不触发任何本地解析。所以对绝大多数条目而言,「命中 ProxyGFW」与「一路落到 FINAL」的差别**只剩日志里那个规则名**。
+
+2026-08-31 全量核算(6,427 条域名规则):
+
+| 类别 | 条数 | 含义 |
+|---|---:|---|
+| **承载** | **18** | 后位表有更宽的兜底会接住它 ⇒ 删掉这一条,该域会被判成 **DIRECT**。后位分布:ChinaDomain 11 / Domestic 5 / TencentCN 2 |
+| 惰性 | 6,409(99.7%) | 后位无覆盖,删掉也是落 FINAL → `Final`,**同策略、逐位等价** |
+
+**裁决:不删表**,重定位为「**FINAL 策略保险层 + 防后位误直连层**」。三条操作性后果:
+
+1. **验收基准改为那 18 条承载集**是否完整,不再按行数、也不按与上游对齐判定;惰性部分的增减**不作为回归**。死域再生过滤器必须给承载集开豁免 —— 承载集与 769 条死域清单的交集恰好 3 条(`666pool.cn` / `hasi.wang` / `bbs.tuitui.info`),它们之所以承载,正是因为后位有 `cn` / `wang` / `tuitui.info` 这类更宽的兜底。
+2. **本表的存在理由是条件性的**:只要哪天裁决把 `FINAL` 的去向从 `Final` 改成 `DIRECT`,全表 6,427 条会**同时**变成承载条目。因此「99.7% 无用」不是删表的理由,它只是「当前 FINAL 恰好也是 `Final`」的推论。
+3. 与之配套的宽后缀分层(`amazonaws.com` / `microsoft.com` / `azureedge.net`,见 D6)留在本表是刻意的:审计报「重复 / 遮蔽」属预期。
+
+### `extended-matching` 该开在哪几张表:判据 R
+
+`extended-matching` 让规则除域名外**同时匹配 SNI / Host 等扩展信息**,从而接住「客户端拿着字面量 IP 直连、但握手里带了域名」的连接。现状 **11 开 / 23 不开**,开关面**只在 conf 的 RULE-SET 行**。
+
+> **判据 R** —— 当「本表策略」与「本表不命中后该请求最终会落到的策略」**不同**,且该表流量存在**可能携带 SNI / Host 的字面量 IP 连接**时,才值得开 `extended-matching`。
+
+按 R 复核 34 张表,32 张与现状一致,且**不开是有理由的**:
+
+- 国内直连各表的兜底是 `ChinaIP` + `GEOIP,CN` ⇒ **同为 DIRECT**,开了不改变落点;
+- `ProxyGFW` 的策略就是 `Final`、与 FINAL 同组 ⇒ 同上,且代价是 6,424 条后缀 × 每连接多两个匹配键;
+- 区 9 地区表自带 GEOIP / IP-ASN,在**同一位次**就接住了字面量 IP;
+- `Games` 的硬编码 IP 流量是**裸 TCP/UDP,没有 SNI 可取**。
+
+真正的两个缺口是 **`Reject`**(策略与兜底差最远,且广告 / HTTPDNS SDK 是硬编码 IP 的高发区)与 **`DownloadCDN`**(存在明文 HTTP + Host 头的按 IP 下载)。两者都**先测再加**:Reject 的前置条件是先清掉剩余的无边界特异词 —— 否则扩展匹配会让这些子串在 SNI 上也做匹配,这是最大风险点。
+
+**红线**:官方语义是「set 文件里**任意一行**域名规则带 `extended-matching`,**整张表**的域名规则都被打开」。当前 `lists/` 行级为 0,必须保持为 0(见 [MAINTENANCE.md §6 红线 9](MAINTENANCE.md));Clash 侧无等价物,见 §5.2 的 sniffer 合同。
 
 ---
 
@@ -143,9 +177,23 @@ Surge 匹配一条 IP 类规则时,如果连接的目标是**域名**而不是�
 - 所有域名规则都不命中的域名,**不在本地解析**,直接按 FINAL 交给 `Final` 策略组,**由远端出口完成解析**。这正是"零本地 DNS 解析"闭环的收口。
 - `dns-failed` 参数覆盖另一种情形:本地 DNS 解析确实失败的连接同样兜到 FINAL,交远端处理,而不是直接失败。
 
-### 4.4 为什么这条约束需要 674 条断言守着
+### 4.4 为什么这条约束需要 915 条断言守着
 
-`runsuite.py` 的 1731 条断言里有 **674 条专门是 DNS 泄漏断言**。原因是这条约束的破坏方式极其隐蔽:上游同步一批 IP 段、有人"顺手"给某条 GEOIP 去掉 `no-resolve` 想"修一个不生效的规则",分流表面看还是对的,泄漏却已经发生。只有把它变成会打红的断言,才守得住。
+`runsuite.py` 的 2269 条断言里有 **915 条专门是 DNS 泄漏断言**。原因是这条约束的破坏方式极其隐蔽:上游同步一批 IP 段、有人"顺手"给某条 GEOIP 去掉 `no-resolve` 想"修一个不生效的规则",分流表面看还是对的,泄漏却已经发生。只有把它变成会打红的断言,才守得住。
+
+### 4.5 第三根支柱:两个必须保持 `false` 的 conf 键
+
+前面两节是这条约束的头两根支柱 —— **IP 规则的 `no-resolve`**(§4.1,915 条断言守着)与 **`FINAL,Final,dns-failed`**(§4.3,收口)。闭环还有第三根,它**不在规则里、在 conf 里,且没有任何断言能看见**:
+
+| 键 | 值 | 作用 |
+|---|---|---|
+| `use-local-host-item-for-proxy` | `false`(**conf 已显式写死**) | 官方默认就是 false。一旦为 true:目标域只要存在**本地 DNS mapping**,Surge 就会用 **IP 而不是域名**建立代理连接 —— 这正是本节禁止的行为。而本 conf 同时开着 `read-etc-hosts = true`,`/etc/hosts` 里的条目就是这样的 local DNS mapping ⇒ **两键叠加即精确破坏该架构** |
+| `allow-dns-svcb` | 缺省(即 `false`,**刻意不写**) | 关闭时 Surge 拒绝 SVCB / HTTPS(type 65)查询,恰好堵住「用 HTTPS RR 的 `ipv4hint` 绕过 fake-IP」这条路。配合 `hijack-dns = *:53`(客户端查询在 53 端口就被 fake-IP 应答器接住),规则链**始终看到原始域名**,即便客户端自行解析也一样 |
+
+两点操作性含义:
+
+1. **`use-local-host-item-for-proxy` 之所以显式写出来**,不是因为默认值不对,而是因为它默认对、但没人看得见:915 条断言只检 IP 规则的 `no-resolve`,不解析 conf 的这个键;全库搜索它在文档、测试、裁决登记里一次都没出现过。显式写死 + [MAINTENANCE.md §6 红线 8](MAINTENANCE.md) 是它唯一的守护。
+2. **不要为了"支持 ECH / HTTPS RR"去开 `allow-dns-svcb`** —— 那等于给零本地解析闭环开一个 IP 直通口。这也是全库 13,333 条 IP 类规则实际很少被触发的原因之一:真正会走到 IP 规则的,只剩**硬编码 IP 字面量**的连接。
 
 ---
 
@@ -169,16 +217,35 @@ lists/*.list  ──(tools/surge2clash.py 全量再生)──▶  clash/*.list +
 | `USER-AGENT` | (剔除) | Clash 无 UA 匹配层。剔除数量记在目标文件头 |
 | `URL-REGEX` | (剔除) | Clash 无 URL 匹配层。剔除数量记在目标文件头 |
 | 其余类型(含 `no-resolve`) | 原样透传 | `no-resolve` 语义两端一致,必须保留 |
+| `extended-matching`(conf 的 RULE-SET 行,现 11 处) | **无等价物,provider 携带不了** | 它不是规则行上的参数,而是**整张表的匹配语义**(见 §2「判据 R」)。rule-provider 只承载规则集本身,无处安放这个开关 ⇒ Clash / Mihomo 端必须由**使用者在自己的 config 里显式配 `sniffer`** 才能取回等价行为 |
 | 未知类型 | **fail-fast** | 转换器中止,发布随之中止。宁可不发,不做静默降级 |
 
-因为 UA / URL 两层被剔除,**Clash 端的分流精度必然略低于 Surge 端**。这是引擎能力差异,不是 bug;文件头的计数就是这份差额的账本。
+#### 能力差额的账本
 
-### 5.3 143,640 条守恒验证
+原本的账本是「被剔除的 UA / URL 规则条数」,记在目标文件头。但 D7 之后**这两类在全库已归零**,那份计数恒为 0 —— **旧账本已经空了**。当前两端真实的差额全部转移到了 `extended-matching` 上,而它**不可计数**:差的不是若干条规则,是 11 张表的匹配语义。
 
-派生层的正确性基线是:**mihomo 1.19.20 实载后规则总数守恒于 143,640 条**。
-2026-08-31 实测:Mihomo 1.19.20 实载 34 个 classical provider,controller API 汇总 `ruleCount` = 143,640。
+#### sniffer 合同(消费端必须履约)
 
-验证时有两个坑:
+Surge 侧开 `extended-matching` 的 11 张表(含 Payment / AI / Telegram)会用 SNI / Host 兜底「客户端拿着字面量 IP 直连」的场景。Clash / Mihomo 侧要取回这个行为,**使用者必须自行开启 `sniffer`**,至少嗅探 TLS SNI 与 HTTP Host。
+
+- **不配 sniffer 不会报任何错**,只会在上述连接上**静默漏匹配**——这是本派生层最容易被忽略的一处能力差。
+- 合同的书面落点有两处:本节,以及 `clash/rule-providers.yaml` 头部注释(由 `tools/surge2clash.py` 的模板产出)。改动其一必须同步另一处。
+- 与它并列的已知能力差还有两条:`SYSTEM` 在 Clash 端**无等价物**;内建 `LAN` 用 `GEOIP,lan` 近似。三条都是**已知且刻意**的取舍,不是 bug。
+
+### 5.3 142,708 条守恒验证
+
+派生层的正确性基线是:**`lists/` 源规则总数与 mihomo 实载后规则总数守恒**。
+
+| 日期 | 基线 | 取数方式 | 状态 |
+|---|---:|---|---|
+| 2026-08-31(修复批次前) | 143,640 | Mihomo 1.19.20 实载 34 个 classical provider,controller API 汇总 `ruleCount` | 已作废 |
+| **2026-08-31(修复批次后)** | **142,708** | `python3 tools/surge2clash.py --check` —— 34 表 / 142,708 条,`lists/` 与 `clash/` 逐表一致 | **当前基线** |
+
+**2026-08-31 修复批次重标:143,640 → 142,708(净 −932 条)**。删除面集中在多租户/PSL 注册边界后缀、S3 兼容对象存储族、死条目与信任面清理;迁移(Google `-cn` 族 → Domestic、BBC 专属播放面 → UK、DownloadCDN 静态子域 → 各地区表)在总数上互相抵消。逐项见 [`CHANGELOG.md`](../CHANGELOG.md) 2026-08-31 条目。
+
+> ⚠️ **本基线取自转换器计数,不是 mihomo 实载复验。** 上一版 143,640 是 controller API 的 `ruleCount` 实测值,本版因批次收尾未再起 mihomo 实例。**mihomo 实载复验留待下次发布前补做**;补做后若两者不等,以实载值为准并回写本节。
+
+验证 mihomo 实载数时有两个坑:
 
 1. `mihomo -t`(配置测试)是**懒加载**,不会真正拉取和解析 rule-provider 的内容,数出来的数字没有意义。必须**真正启动**,再查 API 的 `ruleCount`。
 2. provider 是**异步初始化**的。启动后立刻查会读到偏小的数字,需要**等约 10 秒**让所有 provider 就绪再读。
@@ -238,7 +305,7 @@ lists/*.list  ──(tools/surge2clash.py 全量再生)──▶  clash/*.list +
 ```mermaid
 flowchart LR
     E["engine.py<br/>离线规则引擎"]
-    A["audit.py<br/>静态审计 A1–A8"]
+    A["audit.py<br/>静态审计 A1–A10"]
     R["runsuite.py<br/>场景回归"]
     LC["live_check.py<br/>在线核对"]
     E --> R
@@ -249,8 +316,8 @@ flowchart LR
 | 组件 | 角色 | 依赖 | 是否发布闸门 |
 |---|---|---|---|
 | `engine.py` | **离线规则引擎**。只读解析 `Surge.conf` 与本仓库 `.list`,复现 Surge 的自上而下匹配语义,给出"某请求最终落到哪个策略、路上是否触发本地解析" | 只读,不联网 | 否(被 runsuite 使用) |
-| `audit.py` | **静态审计**。A1–A8 八项结构性检查(判据见下表);配合 `allowlist.json` 的 `exemptions` 段豁免既定裁决,`forbidden` 段则由 A8 强制、**不可豁免** | 只读 | **是**(`--check all --fail-on P1`) |
-| `runsuite.py` | **场景回归**。用 engine 跑 `scenarios/*.json` 中的 **147 个真实场景**,断言 **1731 条**,其中 **674 条 DNS 泄漏断言** | engine.py | **是** |
+| `audit.py` | **静态审计**。A1–A10 十项结构性检查(判据见下表);配合 `allowlist.json` 的 `exemptions` 段豁免既定裁决,`forbidden` 段则由 A8 强制、**不可豁免** | 只读 | **是**(`--check all --fail-on P1`) |
+| `runsuite.py` | **场景回归**。用 engine 跑 `scenarios/*.json` 中的 **189 个真实场景**,断言 **2269 条**,其中 **915 条 DNS 泄漏断言** | engine.py | **是** |
 | `live_check.py` | **在线核对**。对着运行中的 Surge 实例验证真实落点 | **需要 conf 开启 http-api** | 否(手动运行) |
 
 audit 的八项判据(严重度分级 P0–P3,详见 [../tests/README.md](../tests/README.md)):

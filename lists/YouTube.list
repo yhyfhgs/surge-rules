@@ -2,8 +2,11 @@
 # 精确后缀集对撞自上游 blackmatrix7 YouTube 表；2026-08-31 审计删除宽 DOMAIN-KEYWORD,youtube
 # 排序：规则类型分区，区内字母序
 
+DOMAIN,jnn-pa.googleapis.com
 DOMAIN,yt3.ggpht.com
+DOMAIN,yt3.googleusercontent.com
 DOMAIN,yt4.ggpht.com
+DOMAIN,yt4.googleusercontent.com
 
 DOMAIN-SUFFIX,googlevideo.com
 DOMAIN-SUFFIX,video.google.com
@@ -186,3 +189,4 @@ IP-CIDR,216.73.80.0/20,no-resolve
 
 IP-CIDR6,2620:120:e000::/40,no-resolve
 
+IP-ASN,36040,no-resolve

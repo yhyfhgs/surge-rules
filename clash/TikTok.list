@@ -5,7 +5,6 @@
 # 排序：规则类型分区，区内字母序
 # CNAME 展平形态用 DOMAIN-WILDCARD 带标签边界收敛，不用无边界 DOMAIN-KEYWORD
 
-DOMAIN,courses.snapsolve.com
 DOMAIN,lf16-campaign.ttlstatic.com
 DOMAIN,lf16-csp.oecstatic.com
 DOMAIN,lf16-effectcdn.byteeffecttos-g.com
@@ -23,7 +22,6 @@ DOMAIN,p26-tt.byteimg.com
 DOMAIN,p3-tt-ipv6.byteimg.com
 DOMAIN,p9-tt.byteimg.com
 
-DOMAIN-SUFFIX,bytedance.net
 DOMAIN-SUFFIX,bytedapm.com
 DOMAIN-SUFFIX,bytefcdn-oversea.com
 DOMAIN-SUFFIX,bytefcdn-ttpeu.com

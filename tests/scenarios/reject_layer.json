@@ -84,7 +84,7 @@
       {"host": "www.mackeeper.com", "note": "MacKeeper scareware"},
       {"host": "www.kuaizip.com", "note": "快压：捆绑安装流氓推广"},
       {"host": "www.mairuan.com", "note": "麦软商城：下列全部假冒官网的运营主体"},
-      {"host": "www.mindmanager.cc", "note": "假冒 MindManager 中文官网"},
+      {"host": "www.mindmanager.cn", "note": "假冒 MindManager 中文官网；2026-08-31 由 www.mindmanager.cc 换来——.cc 双侧 NXDOMAIN 已随 W3-07 A 组删除，.cn 为同产品同族存活样本"},
       {"host": "www.ntfsformac.cn", "note": "假冒 Tuxera/Paragon NTFS 中文站"},
       {"host": "www.imazingchina.com", "note": "假冒 iMazing 中文站"},
       {"host": "www.zbrushcn.com", "note": "假冒 ZBrush 中文站"},
@@ -96,10 +96,10 @@
       {"host": "www.gouwubang.com"},
       {"host": "www.cjmakeding.com", "note": "makeding 系推广跳转"},
       {"host": "www.kualianyingxiao.cn"},
-      {"host": "www.pinzhitmall.com"},
+      {"host": "www.mairuan.cn", "note": "麦软系运营主体的另一注册域；2026-08-31 由 www.pinzhitmall.com 换来——后者双侧 NXDOMAIN 已随 W3-07 A 组删除"},
       {"host": "www.sifubo.cn", "note": "私服垃圾站（sifu*.cn 系列 11 域）"},
       {"host": "www.tt114.net", "note": "114 导航劫持"},
-      {"host": "cdn.smgru.net", "note": "劫持注入脚本分发"},
+      {"host": "www.makeding.com", "note": "makeding 系推广跳转分发主域；2026-08-31 由 cdn.smgru.net 换来——后者双侧 NXDOMAIN 已随 W3-07 A 组删除"},
       {"host": "www.adsame.com", "note": "安沃 adsame 广告网络；ChinaDomain.list 亦收录同域为 DIRECT，本表前位抢占——须联动从 ChinaDomain 删除"},
       {"host": "www.yukhj.com", "note": "AlibabaCN.list 亦收录（上游抓取噪声），本表前位抢占——须联动从 AlibabaCN 删除"}
     ],
@@ -113,7 +113,9 @@
       {"host": "brdtest.com"},
       {"host": "earnapp.com", "note": "Bright Data 卖带宽客户端"},
       {"host": "holacdn.com", "note": "Hola 免费 VPN 的出口网络"},
-      {"host": "hostingcloud.racing", "note": "DOMAIN-KEYWORD,hostingcloud —— Coinhive 后继挖矿脚本宿主"},
+      {"host": "hostingcloud.racing", "note": "DOMAIN-WILDCARD,hostingcloud.* —— Coinhive 后继挖矿脚本宿主；apex 形态"},
+      {"host": "www.hostingcloud.racing", "note": "W3-09 回归：子域形态须由 DOMAIN-WILDCARD,*.hostingcloud.* 承接，旧关键词迁通配时曾静默丢失"},
+      {"host": "a.hostingcloud.download", "note": "W3-09 回归：另一 TLD 的子域形态，证明 *.hostingcloud.* 的两个 * 都跨点生效"},
       {"host": "api.nimiqpool.com", "note": "DOMAIN-KEYWORD,nimiqpool"},
       {"host": "sdk.packetsdk.com", "note": "DOMAIN-KEYWORD,packetsdk —— 偷带宽 SDK"}
     ],
@@ -123,7 +125,7 @@
     "name": "malware_layer_no_overcapture",
     "desc": "恶意层误伤面回归：183 条假冒官网/劫持后缀不得牵连被假冒的真官网，也不得越界到「拦广告不拦统计」的分界之外",
     "requests": [
-      {"host": "www.mindmanager.com", "note": "真 MindManager；表内只收 mindmanager.cc / mindmanager.cn"},
+      {"host": "www.mindmanager.com", "note": "真 MindManager；表内只收 mindmanager.cn（mindmanager.cc 已随 W3-07 A 组删除）"},
       {"host": "www.anydesk.com", "note": "真 AnyDesk；表内只收 anydeskchina.cn"},
       {"host": "www.mathtype.com", "note": "真 MathType；表内只收 mathtype.cn"},
       {"host": "www.adobe.com", "note": "Adobe 主站"},
@@ -289,7 +291,8 @@
       {"host": "17admob.com", "note": "旧 DOMAIN-KEYWORD,admob 命中，现改窄后缀 admob.com"},
       {"host": "www.zooplus.de", "note": "旧 DOMAIN-KEYWORD,.zooplus. 屏蔽整站"},
       {"host": "www.footlocker.com", "note": "旧 DOMAIN-KEYWORD,.footlocker. 屏蔽整站"},
-      {"host": "adwords.google.com", "note": "旧 DOMAIN-KEYWORD,adwords 命中广告主后台"}
+      {"host": "adwords.google.com", "note": "旧 DOMAIN-KEYWORD,adwords 命中广告主后台"},
+      {"host": "myhostingcloud.com", "note": "W3-09 反例：*.hostingcloud.* 的首个 * 必须吃掉一个标签边界的点，不得回退成无边界子串（旧 DOMAIN-KEYWORD,hostingcloud 会命中此域）"}
     ],
     "assert": {
       "same_policy": false,
@@ -301,7 +304,8 @@
         {"host": "17admob.com", "policy": "DIRECT"},
         {"host": "www.zooplus.de", "policy": "Final"},
         {"host": "www.footlocker.com", "policy": "Final"},
-        {"host": "adwords.google.com", "policy": "Google-X-Meta-MS"}
+        {"host": "adwords.google.com", "policy": "Google-X-Meta-MS"},
+        {"host": "myhostingcloud.com", "policy": "Final"}
       ]
     }
   },
