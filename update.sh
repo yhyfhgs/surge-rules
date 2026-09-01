@@ -94,7 +94,7 @@ purge_one() {
 report_group() {
   local n="$1" title="$2" files="$3" f
   if [ "$n" -gt 0 ]; then
-    echo "  · $title（$n）"
+    echo "  · ${title}（${n}）"
     for f in $files; do echo "      $f"; done
   fi
 }
@@ -187,7 +187,7 @@ if [ -n "$old" ] && [ "$old" != "$new" ]; then
   grep_rc=0
   changed=$(printf '%s\n' "$diff_out" | grep -E "$DIST_RE") || grep_rc=$?
   if [ "$grep_rc" -gt 1 ]; then
-    echo "✗ 解析 git diff 输出失败（grep 退出码 $grep_rc），中止"
+    echo "✗ 解析 git diff 输出失败（grep 退出码 ${grep_rc}），中止"
     exit 1
   fi
   for f in $changed; do
@@ -197,7 +197,7 @@ if [ -n "$old" ] && [ "$old" != "$new" ]; then
       gone="$gone $f"; gone_n=$((gone_n+1))
     fi
   done
-  echo "[publish] 本次变更分发文件 $((live_n+gone_n)) 个（现存 $live_n ｜ 已删除 $gone_n）"
+  echo "[publish] 本次变更分发文件 $((live_n+gone_n)) 个（现存 ${live_n} ｜ 已删除 ${gone_n}）"
 else
   for f in lists/*.list clash/*.list clash/rule-providers.yaml; do
     if [ -f "$f" ]; then live="$live $f"; live_n=$((live_n+1)); fi
@@ -239,9 +239,9 @@ for f in $live; do
     pre_code=$(cat "$RUN_TMP/cdn.code" 2>/dev/null || true)
     if [ "$pre_code" = "404" ]; then
       fetch_404_pre_files="$fetch_404_pre_files $f"
-      echo "  ⚠ 先验 404: $f（CDN 尚无此路径，新增分发文件属预期；照常 purge，待复验裁决）"
+      echo "  ⚠ 先验 404: ${f}（CDN 尚无此路径，新增分发文件属预期；照常 purge，待复验裁决）"
     else
-      echo "  ⚠ 先验拉取失败: $f（HTTP ${pre_code:-无响应}，按待刷新处理，照常 purge）"
+      echo "  ⚠ 先验拉取失败: ${f}（HTTP ${pre_code:-无响应}，按待刷新处理，照常 purge）"
     fi
   fi
 
@@ -254,11 +254,11 @@ for f in $live; do
       t=${res#throttled:}; t=${t:-0}
       throttled_n=$((throttled_n+1)); throttled_files="$throttled_files $f"
       if [ "$t" -gt "$max_reset" ]; then max_reset=$t; fi
-      echo "  ⚠ 限流中: $f（重置 ${t}s，本轮未刷新）"
+      echo "  ⚠ 限流中: ${f}（重置 ${t}s，本轮未刷新）"
       ;;
     *)
       purge_fail_n=$((purge_fail_n+1)); purge_fail_files="$purge_fail_files $f"
-      echo "  ✗ purge 未受理: $f（$res）"
+      echo "  ✗ purge 未受理: ${f}（${res}）"
       ;;
   esac
 done
@@ -275,11 +275,11 @@ for f in $gone; do
       t=${res#throttled:}; t=${t:-0}
       throttled_n=$((throttled_n+1)); throttled_files="$throttled_files $f"
       if [ "$t" -gt "$max_reset" ]; then max_reset=$t; fi
-      echo "  ⚠ 限流中(删除项): $f（重置 ${t}s，本轮未刷新）"
+      echo "  ⚠ 限流中(删除项): ${f}（重置 ${t}s，本轮未刷新）"
       ;;
     *)
       purge_fail_n=$((purge_fail_n+1)); purge_fail_files="$purge_fail_files $f"
-      echo "  ✗ purge 未受理(删除项): $f（$res）"
+      echo "  ✗ purge 未受理(删除项): ${f}（${res}）"
       ;;
   esac
 done
@@ -342,7 +342,7 @@ done
 
 echo
 if [ "$problems" -eq 0 ]; then
-  echo "STATUS: PUBLISHED_AND_VERIFIED — 已推送 $(git rev-parse --short HEAD)；候选 $targets_n（先验已一致 $already ｜ purge 后复验一致 $verify_ok ｜ 删除项 $deleted_ok）"
+  echo "STATUS: PUBLISHED_AND_VERIFIED — 已推送 $(git rev-parse --short HEAD)；候选 ${targets_n}（先验已一致 ${already} ｜ purge 后复验一致 ${verify_ok} ｜ 删除项 ${deleted_ok}）"
   if [ "$resolved_pre_n" -gt 0 ]; then
     echo "  · 其中 $resolved_pre_n 个文件先验拉取失败（新增分发文件的 404 属预期），purge 后复验一致，已按成功计："
     for f in $resolved_pre_files; do echo "      $f"; done
