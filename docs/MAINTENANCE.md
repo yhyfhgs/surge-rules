@@ -108,6 +108,16 @@ python3 tools/collapse_cidr.py lists/ChinaIP.list --check
 python3 tools/rebuild.py --id blackmatrix7_china_ip
 ```
 
+The upstream is a geolocation-database export, not an RIR feed, and it carries
+foreign allocations. `config/chinaip-exclusions.txt` holds every range the
+2026-09-01 ownership audit proved non-CN under the RIR/RDAP tier (517 verdict
+segments → 587 exclusion CIDRs, including the user-ruled removal of Chinese
+cloud vendors' overseas regions); the `exclude_cidr` transform in
+`sources.lock.json` subtracts it during every rebuild, so an upstream refresh
+cannot silently re-import them. Re-admitting a range requires fresh RDAP
+evidence recorded next to its line. Segments where the evidence tiers conflict
+(195 C-class) stay in ChinaIP deliberately — conservative direct.
+
 ChinaIP precedes regional GeoIP fallback because pinned GeoLite regional
 selectors intersect ChinaIP-owned ranges. A verified service range only needs its
 own list ahead of ChinaIP when the two actually intersect; when they are disjoint

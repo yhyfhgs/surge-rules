@@ -37,20 +37,48 @@
       "sha256": "75004937d3683535892fb0c7a0cc17d4965f1b47e6d08733d80d04d500860046",
       "size": 799748,
       "license": "GPL-2.0",
-      "targets": ["ChinaIP.list"],
-      "upstream_counts": {"IP-CIDR": 17265, "IP-CIDR6": 5153, "total": 22418},
+      "targets": [
+        "ChinaIP.list"
+      ],
+      "upstream_counts": {
+        "IP-CIDR": 17265,
+        "IP-CIDR6": 5153,
+        "total": 22418
+      },
       "transform": [
-        {"op": "require_types", "types": ["IP-CIDR", "IP-CIDR6"]},
-        {"op": "require_param", "param": "no-resolve"},
-        {"op": "collapse_cidr", "tool": "tools/collapse_cidr.py"},
-        {"op": "exclude_cidr", "values": ["74.125.16.64/26", "162.105.0.0/16"]}
+        {
+          "op": "require_types",
+          "types": [
+            "IP-CIDR",
+            "IP-CIDR6"
+          ]
+        },
+        {
+          "op": "require_param",
+          "param": "no-resolve"
+        },
+        {
+          "op": "collapse_cidr",
+          "tool": "tools/collapse_cidr.py"
+        },
+        {
+          "op": "exclude_cidr",
+          "values": [
+            "74.125.16.64/26",
+            "162.105.0.0/16"
+          ],
+          "file": "config/chinaip-exclusions.txt"
+        }
       ],
       "expect": {
-        "rules": 11088,
-        "per_type": {"IP-CIDR": 7163, "IP-CIDR6": 3925},
+        "rules": 10858,
+        "per_type": {
+          "IP-CIDR": 6990,
+          "IP-CIDR6": 3868
+        },
         "set_sha256": {
-          "IP-CIDR": "f344f13337c82aec7d81a695c8b0ab793f100a4896c027949713b3befc375793",
-          "IP-CIDR6": "47d5ecf01a4ed44194e32d7710076c8a9bf8b5080a4c1dfe81d7317c22588199"
+          "IP-CIDR": "61fca00efbf2b78ec198978dbd618feae9f62794b86250ba0e9d1449579ebb42",
+          "IP-CIDR6": "fb315ce0a35f261e642e4f72f39af6d90c37f9d9998d2a343e60d085cc8ad216"
         }
       },
       "verified": {
@@ -92,7 +120,9 @@
     {
       "target": "手工维护层全部 .list",
       "provenance": "unpinned",
-      "reason": ["无上游，逐条人工裁决；可重建性由 git 历史 + tests/ 断言保证，不属 lock 的职责范围。"]
+      "reason": [
+        "无上游，逐条人工裁决；可重建性由 git 历史 + tests/ 断言保证，不属 lock 的职责范围。"
+      ]
     }
   ]
 }

@@ -4,6 +4,33 @@
 
 ---
 
+## [2026-09-01·ChinaIP 归属审计] 剔除 432 个 RIR 口径下确属外国的上游错误收录条目
+
+**动机**:用户质疑「ChinaIP 为何与地区 IP 选择器重叠」。全量归属审计(724 个交集段
+×四层证据:RIR delegated 五库全量 + 每段独立 RDAP + BGP 宣告 + GeoLite,全程零 DNS
+依赖)证实:预期中的「GeoLite 误圈真中国段」只有 12 段;**绝大多数交集是 ChinaIP
+上游(地理库导出,非 RIR 口径;/32、/31 的 summarize 形状是硬证据)错误收录了外国
+网段** —— Apple、Amazon/S3、Microsoft、Cogent、IETF 会场网、JPNIC 遗留块、被查封
+的 DOJ-USMS 空间等赫然在列。
+
+### Changed
+- **剔除 B 档 517 段 / 432 个条目**(375 整删 + 57 挖洞裁剪),ChinaIP
+  11,088 → **10,858** 条(6,990 v4 + 3,868 v6),全库 141,649 → **141,419**。
+  含用户裁决:阿里云新加坡、腾讯云 SG/US/DE/JP、字节 ARIN-US 等中国云厂商海外
+  区域(67 段/103 万地址)一并按地理归位,不再强制直连绕路。
+- **排除层机制化**:`config/chinaip-exclusions.txt`(587 条 CIDR,每条带 RIR
+  国家/注册实体/分档注释)由 `sources.lock.json` 的 `exclude_cidr` transform 消费
+  (该 op 新增 `file` 引用支持);上游再生永不静默回灌,恢复任一段需新 RDAP 证据。
+  expect 指纹(rules/per_type/set_sha256)同步更新,`rebuild --check` diff=0 闭环。
+- **rebuild.py --write 截断 bug 修复**:`open(dest,"w")` 在 `render_target` 读取
+  头注释之前截断了目标文件,导致写回丢表头 —— 先渲染后打开写,根治。
+- C 档 195 个证据冲突段(蓝汛破产出租段、滴滴/腾讯云 RDAP 分歧段、大中华区 HK 段)
+  刻意保留直连;A 档 12 段维持现状。JapanIP 五个 ASN 选择器经审计 99.97% 纯日本,
+  无溢出,不收窄。
+- audit(未豁免仍 3 条 P3)/runsuite 3,097 断言/analyzer 双跑 order_unsafe 全零/
+  collapse、sort、surge2clash、rebuild 全部 exit 0。审计全量证据(verdicts.csv
+  724 段四层证据串、RDAP 原始应答)存 scratchpad,结论入本条目。
+
 ## [2026-09-01·用户排法] 六分区聚类 + 地区表域名/IP 合并(34 表),吸收用户手写 conf 排法
 
 **来源与事故披露**:用户曾直接手改活动 `Surge.conf` 的 `[Rule]` 段(六个自命名分区、

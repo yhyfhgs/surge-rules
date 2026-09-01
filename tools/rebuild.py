@@ -123,9 +123,33 @@ def op_collapse_cidr(step, by_type, params, other, log):
     return out
 
 
+def _load_exclude_file(rel_path):
+    """读排除清单文件：非空、非 # 行，剥行尾 ` #` 注释，逐条解析为网段。"""
+    path = os.path.join(REPO_ROOT, rel_path)
+    if not os.path.isfile(path):
+        raise RebuildError("exclude_cidr 引用的文件不存在：%s" % rel_path)
+    nets = []
+    for lineno, raw in enumerate(read_text(path).splitlines(), 1):
+        s = raw.strip()
+        if not s or s.startswith("#"):
+            continue
+        idx = s.find(" #")
+        if idx >= 0:
+            s = s[:idx].strip()
+        try:
+            nets.append(ipaddress.ip_network(s, strict=True))
+        except ValueError as e:
+            raise RebuildError("%s:%d 排除段非法：%s（%s）" % (rel_path, lineno, s, e))
+    if not nets:
+        raise RebuildError("exclude_cidr 文件 %s 没有任何有效网段" % rel_path)
+    return nets
+
+
 def op_exclude_cidr(step, by_type, params, other, log):
     excludes = [ipaddress.ip_network(value, strict=True)
                 for value in step.get("values", [])]
+    if step.get("file"):
+        excludes.extend(_load_exclude_file(step["file"]))
     out = {}
     for rule_type, networks in by_type.items():
         current = list(networks)
@@ -281,8 +305,11 @@ def rebuild_one(src, prefer_network, write, diff_lines):
         if write:
             for target, _, _ in results:
                 dest = os.path.join(LISTS_DIR, target)
+                # 先渲染再打开写：open(dest, "w") 会立刻截断文件，而 render_target
+                # 需要读同一路径收集头注释——顺序颠倒会把表头写成空。
+                content = render_target(src, by_type, target)
                 with io.open(dest, "w", encoding="utf-8") as f:
-                    f.write(render_target(src, by_type, target))
+                    f.write(content)
                 print("  已写回 : lists/%s（--write）" % target)
             return 0
         return 1
