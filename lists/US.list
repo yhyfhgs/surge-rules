@@ -1,6 +1,11 @@
-# US — 美国区域服务，含银行/券商/征信域（chase/citi/wellsfargo/schwab/equifax 等，非支付渠道，刻意不入 Payment.list）
-# 排序：规则类型分区，区内字母序
-# 域名与 GEOIP/IP-ASN 同表自包含，整表刻意置于 Apple/微软/GFW 之后（前置会遮蔽它们的 IP 规则）
+# US — 美国服务域名；IP fallback 见 USIP.list
+
+DOMAIN-SUFFIX,cmu.edu
+DOMAIN-SUFFIX,cnet.com
+DOMAIN-SUFFIX,mit.edu
+DOMAIN-SUFFIX,nasa.gov
+DOMAIN-SUFFIX,uchicago.edu
+DOMAIN-SUFFIX,umich.edu
 
 DOMAIN-SUFFIX,att.com
 DOMAIN-SUFFIX,att.net
@@ -13,6 +18,7 @@ DOMAIN-SUFFIX,cbs.com
 DOMAIN-SUFFIX,cbsinteractive.com
 DOMAIN-SUFFIX,cbsnews.com
 DOMAIN-SUFFIX,chase.com
+DOMAIN-SUFFIX,chasecdn.com
 DOMAIN-SUFFIX,citi.com
 DOMAIN-SUFFIX,costco.com
 DOMAIN-SUFFIX,creditkarma.com
@@ -36,6 +42,7 @@ DOMAIN-SUFFIX,nbcnews.com
 DOMAIN-SUFFIX,newegg.com
 DOMAIN-SUFFIX,robinhood.com
 DOMAIN-SUFFIX,schwab.com
+DOMAIN-SUFFIX,schwab.com.cn
 DOMAIN-SUFFIX,siriusxm.com
 DOMAIN-SUFFIX,sling.com
 DOMAIN-SUFFIX,ssa.gov
@@ -52,5 +59,3 @@ DOMAIN-SUFFIX,verizonwireless.com
 DOMAIN-SUFFIX,visible.com
 DOMAIN-SUFFIX,walmart.com
 DOMAIN-SUFFIX,wellsfargo.com
-
-GEOIP,US,no-resolve

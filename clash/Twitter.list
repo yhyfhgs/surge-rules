@@ -1,9 +1,7 @@
 # AUTO-GENERATED — Clash(Mihomo) classical 规则，由 ../lists/Twitter.list 派生
 # 勿手工编辑；修改 Surge 源后运行 python3 tools/surge2clash.py 重新生成
 
-# Twitter — X/Twitter 生态，含 xAI（Grok/x.ai）；Cursor/Anysphere 为独立公司，2026-08-31 审计更正后归 AI.list
-# twitter 精确后缀集对撞自上游 blackmatrix7 Twitter 表；2026-08-31 审计删除宽 DOMAIN-KEYWORD,twitter
-# 排序：规则类型分区，区内字母序
+# X/Twitter and xAI; independent AI vendors remain in AI.
 
 DOMAIN-SUFFIX,ads-twitter.com
 DOMAIN-SUFFIX,cms-twdigitalassets.com
@@ -41,4 +39,3 @@ IP-CIDR,209.237.192.0/19,no-resolve
 
 IP-ASN,13414,no-resolve
 IP-ASN,35995,no-resolve
-IP-ASN,54888,no-resolve

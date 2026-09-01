@@ -1,12 +1,4 @@
-# Google — Google 全家桶（含 .google/.goog gTLD、搜索 ccTLD、Gemini/AI Studio/DeepMind/NotebookLM）；YouTube 全量在前表匹配
-# blogspot/gmail/recaptcha 精确后缀集对撞自上游 blackmatrix7 Google 表；2026-08-31 审计删除同名宽 DOMAIN-KEYWORD
-# 排序：规则类型分区，区内字母序；.google/.goog 后缀已兜底各 AI 门面（deepmind.google / labs.google / ai.google 等）
-# `-cn` 族 2026-08-31 处置（审计 R1-24 / 观察项 O-3，证据见 W2 逐端点可达性矩阵）：证书层已证实该族与
-#   Domestic 的 `.cn` 镜像族同基础设施（同一张 CN=*.google.cn 的 GTS 证书，SAN 同时含两族）⇒ 应同策略。
-#   18 条整条迁 Domestic.list（DIRECT）；googleadservices-cn.com 删（`www.` 在 CN 权威侧被置空为
-#   0.0.0.0/127.0.0.1，整条迁 DIRECT 会连黑洞且不回退代理）；qiao-cn.com 删（双侧 NODATA，死条目）。
-#   **gstatic-cn.com 刻意留本表**：apex 无 exact SAN（两侧皆 TLS 失败），本轮未抓到实际被引用的子域，
-#   证据不足以支撑迁移；列为观察项，取到真实 `*.gstatic-cn.com` 子域后再复核。
+# Google international ecosystem; YouTube precedes this list and verified CN mirrors are in Domestic.
 
 DOMAIN-SUFFIX,0emm.com
 DOMAIN-SUFFIX,1e100.net
@@ -223,7 +215,50 @@ DOMAIN-SUFFIX,getbumptop.com
 DOMAIN-SUFFIX,getmdl.io
 DOMAIN-SUFFIX,getoutline.org
 DOMAIN-SUFFIX,ggoogle.com
-DOMAIN-SUFFIX,ggpht.com
+DOMAIN,ggpht.com
+DOMAIN,accounts.google.com
+DOMAIN,adwords.google.com
+DOMAIN,aistudio.google.com
+DOMAIN,apis.google.com
+DOMAIN,clients6.google.com
+DOMAIN,colab.research.google.com
+DOMAIN-SUFFIX,drive.google.com
+DOMAIN,gemini.google.com
+DOMAIN,l.google.com
+DOMAIN-SUFFIX,mail.google.com
+DOMAIN,notebooklm.google.com
+DOMAIN,www.google.com
+DOMAIN-SUFFIX,calendar.google.com
+DOMAIN-SUFFIX,chat.google.com
+DOMAIN-SUFFIX,contacts.google.com
+DOMAIN-SUFFIX,docs.google.com
+DOMAIN-SUFFIX,forms.google.com
+DOMAIN-SUFFIX,groups.google.com
+DOMAIN-SUFFIX,meet.google.com
+DOMAIN-SUFFIX,maps.google.com
+DOMAIN-SUFFIX,myaccount.google.com
+DOMAIN-SUFFIX,news.google.com
+DOMAIN-SUFFIX,photos.google.com
+DOMAIN-SUFFIX,play.google.com
+DOMAIN-SUFFIX,sheets.google.com
+DOMAIN-SUFFIX,sites.google.com
+DOMAIN-SUFFIX,slides.google.com
+DOMAIN-SUFFIX,support.google.com
+DOMAIN-SUFFIX,translate.google.com
+DOMAIN-SUFFIX,vids.google.com
+DOMAIN-SUFFIX,workspace.google.com
+DOMAIN-SUFFIX,lh1.ggpht.com
+DOMAIN-SUFFIX,lh2.ggpht.com
+DOMAIN-SUFFIX,lh3.ggpht.com
+DOMAIN-SUFFIX,lh4.ggpht.com
+DOMAIN-SUFFIX,lh5.ggpht.com
+DOMAIN-SUFFIX,lh6.ggpht.com
+DOMAIN-SUFFIX,lh1.googleusercontent.com
+DOMAIN-SUFFIX,lh2.googleusercontent.com
+DOMAIN-SUFFIX,lh3.googleusercontent.com
+DOMAIN-SUFFIX,lh4.googleusercontent.com
+DOMAIN-SUFFIX,lh5.googleusercontent.com
+DOMAIN-SUFFIX,lh6.googleusercontent.com
 DOMAIN-SUFFIX,gipscorp.com
 DOMAIN-SUFFIX,globaledu.org
 DOMAIN-SUFFIX,gmail.com
@@ -303,7 +338,7 @@ DOMAIN-SUFFIX,google.co.vi
 DOMAIN-SUFFIX,google.co.za
 DOMAIN-SUFFIX,google.co.zm
 DOMAIN-SUFFIX,google.co.zw
-DOMAIN-SUFFIX,google.com
+DOMAIN,google.com
 DOMAIN-SUFFIX,google.com.af
 DOMAIN-SUFFIX,google.com.ag
 DOMAIN-SUFFIX,google.com.ai
@@ -459,7 +494,21 @@ DOMAIN-SUFFIX,google.ws
 DOMAIN-SUFFIX,googleacquisitionmigration.com
 DOMAIN-SUFFIX,googleadapis.com
 DOMAIN-SUFFIX,googleanalytics.com
-DOMAIN-SUFFIX,googleapis.com
+DOMAIN,aiplatform.googleapis.com
+DOMAIN,ajax.googleapis.com
+DOMAIN,calendar.googleapis.com
+DOMAIN,content.googleapis.com
+DOMAIN,drive.googleapis.com
+DOMAIN,firebaseinstallations.googleapis.com
+DOMAIN,fonts.googleapis.com
+DOMAIN,generativelanguage.googleapis.com
+DOMAIN,gmail.googleapis.com
+DOMAIN,maps.googleapis.com
+DOMAIN,oauth2.googleapis.com
+DOMAIN,people.googleapis.com
+DOMAIN,sheets.googleapis.com
+DOMAIN,translate.googleapis.com
+DOMAIN,www.googleapis.com
 DOMAIN-SUFFIX,googleapps.com
 DOMAIN-SUFFIX,googlearth.com
 DOMAIN-SUFFIX,googleartproject.com
@@ -497,7 +546,7 @@ DOMAIN-SUFFIX,googlestore.com
 DOMAIN-SUFFIX,googlesverige.com
 DOMAIN-SUFFIX,googletagmanager.com
 DOMAIN-SUFFIX,googletraveladservices.com
-DOMAIN-SUFFIX,googleusercontent.com
+DOMAIN,googleusercontent.com
 DOMAIN-SUFFIX,googleventures.com
 DOMAIN-SUFFIX,googleweblight.com
 DOMAIN-SUFFIX,googlezip.net

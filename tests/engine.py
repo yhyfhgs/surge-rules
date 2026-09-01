@@ -212,7 +212,6 @@ BUILTIN_ASN_SAMPLES = {
     "13414": ["104.244.40.0/21", "192.133.76.0/22", "199.16.156.0/22",
               "199.59.148.0/22", "199.96.56.0/21"],
     "35995": ["69.195.160.0/19"],
-    "54888": ["209.237.192.0/19"],
     # Telegram
     "62014": ["149.154.160.0/20"], "62041": ["91.108.4.0/22"],
     "44907": ["91.108.56.0/22"], "59930": ["91.105.192.0/23"],
@@ -1210,9 +1209,9 @@ def run_selftest(verbose=True):
                   len(re_engine.rules) > 100000, True)
             check("R02 FINAL 存在且指向 Final 组",
                   re_engine.final_rule.policy, "Final")
-            # R03–R05 断言真实 conf 的叶子出口**画像**而不是组名 —— 组名带线路商
+            # R03–R06 断言真实 conf 的叶子出口**画像**而不是组名 —— 组名带线路商
             # 标识，不入库；组名→exit_class 的对照放本地私有覆盖档。覆盖档缺失时
-            # 真实组名不在 EXIT_CLASS_MAP 内，这三条只能退化为国旗兜底，故跳过。
+            # 真实组名不在 EXIT_CLASS_MAP 内，这四条只能退化为国旗兜底，故跳过。
             if LOCAL_EXIT_CLASS_LOADED:
                 check("R03 Final 组递归到美国家宽 A 出口",
                       re_engine.resolve_exit("Final")[1], "US-HOME-A")
@@ -1223,15 +1222,21 @@ def run_selftest(verbose=True):
                 check("R05b Final 与 AI 落到同一个叶子出口组",
                       re_engine.resolve_exit("Final")[0] ==
                       re_engine.resolve_exit("AI")[0], True)
+                # R06：2026-09-01 用户删除全部「落地」(DC) 组与其节点链后，社交媒体
+                # 组首项改为美国家宽 A。旧断言 ("🇺🇸美国落地","US-DC") 引用的组已不
+                # 存在，故按当前 conf 实际递归结果重写；同时改断**画像**不断组名，
+                # 与 R03–R05 对齐（真实组名不入库），并移进覆盖档门禁——无覆盖档时
+                # 首项是表外组名，会退化成国旗兜底 US-DC 而假绿。
+                check("R06 社交媒体组递归到美国家宽 A 出口",
+                      re_engine.resolve_exit("社交媒体")[1], "US-HOME-A")
             else:
                 for _n in ("R03 Final 组出口画像", "R04 AI 组出口画像",
-                           "R05 Google-X-Meta-MS 组出口画像"):
+                           "R05 Google-X-Meta-MS 组出口画像",
+                           "R06 社交媒体组出口画像"):
                     results.append({
                         "name": _n, "ok": True,
                         "got": "skipped(无本地 exit_class_exact 覆盖档)",
                         "want": "skipped"})
-            check("R06 社交媒体组递归到美国落地",
-                  re_engine.resolve_exit("社交媒体"), ("🇺🇸美国落地", "US-DC"))
             check("R07 chatgpt.com → AI 组",
                   re_engine.match(host="chatgpt.com")["policy"], "AI")
             check("R08 www.youtube.com → 流媒体组（先于 Google）",

@@ -61,7 +61,7 @@
         {"host": "store.steampowered.com", "policy": "游戏"},
         {"host": "cdn.jsdelivr.net", "policy": "下载"},
         {"host": "github.com", "policy": "Google-X-Meta-MS", "reason": "2026-08-29 用户裁决：GitHub 平台域归 Microsoft.list（微软生态），撤销 2026-08-25 的 FIX-B。"},
-        {"host": "en.wikipedia.org", "policy": "Final"}
+        {"host": "en.wikipedia.org", "policy": "Proxy", "reason": "命中 ProxyGFW 的 wikipedia.org；2026-09-01 起 ProxyGFW 独立挂 Proxy 组（与收尾 FINAL 解耦）"}
       ]
     }
   },

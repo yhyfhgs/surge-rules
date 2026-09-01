@@ -227,7 +227,7 @@
         {
           "host": "rthklive2-lh.akamaihd.net",
           "policy": "流媒体",
-          "reason": "精确 host 前置于 ProxyGFW 的 akamaihd.net 宽后缀"
+          "reason": "由 Streaming.list 的精确 host 规则承接"
         },
         {
           "host": "dca-ll-voddazn-dznvodjp.s.llnwi.net",
@@ -442,7 +442,7 @@
         {
           "host": "abcd1234.execute-api.us-east-1.amazonaws.com",
           "policy": "Final",
-          "reason": "落 ProxyGFW 的 amazonaws.com 刻意兜底"
+          "reason": "任意租户的 AWS API Gateway 不代表流媒体身份；amazonaws.com 宽兜底已移除，落 FINAL"
         },
         {
           "host": "44wilhpljf.execute-api.ap-southeast-1.amazonaws.com",
@@ -588,8 +588,8 @@
         },
         {
           "host": "mytiktokcdn.com.cn",
-          "policy": "DIRECT",
-          "reason": "回落国内直连，不再被 TikTok 关键词抢走"
+          "policy": "Final",
+          "reason": "The synthetic third-party registrant remains neutral after the broad com.cn rule was removed."
         }
       ]
     }

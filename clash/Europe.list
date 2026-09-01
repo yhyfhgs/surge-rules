@@ -1,11 +1,9 @@
 # AUTO-GENERATED — Clash(Mihomo) classical 规则，由 ../lists/Europe.list 派生
 # 勿手工编辑；修改 Surge 源后运行 python3 tools/surge2clash.py 重新生成
 
-# Europe — 欧洲区域服务；域名与 GEOIP/IP-ASN 同表自包含，整表刻意置于 Apple/微软/GFW 之后（前置会遮蔽它们的 IP 规则）
-# 排序：规则类型分区，区内字母序
-# GEOIP 口径：GEOIP 层只对「已携带字面量 IP」的连接生效（全部 no-resolve），当前覆盖 CH/DE/FR/NL——按有出口的国家取，不按欧洲全集取；
-#             域名层按实体枚举，含 BE/LU 与跨国实体（europa.eu / esa.int / cern.ch 等）。两层范围刻意不对齐，不是缺陷，勿为「对齐」增删 GEOIP 行。
-#             要改 GEOIP 本身须先开 conf 的 http-api：离线引擎无 MaxMind 库，非 CN 的 GEOIP 一律判不匹配，改动无法在 runsuite 里验证。
+# Europe — 欧洲服务域名；CH/DE/FR/NL IP fallback 见 EuropeIP.list
+
+DOMAIN-SUFFIX,yandex.ru
 
 DOMAIN-SUFFIX,1und1.de
 DOMAIN-SUFFIX,abnamro.nl
@@ -75,8 +73,3 @@ DOMAIN-SUFFIX,zdf-cdn.de
 DOMAIN-SUFFIX,zdf.de
 DOMAIN-SUFFIX,zeit.de
 DOMAIN-SUFFIX,ziggo.nl
-
-GEOIP,CH,no-resolve
-GEOIP,DE,no-resolve
-GEOIP,FR,no-resolve
-GEOIP,NL,no-resolve

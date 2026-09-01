@@ -107,7 +107,7 @@
         {
           "host": "mybucket.s3.amazonaws.com",
           "policy": "Final",
-          "reason": "落 ProxyGFW 的刻意 AWS 兜底 DOMAIN-SUFFIX,amazonaws.com（Final 组）"
+          "reason": "删除 S3 多租户宽后缀后不再命中 DownloadCDN 或 ProxyGFW，落 FINAL 兜底"
         },
         {
           "host": "abcdefghijkl.supabase.co",
@@ -512,7 +512,7 @@
       },
       {
         "host": "docs.gitbook.io",
-        "note": "负例：GitBook 文档面不是文件面，由 ProxyGFW 承接落 Final"
+        "note": "负例：GitBook 文档面不是文件面，*-files.gitbook.io 之外落 FINAL 兜底"
       },
       {
         "host": "akamaized.net",
@@ -596,7 +596,8 @@
         },
         {
           "host": "docs.gitbook.io",
-          "policy": "Final"
+          "policy": "Final",
+          "reason": "GitBook 文档面未命中下载专用的 *-files.gitbook.io，gitbook.io 宽后缀已移除，落 FINAL 兜底"
         },
         {
           "host": "akamaized.net",

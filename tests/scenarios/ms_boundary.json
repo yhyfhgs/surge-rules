@@ -1,0 +1,106 @@
+[
+  {
+    "name": "ms_gfw_to_microsoft_migration",
+    "desc": "W-MS 迁移正例：5 条微软注册域自 ProxyGFW 迁入 Microsoft.list（区 5，先于 MicrosoftCN 区 7），出口自 GFW 兜底层变 Google-X-Meta-MS。归属证据：gfx.ms/skype.com 为 MarkMonitor + Azure DNS，microsoft-falcon.io/microsofttranslator.com SOA 为 azuredns-hostmaster.microsoft.com（COM LAUDE 品牌注册商），msn.com.tw CNAME → reroute.microsoft.com；五条均经全前位遮蔽扫描确认不遮蔽 MicrosoftCN/AppleCN/Domestic 任何直连条目",
+    "requests": [
+      {"host": "gfx.ms", "note": "Live/登录静态资产注册域"},
+      {"host": "mem.gfx.ms", "note": "实活主机：CNAME → t-msedge 全球 anycast，CN 侧 13.107.246.74 非 CN ASN"},
+      {"host": "microsoft-falcon.io", "note": "Bing Shopping 基建域；本次由窄条 bing-shopping.microsoft-falcon.io 合并为父后缀（Mixpanel 先例）"},
+      {"host": "bing-shopping.microsoft-falcon.io", "note": "原 Microsoft.list 窄条（双侧 NXDOMAIN），删除后仍由父后缀覆盖，落点不变"},
+      {"host": "microsofttranslator.com"},
+      {"host": "www.microsofttranslator.com", "note": "CN 侧 CNAME → china.bing123.com，与 www.bing.com 同一地理引导壳；bing.com 已在本表，同会话须同组"},
+      {"host": "api.cognitive.microsofttranslator.com", "note": "Translator 现网 API 端点"},
+      {"host": "msn.com.tw", "note": "MSN 台湾站，与 MicrosoftCN 的 msn.com 是不同注册域，不构成遮蔽"},
+      {"host": "www.msn.com.tw"},
+      {"host": "skype.com"},
+      {"host": "www.skype.com", "note": "双侧均落 s-msedge 52.123.128-131.14，无投毒无 CN 面"},
+      {"host": "login.skype.com", "note": "登录面随主域同组"}
+    ],
+    "assert": {
+      "same_policy": true,
+      "policy": "Google-X-Meta-MS",
+      "no_dns_leak": true
+    }
+  },
+  {
+    "name": "ms_mscn_direct_face_unshadowed",
+    "desc": "W-MS 防遮蔽回归（负例）：迁入 Microsoft.list 的任何条目都不得把 MicrosoftCN 的国内直连面拽进代理。本组 13 条全部经双侧 dig 实证 CN 面（tdnsdl1.cn / cngslb.com / ksyuncdn.com / ctlcdn.cn / cn.akamaitech.net / Akamai CN POP），必须仍 DIRECT；任何一条翻成 Google-X-Meta-MS 即为「宽后缀回流 Microsoft.list」的信号",
+    "requests": [
+      {"host": "oneclient.sfx.ms", "note": "CN 侧 a124.dscd.akamai.net.0.1.cn.akamaitech.net = Akamai 中国节点；与 ProxyGFW 的精确 p.sfx.ms 规则共同证明父后缀必须禁止"},
+      {"host": "office.live.com", "note": "R1-01 边界：onedrive.live.com 走代理，office.live.com 精确子树仍直连"},
+      {"host": "view.officeapps.live.com"},
+      {"host": "g.live.com"},
+      {"host": "www.msn.com", "note": "与新迁入的 msn.com.tw 的分界：msn.com 仍 DIRECT"},
+      {"host": "www.office.com"},
+      {"host": "officecdn.microsoft.com", "note": "CN 侧 fw85yi09.sched.vodtylego.tdnsvod1.cn"},
+      {"host": "software.download.prss.microsoft.com", "note": "CN 侧 5g7oqi2b.sched.dma.tdnsdl1.cn，23 条 prss 族代表"},
+      {"host": "download.windowsupdate.com", "note": "CN 侧 wu-xlc.…i.cngslb.com"},
+      {"host": "dl.delivery.mp.microsoft.com", "note": "CN 侧 wsdnt-xlc.…z1.cngslb.com"},
+      {"host": "crl.microsoft.com", "note": "微软自家 CA，握手关键路径"},
+      {"host": "oneocsp.microsoft.com"},
+      {"host": "statics.teams.cdn.office.net", "note": "CN 侧 a1813.dscd.akamai.net.0.1.cn.akamaitech.net"}
+    ],
+    "assert": {
+      "same_policy": true,
+      "policy": "DIRECT",
+      "no_dns_leak": true
+    }
+  },
+  {
+    "name": "ms_explicit_owner_boundary",
+    "desc": "Microsoft first-party navigation/API namespaces stay with Microsoft while arbitrary Azure tenants and retired HockeyApp fall through to Final.",
+    "requests": [
+      {"host": "microsoft.com"},
+      {"host": "officeclient.microsoft.com"},
+      {"host": "apis.live.net"},
+      {"host": "www.onenote.com"},
+      {"host": "content.office.net"},
+      {"host": "p.sfx.ms", "note": "Exact Microsoft host; oneclient.sfx.ms remains MicrosoftCN"},
+      {"host": "sometenant.webpubsub.azure.com", "note": "任意 WebPubSub 租户不属于 AI 的 OpenAI 专属实例，azure.com 多租户宽后缀已移除"},
+      {"host": "sometenant.azureedge.net", "note": "任意 Azure Edge 租户，宽兜底已移除"},
+      {"host": "sometenant.azurewebsites.net", "note": "PSL 多租户边界，宽兜底已移除"},
+      {"host": "hockeyapp.net", "note": "微软持有但已停服，NS/SOA 双侧无应答，已移除死域规则"}
+    ],
+    "assert": {
+      "same_policy": false,
+      "no_dns_leak": true,
+      "per_request": [
+        {"host": "microsoft.com", "policy": "Google-X-Meta-MS"},
+        {"host": "officeclient.microsoft.com", "policy": "Google-X-Meta-MS"},
+        {"host": "apis.live.net", "policy": "Google-X-Meta-MS"},
+        {"host": "www.onenote.com", "policy": "Google-X-Meta-MS"},
+        {"host": "content.office.net", "policy": "Google-X-Meta-MS"},
+        {"host": "p.sfx.ms", "policy": "Google-X-Meta-MS"},
+        {"host": "sometenant.webpubsub.azure.com", "policy": "Final"},
+        {"host": "sometenant.azureedge.net", "policy": "Final"},
+        {"host": "sometenant.azurewebsites.net", "policy": "Final"},
+        {"host": "hockeyapp.net", "policy": "Final"}
+      ]
+    }
+  },
+  {
+    "name": "ms_explicit_subtrees_intact",
+    "desc": "微软控制/OneDrive 数据端点归 Microsoft owner；独立下载、Azure 监控包与 OpenAI 专属 WebPubSub 保持各自 owner。",
+    "requests": [
+      {"host": "d.docs.live.net", "note": "OneDrive 数据面与微软控制面同出口"},
+      {"host": "contentsync.onenote.com"},
+      {"host": "hierarchyapi.onenote.com"},
+      {"host": "support.content.office.net"},
+      {"host": "monitor.azure.com"},
+      {"host": "pkgs.dev.azure.com"},
+      {"host": "chatgpt-async-webps-prod-eastus-1.webpubsub.azure.com", "note": "AI.list 的 OpenAI 专属 WebPubSub 实例：位次在 Microsoft.list 之后，azure.com 上移即被吃掉"}
+    ],
+    "assert": {
+      "no_dns_leak": true,
+      "per_request": [
+        {"host": "d.docs.live.net", "policy": "Google-X-Meta-MS"},
+        {"host": "contentsync.onenote.com", "policy": "Google-X-Meta-MS"},
+        {"host": "hierarchyapi.onenote.com", "policy": "Google-X-Meta-MS"},
+        {"host": "support.content.office.net", "policy": "Google-X-Meta-MS"},
+        {"host": "monitor.azure.com", "policy": "下载"},
+        {"host": "pkgs.dev.azure.com", "policy": "下载"},
+        {"host": "chatgpt-async-webps-prod-eastus-1.webpubsub.azure.com", "policy": "AI"}
+      ]
+    }
+  }
+]

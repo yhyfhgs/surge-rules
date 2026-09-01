@@ -43,7 +43,7 @@
   },
   {
     "name": "kw_direct_microsoftcn_onedrive_exact",
-    "desc": "MicrosoftCN 删 1drv/onedrive/skydrive 三条关键词，改上游 OneDrive 表精确后缀；OneDrive 数据面 files.1drv.com 归 DownloadCDN 的既有未决裁决保持不动",
+    "desc": "OneDrive 国内端点保持 DIRECT；国际控制与数据端点归 Microsoft 组，避免会话跨出口。",
     "requests": [
       {"host": "1drv.ms", "note": "OneDrive 短链"},
       {"host": "1drv.com"},
@@ -51,7 +51,7 @@
       {"host": "api.onedrive.com"},
       {"host": "onedrive.live.com", "note": "R1-01 起由 Microsoft.list（前位）窄豁免认领，不再落 MicrosoftCN 的 live.com"},
       {"host": "skydrive.wns.windows.com", "note": "WNS 推送端点"},
-      {"host": "files.1drv.com", "note": "既有未决裁决：数据面在 DownloadCDN（前位）"},
+      {"host": "files.1drv.com", "note": "国际 OneDrive 数据面归 Microsoft owner"},
       {"host": "firestonedrivestore.com", "note": "负例：上游 Global 表域，串中含 onedrive"},
       {"host": "51drv.com", "note": "负例：上游 ChinaMax 表域，串中含 1drv"}
     ],
@@ -64,9 +64,9 @@
         {"host": "api.onedrive.com", "policy": "DIRECT", "reason": "DOMAIN-SUFFIX,onedrive.com（新增）"},
         {"host": "onedrive.live.com", "policy": "Google-X-Meta-MS", "reason": "R1-01 在 Microsoft.list（前位）加了 DOMAIN-SUFFIX,onedrive.live.com 窄豁免——CN 侧解析被投毒，直连必挂；与本场景删 keyword 无关"},
         {"host": "skydrive.wns.windows.com", "policy": "DIRECT", "reason": "DOMAIN-SUFFIX,skydrive.wns.windows.com（新增）"},
-        {"host": "files.1drv.com", "policy": "下载", "reason": "DownloadCDN 前位认领，本次不动"},
+        {"host": "files.1drv.com", "policy": "Google-X-Meta-MS", "reason": "OneDrive 数据面与国际控制面统一由 Microsoft.list 认领"},
         {"host": "firestonedrivestore.com", "policy": "Final", "reason": "原被 onedrive keyword 强制 DIRECT，属跨境误分流"},
-        {"host": "51drv.com", "policy_in": ["Final", "DIRECT"], "reason": "原被 1drv keyword 强制 DIRECT。双态可接受：回收前无表认领落 Final，ChinaDomain 整表再生后自然回收为 DIRECT——MAINTENANCE §8「再生回收清单」明载「属预期，勿当回归」"}
+        {"host": "51drv.com", "policy_in": ["Final", "DIRECT"], "reason": "无显式 owner 时落 Final；ChinaDomain 再生后可能按机器层证据回收为 DIRECT。"}
       ]
     }
   },
@@ -130,16 +130,16 @@
   },
   {
     "name": "kw_direct_proxygfw_brand_exact_restore",
-    "desc": "ProxyGFW 的 abema/appledaily/beetalk/dlercloud/dropbox 五条品牌关键词改精确后缀：本表策略与 FINAL 同为 Final，故落点不变，但资产从此显式可审",
+    "desc": "ProxyGFW 的品牌规则收窄为可审计的精确后缀：dropbox/appledaily/dlercloud 资产仍走 Proxy，已移除的 beetalk 退回 Final；abema 资产由 Streaming 承接，仿冒域继续落 Final",
     "requests": [
       {"host": "www.dropbox.com"},
       {"host": "api.dropboxapi.com"},
       {"host": "getdropbox.com"},
-      {"host": "dropboxusercontent.com"},
-      {"host": "dl.dropboxusercontent.com", "note": "DownloadCDN 前位认领，不动"},
+      {"host": "dropboxusercontent.com", "note": "Dropbox content namespace is unified under DownloadCDN"},
+      {"host": "dl.dropboxusercontent.com"},
       {"host": "dropboxstatic.com", "note": "DownloadCDN 前位认领，不动"},
       {"host": "appledaily.com.hk"},
-      {"host": "beetalk.com"},
+      {"host": "beetalk.com", "note": "已移除的死域，回落 Final"},
       {"host": "dlercloud.com"},
       {"host": "abema.tv", "note": "Abema 资产归 Streaming（前位），删 keyword 不影响"},
       {"host": "dropbox-download.com", "note": "负例：上游 Advertising 表仿冒域"},
@@ -148,15 +148,15 @@
     "assert": {
       "no_dns_leak": true,
       "per_request": [
-        {"host": "www.dropbox.com", "policy": "Final", "reason": "DOMAIN-SUFFIX,dropbox.com（新增）"},
-        {"host": "api.dropboxapi.com", "policy": "Final", "reason": "DOMAIN-SUFFIX,dropboxapi.com（新增）"},
-        {"host": "getdropbox.com", "policy": "Final", "reason": "DOMAIN-SUFFIX,getdropbox.com（新增）"},
-        {"host": "dropboxusercontent.com", "policy": "Final", "reason": "DOMAIN-SUFFIX,dropboxusercontent.com（新增）"},
-        {"host": "dl.dropboxusercontent.com", "policy": "下载", "reason": "DownloadCDN 前位，唯一归属不变"},
+        {"host": "www.dropbox.com", "policy": "Proxy", "reason": "DOMAIN-SUFFIX,dropbox.com（新增）；2026-09-01 起 ProxyGFW 独立挂 Proxy 组（与收尾 FINAL 解耦）"},
+        {"host": "api.dropboxapi.com", "policy": "Proxy", "reason": "DOMAIN-SUFFIX,dropboxapi.com（新增）；2026-09-01 起 ProxyGFW 独立挂 Proxy 组（与收尾 FINAL 解耦）"},
+        {"host": "getdropbox.com", "policy": "Proxy", "reason": "DOMAIN-SUFFIX,getdropbox.com（新增）；2026-09-01 起 ProxyGFW 独立挂 Proxy 组（与收尾 FINAL 解耦）"},
+        {"host": "dropboxusercontent.com", "policy": "下载"},
+        {"host": "dl.dropboxusercontent.com", "policy": "下载"},
         {"host": "dropboxstatic.com", "policy": "下载", "reason": "DownloadCDN 前位，唯一归属不变"},
-        {"host": "appledaily.com.hk", "policy": "Final", "reason": "DOMAIN-SUFFIX,appledaily.com.hk（新增）"},
-        {"host": "beetalk.com", "policy": "Final", "reason": "DOMAIN-SUFFIX,beetalk.com（新增，上游无精确行，按品牌主域恢复）"},
-        {"host": "dlercloud.com", "policy": "Final", "reason": "DOMAIN-SUFFIX,dlercloud.com（新增）"},
+        {"host": "appledaily.com.hk", "policy": "Proxy", "reason": "DOMAIN-SUFFIX,appledaily.com.hk（新增）；2026-09-01 起 ProxyGFW 独立挂 Proxy 组（与收尾 FINAL 解耦）"},
+        {"host": "beetalk.com", "policy": "Final", "reason": "beetalk.com 已从 ProxyGFW 移除，落 FINAL 兜底"},
+        {"host": "dlercloud.com", "policy": "Proxy", "reason": "DOMAIN-SUFFIX,dlercloud.com（新增）；2026-09-01 起 ProxyGFW 独立挂 Proxy 组（与收尾 FINAL 解耦）"},
         {"host": "abema.tv", "policy": "流媒体", "reason": "Streaming 前位，唯一归属不变"},
         {"host": "dropbox-download.com", "policy": "Final", "reason": "不再由 ProxyGFW keyword 显式认领，落 FINAL 兜底"},
         {"host": "a8.abemashopping.jp", "policy": "Final", "reason": "不再由 ProxyGFW keyword 显式认领，落 FINAL 兜底"}
@@ -185,28 +185,32 @@
         {"host": "api.githubcopilot.com", "policy": "Google-X-Meta-MS", "reason": "Microsoft.list，删 keyword 前后不变"},
         {"host": "1e100.net", "policy": "Google-X-Meta-MS", "reason": "Google.list，删 keyword 前后不变"},
         {"host": "yx-in-f108.1e100.net", "policy": "Google-X-Meta-MS", "reason": "Google.list，删 keyword 前后不变"},
-        {"host": "kkgithub.com", "policy_in": ["Final", "DIRECT"], "reason": "不再被 ProxyGFW 钉住。双态可接受：回收前无表认领落 Final，ChinaDomain 整表再生后自然回收为 DIRECT——MAINTENANCE §8「再生回收清单」明载「属预期，勿当回归」"},
-        {"host": "hellogithub.com", "policy_in": ["Final", "DIRECT"], "reason": "不再被 ProxyGFW 钉住。双态可接受：回收前无表认领落 Final，ChinaDomain 整表再生后自然回收为 DIRECT——MAINTENANCE §8「再生回收清单」明载「属预期，勿当回归」"},
-        {"host": "githubim.com", "policy_in": ["Final", "DIRECT"], "reason": "不再被 ProxyGFW 钉住。双态可接受：回收前无表认领落 Final，ChinaDomain 整表再生后自然回收为 DIRECT——MAINTENANCE §8「再生回收清单」明载「属预期，勿当回归」"},
-        {"host": "githubshare.com", "policy_in": ["Final", "DIRECT"], "reason": "不再被 ProxyGFW 钉住。双态可接受：回收前无表认领落 Final，ChinaDomain 整表再生后自然回收为 DIRECT——MAINTENANCE §8「再生回收清单」明载「属预期，勿当回归」"}
+        {"host": "kkgithub.com", "policy_in": ["Final", "DIRECT"], "reason": "无显式 owner 时落 Final；ChinaDomain 再生可按机器层证据回收为 DIRECT。"},
+        {"host": "hellogithub.com", "policy_in": ["Final", "DIRECT"], "reason": "无显式 owner 时落 Final；ChinaDomain 再生可按机器层证据回收为 DIRECT。"},
+        {"host": "githubim.com", "policy_in": ["Final", "DIRECT"], "reason": "无显式 owner 时落 Final；ChinaDomain 再生可按机器层证据回收为 DIRECT。"},
+        {"host": "githubshare.com", "policy_in": ["Final", "DIRECT"], "reason": "无显式 owner 时落 Final；ChinaDomain 再生可按机器层证据回收为 DIRECT。"}
       ]
     }
   },
   {
     "name": "kw_direct_proxygfw_avtb_wildcard",
-    "desc": "ProxyGFW 的 avtb 关键词改左锚定 DOMAIN-WILDCARD,avtb*：只收以 avtb 起头的成人站族，不再吞中段含该串的域（报告实证的快手上游域 eqoavtbu.com）",
+    "desc": "ProxyGFW 的 avtb 规则改为显式后缀：avtb.com、avtb.net、avtb123.com 及其子域走 Proxy，不再依赖宽关键词吞入中段含该串的域",
     "requests": [
-      {"host": "avtb123.com", "note": "正例：左锚定命中"},
-      {"host": "avtb.net", "note": "正例：左锚定命中"},
+      {"host": "avtb123.com", "note": "正例：显式后缀"},
+      {"host": "avtb.net", "note": "正例：显式后缀"},
+      {"host": "www.avtb.com", "note": "正例：显式 avtb.com 后缀"},
+      {"host": "foo.avtb.net", "note": "正例：显式 avtb.net 后缀"},
       {"host": "eqoavtbu.com", "note": "负例：上游 KuaiShou/ChinaMax 域，串在中段"},
       {"host": "dnavtbt.com", "note": "负例：上游 Advertising 域，串在中段"}
     ],
     "assert": {
       "no_dns_leak": true,
       "per_request": [
-        {"host": "avtb123.com", "policy": "Final", "reason": "DOMAIN-WILDCARD,avtb*"},
-        {"host": "avtb.net", "policy": "Final", "reason": "DOMAIN-WILDCARD,avtb*"},
-        {"host": "eqoavtbu.com", "policy_in": ["Final", "DIRECT"], "reason": "不再被 ProxyGFW 钉住。双态可接受：回收前无表认领落 Final，ChinaDomain 整表再生后自然回收为 DIRECT——MAINTENANCE §8「再生回收清单」明载「属预期，勿当回归」"},
+        {"host": "avtb123.com", "policy": "Proxy", "reason": "DOMAIN-SUFFIX,avtb123.com"},
+        {"host": "avtb.net", "policy": "Proxy", "reason": "DOMAIN-SUFFIX,avtb.net"},
+        {"host": "www.avtb.com", "policy": "Proxy", "reason": "DOMAIN-SUFFIX,avtb.com"},
+        {"host": "foo.avtb.net", "policy": "Proxy", "reason": "DOMAIN-SUFFIX,avtb.net"},
+        {"host": "eqoavtbu.com", "policy_in": ["Final", "DIRECT"], "reason": "无显式 owner 时落 Final；ChinaDomain 再生可按机器层证据回收为 DIRECT。"},
         {"host": "dnavtbt.com", "policy": "Final", "reason": "不再被 ProxyGFW 钉住；广告域应由 Reject 层裁决"}
       ]
     }

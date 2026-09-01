@@ -1,10 +1,13 @@
-# Games — 游戏平台国际服（Steam/Epic/暴雪；上游 blackmatrix7 Game）；国服品牌域与国服下载 CDN 归 GameDownloadCN.list
-# 排序：规则类型分区，区内字母序
+# International game services; mainland game downloads are owned by GameDownloadCN.
+
+DOMAIN-SUFFIX,armorgames.com
 
 DOMAIN,eaasserts-a.akamaihd.net
+DOMAIN,assets-priconne-redive-us.akamaized.net
 DOMAIN,gog.salesmanago.com
 DOMAIN,img-prod-cms-rt-microsoft-com.akamaized.net
 DOMAIN,originasserts.akamaized.net
+DOMAIN,pf-cdn-content-prod.azureedge.net
 DOMAIN,steampipe-partner.secure2.footprint.net
 DOMAIN,store-images.s-microsoft.com
 
@@ -14,7 +17,6 @@ DOMAIN-SUFFIX,amiibo.com
 DOMAIN-SUFFIX,anthemgame.com
 DOMAIN-SUFFIX,anthemthegame.com
 DOMAIN-SUFFIX,apexlegends.com
-DOMAIN-SUFFIX,api-priconne-redive.cygames.jp
 DOMAIN-SUFFIX,avatargarenanow-a.akamaihd.net
 DOMAIN-SUFFIX,awayoutgame.com
 DOMAIN-SUFFIX,ayudanintendo.com
@@ -41,7 +43,8 @@ DOMAIN-SUFFIX,bethsoft.com
 DOMAIN-SUFFIX,bioware.com
 DOMAIN-SUFFIX,biowarestore.com
 DOMAIN-SUFFIX,blackboxgames.com
-DOMAIN-SUFFIX,blizzard.com
+DOMAIN,blizzard.com
+DOMAIN,www.blizzard.com
 DOMAIN-SUFFIX,blizzard.gcdn.cloudn.co.kr
 DOMAIN-SUFFIX,blizzard.nefficient.co.kr
 DOMAIN-SUFFIX,blizzardgearstore.com
@@ -61,7 +64,6 @@ DOMAIN-SUFFIX,camelotherald.com
 DOMAIN-SUFFIX,camelotherald.net
 DOMAIN-SUFFIX,capitalgames.com
 DOMAIN-SUFFIX,cdngarenanow-a.akamaihd.net
-DOMAIN-SUFFIX,cdp.cloud.unity3d.com
 DOMAIN-SUFFIX,cfx.re
 DOMAIN-SUFFIX,championshipseriesleague.com
 DOMAIN-SUFFIX,chillingo.com
@@ -293,7 +295,6 @@ DOMAIN-SUFFIX,nintendoswitch.net
 DOMAIN-SUFFIX,nintendoswitchtogether.com
 DOMAIN-SUFFIX,nintendowifi.net
 DOMAIN-SUFFIX,nintendowii.com
-DOMAIN-SUFFIX,omotenashi.cygames.jp
 DOMAIN-SUFFIX,op.gg
 DOMAIN-SUFFIX,opgg-static.akamaized.net
 DOMAIN-SUFFIX,origin.com
@@ -401,14 +402,17 @@ DOMAIN-SUFFIX,steambroadcast.akamaized.net
 DOMAIN-SUFFIX,steamcdn-a.akamaihd.net
 DOMAIN-SUFFIX,steamcommunity-a.akamaihd.net
 DOMAIN-SUFFIX,steamcommunity.com
-DOMAIN-SUFFIX,steamcontent.tnkjmec.com
 DOMAIN-SUFFIX,steamdeck.com
 DOMAIN-SUFFIX,steamgames.com
 DOMAIN-SUFFIX,steammobile.akamaized.net
 DOMAIN-SUFFIX,steamos.cloud
 DOMAIN-SUFFIX,steampipe-kr.akamaized.net
 DOMAIN-SUFFIX,steampipe-partner.akamaized.net
-DOMAIN-SUFFIX,steampowered.com
+DOMAIN,steampowered.com
+DOMAIN-SUFFIX,api.steampowered.com
+DOMAIN-SUFFIX,help.steampowered.com
+DOMAIN-SUFFIX,store.steampowered.com
+DOMAIN-SUFFIX,www.steampowered.com
 DOMAIN-SUFFIX,steamstat.us
 DOMAIN-SUFFIX,steamstatic.com
 DOMAIN-SUFFIX,steamstore-a.akamaihd.net
@@ -493,6 +497,12 @@ DOMAIN-SUFFIX,xenoblade.com
 DOMAIN-SUFFIX,xn--mts47c3w9b1qr.net
 DOMAIN-SUFFIX,yogify.com
 DOMAIN-SUFFIX,yoshisnewisland.com
+DOMAIN-SUFFIX,nexon.com
+DOMAIN-SUFFIX,tap.io
+DOMAIN-SUFFIX,taptap.io
+DOMAIN-SUFFIX,taptap.tw
+DOMAIN-SUFFIX,tnt-ea.com
+DOMAIN-SUFFIX,unity3d.com
 
 IP-CIDR,3.1.80.68/32,no-resolve
 IP-CIDR,3.25.190.152/32,no-resolve

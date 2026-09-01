@@ -624,7 +624,6 @@ DOMAIN-SUFFIX,in-tencentclb.cloud
 DOMAIN-SUFFIX,in-tencentclb.com
 DOMAIN-SUFFIX,in-tencentclb.net
 DOMAIN-SUFFIX,in-tencentclb.work
-DOMAIN-SUFFIX,in.th
 DOMAIN-SUFFIX,incentivepower.cn
 DOMAIN-SUFFIX,insightpower.cn
 DOMAIN-SUFFIX,intencent.com
@@ -762,14 +761,13 @@ DOMAIN-SUFFIX,myelasticsearch.com
 DOMAIN-SUFFIX,mylightsite.com
 DOMAIN-SUFFIX,myoed.com
 DOMAIN-SUFFIX,myqcloud.cn
-DOMAIN-SUFFIX,myqcloud.com
+DOMAIN,myqcloud.com
 DOMAIN-SUFFIX,myqcloud.net
 DOMAIN-SUFFIX,myrtx.com
 DOMAIN-SUFFIX,mytencentes.com
 DOMAIN-SUFFIX,mytt.com
 DOMAIN-SUFFIX,nagcloudcs.com
 DOMAIN-SUFFIX,nazarstudios.com
-DOMAIN-SUFFIX,nba.com
 DOMAIN-SUFFIX,neuroxiv.cn
 DOMAIN-SUFFIX,neuroxiv.com
 DOMAIN-SUFFIX,neuroxiv.net
@@ -857,7 +855,7 @@ DOMAIN-SUFFIX,qcdntest.net
 DOMAIN-SUFFIX,qclivecdn.cn
 DOMAIN-SUFFIX,qclivecdn.com
 DOMAIN-SUFFIX,qcloud-edumall.com
-DOMAIN-SUFFIX,qcloud.com
+DOMAIN,qcloud.com
 DOMAIN-SUFFIX,qcloud.la
 DOMAIN-SUFFIX,qcloudapps.com
 DOMAIN-SUFFIX,qcloudcdn.cn
@@ -1122,7 +1120,7 @@ DOMAIN-SUFFIX,sjwec-tencentclb.com
 DOMAIN-SUFFIX,sjwec-tencentclb.net
 DOMAIN-SUFFIX,sjwec-tencentclb.work
 DOMAIN-SUFFIX,smoba.net
-DOMAIN-SUFFIX,smtcdns.com
+DOMAIN,smtcdns.com
 DOMAIN-SUFFIX,snoba.net
 DOMAIN-SUFFIX,sogou-compress.com
 DOMAIN-SUFFIX,sogou-diskmgr.com
@@ -2070,7 +2068,7 @@ DOMAIN-SUFFIX,we-pass.com
 DOMAIN-SUFFIX,webacc.net
 DOMAIN-SUFFIX,websec1.com
 DOMAIN-SUFFIX,websec1.net
-DOMAIN-SUFFIX,wechat.com
+DOMAIN,wechat.com
 DOMAIN-SUFFIX,wechat.design
 DOMAIN-SUFFIX,wechat.me
 DOMAIN-SUFFIX,wechat.org

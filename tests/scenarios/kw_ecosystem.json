@@ -376,7 +376,7 @@
         {
           "host": "fbcdn-a.akamaihd.net",
           "policy": "Final",
-          "reason": "2026-08-31 审计 N 档：CNAME 到 edgesuite.net 无 A、双侧 NXDOMAIN，已随 R1-06 从 Meta.list 删除；退化到 ProxyGFW 的 akamaihd.net（Final）属预期。"
+          "reason": "Akamai 旧边缘死域已从 Meta.list 删除，也不再由 akamaihd.net 宽后缀兜底，落 FINAL。"
         },
         {
           "host": "whatsapp-plus.net",
@@ -537,7 +537,7 @@
         {
           "host": "foo.webpubsub.azure.com",
           "policy": "Final",
-          "reason": "他人 WebPubSub 实例走 ProxyGFW 的 azure.com 兜底"
+          "reason": "他人 WebPubSub 实例不命中 AI 的 OpenAI 专属规则，azure.com 多租户宽后缀已移除，落 FINAL 兜底"
         }
       ]
     }

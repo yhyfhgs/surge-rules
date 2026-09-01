@@ -1,89 +1,37 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""
-runsuite.py — L2 场景断言运行器（Surge 分流测试套件 / W7）
+"""Run the L2 Surge-routing scenario assertions.
 
-加载 scenarios/*.json 全量场景，逐条请求调用 L0 引擎 engine.py 判定，
-按文件分组输出 pass / fail / known_broken 统计表与失败明细。
+The runner loads every ``scenarios/*.json``, validates the complete schema
+before querying ``engine.py``, and reports pass/fail/known-broken results by
+file. It uses only the Python standard library.
 
-依赖：python3 标准库 only；同目录的 engine.py（W6 交付）。
+Usage::
 
-用法：
-    python3 runsuite.py                       # 跑全部场景，人读输出
-    python3 runsuite.py --filter openai       # 只跑名字/文件名含 openai 的场景
-    python3 runsuite.py --json                # 机器可读输出
-    python3 runsuite.py --conf /path/Surge.conf --dir scenarios --engine ./engine.py
-    python3 runsuite.py --conf tests/fixtures/Surge.test.conf --rules lists/
-                                              # 脱敏 fixture + 显式 .list 目录（CI 用）
-    python3 runsuite.py --list-known-broken   # 只列当前的待修清单
-    python3 runsuite.py --allow-known-broken  # 放行 known_broken（默认严格：>0 即退出码 1）
+    python3 runsuite.py [--filter TEXT] [--json]
+    python3 runsuite.py --conf PATH --dir PATH --engine PATH [--rules PATH]
+    python3 runsuite.py --list-known-broken [--allow-known-broken]
 
-退出码：0=无失败且无 known_broken；1=有失败断言，或存在 known_broken 而未加
-       --allow-known-broken；2=引擎不可用/场景文件损坏/schema 校验不通过。
+Exit codes: 0 means no failures or unallowed known-broken assertions; 1 means
+an assertion failure or an unallowed known-broken scenario; 2 means the engine,
+input, or schema is unusable.
 
---------------------------------------------------------------------------
-场景 JSON schema（与 spec/testkit.md 一致，known_broken 为其定义的机制）
---------------------------------------------------------------------------
-[
-  {
-    "name": "openai_chatgpt_web",
-    "desc": "一句话说明这是哪个真实用户行为",
-    "requests": [
-      {"host": "chatgpt.com"},                     # 域名查询
-      {"host": "api.openai.com", "process": "ChatGPT"},   # 带进程
-      {"ip": "8.8.8.8"},                           # 纯 IP 查询
-      {"ua": "YouTube/17.38.10"},                  # 纯 UA 查询
-      {"host": "x.com", "note": "任意人读注释，不参与断言"}
-    ],
-    "assert": {
-      "same_policy": true,        # 会话内（未被 per_request 覆盖的）请求同一策略组
-      "policy": "AI",             # 期望策略组名
-      "policy_in": ["AI","Final"],# 或：允许多组之一（与 policy 二选一）
-      "no_dns_leak": true,        # 匹配路径上不得有缺 no-resolve 的 IP 类规则
-      "per_request": [            # 个别请求单独期望；按完整查询元组精确匹配
-        {"host": "discord.com", "policy": "社交媒体"},
-        {"host": "sentry.io", "policy": "Final",
-         "known_broken": true, "reason": "现状 AI，KEYWORD 误伤"}
-      ]
-    },
-    "known_broken": true,         # 整场景的策略类断言记为「已知待修」，不计失败
-    "reason": "为什么现在是坏的 + 怎么修"
-  }
-]
+Schema invariants:
+* Scenario names are globally unique. Requests are non-empty and contain a
+  valid host (at least two labels, no scheme/port/path/wildcard) or a literal,
+  non-CIDR IP address.
+* Each scenario has a real assertion; ``policy`` and ``policy_in`` are
+  mutually exclusive, and ``same_policy: false`` alone is not an assertion.
+* Per-request keys are unique and must match a request exactly by
+  ``(host, ip, process, ua)``. Orphans are errors.
+* Unknown keys are rejected at every schema level. ``same_policy: true`` needs
+  at least two requests not covered by ``per_request``.
+* ``known_broken`` exempts policy assertions only. ``no_dns_leak`` remains a
+  hard safety assertion; omitting it means no DNS-leak check.
 
-约定：
-* per_request 条目按 (host, ip, process, ua) 完整元组精确匹配请求，因此同一
-  host 的不同 process 变体可以各自给期望，互不误伤。
-* 被 per_request 覆盖的请求不参与 same_policy 分组判定（它们本来就被声明为不同）。
-* 场景级 known_broken 只作用于「策略类」断言（policy / policy_in /
-  same_policy / per_request 策略），不作用于 no_dns_leak——DNS 泄漏是独立的
-  安全轴，任何时候泄漏都必须是硬失败。
-* no_dns_leak 字段缺省即不断言（如国内直连域名，本地解析是期望行为）。
-* 数据集自检：写了却匹配不到任何请求的 per_request 条目会报 per_request.orphan
-  失败（防止 host 拼错或漏写 process 导致断言静默失效）。
-
---------------------------------------------------------------------------
-加载期 schema 严格校验（审计 P1-10 / §12.2）
---------------------------------------------------------------------------
-场景不是「静默跳过」而是「加载失败并指名道姓」。任一场景违规 → 整个套件拒绝
-运行、退出码 2。规则：
-
-  1. name 全局唯一（跨文件），且为非空字符串；
-  2. requests 非空，每项含合法 host 或 ip（host 至少两级标签、无 scheme/端口/
-     路径/通配符；ip 必须能被 ipaddress 解析且不能是 CIDR）；
-  3. assert 至少有一项有效断言（policy / policy_in / same_policy:true /
-     no_dns_leak:true / 非空 per_request）——注意 same_policy:false 是说明性
-     字段，本身不构成断言；
-  4. policy 与 policy_in 互斥（assert 级与 per_request 条目级都查）；
-  5. per_request 的 (host,ip,process,ua) 键唯一，且每条都必须对上 requests 里
-     的某个请求（撞键会静默覆盖、孤儿条目会静默失效，两者都拒绝）；
-  6. 场景级 / request 级 / assert 级 / per_request 级出现白名单外的键即报错，
-     报错信息里列出该层的完整白名单；
-  7. same_policy:true 时，未被 per_request 覆盖的请求必须 ≥ 2 个——空集合或单
-     请求的「同组」断言没有信息量，是典型假绿。
-
-历史遗留：LEGACY_EMPTY_REQUESTS 里登记的场景暂免第 2 条的「非空」检查，运行时
-打印醒目告警而非报错（详见该常量注释）。豁免登记若失效会提示删除。
+Invalid scenarios fail the whole suite with exit 2; they are never silently
+skipped. ``LEGACY_EMPTY_REQUESTS`` is an explicit temporary exemption for the
+non-empty request check and emits a warning when used.
 """
 
 import argparse
@@ -100,30 +48,20 @@ DEFAULT_ENGINE = os.path.join(HERE, "engine.py")
 
 QUERY_KEYS = ("host", "ip", "process", "ua")
 
-# -- schema 白名单：出现白名单外的键 = 加载失败（打错字不再被静默忽略）--------
+# Schema keys are whitelisted; unknown keys fail loading.
 SCENARIO_KEYS = ("assert", "desc", "known_broken", "name", "note", "reason", "requests")
 REQUEST_KEYS = ("host", "ip", "note", "process", "ua")
 ASSERT_KEYS = ("no_dns_leak", "per_request", "policy", "policy_in", "same_policy")
 PERREQ_KEYS = ("host", "ip", "known_broken", "note", "policy", "policy_in",
                "process", "reason", "ua")
 
-# -- 历史遗留豁免（仅豁免「requests 非空」一条，且只对这些具名场景生效）------
-# 这两个场景原本完全建立在 PROCESS-NAME 请求上；commit 0fa4a24「全库移除 96 条
-# PROCESS-NAME 与 155 条 USER-AGENT」把它们的 requests 掏空成 []，留下产出 0 条
-# 断言却照样「通过」的空壳——正是 P1-10 点名的假绿空洞本体。
-# runsuite 不拥有 scenarios/ 下的文件，故此处以具名豁免让闸门保持可跑，同时每次
-# 运行都打印告警。正确的了结方式是补齐请求或整条删除，然后删掉这里的登记。
-LEGACY_EMPTY_REQUESTS = {}  # 2026-08-31 两个空场景已重建为域名版，豁免清空；加回时按 {场景名: 成因说明} 登记
+# Explicit temporary exemptions for empty request sets. Each entry names a
+# reason; use is warned at runtime and should be removed when the scenario is repaired.
+LEGACY_EMPTY_REQUESTS = {}
 
 
-# --------------------------------------------------------------------------
-# 引擎适配层：只依赖 spec/testkit.md 定义的 engine 接口
-#   1) 模块级函数     engine.match(host=..., ip=..., process=..., ua=...)
-#   2) 引擎实例       engine.build_engine(conf).match(...) / engine.Engine(conf).match(...)
-#   3) 退化到 CLI     engine.py match <host> [--ip I] [--process P] [--ua U] --json
-# 三者返回同一份 spec 定义的结果 JSON，runsuite 只读其中的
-# policy / matched_rule / source / physical_exit / exit_class / dns_leak(_at)。
-# --------------------------------------------------------------------------
+# Engine adapters may expose a module function, an instance, or the CLI.
+# Each path must return the normalized result fields consumed below.
 class EngineError(Exception):
     pass
 
@@ -263,9 +201,7 @@ class Engine(object):
         }
 
 
-# --------------------------------------------------------------------------
-# 断言执行
-# --------------------------------------------------------------------------
+# Scenario assertions.
 def qkey(d):
     return tuple(d.get(k) for k in QUERY_KEYS)
 
@@ -283,10 +219,8 @@ def qlabel(q):
     return " ".join(bits) or "<空查询>"
 
 
-# --------------------------------------------------------------------------
-# 加载期 schema 严格校验（P1-10 / §12.2）
-# 违规 = 加载失败并指名道姓（文件[下标] «场景名» 层级[下标]：原因），不静默跳过。
-# --------------------------------------------------------------------------
+# Strict load-time schema validation: invalid entries fail with file/scenario
+# context; nothing is silently skipped.
 # host 里不该出现的东西：空白、scheme/路径分隔、端口冒号、查询串、通配符、引号等。
 _HOST_BAD_CHARS = set(" \t\r\n\f\v/\\:?#@*%&=+,;'\"()[]{}<>|^`~!$")
 
@@ -593,9 +527,7 @@ def run_scenario(scn, engine):
     return out, None
 
 
-# --------------------------------------------------------------------------
-# 输出
-# --------------------------------------------------------------------------
+# Output formatting.
 def dwidth(s):
     return sum(2 if unicodedata.east_asian_width(c) in "WF" else 1 for c in str(s))
 

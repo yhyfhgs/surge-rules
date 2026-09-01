@@ -1,0 +1,6 @@
+# EuropeIP — 欧洲 IP fallback（当前可用出口：CH/DE/FR/NL）
+
+GEOIP,CH,no-resolve
+GEOIP,DE,no-resolve
+GEOIP,FR,no-resolve
+GEOIP,NL,no-resolve

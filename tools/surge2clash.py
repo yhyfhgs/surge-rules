@@ -1,50 +1,30 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""surge2clash.py — 从 Surge .list 派生 Clash(Mihomo) classical 规则集。
+"""Derive Clash/Mihomo classical rule sets from Surge lists.
 
-单一编辑源原则：只编辑 lists/ 下的 Surge .list；clash/ 整个目录为派生产物，
-由本脚本全量重建（update.sh 发布前自动执行），勿手工编辑。
+``lists/*.list`` is the single editing layer; ``clash/`` is generated and
+must not be hand-edited. Paths are resolved from this script, so it can be
+invoked from the repository root or another working directory.
 
-本脚本位于仓库的 tools/ 下，读写路径全部相对脚本自身位置推导：
-  输入 <仓库根>/lists/*.list  →  输出 <仓库根>/clash/
-在仓库根执行 `python3 tools/surge2clash.py` 即可，无需 cd。
+The generation is transactional:
+1. Parse every manifest source and aggregate unknown types before touching
+   ``clash/``.
+2. Render every artifact in a temporary directory.
+3. Atomically replace changed files (same-directory ``os.replace``), leave
+   byte-identical files untouched, and remove stale generated lists.
+4. ``--check`` performs steps 1–2 and reports drift without writing files.
 
-事务式流水线（2026-08-31 起；此前是「边解析边覆盖正式目录」，中途报错会留下
-「前半新、后半旧」的混合工作树）：
-  1. 解析校验   全量读入 lists/，未知规则类型**汇总成清单**后一次性报错退出，
-                此时正式 clash/ 一个字节都没被碰过
-  2. 暂存生成   全部产物先在临时目录里完整生成，不碰正式目录
-  3. 原子提交   逐文件与现有 clash/ 按字节比对：相同则跳过（不刷 mtime，
-                避免整目录 mtime churn 触发无谓的 CDN purge），不同才经
-                同目录临时文件 os.replace 原子换入；陈旧 .list 一并删除
-  4. 只读校验   `--check` 只做 1+2，再与现有 clash/ 比对并打印漂移摘要，
-                不写任何正式文件（供 CI / 发布前确认派生产物未过期）
+Supported rule parameters, including ``no-resolve``, are passed through.
+Trailing comments are removed only after ``" #"`` and with the same delimiter
+as the semantic engine; leading comment lines are kept. ``USER-AGENT`` and
+``URL-REGEX`` are omitted because Mihomo has no matching layer. Unknown types
+fail with the complete list.
 
-转换规则：
-  原样透传   DOMAIN / DOMAIN-SUFFIX / DOMAIN-KEYWORD / DOMAIN-WILDCARD / IP-CIDR
-             / IP-CIDR6 / GEOIP / IP-ASN / PROCESS-NAME（含 no-resolve 等尾参；
-             Mihomo ≥1.19 原生支持 DOMAIN-WILDCARD 且 */? 语义与 Surge 一致，
-             2026-08-31 起不再改写为 DOMAIN-REGEX——正则方言差异与可审计性都更差）
-  行尾注释   剥离（2026-08-31 修复）：`DOMAIN,x  # last_verified=…` 只输出 `DOMAIN,x`。
-             此前只跳过**行首** `#`，行尾注释被原样带进派生文件 —— Mihomo 会把
-             `# last_verified=…` 当成规则的第 3 个逗号后参数/负载解析，轻则该条失效、
-             重则整个 provider 加载失败。剥离逻辑与 tests/engine.py:strip_comment()
-             **逐字符对齐**（同为 `s.find(" #")`，即只认「空格 + #」这一种分隔形态），
-             刻意不放宽到制表符或裸 `#`：语义引擎与派生层必须对同一行给出同一条规则，
-             任何一侧单独放宽都会让 clash/ 与 Surge 的落点静默分叉。
-             行首注释行仍原样保留（派生文件保留表头与分区注释）。
-  剔除       USER-AGENT / URL-REGEX（Clash/Mihomo 无 UA/URL 匹配层），文件头汇总计数
-  未知类型   报全清单后中止 —— 防止上游出现新类型时被静默丢弃
-
-产物：
-  clash/<Name>.list          — classical text 规则（与 Surge 同名对应）
-  clash/rule-providers.yaml  — Clash Verge Rev 可直接 Merge 的 rule-providers 段
-                               + 按 Surge.conf 优先级排列的 rules 参考序列（注释态）
-
-退出码：
-  0  成功（--check 下为「clash/ 与 lists/ 一致」）
-  1  --check 检出漂移
-  2  输入校验失败（未知规则类型 / 找不到 lists/）——正式 clash/ 未被修改
+Outputs are one classical file per manifest source plus
+``rule-providers.yaml`` in manifest order, including policy and ``no-resolve``
+markers. Exit 0 means success (or no drift under ``--check``), 1 means drift,
+and 2 means input/validation failure; failed validation never modifies
+``clash/``.
 """
 import argparse
 import difflib
@@ -55,10 +35,13 @@ import sys
 import tempfile
 import time
 
-# 脚本在 <仓库根>/tools/ 下，上跳一级即仓库根；不写死绝对路径，便于整仓迁移。
+from routing_manifest import load_routing_manifest
+
+# Resolve repository paths from this file; do not hard-code an absolute root.
 REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 RULES_DIR = os.path.join(REPO_ROOT, "lists")
 OUT_DIR = os.path.join(REPO_ROOT, "clash")
+ROUTING_MANIFEST = os.path.join(REPO_ROOT, "config", "routing.json")
 CDN_BASE = "https://cdn.jsdelivr.net/gh/yhyfhgs/surge-rules@main/clash"
 PROVIDERS_NAME = "rule-providers.yaml"
 
@@ -70,63 +53,17 @@ DROP = {"USER-AGENT", "URL-REGEX"}
 
 
 def strip_trailing_comment(s):
-    """剥掉行尾注释，返回规则本体（已 strip）。
+    """Return stripped rule text after removing only a space-delimited comment.
 
-    与 tests/engine.py:strip_comment() 的行尾分支逐字符相同：只认 `" #"`
-    （空格 + 井号）这一种分隔形态。不放宽到裸 `#` 是必需的 —— `#` 可以合法出现在
-    URL-REGEX 与某些 PROCESS-NAME 里；不放宽到制表符则是为了与语义引擎保持一位不差，
-    否则同一行会在 Surge 侧与 clash/ 侧解析成两条不同的规则。
-
-    调用方只对 PASSTHROUGH 类型用它；URL-REGEX 走 DROP 分支，永远到不了这里。
+    Keep this delimiter aligned with ``tests/engine.py``: bare ``#`` and tab
+    delimiters remain rule text, and callers use this only for passthrough types.
     """
     idx = s.find(" #")
     if idx >= 0:
         s = s[:idx]
     return s.strip()
 
-# Surge.conf [Rule] 区的完整引用顺序（规则顺序即优先级），用于生成 rules 参考序列。
-# (文件名, Surge 策略名)；SYSTEM/LAN 为 Surge 内置集，Clash 端以注释说明等价物。
-# 必须与真实 Surge.conf 逐行同序 —— 2026-08-31 修正：Reject 补入 PKU 之后的真实位置
-# （此前 Clash 参考把 Reject 排在 PrivateLAN/PKU 之前，与 Surge 顺序分叉）。
-CONF_ORDER = [
-    ("PrivateLAN", "DIRECT"),
-    ("PKU", "DIRECT"),
-    ("Reject", "REJECT"),
-    ("GameDownloadCN", "DIRECT"),
-    ("ModelDownloadCDN", "下载"),
-    ("YouTube", "流媒体"),
-    ("Google", "Google-X-Meta-MS"),
-    ("Twitter", "Google-X-Meta-MS"),
-    ("Meta", "Google-X-Meta-MS"),
-    ("Microsoft", "Google-X-Meta-MS"),
-    ("AI", "AI"),
-    ("TikTok", "社交媒体"),
-    ("SocialOthers", "社交媒体"),
-    ("Telegram", "Telegram"),
-    ("Streaming", "流媒体"),
-    ("Games", "游戏"),
-    ("DownloadCDN", "下载"),
-    ("Payment", "Payment"),
-    ("AppleCN", "DIRECT"),
-    ("MicrosoftCN", "DIRECT"),
-    ("ProxyGFW", "Final"),
-    ("Japan", "🇯🇵日本节点"),
-    ("UK", "🇬🇧英国节点"),
-    ("Europe", "🇪🇺欧洲节点"),
-    ("US", "🇺🇸美国节点"),
-    ("Domestic", "DIRECT"),
-    ("ChinaMedia", "DIRECT"),
-    ("TencentCN", "DIRECT"),
-    ("AlibabaCN", "DIRECT"),
-    ("ByteDanceCN", "DIRECT"),
-    ("BaiduCN", "DIRECT"),
-    ("NetEaseCN", "DIRECT"),
-    ("ChinaDomain", "DIRECT"),
-    ("ChinaIP", "DIRECT"),
-]
-
-
-# ── 阶段 1：解析校验 ─────────────────────────────────────────────────────────
+# ── 解析校验 ────────────────────────────────────────────────────────────────
 def convert_file(name):
     """解析单个 .list，返回 (输出行列表, 有效规则数, {类型: 剔除数}, 未知类型清单)。
 
@@ -147,7 +84,7 @@ def convert_file(name):
                 continue
             rtype = stripped.split(",", 1)[0].strip().upper()
             if rtype in PASSTHROUGH:
-                # 行尾注释（如 `,no-resolve  # last_verified=2026-08-31`）必须在这里
+                # 行尾注释（如 `,no-resolve  # note`）必须在这里
                 # 剥掉：Mihomo 不识别行尾注释，会连注释一起当规则参数解析。
                 body.append(strip_trailing_comment(stripped))
                 kept += 1
@@ -158,7 +95,7 @@ def convert_file(name):
     return body, kept, dropped, unknown
 
 
-# ── 阶段 2：渲染产物（纯函数，只产生文本，不落盘）─────────────────────────────
+# ── 渲染产物（纯函数，不落盘）───────────────────────────────────────────────
 def render_list(name, body, dropped):
     header = [
         "# AUTO-GENERATED — Clash(Mihomo) classical 规则，由 ../lists/%s 派生" % name,
@@ -171,7 +108,8 @@ def render_list(name, body, dropped):
     return "\n".join(header + body).rstrip("\n") + "\n"
 
 
-def render_providers(names):
+def render_providers(routing):
+    extended_count = sum(bool(entry.get("extended_matching")) for entry in routing)
     lines = [
         "# AUTO-GENERATED — Clash Verge Rev 规则集配置（由 tools/surge2clash.py 生成，勿手工编辑）",
         "# 用法：在 Clash Verge Rev 中对订阅配置使用「Merge」扩展，粘贴本文件的",
@@ -179,7 +117,7 @@ def render_providers(names):
         "# 各 provider 与 Surge 同名 .list 一一对应，优先级语义见仓库 README。",
         "#",
         "# ─── sniffer 合同（消费端必须履约）───────────────────────────────────────",
-        "# Surge 侧有 11 张表在 conf 的 RULE-SET 行上开了 extended-matching（含 Payment /",
+        "# Surge 侧有 %d 张表在 conf 的 RULE-SET 行上开了 extended-matching（含 Payment /" % extended_count,
         "# AI / Telegram），让规则除域名外**同时匹配 SNI / Host 等扩展信息**，从而接住",
         "# 「客户端拿着字面量 IP 直连、但握手里带了域名」的连接。",
         "#",
@@ -202,13 +140,14 @@ def render_providers(names):
         "#",
         "# 与它并列的已知能力差另有两条：Surge 内建 SYSTEM 集在 Clash 端无等价物；",
         "# 内建 LAN 集用 GEOIP,lan 近似。三条都是已知且刻意的取舍，不是 bug。",
-        "# 合同的书面落点有两处：本注释与 docs/ARCHITECTURE.md §5.2，改一处必须同步另一处。",
+        "# 合同的书面落点有两处：本注释与 docs/ARCHITECTURE.md 的 Clash derivation，改一处必须同步另一处。",
         "# ────────────────────────────────────────────────────────────────────────",
         "",
         "rule-providers:",
     ]
-    for name in names:
-        stem = name[:-5]
+    for entry in routing:
+        stem = entry["name"]
+        name = stem + ".list"
         lines += [
             "  %s:" % stem,
             "    type: http",
@@ -226,15 +165,10 @@ def render_providers(names):
         "#  - GEOIP,lan,DIRECT,no-resolve",
         "# rules:",
     ]
-    ordered = {n for n, _ in CONF_ORDER}
-    for stem, policy in CONF_ORDER:
-        if (stem + ".list") in set(names):
-            suffix = ",no-resolve" if stem == "ChinaIP" else ""
-            lines.append("#  - RULE-SET,%s,%s%s" % (stem, policy, suffix))
-    for name in sorted(names):
-        stem = name[:-5]
-        if stem not in ordered:
-            lines.append("#  - RULE-SET,%s,<策略组>   # 未在 Surge.conf 启用，按需接入" % stem)
+    for entry in routing:
+        suffix = ",no-resolve" if entry.get("no_resolve") else ""
+        lines.append("#  - RULE-SET,%s,%s%s"
+                     % (entry["name"], entry["policy"], suffix))
     lines += [
         "#  - GEOIP,CN,DIRECT,no-resolve",
         "#  - MATCH,Final",
@@ -243,17 +177,16 @@ def render_providers(names):
 
 
 def build_all():
-    """阶段 1+2：全量解析校验并渲染。返回 (产物 {文件名: 文本}, 总规则数, 总剔除)。
+    """Parse and render all manifest sources without touching formal ``clash/``.
 
-    任何未知规则类型都会在这里汇总报错退出（退出码 2），此时正式 clash/ 未被触碰。
+    Unknown types are aggregated and fail with exit 2 before any formal output.
     """
-    if not os.path.isdir(RULES_DIR):
-        sys.stderr.write("找不到规则目录 %s\n" % RULES_DIR)
+    try:
+        routing = load_routing_manifest(ROUTING_MANIFEST, RULES_DIR)
+    except ValueError as exc:
+        sys.stderr.write("%s\n" % exc)
         raise SystemExit(2)
-    names = sorted(f for f in os.listdir(RULES_DIR) if f.endswith(".list"))
-    if not names:
-        sys.stderr.write("未在 %s 找到任何 .list\n" % RULES_DIR)
-        raise SystemExit(2)
+    names = [entry["name"] + ".list" for entry in routing]
 
     artifacts = {}
     unknown_all = []
@@ -277,16 +210,12 @@ def build_all():
         sys.stderr.write("涉及类型：%s\n" % ", ".join(types))
         raise SystemExit(2)
 
-    artifacts[PROVIDERS_NAME] = render_providers(names)
+    artifacts[PROVIDERS_NAME] = render_providers(routing)
     return artifacts, len(names), total_kept, total_dropped
 
 
 def stage(artifacts):
-    """阶段 2 落盘：把全部产物完整写进系统临时目录，返回目录路径。
-
-    刻意不落在仓库内：进程被硬杀时不会给 update.sh 的 `git add -A` 留下垃圾。
-    跨文件系统由提交阶段的「同目录临时文件 + os.replace」兜底。调用方负责 rmtree。
-    """
+    """Write all artifacts to a system temp directory; the caller removes it."""
     stage_dir = tempfile.mkdtemp(prefix="surge2clash-stage-")
     for name, text in artifacts.items():
         with io.open(os.path.join(stage_dir, name), "w", encoding="utf-8") as f:
@@ -294,9 +223,9 @@ def stage(artifacts):
     return stage_dir
 
 
-# ── 阶段 3/4：与正式目录比对、提交 ───────────────────────────────────────────
+# ── 比对与提交 ──────────────────────────────────────────────────────────────
 def read_existing(name):
-    """读现有产物字节；不存在返回 None。按字节比对，避免非法编码残留读不出来。"""
+    """Read an existing artifact as bytes, or return ``None`` if absent."""
     path = os.path.join(OUT_DIR, name)
     if not os.path.isfile(path):
         return None
@@ -305,7 +234,7 @@ def read_existing(name):
 
 
 def stale_files(artifacts):
-    """正式目录里已不该存在的派生文件（源表被删/改名后的残留）。"""
+    """Return generated lists left behind after a source was removed or renamed."""
     if not os.path.isdir(OUT_DIR):
         return []
     return sorted(f for f in os.listdir(OUT_DIR)
@@ -327,10 +256,7 @@ def line_delta(old_text, new_text):
 
 
 def compare(stage_dir, artifacts):
-    """比对暂存产物与现有 clash/。返回 (新增, 变更[(名, +n, -n)], 陈旧)。
-
-    刻意读暂存目录里的字节而不是内存文本：比对的就是提交阶段会换入的那份字节。
-    """
+    """Compare staged bytes with formal output; return created, changed, and stale."""
     created, changed = [], []
     for name in sorted(artifacts):
         with open(os.path.join(stage_dir, name), "rb") as f:
@@ -346,7 +272,7 @@ def compare(stage_dir, artifacts):
 
 
 def sweep_orphan_temps():
-    """清掉上次被硬杀留下的换入临时文件（超过 1 小时才算孤儿，免得踩并发实例）。"""
+    """Remove same-directory temp files older than one hour, preserving live runs."""
     if not os.path.isdir(OUT_DIR):
         return
     cutoff = time.time() - 3600
@@ -362,10 +288,9 @@ def sweep_orphan_temps():
 
 
 def commit(stage_dir, artifacts):
-    """阶段 3：逐文件原子换入，内容相同的不重写（不刷 mtime），删除陈旧文件。
+    """Atomically install changed artifacts, skip identical files, and remove stale lists.
 
-    换入用「与目标同目录的临时文件 + os.replace」：同文件系统保证 rename 原子，
-    读者（Surge/CDN 发布脚本）永远看到完整的旧版或完整的新版，不会读到半截。
+    Same-directory ``os.replace`` ensures readers see a complete old or new file.
     """
     created, changed, stale = compare(stage_dir, artifacts)
     if not os.path.isdir(OUT_DIR):
@@ -408,7 +333,7 @@ def main(argv=None):
                  if total_dropped else "")
 
     if args.check:
-        # 只读路径：仍走完整暂存生成，比对的就是「真正会写出去的那份字节」。
+        # Build the same staged bytes as a write, but never modify formal output.
         stage_dir = stage(artifacts)
         try:
             created, changed, stale = compare(stage_dir, artifacts)

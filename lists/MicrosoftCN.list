@@ -1,14 +1,32 @@
-# MicrosoftCN — 微软 CDN/OneDrive/Office 国内可直连面；位次先于 ProxyGFW，是微软域唯一能生效的直连位
-# 排序：规则类型分区，区内字母序
-# 微软自家 CA 端点（crl / ocsp / oneocsp.microsoft.com）收在本表：Domestic 在 ProxyGFW 的 microsoft.com 后缀之后，接不住
+# MicrosoftCN — 已验证可直连的微软国内 CDN、更新与 Office 端点
 
+DOMAIN,1drv.com
+DOMAIN,al.msn.com
+DOMAIN,by3301-a.1drv.com
+DOMAIN,c.live.com
+DOMAIN,config.office.com
+DOMAIN,g.live.com
+DOMAIN,insiders.office.com
+DOMAIN,live.com
+DOMAIN,mail.live.com
+DOMAIN,msn.com
+DOMAIN,ntp.msn.com
+DOMAIN,office.com
+DOMAIN,people.live.com
+DOMAIN,profile.live.com
 DOMAIN,res-1.cdn.office.net
 DOMAIN,res-2.cdn.office.net
 DOMAIN,res-h3.public.cdn.office.net
 DOMAIN,res.cdn.office.net
 DOMAIN,statics.teams.cdn.office.net
+DOMAIN,storage.live.com
+DOMAIN,support.office.com
+DOMAIN,templates.office.com
+DOMAIN,view.officeapps.live.com
+DOMAIN,www.msn.com
+DOMAIN,www.office.com
+DOMAIN,sa.msn.com
 
-DOMAIN-SUFFIX,1drv.com
 DOMAIN-SUFFIX,1drv.ms
 DOMAIN-SUFFIX,azuremigrate.download.prss.microsoft.com
 DOMAIN-SUFFIX,azuremigratetest.download.prss.microsoft.com
@@ -32,7 +50,6 @@ DOMAIN-SUFFIX,itacademy.download.prss.microsoft.com
 DOMAIN-SUFFIX,itacademyuat.download.prss.microsoft.com
 DOMAIN-SUFFIX,lex.download.prss.microsoft.com
 DOMAIN-SUFFIX,lexuat.download.prss.microsoft.com
-DOMAIN-SUFFIX,live.com
 DOMAIN-SUFFIX,livefilestore.com
 DOMAIN-SUFFIX,mbs.download.prss.microsoft.com
 DOMAIN-SUFFIX,microsoft.com.edgesuite.net
@@ -43,18 +60,17 @@ DOMAIN-SUFFIX,mpnbenefitsrtluat.download.prss.microsoft.com
 DOMAIN-SUFFIX,msdn.download.prss.microsoft.com
 DOMAIN-SUFFIX,msdprod-ad.download.prss.microsoft.com
 DOMAIN-SUFFIX,msedge.net
-DOMAIN-SUFFIX,msn.com
 DOMAIN-SUFFIX,msocsp.com
 DOMAIN-SUFFIX,msproduct.download.prss.microsoft.com
 DOMAIN-SUFFIX,myvs.download.prss.microsoft.com
 DOMAIN-SUFFIX,ocsp.microsoft.com
 DOMAIN-SUFFIX,oemsoc.download.prss.microsoft.com
 DOMAIN-SUFFIX,oemsocuat.download.prss.microsoft.com
-DOMAIN-SUFFIX,office.com
 DOMAIN-SUFFIX,office365.com
 DOMAIN-SUFFIX,officecdn.microsoft.com
 DOMAIN-SUFFIX,officemkt.download.prss.microsoft.com
 DOMAIN-SUFFIX,officemktuat.download.prss.microsoft.com
+DOMAIN-SUFFIX,office.live.com
 DOMAIN-SUFFIX,oneclient.sfx.ms
 DOMAIN-SUFFIX,onedrive.com
 DOMAIN-SUFFIX,oneocsp.microsoft.com
@@ -75,4 +91,3 @@ DOMAIN-SUFFIX,volic.download.prss.microsoft.com
 DOMAIN-SUFFIX,vscode.download.prss.microsoft.com
 DOMAIN-SUFFIX,vz.download.prss.microsoft.com
 DOMAIN-SUFFIX,windbg.download.prss.microsoft.com
-

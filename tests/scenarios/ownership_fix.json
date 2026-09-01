@@ -138,7 +138,7 @@
   },
   {
     "name": "tiktok_foreign_assets_removed",
-    "desc": "Snap Kit 域（api.snapkit.com@TikTok、sdk.snapkit.com@DownloadCDN）属 Snap 官方资产，cocacola.co.jp 属日本可口可乐——移除后 Snap 域与 snapchat.com（ProxyGFW）同落 Final 出口，可口可乐迁 Japan.list 走日本出口",
+    "desc": "Snap Kit 域（api.snapkit.com@TikTok、sdk.snapkit.com@DownloadCDN）属 Snap 官方资产，cocacola.co.jp 属日本可口可乐——移除后两条 Snap Kit 域落 FINAL→Final，snapchat.com 由 SocialOthers.list 承接走社交媒体组；可口可乐迁 Japan.list 走日本出口",
     "requests": [
       {
         "host": "api.snapkit.com"
@@ -168,7 +168,8 @@
         },
         {
           "host": "snapchat.com",
-          "policy": "Final"
+          "policy": "社交媒体",
+          "reason": "由 SocialOthers.list 的 DOMAIN-SUFFIX,snapchat.com 承接"
         },
         {
           "host": "cocacola.co.jp",

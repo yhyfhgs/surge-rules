@@ -1,7 +1,7 @@
 [
   {
     "name": "onedrive_personal_carveout_proxy",
-    "desc": "R1-01 止血：OneDrive 个人版会话面全部走 Google-X-Meta-MS。CN 侧 live.com 解析被投毒导致直连不可用，Microsoft.list（区 5）的窄后缀 onedrive.live.com 位次先于 MicrosoftCN.list（区 8）的宽后缀 live.com",
+    "desc": "R1-01 止血：OneDrive 个人版会话面全部走 Google-X-Meta-MS。CN 侧 onedrive.live.com 子树解析被投毒导致直连不可用；当前由 Microsoft.list 的显式子树认领，MicrosoftCN 只保留已验证的精确 live.com 主机/子树",
     "requests": [
       {"host": "onedrive.live.com", "note": "个人版 Web 入口"},
       {"host": "skyapi.onedrive.live.com", "note": "SkyDrive 遗留 API 端点，客户端同步用"},
@@ -12,7 +12,7 @@
   },
   {
     "name": "onedrive_carveout_no_overreach_direct",
-    "desc": "R1-01 防误伤负例：onedrive.live.com 的窄后缀不得把 live.com 下的其他 Office/账户面一起拽走，三条必须仍由 MicrosoftCN.list 的 live.com 接住走 DIRECT",
+    "desc": "R1-01 防误伤负例：onedrive.live.com 的窄后缀不得把其他 Office/账户面一起拽走；三条必须仍由 MicrosoftCN.list 的精确主机/子树走 DIRECT",
     "requests": [
       {"host": "office.live.com", "note": "Office 网页版入口"},
       {"host": "view.officeapps.live.com", "note": "Office 文档在线预览"},
@@ -36,7 +36,7 @@
     "requests": [
       {"ip": "184.173.128.1", "note": "SoftLayer /17，删除前是本表最大的一条错误覆盖（32768 地址）"},
       {"ip": "54.235.23.242", "note": "AWS 动态 EC2 /32，实测无任何 Meta 域名解析落点"},
-      {"ip": "119.235.224.1", "note": "LY Corporation/LINE 段；删除后由 ProxyGFW.list 的 119.235.224.0/21 接住，同样不是 Meta"}
+      {"ip": "119.235.224.1", "note": "LY Corporation/LINE 段；删除 Meta 误收后由 JapanIP.list 的 119.235.224.0/21 接住，同样不是 Meta"}
     ],
     "assert": {
       "same_policy": false,
@@ -44,7 +44,7 @@
       "per_request": [
         {"ip": "184.173.128.1", "policy": "Final"},
         {"ip": "54.235.23.242", "policy": "Final"},
-        {"ip": "119.235.224.1", "policy": "Final", "note": "落 ProxyGFW.list 的 119.235.224.0/21，策略仍是 Final"}
+        {"ip": "119.235.224.1", "policy": "🇯🇵日本节点", "note": "落 JapanIP.list 的 119.235.224.0/21；LINE 段不属于 Meta 组"}
       ]
     }
   },
@@ -93,7 +93,13 @@
       {"host": "igcdn.com", "note": "两台自建 NS 均不应答，任何 *.igcdn.com 当前不可解析"},
       {"host": "fbcdn-a.akamaihd.net", "note": "CNAME 到 edgesuite.net 但无 A，Akamai 旧边缘主机名已停用"}
     ],
-    "assert": {"same_policy": true, "policy": "Final"}
+    "assert": {
+      "same_policy": true,
+      "policy": "Final",
+      "per_request": [
+        {"host": "fbcdn-a.akamaihd.net", "policy": "Final", "reason": "Akamai 旧边缘死域已从 Meta.list 删除，也不再由 akamaihd.net 宽后缀兜底，三条死域均落 FINAL。"}
+      ]
+    }
   },
   {
     "name": "youtube_session_assets_reunified",
@@ -108,14 +114,23 @@
     "assert": {"same_policy": true, "policy": "流媒体", "no_dns_leak": true}
   },
   {
-    "name": "google_wide_suffix_not_shadowed_by_youtube",
-    "desc": "R1-16 防误伤：YouTube.list 新增的三条 DOMAIN 精确规则位次先于 Google.list，但不得把 googleusercontent.com / googleapis.com 的其余主机一起拽进流媒体组",
+    "name": "google_api_owner_boundaries",
+    "desc": "Explicit Google and YouTube API hosts retain their owner; the shared GCS tenant endpoint remains Final.",
     "requests": [
       {"host": "lh3.googleusercontent.com", "note": "Google 相册/头像通用 CDN，必须仍归 Google 组"},
       {"host": "www.googleapis.com", "note": "Google API 主入口"},
-      {"host": "storage.googleapis.com"}
+      {"host": "storage.googleapis.com"},
+      {"host": "tenant-project.googleapis.com"}
     ],
-    "assert": {"same_policy": true, "policy": "Google-X-Meta-MS", "no_dns_leak": true}
+    "assert": {
+      "no_dns_leak": true,
+      "per_request": [
+        {"host": "lh3.googleusercontent.com", "policy": "Google-X-Meta-MS"},
+        {"host": "www.googleapis.com", "policy": "Google-X-Meta-MS"},
+        {"host": "storage.googleapis.com", "policy": "Final"},
+        {"host": "tenant-project.googleapis.com", "policy": "Final"}
+      ]
+    }
   },
   {
     "name": "google_shared_cloud_asn_removed",

@@ -1,11 +1,4 @@
-# Meta — Meta 生态（Facebook/Instagram/WhatsApp/Threads/Oculus，含 Meta AI 与 llama.com）
-# fbcdn/instagram/whatsapp 精确后缀对撞自上游 Facebook/Instagram/Whatsapp 表；2026-08-31 审计删除三条宽 DOMAIN-KEYWORD
-# 明确不收：llama-api.com、metaquest.com、horizonworlds.com、上游品牌抢注/第三方刷粉站与 whatsapp-plus.*；排序：类型分区，区内字母序
-# 2026-08-31 审计 R1-09/R3-6：本表只收运行面（域名区 520→92 = 运行 32 + Meta 自有网页面 32 + 开源项目站 28）。
-#   Meta 自持的 411 条防御/库存停放域（NS=*.ns.facebook.com + A=57.144/14 的 *.141 + 无证书 + 301 回自身）已迁出，
-#   原文存于 reference/meta-defensive-inventory-20260831.txt（本地参考，不入库不分发）；再生/上游合并时按该签名过滤，勿重新收录。
-# IP 区 R1-06/07：删 27 条非 Meta 段（AWS EC2 /32 8、IBM SoftLayer 15、LY Corp/LINE 3、Google 1）；
-#   129.134/17 与 157.240/17 各并为 /16（ARIN NetName THEFA-3 整段归 Facebook）；补 57.144.0.0/14（RIPE FB-BLOCK，AS32934 原样通告）。
+# Meta-owned production services and networks; defensive registrations and shared-cloud addresses are excluded.
 
 DOMAIN-SUFFIX,atdmt2.com
 DOMAIN-SUFFIX,atmeta.com

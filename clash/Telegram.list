@@ -1,9 +1,7 @@
 # AUTO-GENERATED — Clash(Mihomo) classical 规则，由 ../lists/Telegram.list 派生
 # 勿手工编辑；修改 Surge 源后运行 python3 tools/surge2clash.py 重新生成
 
-# Telegram — Telegram 域名与 IP 段（上游 blackmatrix7 Telegram + Global 表 nicegram）；通用分析域（如 api.mixpanel.com）不收，归 ProxyGFW.list
-# 2026-08-31 审计：telegram/nicegram 精确后缀恢复后删除两条宽 DOMAIN-KEYWORD
-# 排序：规则类型分区，区内字母序
+# Telegram-owned domains and networks; shared analytics are excluded.
 
 DOMAIN,events-gateway.ncdev.site
 

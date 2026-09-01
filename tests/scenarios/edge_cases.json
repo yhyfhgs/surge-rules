@@ -259,8 +259,8 @@
       "per_request": [
         {
           "host": "auth0.com",
-          "policy": "Final",
-          "reason": "2026-08-25 F1 已修复：auth0.com 自 AI.list 移入 ProxyGFW.list。"
+          "policy": "Proxy",
+          "reason": "2026-08-25 F1 已修复：auth0.com 自 AI.list 移入 ProxyGFW.list。2026-09-01 起 ProxyGFW 独立挂 Proxy 组（与收尾 FINAL 解耦），故落点由 Final 变为 Proxy；断言的真实内容不变——不得再被 AI.list 认领。"
         },
         {
           "host": "api-iam.intercom.io",

@@ -50,7 +50,7 @@ DOMAIN-SUFFIX,byteeffecttos.com
 DOMAIN-SUFFIX,bytefcdn.com
 DOMAIN-SUFFIX,bytegoofy.com
 DOMAIN-SUFFIX,bytegslb.com
-DOMAIN-SUFFIX,byteimg.com
+DOMAIN,byteimg.com
 DOMAIN-SUFFIX,bytelb.net
 DOMAIN-SUFFIX,bytelove.cn
 DOMAIN-SUFFIX,bytemaimg.com
@@ -208,7 +208,6 @@ DOMAIN-SUFFIX,juliangyinqing.com
 DOMAIN-SUFFIX,juliangyinqing.net
 DOMAIN-SUFFIX,knightedge.com
 DOMAIN-SUFFIX,kolbuyer.cn
-DOMAIN-SUFFIX,larksuitecdn.com
 DOMAIN-SUFFIX,lingovalley-cdn.cn
 DOMAIN-SUFFIX,luckforcalendar.com
 DOMAIN-SUFFIX,luckincalendar.com

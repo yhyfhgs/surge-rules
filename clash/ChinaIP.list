@@ -1,9 +1,7 @@
 # AUTO-GENERATED — Clash(Mihomo) classical 规则，由 ../lists/ChinaIP.list 派生
 # 勿手工编辑；修改 Surge 源后运行 python3 tools/surge2clash.py 重新生成
 
-# ChinaIP — 中国大陆 IP 段全量兜底（IPv4 + IPv6，逐条 no-resolve）；机器管理层，勿手改
-# 数据源：blackmatrix7/ios_rule_script rule/Surge/ChinaIPs/ChinaIPs.list @ 65e8adf（须用 IPv4+IPv6 全量源，lite 类源 IPv4 覆盖不足）
-# 排序：规则类型分区，区内按网络地址序；发布前经 tools/collapse_cidr.py 等价折叠（地址集合逐位不变，见 --verify）
+# Machine-managed mainland IPv4/IPv6 fallback; rebuild from sources.lock.json and do not edit manually.
 
 IP-CIDR,1.0.1.0/24,no-resolve
 IP-CIDR,1.0.2.0/23,no-resolve
@@ -1346,7 +1344,6 @@ IP-CIDR,74.119.193.16/28,no-resolve
 IP-CIDR,74.119.193.32/27,no-resolve
 IP-CIDR,74.119.193.64/26,no-resolve
 IP-CIDR,74.119.193.128/25,no-resolve
-IP-CIDR,74.125.16.64/26,no-resolve
 IP-CIDR,74.214.161.0/24,no-resolve
 IP-CIDR,75.75.236.0/29,no-resolve
 IP-CIDR,80.76.36.0/22,no-resolve
@@ -5151,7 +5148,6 @@ IP-CIDR,161.248.136.0/23,no-resolve
 IP-CIDR,162.14.0.0/16,no-resolve
 IP-CIDR,162.62.240.0/23,no-resolve
 IP-CIDR,162.62.242.0/24,no-resolve
-IP-CIDR,162.105.0.0/16,no-resolve
 IP-CIDR,163.0.0.0/16,no-resolve
 IP-CIDR,163.47.4.0/22,no-resolve
 IP-CIDR,163.53.0.0/20,no-resolve

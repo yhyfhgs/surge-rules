@@ -1,176 +1,137 @@
 # surge-rules
 
-个人维护的 Surge 分流规则集,以及由它自动派生的 Clash (Mihomo) 规则集 —— 一套编辑源、两端消费,经全局唯一化去重与冲突消解,全链路零本地 DNS 解析。
+Surge rules with a generated Mihomo/Clash mirror. `lists/*.list` are the rule
+sources; [`config/routing.json`](config/routing.json) is the only source of list
+order, policies, `extended-matching`, and `no-resolve` metadata.
 
-规则本地化自 skk.moe / Repcz / Loyalsoldier / blackmatrix7 等上游来源(来源与许可登记见 [SOURCES.md](SOURCES.md))。`lists/` 下的 34 个 Surge `.list` 是**唯一编辑源**;`clash/` 下的同名文件由 [`tools/surge2clash.py`](tools/surge2clash.py) 全量再生,**禁止手工编辑**。
+Current verified baseline:
 
----
+- 39 lists and 141,829 source rules.
+- 1,630 materialized syntax relations: 367 `covers` and 1,263 `overlaps`.
+- 3,579,582 exact keyword/wildcard↔suffix intersection pairs represented compactly
+  in 960 weighted records: 21,554 same-policy and 3,558,028 split-policy.
+- Syntax topology: 80 order-dependent exceptions, 46 Reject/security split
+  apexes, 119 fragmented domains, and 13 constraints.
+- Runtime MMDB: 3,304 relations (1,750 `covers` / 1,554 `overlaps`), 1,414
+  order-dependent exceptions, 119 fragmented domains, and 30 constraints.
+- Both analyses have zero active shadows, conflicting equivalents, or cycles;
+  non-security split apexes and broad parents are zero, and runtime selectors are
+  all non-empty.
+- 208 scenarios, 1,418 requests, 2,639 assertions, and 1,100 DNS-leak assertions.
 
-## 分发链架构
+## Routing model
 
-```mermaid
-flowchart TD
-    A["本地编辑<br/>lists/*.list"] --> B{"update.sh 双闸门"}
-    B --> B1["tests/audit.py<br/>--check all --fail-on P1"]
-    B --> B2["tests/runsuite.py<br/>189 场景 / 2269 断言"]
-    B1 -- 失败 --> A
-    B2 -- 失败 --> A
-    B1 -- 通过 --> C
-    B2 -- 通过 --> C["tools/surge2clash.py<br/>再生 clash/ 派生层"]
-    C --> D["git commit + push<br/>github.com/yhyfhgs/surge-rules"]
-    D --> E["逐文件 purge jsDelivr<br/>共 69 个文件"]
-    E --> F["md5 校验<br/>CDN 内容 == 本地内容"]
-    F --> G(("jsDelivr CDN"))
-    G --> H["Surge<br/>RULE-SET 引用 @main/lists/*.list"]
-    G --> I["Clash / Mihomo<br/>rule-providers 引用 @main/clash/*.list"]
+Surge is first-match-wins. The manifest orders rules into explicit domain and IP
+phases:
+
+| Phase | Lists | Purpose |
+|---|---|---|
+| Local/security | PrivateLAN, PKU, Reject | Local traffic and global reject overrides |
+| Precise exceptions | GameDownloadCN, ModelDownloadCDN, YouTube | Narrow rules before their broader owners |
+| Service owners | Google, Twitter, Meta, Microsoft, AI, TikTok, SocialOthers, Telegram, Streaming, Games, DownloadCDN, Payment | Stable service/session ownership |
+| Verified direct | AppleCN, MicrosoftCN | Explicit CN-reachable vendor endpoints |
+| Regional domains | Japan, UK, Europe, US | Region-bound sites before generic proxy fallback |
+| Domestic domains | Domestic, ChinaMedia, TencentCN, AlibabaCN, ByteDanceCN, BaiduCN, NetEaseCN | Curated domestic ownership |
+| Residual proxy | ProxyGFW | Domain-only rules that are verified to require proxying and fit no owner list |
+| Machine domain fallback | ChinaDomain | Generated domestic long tail after explicit proxy exceptions |
+| Service IP | JapanServiceIP | Verified first-party ranges before generic geography |
+| CN IP | ChinaIP | Authoritative CN ranges before GeoLite regional fallback |
+| Regional IP fallback | JapanIP, UKIP, EuropeIP, USIP | ASN/GEOIP routing for remaining literal-IP traffic |
+| Terminal | LAN, GEOIP CN, FINAL | Built-in safety and unmatched traffic |
+
+`ProxyGFW` uses `Proxy`; terminal `FINAL` uses `Final`. They are deliberately
+different policies. Shared cloud CIDRs, public-suffix tenant spaces, dead domains,
+and domains with a specific service owner do not belong in `ProxyGFW`.
+
+## Repository
+
+```text
+config/routing.json             canonical topology
+config/proxygfw-expired.txt     dead-domain re-entry denylist
+lists/*.list                    Surge sources
+clash/*.list                    generated Mihomo sources
+tools/analyze_rules.py          exhaustive relationship analyzer
+tools/render_surge_rules.py     render manifest order into a Surge profile
+tools/surge2clash.py            regenerate Clash outputs
+tests/audit.py                  structural checks
+tests/runsuite.py               behavioral regression suite
+docs/ARCHITECTURE.md            invariants and algorithms
+docs/MAINTENANCE.md             edit/verify/publish workflow
+docs/RULE_ANALYSIS_2026-09-01.md evidence and refactor record
 ```
 
-各环节职责详见 [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)。
+## Verify
 
----
+```bash
+# Render and validate a candidate profile without touching the active profile.
+python3 tools/render_surge_rules.py ../Surge.conf /tmp/Surge.candidate.conf
+surge-cli --check /tmp/Surge.candidate.conf
 
-## 目录结构
+# Every source rule is emitted to rules.jsonl and analyzed.
+python3 tools/analyze_rules.py \
+  --conf /tmp/Surge.candidate.conf --rules lists \
+  --out /tmp/rule-analysis --fail-on-shadow
 
-```
-rules/                        # git 仓库根(公开仓库)
-├── README.md                 # 本文件:总览、架构图、目录导航、快速开始
-├── CHANGELOG.md              # 更新记录(Keep a Changelog 风格,倒序)
-├── update.sh                 # 发布入口:双闸门 → clash 再生 → commit/push → purge → md5(三态发布)
-├── .gitignore                # 忽略 __pycache__/、*.pyc、reference/
-├── lists/                    # ★ 34 个 Surge .list —— 唯一编辑源
-├── modules/                  # Surge 模块 .sgmodule
-│   ├── README.md             # 目录约定与入库标准
-│   └── _template.sgmodule    # 新模块起手模板
-├── scripts/                  # Surge JS 脚本
-│   ├── README.md             # 目录约定与入库标准
-│   └── _template.js          # 新脚本起手模板
-├── clash/                    # 派生层:34 个同名 .list + rule-providers.yaml(勿手编)
-├── tools/
-│   └── surge2clash.py        # Surge → Clash(Mihomo)转换器
-├── tests/                    # 离线测试四件套
-│   ├── engine.py             # 离线规则引擎(只读解析 Surge.conf 与 lists/)
-│   ├── audit.py              # 静态审计(A1–A10)
-│   ├── runsuite.py           # 场景回归:189 场景 / 2269 断言(含 915 条 DNS 泄漏断言)
-│   ├── live_check.py         # 在线核对(需 conf 开启 http-api)
-│   ├── allowlist.json        # 审计豁免白名单(既定裁决的落点)
-│   └── scenarios/*.json      # 场景定义
-├── docs/
-│   ├── ARCHITECTURE.md       # 架构与设计裁决
-│   ├── MAINTENANCE.md        # 日常维护与发布手册
-│   └── DEVELOPMENT.md        # module / script 开发指南
-└── reference/                # 本地参考库(gitignored,不入库)
+python3 tests/audit.py \
+  --conf /tmp/Surge.candidate.conf --rules lists \
+  --check all --fail-on P1
+python3 tests/runsuite.py \
+  --conf /tmp/Surge.candidate.conf --rules lists
+
+# Derived layer must match the sources and manifest.
+python3 tools/surge2clash.py --check
 ```
 
-> `reference/` 存放上游参考项目与官方文档抓取,仅供本地查阅,已在 `.gitignore` 中,**绝不 `git add`**。
+For a complete ASN/GEOIP cross-match, pass Surge's pinned MMDB files and make
+`maxminddb` available:
 
----
+```bash
+python3 -m pip install -r requirements-analysis.txt
 
-## 34 个 list 总览
-
-**34 张表 / 142,708 条规则**(2026-08-31 修复批次后的守恒基线;`clash/` 派生层逐表一致,见 [docs/ARCHITECTURE.md §5.3](docs/ARCHITECTURE.md))。体量分布极不均匀 —— ChinaDomain 一张就占约 10.6 万条,其余 33 张合计约 3.6 万条。
-
-下表按 Surge.conf `[Rule]` 段的实际规则序(0–10 十一个区块)组织 —— **表格自上而下的顺序就是匹配优先级**。区的划分原理与排序依据见 [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)。
-
-| 区 | list | 策略去向 | 职责 |
-|---|---|---|---|
-| 0 系统/内网/校园网 | PrivateLAN | DIRECT | 内网与本地域名,先于一切代理规则 |
-| 0 系统/内网/校园网 | PKU | DIRECT | 北大校园网 / CERNET 直连 |
-| 1 广告拦截 | Reject | REJECT | HTTPDNS/私有 DoH + 广告投放 + 钓鱼恶意层,位次全链最前 |
-| 2 国服游戏下载 | GameDownloadCN | DIRECT | 国服游戏下载 CDN,须先于 Games / DownloadCDN |
-| 3 模型权重下载 | ModelDownloadCDN | 下载 | 大模型权重/数据集大文件下载端点,须先于 AI |
-| 4 YouTube | YouTube | 流媒体 | YouTube / YouTube Music 全量,须先于 Google |
-| 5 生态分类 | Google | Google-X-Meta-MS | Google 生态(含 Gemini),须先于 AI |
-| 5 生态分类 | Twitter | Google-X-Meta-MS | X / Twitter 生态(含 Grok/xAI),须先于 AI |
-| 5 生态分类 | Meta | Google-X-Meta-MS | Meta 生态(含 Meta AI),须先于 AI |
-| 5 生态分类 | Microsoft | Google-X-Meta-MS | Copilot / Bing / MSN / GitHub 平台 / 国际登录面 |
-| 5 生态分类 | AI | AI 组 | 独立 AI 服务商(OpenAI/Anthropic/Cursor 等)与 AI 基础设施;以 extended-matching 引用 |
-| 5 生态分类 | TikTok | 社交媒体 | TikTok 生态 |
-| 5 生态分类 | SocialOthers | 社交媒体 | 其余社交平台 |
-| 5 生态分类 | Telegram | Telegram(独立组) | Telegram 域名与 IP,单独成组便于独立选线 |
-| 5 生态分类 | Streaming | 流媒体 | 境外流媒体服务 |
-| 5 生态分类 | Games | 游戏 | 国际游戏平台与对战服务 |
-| 5 生态分类 | DownloadCDN | 下载 | 大流量批量下载域(定位已收窄,非站点静态资源) |
-| 6 支付 | Payment | Payment | 国际支付渠道,须固定同一出口防 3DS/风控 |
-| 7 Apple/微软国内 | AppleCN | DIRECT | Apple 国内可直连面,先于 GFW 防抢跑 |
-| 7 Apple/微软国内 | MicrosoftCN | DIRECT | 微软国内可直连面,先于 GFW 防抢跑 |
-| 8 GFW 兜底 | ProxyGFW | Final | 被墙域名兜底(含 `DOMAIN-SUFFIX,amazonaws.com` 的刻意 AWS 兜底) |
-| 9 地区表 | Japan | 日本节点组 | 日本地区域名 + GEOIP/IP-ASN,同表自包含 |
-| 9 地区表 | UK | 英国节点组 | 英国地区域名 + GEOIP/IP-ASN,同表自包含 |
-| 9 地区表 | Europe | 欧洲节点组 | 欧洲地区域名 + GEOIP/IP-ASN,同表自包含 |
-| 9 地区表 | US | 美国节点组 | 美国地区域名 + GEOIP/IP-ASN,同表自包含 |
-| 10 国内直连 | Domestic | DIRECT | 手工杂项层,国内区最高优先(第一层) |
-| 10 国内直连 | ChinaMedia | DIRECT | 国内媒体与其 CDN(第二层) |
-| 10 国内直连 | TencentCN | DIRECT | 腾讯生态国内域名(第二层) |
-| 10 国内直连 | AlibabaCN | DIRECT | 阿里生态国内域名(第二层) |
-| 10 国内直连 | ByteDanceCN | DIRECT | 字节生态国内域名(第二层) |
-| 10 国内直连 | BaiduCN | DIRECT | 百度生态国内域名(第二层) |
-| 10 国内直连 | NetEaseCN | DIRECT | 网易生态国内域名(第二层) |
-| 10 国内直连 | ChinaDomain | DIRECT | 约 10.6 万条国内域名长尾兜底(第三层,机器管理,**手工条目勿加**) |
-| 10 国内直连 | ChinaIP | DIRECT(`no-resolve`) | 国内 IP 段 |
-
-表外还有 conf 内建规则(非本仓库 list):区 0 开头的 `RULE-SET,SYSTEM,DIRECT`(Surge 内建系统规则集);区 10 尾部的收尾链 `RULE-SET,LAN`(`no-resolve`)→ `GEOIP,CN`(`no-resolve`)→ `FINAL,Final,dns-failed`。
-
-**两条不变量**:每个域名/IP 在全链中**唯一归属**一个 list(按 conf 顺序级联去重);所有 IP 类规则一律带 `no-resolve`。
-
----
-
-## 快速开始
-
-### Surge
-
-在 `[Rule]` 段按上表顺序引用远程 RULE-SET:
-
-```
-# 域名类
-RULE-SET,https://cdn.jsdelivr.net/gh/yhyfhgs/surge-rules@main/lists/GameDownloadCN.list,DIRECT
-RULE-SET,https://cdn.jsdelivr.net/gh/yhyfhgs/surge-rules@main/lists/YouTube.list,流媒体,extended-matching
-RULE-SET,https://cdn.jsdelivr.net/gh/yhyfhgs/surge-rules@main/lists/AI.list,AI,extended-matching
-
-# IP 类:必须带 no-resolve
-RULE-SET,https://cdn.jsdelivr.net/gh/yhyfhgs/surge-rules@main/lists/ChinaIP.list,DIRECT,no-resolve
+python3 tools/analyze_rules.py \
+  --conf /tmp/Surge.candidate.conf --rules lists \
+  --country-db "/Users/fhgs/Library/Application Support/com.nssurge.surge-mac/GeoLite2-Country.mmdb" \
+  --asn-db /Applications/Surge.app/Contents/Resources/GeoLite2-ASN.mmdb \
+  --out /tmp/rule-analysis-mmdb --fail-on-shadow
 ```
 
-URL 模板:`https://cdn.jsdelivr.net/gh/yhyfhgs/surge-rules@main/lists/<Name>.list`
+The active profile sets `geoip-maxmind-url`, so Surge stores the runtime Country
+database in its app-support directory; the ASN database remains bundled with the
+application. Analyze the same pair the running profile uses.
 
-### Clash (Verge Rev / Mihomo)
+## Edit and publish
 
-```yaml
-rule-providers:
-  YouTube:
-    type: http
-    behavior: classical
-    format: text
-    url: "https://cdn.jsdelivr.net/gh/yhyfhgs/surge-rules@main/clash/YouTube.list"
-    path: ./ruleset/YouTube.list
-    interval: 86400        # 自行设定刷新周期
+1. Move a rule from its old owner to its new owner; never duplicate it.
+2. Do not add a broad suffix, wildcard, or keyword parent when narrower rules use
+   another policy. Use explicit hosts/subtrees or unify the service family.
+3. Every IP rule must include `no-resolve`.
+4. Run the verification commands above.
+5. Run `python3 tools/surge2clash.py` to refresh `clash/`.
+6. Publish with `./update.sh "message"`.
 
-rules:
-  - RULE-SET,YouTube,流媒体
+`update.sh` requires the analysis dependency and readable Country/ASN MMDB files.
+`SURGE_COUNTRY_DB_PATH` / `SURGE_ASN_DB_PATH` override discovery; otherwise the
+Country path follows `geoip-maxmind-url` and the ASN path uses Surge's bundled
+database. It runs the full MMDB-expanded analysis before static audit, scenarios,
+Clash generation, push verification, jsDelivr purge, and CDN md5 verification.
+
+## Consumers
+
+Surge URL:
+
+```text
+https://cdn.jsdelivr.net/gh/yhyfhgs/surge-rules@main/lists/<Name>.list
 ```
 
-URL 模板:`https://cdn.jsdelivr.net/gh/yhyfhgs/surge-rules@main/clash/<Name>.list`
+Mihomo URL:
 
-[`clash/rule-providers.yaml`](clash/rule-providers.yaml) 已提供全部 34 个 provider 的定义与按优先级排好序的 `rules` 参考序列(与 Surge.conf `[Rule]` 逐行同序),可在 Clash Verge Rev 的「Merge」扩展中直接取用,无需手抄。
+```text
+https://cdn.jsdelivr.net/gh/yhyfhgs/surge-rules@main/clash/<Name>.list
+```
 
----
+Use the generated reference order in
+[`clash/rule-providers.yaml`](clash/rule-providers.yaml). Do not hand-edit files
+under `clash/`.
 
-## 维护流程摘要
-
-三步走,细节见 [docs/MAINTENANCE.md](docs/MAINTENANCE.md):
-
-1. **改** —— 只改 `lists/` 下的 Surge `.list`。先按 0–10 十一区定位区,再按国内三层定位层;保证全链唯一归属;IP 规则必带 `no-resolve`。
-2. **测** —— `python3 tests/runsuite.py` 跑场景回归;必要时 `python3 tests/audit.py --check all` 看静态审计详情。
-3. **发** —— `./update.sh "<commit message>"`。脚本自带双闸门(audit `--fail-on P1` + runsuite),通过后才再生 `clash/`、commit、push(仅限 main 分支,push 后校验远端 SHA)、逐文件 purge jsDelivr(含本次删除的文件)、md5 校验。闸门不过即中止,不会发出半成品;发布结果三态如实上报 —— `VALIDATED_NOT_PUBLISHED`(无需发布)、`PUBLISHED_AND_VERIFIED`(退出码 0)、`PUBLISHED_BUT_UNVERIFIED`(限流/复验不一致,退出码 1)。
-
----
-
-## 文档导航
-
-| 文档 | 内容 |
-|---|---|
-| [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | 分发链全图、`[Rule]` 0–10 十一区规则序与排序原理、国内直连三层、零本地 DNS 解析约束、Clash 派生层设计、设计裁决记录、测试体系设计 |
-| [docs/MAINTENANCE.md](docs/MAINTENANCE.md) | 新增规则的归属决策树、本地验证、发布流程逐步拆解、生效方式、故障排查、红线清单、备份与回滚 |
-| [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md) | module / script 开发指南:能力路线图、sgmodule 格式、脚本类型与核心 API、MitM 与 hostname 纪律、本地调试流、参考项目导读 |
-| [modules/README.md](modules/README.md) | `modules/` 目录约定与入库标准 |
-| [scripts/README.md](scripts/README.md) | `scripts/` 目录约定与入库标准 |
-| [CHANGELOG.md](CHANGELOG.md) | 版本更新记录 |
+Upstream provenance is in [SOURCES.md](SOURCES.md). Historical changes are in
+[CHANGELOG.md](CHANGELOG.md).

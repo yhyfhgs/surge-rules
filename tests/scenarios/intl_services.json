@@ -79,8 +79,8 @@
       {"host": "wikimedia.org"},
       {"host": "upload.wikimedia.org", "note": "条目内图片/媒体"}
     ],
-    "assert": {"same_policy": true, "policy": "Final", "no_dns_leak": true},
-    "note": "2026-08-25 F1 已修复：upload.wikimedia.org 等 3 个 wikimedia 子域已撤出 DownloadCDN。"
+    "assert": {"same_policy": true, "policy": "Proxy", "no_dns_leak": true},
+    "note": "2026-08-25 F1 已修复：upload.wikimedia.org 等 3 个 wikimedia 子域已撤出 DownloadCDN。2026-09-01：wikipedia.org / wikimedia.org 命中 ProxyGFW，期望由 Final 改为 Proxy——2026-09-01 起 ProxyGFW 独立挂 Proxy 组（与收尾 FINAL 解耦）。"
   },
   {
     "name": "steam_store_community",

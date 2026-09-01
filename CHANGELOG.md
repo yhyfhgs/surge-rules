@@ -4,6 +4,46 @@
 
 ---
 
+## [2026-09-01] Deterministic topology and residual-GFW refactor
+
+- Added exhaustive domain/CIDR/ASN/GEOIP relationship analysis with runtime-MMDB
+  expansion. Every one of 141,829 source rules is accounted for.
+- Final syntax analysis materializes 1,630 relations (367 covers / 1,263
+  overlaps) and compactly records 3,579,582 exact keyword/wildcard↔suffix pairs
+  in 960 weighted records (21,554 same-policy / 3,558,028 split-policy).
+- Final syntax topology has 80 order-dependent exceptions, 119 fragmented domains,
+  and 13 constraints. All 46 split apexes are Reject/security exceptions;
+  non-security split apexes and general broad parents are zero.
+- The final syntax relation classes include 287 redundant coverage relations,
+  256 same-policy overlaps, and 1,007 split-policy overlaps.
+- The runtime MMDB run reports 3,304 relations (1,750 covers / 1,554 overlaps),
+  1,414 order-dependent exceptions, 336 redundant coverage relations, 293
+  same-policy overlaps, 1,261 split-policy overlaps, 119 fragmented domains, and
+  30 constraints, with no cycles, active conflicts, or empty selectors.
+- Added `config/routing.json` as the canonical 39-list topology; Surge rendering,
+  ChinaDomain ownership filtering, and Clash generation now consume it.
+- Split regional domain, verified service-IP, ChinaIP, and regional GeoIP phases.
+  Pinned MMDB verification reduced active shadows/conflicting equivalents to zero.
+- Reduced `ProxyGFW` to a domain-only residual: removed 766 expired domains, 37
+  public/private-suffix tenant boundaries, shared cloud CIDRs, and service-owned
+  rules; added re-entry and structural gates.
+- Reclassified Microsoft, LINE/LY, BBC, Pinterest/Discord/social, streaming,
+  gaming, and regional service families. Broad mixed-policy parents were removed
+  or narrowed; split apexes fell from 200 to 46 Reject/security exceptions, with
+  zero non-security split apexes.
+- Updated ChinaDomain and ChinaIP regeneration to filter earlier ownership rather
+  than allowlisting downstream duplicates. The generalized `split_parent` gate
+  covers suffix, wildcard, and keyword parents; 42 residual single-label public
+  suffix rules were removed from generated ChinaDomain.
+- Pruned obsolete audit narratives and oversized source/list comments; the full
+  historical reports remain recoverable from git history.
+- `update.sh` now requires the analysis dependency plus readable pinned Country/ASN
+  MMDB files, selects the downloaded Country DB when `geoip-maxmind-url` is active,
+  and blocks publication unless the full expanded analysis passes.
+- Verified 208 scenarios / 1,418 requests / 2,639 assertions / 1,100 DNS-leak
+  assertions, static audit, engine/audit self-tests, Surge syntax, pinned rebuild,
+  and Clash parity.
+
 ## [2026-08-31·三轮] V2 审计整改:24 项确定级修复 + A9/A10 门禁上线 + 供应链锁层开工
 
 依据 `docs/RULES_AUDIT_V2_2026-08-31.md`,分 R0(保险丝)/ R1(确定级)/ R2(门禁)/ R3(供应链)三波并行执行。**守恒基线 143,640 → 142,708 条(净 −932)**,表数 34 不变。删除面集中在多租户注册边界、S3 兼容对象存储族、死条目与信任面缺陷;迁移面在总数上互相抵消。实测得到的口径更正统一登记在审计文档的「执行勘误」节(E-1 … E-8),正文数字以该节为准。
@@ -33,7 +73,7 @@
 
 ### Added
 - **audit A9 · IP 跨表包含 / 遮蔽审计**:按 conf 真实序建前缀模型,报「后位 CIDR 被前位完全包含」与「跨策略部分交叠」;同策略 P3 不阻断,**跨策略 P1**。基线实测 **145 条(144 同策略 + 1 跨策略)**,整体登记 exemption,门禁只对**新增**跨策略交叠报警。审计原文的「154 + 28」是把「完全包含」与「部分交叠」分两次计数,与实装的顺序感知口径不同 —— 已重标,见勘误 E-8。
-- **audit A10 · 单标签后缀与 PSL 注册边界**:用**入库的锁定快照**(`tests/data/public_suffix_list.dat` + `tlds-alpha-by-domain.txt`,逐字节固定 sha256)判「这条后缀是不是别人的注册边界」,ICANN 与 PRIVATE 两段均参与,`*.parent` 通配与 `!exception` 按标准算法处理,IDN 两侧做 IDNA 归一。**门禁不联网**:判据必须可复现可 review,快照更新是一次有意的提交而不是运行时下载。基线 143 条全部预登记,**首次上线 0 误报 0 漏报**;唯一真信号 `TencentCN:in.th`(认领了整个泰国 `in.th` 二级注册边界)列为待裁决。两份快照已登记进 `SOURCES.md`。
+- **audit A10 · 单标签后缀与 PSL 注册边界**:用**入库的锁定快照**(`tests/data/public_suffix_list.dat` + `tlds-alpha-by-domain.txt`,逐字节固定 sha256)判「这条后缀是不是别人的注册边界」,ICANN 与 PRIVATE 两段均参与,`*.parent` 通配与 `!exception` 按标准算法处理,IDN 两侧做 IDNA 归一。**门禁不联网**:判据必须可复现可 review,快照更新是一次有意的提交而不是运行时下载。该版本的历史基线为 143 条预登记,`TencentCN:in.th` 当时列为待裁决;当前状态以 2026-09-01 的无豁免广父规则门禁为准。两份快照已登记进 `SOURCES.md`。
 - **A8 加作用域**:forbidden 条目支持 `file` / `not_file`,可表达「这条模式在 A 表禁收、在 B 表是承接机制」。forbidden **130 → 244 条**,exemptions **30 → 54 条**(撤销 1 / 收窄 1 / 标记 3 / 新增 25)。audit 自检 **33 → 51 条**。
 - **供应链锁层开工**:`sources.lock.json` + `tools/fetch_locked.py` + `tools/rebuild.py`。**ChinaIP 已做实** —— pinned 到 `blackmatrix7/ios_rule_script@65e8adf`,折叠后与本地文件地址集合逐位相同(`rebuild.py` diff = 0),本地镜像与公网两条取源路径 sha256 一致;其余表按 provenance 如实标为 `observed`(未锁)。`tools/regen_chinadomain.py`:ChinaDomain 再生管线过滤器(六级流水线 + P1–P10 护栏,内置 17 删域 / 9 品牌关键词 / D11 排除项 / 21 条承载集豁免),**低频有人值守操作,刻意不进 `update.sh`**。
 - **场景基线 147 → 189 场景 / 1,233 请求 / 2,269 断言 / 915 条 DNS 泄漏断言**,失败 0、已知待修 0。新增 6 个场景文件:`fix_download_v2` / `fix_domestic_v2` / `fix_ecosystem_v2` / `fix_regions_v2`(四波修复的正负例)、`ipv6_parity`(IPv4/IPv6 双栈落点一致性,每条带 `no_dns_leak`)、`payment_chain`(支付全链同出口)。`runsuite.py` 新增 `--rules` 参数,配公共脱敏 conf 使用。

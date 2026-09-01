@@ -1,84 +1,37 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""regen_chinadomain.py — ChinaDomain.list 再生管线过滤器（护栏版）
+"""Guarded generator for the machine-owned ``ChinaDomain.list`` layer.
 
-⚠️ 这是一个**低频、有人值守**的操作，刻意**不进 update.sh**。
-   update.sh 是无人值守的日常发布回路；把一个会依赖 3 个外部 DNS 解析器、
-   会因网络抖动误判、单轮可影响上万条规则的脚本挂进去，等于把「整表清空」
-   放到定时任务里。再生必须由人发起、看着报告、逐轮推进。
+Run this low-frequency pipeline manually, outside ``update.sh``, after a
+locked upstream fetch. ``--shadow`` records decisions without replacing the
+output; ``--apply`` writes only entries that pass the persistence gate. The
+output and per-rule report are the auditable artifacts; individual entries
+must not be hand-edited.
 
-   再生回路（与日常回路并列，见 docs/MAINTENANCE §0）：
-       fetch_locked.py（按 sources.lock 校验上游 sha256）
-         → regen_chinadomain.py --shadow   第 1 轮：只记账
-         → regen_chinadomain.py --shadow   第 2 轮：只记账，人工抽查 30 DROP + 30 KEEP
-         → regen_chinadomain.py --apply    第 3 轮起：P7 迟滞满足的才真删
-         → collapse_cidr.py（ChinaIP）→ runsuite.py → audit.py → update.sh
+Pipeline: type and forbidden filters → ownership de-duplication against the
+earlier routing lists (including broad parents of split-routed children) →
+multi-resolver classification → P1–P10 protections → output checks.
+Built-in poison, keyword, type, and carrier-pin decisions remain independently
+reproducible. Quarantine is only exported here; active reachability must be
+tested without Surge.
 
-定位
-----
-ChinaDomain.list 是「整表机器刷新层」，不允许手工改单条（MAINTENANCE 红线 #5）。
-因此「境外托管噪声」（审计 V2 §3.7 F-01，裸估 ≈16,096 条）的唯一合法治理点就是
-再生管线的过滤器。本脚本吃上游 ChinaMaxNoIP_All.list，吐出可发布的候选表
-以及一份逐条可溯源的裁决报告。
+Protection invariants:
+* Any CN answer or AAAA answer, approved CDN CNAME, non-overlapping resolver
+  answers, grace ASN, Greater-China result, or pin keeps/quarantines the entry.
+* Three foreign verdicts at least seven days apart are required before a drop.
+* A drop batch over the configured threshold exits 1; resolver success below
+  70% exits 2; a deletion that would route outside ``Final``/``Proxy`` (or a
+  compatibility alias) exits 1. Unresolved entries are retained. Meta parked
+  signatures are report-only.
 
-来源：`reference/audit-v2-20260831/w6/chinadomain_regen_filter.py`（W6 可运行原型）。
-入库时相对原型的改动，全部是「把散落在文档里的裁决固化成机器强制」：
-  1. 内置 17 条已删投毒/境外托管域（MAINTENANCE §8）—— 硬 drop，**独立复现**
-     而不是靠 ProxyGFW 位次抢跑（验收 A9 明确要求可独立复现）；
-  2. 内置尾部 9 条品牌关键词（MAINTENANCE §8）—— 与「本层不接受任何
-     DOMAIN-KEYWORD」的类型级硬规则叠加，双保险；
-  3. D11 类型过滤保持原型行为（USER-AGENT / PROCESS-NAME / URL-REGEX 全类型禁收），
-     并显式登记 D11 点名的排除项 `stripe` / 未登记的 `beplay`；
-  4. 内置**承载集豁免**（P10 的机器侧种子）：ProxyGFW 18 条承载集 + Reject 3 条
-     HTTPDNS。这些条目「之所以承载，正是因为后位有更宽的兜底会接住它们」——
-     存活过滤器若把它们当死域丢掉，被承载的 host 会静默掉进 DIRECT。
-  5. 三模式收敛成两模式：`--shadow` / `--apply`。原型的 `--dry-run` 与
-     `--shadow --sample N` 完全等价（都不写表），保留两个入口只会让人选错。
+Usage::
 
-六级流水线
-----------
-  F0  类型过滤    丢弃 USER-AGENT / PROCESS-NAME / URL-REGEX            (D7 / D11)
-  F1  forbidden   丢弃命中 allowlist forbidden 段 + 内置 17 域 + 9 关键词 (A8)
-  F2  归属去重    丢弃已被 conf 中更前位表认领的域                        (唯一归属)
-  F3  解析分类    CN 多解析器 quorum + 境外参照解析 → 落地判定
-  F4  误删保护    P1–P10 十道护栏，任何一道触发即「保留」或「隔离」
-  F5  产出/闸门   写表 + 逐条报告 + 爆炸半径闸门 + 落点复核
+    python3 tools/regen_chinadomain.py --shadow --upstream PATH --state PATH --report PATH
+    python3 tools/regen_chinadomain.py --apply --upstream PATH --state PATH \\
+        --out lists/ChinaDomain.list --report PATH
 
-十道护栏（P1–P10，语义与 W6 §3.3 表格逐条对应，勿在未更新该表的情况下改动）
---------------------------------------------------------------------------
-  P1  多解析器 quorum：3 个 CN 公共解析器任一返回 CN 落点即保留
-  P2  双栈救援：任一 AAAA 落 CN v6 即保留
-  P3  CN CDN CNAME 骨架白名单：命中即**无条件保留**（CDN 双栈域核心保护）
-  P4  全球 anycast / 大厂云宽限：落点 ASN ∈ GRACE_ASN → 不自动丢，进隔离区
-  P5  主动可达性实测（隔离区出口）：**必须在没有 Surge 的环境跑** —— 本机增强模式
-      TUN 会捕获一切，`curl --noproxy '*' --resolve` 也测不到真实直连可达性。
-      本脚本只负责把隔离区导出成 quarantine.txt，不在此处下结论。
-  P6  解析器互斥即隔离：3 个 CN 解析器答案两两无交集 → 证据不足，隔离不丢
-  P7  迟滞：同一域需连续 3 次（间隔 ≥7 天）判为境外才真删
-  P8  爆炸半径闸门：单轮丢弃 >20%（可配）直接 exit 1
-  P9  落点复核：每条待删域用 tests/engine.py 算删除后落点，必须 ∈ {Final, ProxyGFW}
-  P10 pin list：人工钉住 + 内置承载集豁免，机器强制永不删
-  —   解析成功率 <70% → exit 2（判定不可信）；NO_A 默认保留（解析不出 ≠ 境外）
-
-停放域签名（审计裁决 10，供 P9/报告判读，本脚本不据此自动删）
-------------------------------------------------------------
-  Meta 停放判定 = `57.144.0.0/14` 内、host 以 `.141` 结尾 —— **不只** `220.141`
-  与 `221.141` 两个尾段。旧签名只认那两段，会漏判同族其余停放地址。
-
-用法
-----
-  # 影子运行（第 1、2 轮）：算出会丢什么，但一条都不丢
-  python3 tools/regen_chinadomain.py --shadow \\
-      --upstream build/upstream/blackmatrix7_china_max_noip/ChinaMaxNoIP_All.list \\
-      --state tools/state/chinadomain.json --report build/regen-report.json
-
-  # 正式（第 3 轮起）：只有连续 3 轮判境外的才真删
-  python3 tools/regen_chinadomain.py --apply \\
-      --upstream build/upstream/.../ChinaMaxNoIP_All.list \\
-      --state tools/state/chinadomain.json \\
-      --out lists/ChinaDomain.list --report build/regen-report.json
-
-退出码：0 正常；1 P8 爆炸半径闸门拦截 / 输入非法；2 解析成功率过低（判定不可信）。
+Exit codes: 0 success; 1 input/guard or P8/P9 failure; 2 insufficient
+resolver success.
 """
 import argparse
 import fnmatch
@@ -93,7 +46,10 @@ from bisect import bisect_right
 from collections import Counter
 from concurrent.futures import ThreadPoolExecutor
 
+from routing_manifest import load_routing_manifest
+
 REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+ROUTING_MANIFEST = os.path.join(REPO_ROOT, "config", "routing.json")
 
 # ---------------------------------------------------------------- 配置常量
 
@@ -101,10 +57,9 @@ CN_RESOLVERS = ["223.5.5.5", "119.29.29.29", "180.76.76.76"]   # AliDNS / DNSPod
 INTL_RESOLVERS = ["8.8.8.8", "1.1.1.1"]                        # 参照侧（用于识别投毒）
 DIG_TIMEOUT = 4
 
-# ── 内置裁决 1：17 条已删投毒 / 境外托管域（docs/MAINTENANCE.md §8）────────────
-# 国内 DNS 已被投毒或站点境外托管，直连必超时。前 14 条已转 ProxyGFW，后 3 条仅删除
-# 落 FINAL。这里内置的目的是让过滤器**独立复现**「产出表中不存在这 17 条」，
-# 而不是依赖 ProxyGFW 的位次抢跑 —— 验收 A9 的原文要求。
+# ── 内置投毒 / 境外托管域 ────────────────────────────────────────────────────
+# Keep these decisions in the filter so output remains independently reproducible
+# instead of depending on ProxyGFW list order.
 DELETED_POISON_DOMAINS = {
     # 已转 ProxyGFW（14）
     "123du.cc", "23us.so", "biyuwu.cc", "emsec.hk", "hanfan.cc", "hostloc.me",
@@ -114,30 +69,23 @@ DELETED_POISON_DOMAINS = {
     "mojie.kim", "mojieai.com", "springerlink.com",
 }
 
-# ── 内置裁决 2：ChinaDomain 尾部 9 条品牌关键词（docs/MAINTENANCE.md §8）──────
-# 核心域由厂商表的精确后缀承接；本层收关键词等于无标签边界地扩大 DIRECT 面。
-# 已入 tests/allowlist.json forbidden 段由 audit A8 强制，这里再内置一份：
-# allowlist 是「事后检出」，这里是「产出前拦截」，两者不互相替代。
+# ── 内置品牌关键词 ──────────────────────────────────────────────────────────
+# ChinaDomain accepts suffixes, not unbounded keywords; keep this pre-filter
+# independent from the allowlist's post-run audit.
 BANNED_BRAND_KEYWORDS = {
     ".tmall.com", "alicdn", "alipay", "aliyun", "baidu",
     "hnagroup", "officecdn", "taobao", "weibo",
 }
 
-# ── 内置裁决 3：D11 上游合并排除项 ──────────────────────────────────────────
-# `stripe` 是 D11 明文点名的排除项、`beplay` 是审计发现的未登记项（§3.7 表）。
-# 二者都是 DOMAIN-KEYWORD，会被下面的类型级硬规则一并拦下；单列是为了让
-# 报告能把「这条是 D11 裁决拦的」与「这条是类型规则拦的」区分开。
+# ── D11 上游合并排除项 ─────────────────────────────────────────────────────
+# Keep these keyword names separate so reports distinguish them from the
+# general DOMAIN-KEYWORD type filter.
 D11_EXCLUDED_KEYWORDS = {"stripe", "beplay"}
 
-# ── 内置裁决 4：承载集豁免（P10 机器侧种子）────────────────────────────────
-# 「承载」= 该条目一旦消失，被它认领的 host 会掉进后位表的更宽兜底里变成 DIRECT。
-# 存活过滤器必须把它们当作永不删。两组来源：
-#   a) ProxyGFW 18 条承载集（审计 §3.5「18 条承载集全清单」，验收基准）
-#   b) Reject 3 条 HTTPDNS（advisor 裁决 1：承载集同构必留）——删掉会被
-#      TencentCN 的 qcloud.com / Domestic 的 yy.com 接住变 DIRECT，
-#      直接击穿 Reject 表头「绕过系统 DNS 会破坏本架构域名分流」的设立理由。
-# 权威重算方式：reference/audit-v2-20260831/w3/dedup.py 的后位比对段。
-# 这里的静态副本是给过滤器用的**下限**，不是唯一真相 —— 表变了要回去重算。
+# ── 承载集豁免（P10 机器侧种子）────────────────────────────────────────────
+# A carrier entry protects a host that would otherwise fall through a later,
+# broader rule to DIRECT. These pins cover proxy carriers and Reject HTTPDNS;
+# recompute them whenever the routing lists change.
 CARRIER_SET_PINS = {
     # a) ProxyGFW 18 条承载集
     "cloud.oracle.com",           # ← ChinaDomain:68167 oracle.com
@@ -208,18 +156,6 @@ DOMAIN_TYPES = {"DOMAIN", "DOMAIN-SUFFIX", "DOMAIN-WILDCARD", "DOMAIN-KEYWORD"}
 BANNED_TYPES = {"USER-AGENT", "PROCESS-NAME", "URL-REGEX"}
 
 IPV4_RE = re.compile(r"^\d{1,3}(\.\d{1,3}){3}$")
-
-# conf [Rule] 区中位于 ChinaDomain 之前的表（F2 归属去重的比对面）。
-# 必须与 Surge.conf 真实顺序一致；顺序变了这里也要改（S2 的 gen_topology 落地后
-# 应改为从 config/rulesets.yaml 读，届时删掉这份手抄）。
-CONF_ORDER_BEFORE_CHINADOMAIN = [
-    "PrivateLAN", "PKU", "Reject", "GameDownloadCN", "ModelDownloadCDN", "YouTube",
-    "Google", "Twitter", "Meta", "Microsoft", "AI", "TikTok", "SocialOthers",
-    "Telegram", "Streaming", "Games", "DownloadCDN", "Payment", "AppleCN",
-    "MicrosoftCN", "ProxyGFW", "Japan", "UK", "Europe", "US", "Domestic",
-    "ChinaMedia", "TencentCN", "AlibabaCN", "ByteDanceCN", "BaiduCN", "NetEaseCN",
-]
-
 
 # ---------------------------------------------------------------- 工具
 
@@ -364,6 +300,8 @@ def f1_forbidden(rules, allowlist_path):
         #     比逐个登记关键词更抗上游变化 —— 上游新加一个关键词也拦得住。
         if reason is None and t == "DOMAIN-KEYWORD":
             reason = "keyword-not-allowed-in-machine-layer"
+        if reason is None and t == "DOMAIN-SUFFIX" and "." not in v:
+            reason = "single-label-public-suffix"
 
         if reason:
             r["reason"] = reason
@@ -373,18 +311,39 @@ def f1_forbidden(rules, allowlist_path):
     return keep, drop
 
 
-def f2_ownership(rules, lists_dir, order):
-    """丢弃已被 conf 中更前位表认领的域（唯一归属原则）。"""
-    suf, exact, kw = {}, {}, []
+def f2_ownership(rules, lists_dir, order, policies=None):
+    """丢弃前位已认领的规则及包含前位分流子域的宽父后缀。"""
+    suf, exact, kw, split_parents = {}, {}, [], {}
     for t in order:
         p = os.path.join(lists_dir, t + ".list")
-        if not os.path.exists(p):
-            continue
+        if not os.path.isfile(p):
+            raise FileNotFoundError("routing list disappeared after manifest validation: %s" % p)
         for r in parse_rules(p):
             if r["type"] == "DOMAIN-SUFFIX":
                 suf.setdefault(r["value"], (t, r["line"]))
+                if t not in ("PrivateLAN", "Reject") and (
+                        policies is None or policies.get(t) != "DIRECT"):
+                    labels = r["value"].split(".")
+                    for i in range(1, len(labels)):
+                        split_parents.setdefault(".".join(labels[i:]),
+                                                 (r["value"], t, r["line"]))
             elif r["type"] == "DOMAIN":
                 exact.setdefault(r["value"], (t, r["line"]))
+                if t not in ("PrivateLAN", "Reject") and (
+                        policies is None or policies.get(t) != "DIRECT"):
+                    labels = r["value"].split(".")
+                    for i in range(len(labels)):
+                        split_parents.setdefault(".".join(labels[i:]),
+                                                 (r["value"], t, r["line"]))
+            elif r["type"] == "DOMAIN-WILDCARD" and t not in ("PrivateLAN", "Reject") and (
+                    policies is None or policies.get(t) != "DIRECT"):
+                last_meta = max(r["value"].rfind("*"), r["value"].rfind("?"))
+                tail = r["value"][last_meta + 1:]
+                if tail.startswith(".") and len(tail) > 1:
+                    labels = tail[1:].split(".")
+                    for i in range(len(labels)):
+                        split_parents.setdefault(".".join(labels[i:]),
+                                                 (r["value"], t, r["line"]))
             elif r["type"] == "DOMAIN-KEYWORD":
                 kw.append((r["value"], t, r["line"]))
     keep, drop = [], []
@@ -405,6 +364,10 @@ def f2_ownership(rules, lists_dir, order):
                 if k in v:
                     owner = ("keyword:" + k, t, ln)
                     break
+        if owner is None and r["type"] == "DOMAIN-SUFFIX" and "." in v:
+            child = split_parents.get(v)
+            if child:
+                owner = ("split-child:" + child[0], child[1], child[2])
         if owner:
             r["reason"] = "owned-by %s:%s via %s" % (owner[1], owner[2], owner[0])
             drop.append(r)
@@ -548,10 +511,11 @@ def verdict(rec, cnset, asninfo, pinned):
 # ---------------------------------------------------------------- P9 落点复核
 
 def p9_recheck(names, engine_path, conf, rules_dir):
-    """每条待删域用 engine.py 复核删除后落点，必须 ∈ {Final, ProxyGFW}。
+    """Recheck each pending deletion with ``engine.py``; allowed policies are Final or Proxy.
 
-    返回 {name: (policy, source)}；engine 不可用时返回 {}（调用方须当作「未复核」
-    而不是「已通过」—— 静默跳过一道硬门禁比不跑更危险）。
+    The result is ``{name: (policy, source)}``; legacy policy aliases may also
+    be returned by the engine. An empty result means the engine was unavailable
+    and must remain a failed gate, never an implicit pass.
     """
     if not os.path.exists(engine_path):
         return {}
@@ -603,11 +567,25 @@ def main(argv=None):
                    help="正式：P7 迟滞满足的才真删并写表（第 3 轮起）")
     a = ap.parse_args(argv)
 
+    try:
+        routing = load_routing_manifest(ROUTING_MANIFEST, a.lists_dir)
+    except ValueError as exc:
+        print("!! %s" % exc)
+        return 1
+    names = [entry["name"] for entry in routing]
+    try:
+        china_domain_index = names.index("ChinaDomain")
+    except ValueError:
+        print("!! routing manifest is missing required ruleset 'ChinaDomain'")
+        return 1
+    ownership_order = names[:china_domain_index]
+    policies = {entry["name"]: entry["policy"] for entry in routing}
+
     rules = parse_rules(a.upstream)
     n0 = len(rules)
     rules, d0 = f0_type_filter(rules)
     rules, d1 = f1_forbidden(rules, a.allowlist)
-    rules, d2 = f2_ownership(rules, a.lists_dir, CONF_ORDER_BEFORE_CHINADOMAIN)
+    rules, d2 = f2_ownership(rules, a.lists_dir, ownership_order, policies)
     print("F0 type      : -%d   %s" % (len(d0), Counter(r["type"] for r in d0)))
     print("F1 forbidden : -%d   %s" % (len(d1), Counter(r["reason"].split(":")[0] for r in d1)))
     print("F2 ownership : -%d" % len(d2))
@@ -695,24 +673,24 @@ def main(argv=None):
             print("   %s  %s" % (r["name"], r["protections"]))
         return 1
 
-    # P9 落点复核：待删域删除后必须落 Final 或 ProxyGFW
+    # P9 落点复核：待删域删除后必须落 Final 或 Proxy；兼容旧策略别名。
     if eff_drop:
         checked = p9_recheck([r["name"] for r in eff_drop], a.engine, a.conf, a.lists_dir)
         if not checked:
             print("!! P9 未能复核（engine.py 不可用）—— 这是一道硬门禁，不允许静默跳过")
             return 1
         stray = {n: pol for n, (pol, _src) in checked.items()
-                 if pol not in ("Final", "ProxyGFW", "FINAL")}
+                 if pol not in ("Final", "Proxy", "ProxyGFW", "FINAL")}
         for r in out_rows:
             if r["name"] in checked:
                 r["p9_policy"] = checked[r["name"]][0]
                 r["p9_source"] = checked[r["name"]][1]
         if stray:
-            print("!! P9 违规：%d 条待删项删除后不落 Final/ProxyGFW，中止" % len(stray))
+            print("!! P9 违规：%d 条待删项删除后不落 Final/Proxy，中止" % len(stray))
             for n, pol in list(stray.items())[:10]:
                 print("   %-40s → %s" % (n, pol))
             return 1
-        print("P9 落点复核: %d/%d 条落 Final/ProxyGFW ✓" % (len(checked), len(eff_drop)))
+        print("P9 落点复核: %d/%d 条落 Final/Proxy ✓" % (len(checked), len(eff_drop)))
 
     if a.report:
         with open(a.report, "w", encoding="utf-8") as f:
@@ -746,7 +724,7 @@ def main(argv=None):
         kept = [r for r in rules if r["value"] not in drop_names]
         with open(a.out, "w", encoding="utf-8") as f:
             f.write("# ChinaDomain — 整表机器刷新层，由 tools/regen_chinadomain.py 再生；勿手改单条\n")
-            f.write("# 数据源与 pin 见 sources.lock.json；再生回路见 docs/MAINTENANCE §0\n")
+            f.write("# 数据源与 pin 见 sources.lock.json；再生回路见 docs/MAINTENANCE.md\n")
             f.write("# 排序：规则类型分区，区内字母序\n\n")
             for r in sorted(kept, key=lambda x: (x["type"] != "DOMAIN", x["value"])):
                 f.write(r["raw"] + "\n")

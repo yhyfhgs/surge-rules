@@ -27,86 +27,30 @@
 #
 # 与它并列的已知能力差另有两条：Surge 内建 SYSTEM 集在 Clash 端无等价物；
 # 内建 LAN 集用 GEOIP,lan 近似。三条都是已知且刻意的取舍，不是 bug。
-# 合同的书面落点有两处：本注释与 docs/ARCHITECTURE.md §5.2，改一处必须同步另一处。
+# 合同的书面落点有两处：本注释与 docs/ARCHITECTURE.md 的 Clash derivation，改一处必须同步另一处。
 # ────────────────────────────────────────────────────────────────────────
 
 rule-providers:
-  AI:
+  PrivateLAN:
     type: http
     behavior: classical
     format: text
-    url: https://cdn.jsdelivr.net/gh/yhyfhgs/surge-rules@main/clash/AI.list
-    path: ./rule-sets/surge-rules/AI.list
+    url: https://cdn.jsdelivr.net/gh/yhyfhgs/surge-rules@main/clash/PrivateLAN.list
+    path: ./rule-sets/surge-rules/PrivateLAN.list
     interval: 86400
-  AlibabaCN:
+  PKU:
     type: http
     behavior: classical
     format: text
-    url: https://cdn.jsdelivr.net/gh/yhyfhgs/surge-rules@main/clash/AlibabaCN.list
-    path: ./rule-sets/surge-rules/AlibabaCN.list
+    url: https://cdn.jsdelivr.net/gh/yhyfhgs/surge-rules@main/clash/PKU.list
+    path: ./rule-sets/surge-rules/PKU.list
     interval: 86400
-  AppleCN:
+  Reject:
     type: http
     behavior: classical
     format: text
-    url: https://cdn.jsdelivr.net/gh/yhyfhgs/surge-rules@main/clash/AppleCN.list
-    path: ./rule-sets/surge-rules/AppleCN.list
-    interval: 86400
-  BaiduCN:
-    type: http
-    behavior: classical
-    format: text
-    url: https://cdn.jsdelivr.net/gh/yhyfhgs/surge-rules@main/clash/BaiduCN.list
-    path: ./rule-sets/surge-rules/BaiduCN.list
-    interval: 86400
-  ByteDanceCN:
-    type: http
-    behavior: classical
-    format: text
-    url: https://cdn.jsdelivr.net/gh/yhyfhgs/surge-rules@main/clash/ByteDanceCN.list
-    path: ./rule-sets/surge-rules/ByteDanceCN.list
-    interval: 86400
-  ChinaDomain:
-    type: http
-    behavior: classical
-    format: text
-    url: https://cdn.jsdelivr.net/gh/yhyfhgs/surge-rules@main/clash/ChinaDomain.list
-    path: ./rule-sets/surge-rules/ChinaDomain.list
-    interval: 86400
-  ChinaIP:
-    type: http
-    behavior: classical
-    format: text
-    url: https://cdn.jsdelivr.net/gh/yhyfhgs/surge-rules@main/clash/ChinaIP.list
-    path: ./rule-sets/surge-rules/ChinaIP.list
-    interval: 86400
-  ChinaMedia:
-    type: http
-    behavior: classical
-    format: text
-    url: https://cdn.jsdelivr.net/gh/yhyfhgs/surge-rules@main/clash/ChinaMedia.list
-    path: ./rule-sets/surge-rules/ChinaMedia.list
-    interval: 86400
-  Domestic:
-    type: http
-    behavior: classical
-    format: text
-    url: https://cdn.jsdelivr.net/gh/yhyfhgs/surge-rules@main/clash/Domestic.list
-    path: ./rule-sets/surge-rules/Domestic.list
-    interval: 86400
-  DownloadCDN:
-    type: http
-    behavior: classical
-    format: text
-    url: https://cdn.jsdelivr.net/gh/yhyfhgs/surge-rules@main/clash/DownloadCDN.list
-    path: ./rule-sets/surge-rules/DownloadCDN.list
-    interval: 86400
-  Europe:
-    type: http
-    behavior: classical
-    format: text
-    url: https://cdn.jsdelivr.net/gh/yhyfhgs/surge-rules@main/clash/Europe.list
-    path: ./rule-sets/surge-rules/Europe.list
+    url: https://cdn.jsdelivr.net/gh/yhyfhgs/surge-rules@main/clash/Reject.list
+    path: ./rule-sets/surge-rules/Reject.list
     interval: 86400
   GameDownloadCN:
     type: http
@@ -115,12 +59,19 @@ rule-providers:
     url: https://cdn.jsdelivr.net/gh/yhyfhgs/surge-rules@main/clash/GameDownloadCN.list
     path: ./rule-sets/surge-rules/GameDownloadCN.list
     interval: 86400
-  Games:
+  ModelDownloadCDN:
     type: http
     behavior: classical
     format: text
-    url: https://cdn.jsdelivr.net/gh/yhyfhgs/surge-rules@main/clash/Games.list
-    path: ./rule-sets/surge-rules/Games.list
+    url: https://cdn.jsdelivr.net/gh/yhyfhgs/surge-rules@main/clash/ModelDownloadCDN.list
+    path: ./rule-sets/surge-rules/ModelDownloadCDN.list
+    interval: 86400
+  YouTube:
+    type: http
+    behavior: classical
+    format: text
+    url: https://cdn.jsdelivr.net/gh/yhyfhgs/surge-rules@main/clash/YouTube.list
+    path: ./rule-sets/surge-rules/YouTube.list
     interval: 86400
   Google:
     type: http
@@ -129,12 +80,12 @@ rule-providers:
     url: https://cdn.jsdelivr.net/gh/yhyfhgs/surge-rules@main/clash/Google.list
     path: ./rule-sets/surge-rules/Google.list
     interval: 86400
-  Japan:
+  Twitter:
     type: http
     behavior: classical
     format: text
-    url: https://cdn.jsdelivr.net/gh/yhyfhgs/surge-rules@main/clash/Japan.list
-    path: ./rule-sets/surge-rules/Japan.list
+    url: https://cdn.jsdelivr.net/gh/yhyfhgs/surge-rules@main/clash/Twitter.list
+    path: ./rule-sets/surge-rules/Twitter.list
     interval: 86400
   Meta:
     type: http
@@ -150,89 +101,12 @@ rule-providers:
     url: https://cdn.jsdelivr.net/gh/yhyfhgs/surge-rules@main/clash/Microsoft.list
     path: ./rule-sets/surge-rules/Microsoft.list
     interval: 86400
-  MicrosoftCN:
+  AI:
     type: http
     behavior: classical
     format: text
-    url: https://cdn.jsdelivr.net/gh/yhyfhgs/surge-rules@main/clash/MicrosoftCN.list
-    path: ./rule-sets/surge-rules/MicrosoftCN.list
-    interval: 86400
-  ModelDownloadCDN:
-    type: http
-    behavior: classical
-    format: text
-    url: https://cdn.jsdelivr.net/gh/yhyfhgs/surge-rules@main/clash/ModelDownloadCDN.list
-    path: ./rule-sets/surge-rules/ModelDownloadCDN.list
-    interval: 86400
-  NetEaseCN:
-    type: http
-    behavior: classical
-    format: text
-    url: https://cdn.jsdelivr.net/gh/yhyfhgs/surge-rules@main/clash/NetEaseCN.list
-    path: ./rule-sets/surge-rules/NetEaseCN.list
-    interval: 86400
-  PKU:
-    type: http
-    behavior: classical
-    format: text
-    url: https://cdn.jsdelivr.net/gh/yhyfhgs/surge-rules@main/clash/PKU.list
-    path: ./rule-sets/surge-rules/PKU.list
-    interval: 86400
-  Payment:
-    type: http
-    behavior: classical
-    format: text
-    url: https://cdn.jsdelivr.net/gh/yhyfhgs/surge-rules@main/clash/Payment.list
-    path: ./rule-sets/surge-rules/Payment.list
-    interval: 86400
-  PrivateLAN:
-    type: http
-    behavior: classical
-    format: text
-    url: https://cdn.jsdelivr.net/gh/yhyfhgs/surge-rules@main/clash/PrivateLAN.list
-    path: ./rule-sets/surge-rules/PrivateLAN.list
-    interval: 86400
-  ProxyGFW:
-    type: http
-    behavior: classical
-    format: text
-    url: https://cdn.jsdelivr.net/gh/yhyfhgs/surge-rules@main/clash/ProxyGFW.list
-    path: ./rule-sets/surge-rules/ProxyGFW.list
-    interval: 86400
-  Reject:
-    type: http
-    behavior: classical
-    format: text
-    url: https://cdn.jsdelivr.net/gh/yhyfhgs/surge-rules@main/clash/Reject.list
-    path: ./rule-sets/surge-rules/Reject.list
-    interval: 86400
-  SocialOthers:
-    type: http
-    behavior: classical
-    format: text
-    url: https://cdn.jsdelivr.net/gh/yhyfhgs/surge-rules@main/clash/SocialOthers.list
-    path: ./rule-sets/surge-rules/SocialOthers.list
-    interval: 86400
-  Streaming:
-    type: http
-    behavior: classical
-    format: text
-    url: https://cdn.jsdelivr.net/gh/yhyfhgs/surge-rules@main/clash/Streaming.list
-    path: ./rule-sets/surge-rules/Streaming.list
-    interval: 86400
-  Telegram:
-    type: http
-    behavior: classical
-    format: text
-    url: https://cdn.jsdelivr.net/gh/yhyfhgs/surge-rules@main/clash/Telegram.list
-    path: ./rule-sets/surge-rules/Telegram.list
-    interval: 86400
-  TencentCN:
-    type: http
-    behavior: classical
-    format: text
-    url: https://cdn.jsdelivr.net/gh/yhyfhgs/surge-rules@main/clash/TencentCN.list
-    path: ./rule-sets/surge-rules/TencentCN.list
+    url: https://cdn.jsdelivr.net/gh/yhyfhgs/surge-rules@main/clash/AI.list
+    path: ./rule-sets/surge-rules/AI.list
     interval: 86400
   TikTok:
     type: http
@@ -241,12 +115,68 @@ rule-providers:
     url: https://cdn.jsdelivr.net/gh/yhyfhgs/surge-rules@main/clash/TikTok.list
     path: ./rule-sets/surge-rules/TikTok.list
     interval: 86400
-  Twitter:
+  SocialOthers:
     type: http
     behavior: classical
     format: text
-    url: https://cdn.jsdelivr.net/gh/yhyfhgs/surge-rules@main/clash/Twitter.list
-    path: ./rule-sets/surge-rules/Twitter.list
+    url: https://cdn.jsdelivr.net/gh/yhyfhgs/surge-rules@main/clash/SocialOthers.list
+    path: ./rule-sets/surge-rules/SocialOthers.list
+    interval: 86400
+  Telegram:
+    type: http
+    behavior: classical
+    format: text
+    url: https://cdn.jsdelivr.net/gh/yhyfhgs/surge-rules@main/clash/Telegram.list
+    path: ./rule-sets/surge-rules/Telegram.list
+    interval: 86400
+  Streaming:
+    type: http
+    behavior: classical
+    format: text
+    url: https://cdn.jsdelivr.net/gh/yhyfhgs/surge-rules@main/clash/Streaming.list
+    path: ./rule-sets/surge-rules/Streaming.list
+    interval: 86400
+  Games:
+    type: http
+    behavior: classical
+    format: text
+    url: https://cdn.jsdelivr.net/gh/yhyfhgs/surge-rules@main/clash/Games.list
+    path: ./rule-sets/surge-rules/Games.list
+    interval: 86400
+  DownloadCDN:
+    type: http
+    behavior: classical
+    format: text
+    url: https://cdn.jsdelivr.net/gh/yhyfhgs/surge-rules@main/clash/DownloadCDN.list
+    path: ./rule-sets/surge-rules/DownloadCDN.list
+    interval: 86400
+  Payment:
+    type: http
+    behavior: classical
+    format: text
+    url: https://cdn.jsdelivr.net/gh/yhyfhgs/surge-rules@main/clash/Payment.list
+    path: ./rule-sets/surge-rules/Payment.list
+    interval: 86400
+  AppleCN:
+    type: http
+    behavior: classical
+    format: text
+    url: https://cdn.jsdelivr.net/gh/yhyfhgs/surge-rules@main/clash/AppleCN.list
+    path: ./rule-sets/surge-rules/AppleCN.list
+    interval: 86400
+  MicrosoftCN:
+    type: http
+    behavior: classical
+    format: text
+    url: https://cdn.jsdelivr.net/gh/yhyfhgs/surge-rules@main/clash/MicrosoftCN.list
+    path: ./rule-sets/surge-rules/MicrosoftCN.list
+    interval: 86400
+  Japan:
+    type: http
+    behavior: classical
+    format: text
+    url: https://cdn.jsdelivr.net/gh/yhyfhgs/surge-rules@main/clash/Japan.list
+    path: ./rule-sets/surge-rules/Japan.list
     interval: 86400
   UK:
     type: http
@@ -255,6 +185,13 @@ rule-providers:
     url: https://cdn.jsdelivr.net/gh/yhyfhgs/surge-rules@main/clash/UK.list
     path: ./rule-sets/surge-rules/UK.list
     interval: 86400
+  Europe:
+    type: http
+    behavior: classical
+    format: text
+    url: https://cdn.jsdelivr.net/gh/yhyfhgs/surge-rules@main/clash/Europe.list
+    path: ./rule-sets/surge-rules/Europe.list
+    interval: 86400
   US:
     type: http
     behavior: classical
@@ -262,12 +199,110 @@ rule-providers:
     url: https://cdn.jsdelivr.net/gh/yhyfhgs/surge-rules@main/clash/US.list
     path: ./rule-sets/surge-rules/US.list
     interval: 86400
-  YouTube:
+  Domestic:
     type: http
     behavior: classical
     format: text
-    url: https://cdn.jsdelivr.net/gh/yhyfhgs/surge-rules@main/clash/YouTube.list
-    path: ./rule-sets/surge-rules/YouTube.list
+    url: https://cdn.jsdelivr.net/gh/yhyfhgs/surge-rules@main/clash/Domestic.list
+    path: ./rule-sets/surge-rules/Domestic.list
+    interval: 86400
+  ChinaMedia:
+    type: http
+    behavior: classical
+    format: text
+    url: https://cdn.jsdelivr.net/gh/yhyfhgs/surge-rules@main/clash/ChinaMedia.list
+    path: ./rule-sets/surge-rules/ChinaMedia.list
+    interval: 86400
+  TencentCN:
+    type: http
+    behavior: classical
+    format: text
+    url: https://cdn.jsdelivr.net/gh/yhyfhgs/surge-rules@main/clash/TencentCN.list
+    path: ./rule-sets/surge-rules/TencentCN.list
+    interval: 86400
+  AlibabaCN:
+    type: http
+    behavior: classical
+    format: text
+    url: https://cdn.jsdelivr.net/gh/yhyfhgs/surge-rules@main/clash/AlibabaCN.list
+    path: ./rule-sets/surge-rules/AlibabaCN.list
+    interval: 86400
+  ByteDanceCN:
+    type: http
+    behavior: classical
+    format: text
+    url: https://cdn.jsdelivr.net/gh/yhyfhgs/surge-rules@main/clash/ByteDanceCN.list
+    path: ./rule-sets/surge-rules/ByteDanceCN.list
+    interval: 86400
+  BaiduCN:
+    type: http
+    behavior: classical
+    format: text
+    url: https://cdn.jsdelivr.net/gh/yhyfhgs/surge-rules@main/clash/BaiduCN.list
+    path: ./rule-sets/surge-rules/BaiduCN.list
+    interval: 86400
+  NetEaseCN:
+    type: http
+    behavior: classical
+    format: text
+    url: https://cdn.jsdelivr.net/gh/yhyfhgs/surge-rules@main/clash/NetEaseCN.list
+    path: ./rule-sets/surge-rules/NetEaseCN.list
+    interval: 86400
+  ProxyGFW:
+    type: http
+    behavior: classical
+    format: text
+    url: https://cdn.jsdelivr.net/gh/yhyfhgs/surge-rules@main/clash/ProxyGFW.list
+    path: ./rule-sets/surge-rules/ProxyGFW.list
+    interval: 86400
+  ChinaDomain:
+    type: http
+    behavior: classical
+    format: text
+    url: https://cdn.jsdelivr.net/gh/yhyfhgs/surge-rules@main/clash/ChinaDomain.list
+    path: ./rule-sets/surge-rules/ChinaDomain.list
+    interval: 86400
+  JapanServiceIP:
+    type: http
+    behavior: classical
+    format: text
+    url: https://cdn.jsdelivr.net/gh/yhyfhgs/surge-rules@main/clash/JapanServiceIP.list
+    path: ./rule-sets/surge-rules/JapanServiceIP.list
+    interval: 86400
+  ChinaIP:
+    type: http
+    behavior: classical
+    format: text
+    url: https://cdn.jsdelivr.net/gh/yhyfhgs/surge-rules@main/clash/ChinaIP.list
+    path: ./rule-sets/surge-rules/ChinaIP.list
+    interval: 86400
+  JapanIP:
+    type: http
+    behavior: classical
+    format: text
+    url: https://cdn.jsdelivr.net/gh/yhyfhgs/surge-rules@main/clash/JapanIP.list
+    path: ./rule-sets/surge-rules/JapanIP.list
+    interval: 86400
+  UKIP:
+    type: http
+    behavior: classical
+    format: text
+    url: https://cdn.jsdelivr.net/gh/yhyfhgs/surge-rules@main/clash/UKIP.list
+    path: ./rule-sets/surge-rules/UKIP.list
+    interval: 86400
+  EuropeIP:
+    type: http
+    behavior: classical
+    format: text
+    url: https://cdn.jsdelivr.net/gh/yhyfhgs/surge-rules@main/clash/EuropeIP.list
+    path: ./rule-sets/surge-rules/EuropeIP.list
+    interval: 86400
+  USIP:
+    type: http
+    behavior: classical
+    format: text
+    url: https://cdn.jsdelivr.net/gh/yhyfhgs/surge-rules@main/clash/USIP.list
+    path: ./rule-sets/surge-rules/USIP.list
     interval: 86400
 
 # ─── rules 参考序列（与 Surge.conf [Rule] 区逐行同序；取消注释并替换为你的策略组名）───
@@ -295,7 +330,6 @@ rule-providers:
 #  - RULE-SET,Payment,Payment
 #  - RULE-SET,AppleCN,DIRECT
 #  - RULE-SET,MicrosoftCN,DIRECT
-#  - RULE-SET,ProxyGFW,Final
 #  - RULE-SET,Japan,🇯🇵日本节点
 #  - RULE-SET,UK,🇬🇧英国节点
 #  - RULE-SET,Europe,🇪🇺欧洲节点
@@ -307,7 +341,13 @@ rule-providers:
 #  - RULE-SET,ByteDanceCN,DIRECT
 #  - RULE-SET,BaiduCN,DIRECT
 #  - RULE-SET,NetEaseCN,DIRECT
+#  - RULE-SET,ProxyGFW,Proxy
 #  - RULE-SET,ChinaDomain,DIRECT
+#  - RULE-SET,JapanServiceIP,🇯🇵日本节点,no-resolve
 #  - RULE-SET,ChinaIP,DIRECT,no-resolve
+#  - RULE-SET,JapanIP,🇯🇵日本节点,no-resolve
+#  - RULE-SET,UKIP,🇬🇧英国节点,no-resolve
+#  - RULE-SET,EuropeIP,🇪🇺欧洲节点,no-resolve
+#  - RULE-SET,USIP,🇺🇸美国节点,no-resolve
 #  - GEOIP,CN,DIRECT,no-resolve
 #  - MATCH,Final

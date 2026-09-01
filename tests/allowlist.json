@@ -6,38 +6,10 @@
     "可选缩小豁免面的键：by（遮蔽/胜出方规则串）、by_file（遮蔽/胜出方所在 list）。",
     "preventive=true 表示防回归豁免：当前配置本就不该命中，未命中时不计入「未使用豁免」告警。",
     "file / rule / by / by_file 均支持 fnmatch 通配（* ?）。每条必须写 reason。",
-    "基线：2026-08-25 对当前配置运行 audit.py 的结果 —— A1=0, A4=0，本表以防回归条目为主。",
-    "2026-08-25 F1 维护批次追加：机器层(ChinaDomain/ChinaIP)不可手改导致的重复、",
-    "以及 fix_spec FIX-B/D7 裁决为「刻意保留」的条目（见下方 F1 分组）。",
-    "2026-08-30 B2 批次追加：ChinaDomain 已删的 5 条危险宽 UA 的防回流条目、",
-    "AI.list 通用第三方组件域 6 类裁决、Streaming/ChinaMedia/TikTok 的 Android 包名说明。",
-    "2026-08-30 深夜：全库移除 USER-AGENT/PROCESS-NAME（用户裁决，纯域名+IP 架构），Android 包名类豁免随之删除；5 条宽 UA 的 preventive 条目保留（防上游再生回流，命中即删条目本身）。",
-    "2026-08-31 审计整改：preventive 语义拆分——「允许存在的分层/裁决」仍留 exemptions（preventive 只免 unused 告警）；「必须持续不存在」迁入顶层 forbidden 段，由 audit.py A8 扫源文件强制：命中即 P0 且不可豁免。原 5 条宽 UA 与 PROCESS-NAME 的 preventive 条目已由 forbidden 取代删除。",
-    "2026-08-31 Wave-2（WG）：①exemptions 新增可选键 kind（按 finding 的 kind 缩小豁免面，A10 的六个子检查各有独立 kind，避免整表豁免把 arity/严格 CIDR 一并静音）与 pending_decision（「本轮未裁决、待用户决策」，audit 摘要每次单独打印，不影响退出码）；②forbidden 新增可选作用域键 file / not_file（缺省仍是全库语义），使「勿搬进 X.list」「必须只存在于 X.list」这类表内禁令可被机器强制；③A9（IP 跨表包含，顺序感知）与 A10（单标签后缀 + PSL 边界 + arity/严格 CIDR/modifier 白名单）上线，基线命中全部登记为豁免，门禁只对新增报警；④§8/D11 的 34 条禁收裁决 + 五份 Wave-1 交付清单的 forbidden 需求一次性入表。"
+    "允许存在的分层放 exemptions；必须持续不存在的规则放 forbidden，A8 命中即 P0 且不可豁免。",
+    "kind 可缩小检查子类；pending_decision 只登记尚未裁决的项目，不改变退出码。"
   ],
   "exemptions": [
-    {
-      "check": [
-        "A2",
-        "A3",
-        "A4"
-      ],
-      "file": "ProxyGFW.list",
-      "rule": "DOMAIN-SUFFIX,amazonaws.com",
-      "preventive": true,
-      "reason": "ProxyGFW.list 的 amazonaws.com 是 AWS 兜底（Final 组），刻意放在最宽一层；不视为与生态 list 的重复/遮蔽。见 00-context.md「既有刻意设计」。"
-    },
-    {
-      "check": [
-        "A3",
-        "A4"
-      ],
-      "file": "*",
-      "rule": "DOMAIN*,*amazonaws*",
-      "by": "DOMAIN-SUFFIX,amazonaws.com",
-      "preventive": true,
-      "reason": "具体 AWS/S3 子域在 AI.list / Games.list / Streaming.list / DownloadCDN.list 分层，均排在 ProxyGFW.list 之前，是刻意分层而非遮蔽。"
-    },
     {
       "check": [
         "A2",
@@ -130,18 +102,6 @@
       "reason": "上游合并排除表项：ms 作为 ccTLD（蒙特塞拉特）被误当作微软缩写的规则已被刻意排除。规则本身已由本文件 forbidden 段（A8，P0 不可豁免）把守；本条只防它回流瞬间的次生遮蔽告警淹没报告。"
     },
     {
-      "check": "A2",
-      "file": "ChinaDomain.list",
-      "by_file": "AI.list",
-      "reason": "F1/FIX-C：ChinaDomain.list 是机器生成层，约定零手改。skywork.ai、lingyiwanwu.com 等国内厂商的境外托管站点只能在 AI.list 中前置覆盖（AI.list 在 conf 中先于 ChinaDomain），机器层留下的同名条目必然成为死条目，属预期。"
-    },
-    {
-      "check": "A2",
-      "file": "ChinaIP.list",
-      "by_file": "PKU.list",
-      "reason": "F1：PKU.list(162.105.0.0/16) 与 ChinaIP.list 重叠，二者同为 DIRECT，无功能影响。ChinaIP.list 是机器生成层，约定零手改，故长期豁免。（2026-08-31 R1-05：原文并列的 202.127.16.0/20 已随区 0 收窄删除，该段现由 ChinaIP 独占。）"
-    },
-    {
       "check": [
         "A2",
         "A3",
@@ -227,39 +187,6 @@
     },
     {
       "check": [
-        "A3",
-        "A4"
-      ],
-      "file": "DownloadCDN.list",
-      "rule": "DOMAIN-SUFFIX,*onenote.com",
-      "preventive": true,
-      "reason": "F1/FIX-D7 未裁决：contentsync/hierarchyapi.onenote.com 与 d.docs.live.net 属 OneDrive/OneNote 数据面。W4-015 建议整体改归 MicrosoftCN(DIRECT)，本轮 fix_spec 未裁决，保留原状待用户决策。",
-      "pending_decision": true
-    },
-    {
-      "check": [
-        "A3",
-        "A4"
-      ],
-      "file": "DownloadCDN.list",
-      "rule": "DOMAIN-SUFFIX,d.docs.live.net",
-      "preventive": true,
-      "reason": "同上：OneDrive 数据面，本轮未裁决，保留原状。",
-      "pending_decision": true
-    },
-    {
-      "check": [
-        "A3",
-        "A4"
-      ],
-      "file": "DownloadCDN.list",
-      "rule": "DOMAIN-SUFFIX,*azureedge.net",
-      "preventive": true,
-      "reason": "F1/FIX-D7 未裁决：azureedge.net 是共享 CDN，子域归属逐条判定不可靠，17 条整块保留原状。",
-      "pending_decision": true
-    },
-    {
-      "check": [
         "A2",
         "A3",
         "A4"
@@ -321,25 +248,10 @@
       "reason": "R2-1/A9 上线基线（144 条聚合）：AppleCN.list 的 17.0.0.0/8、144.178.0.0/19、2403:300::/32 三段在 conf 中先于 ChinaIP.list，把机器生成层里对应的 142+1+1 条更细网段完全包含。二者同为 DIRECT，无功能影响；ChinaIP.list 约定零手改，无法单独剔除，故长期聚合豁免。门禁只对**新增**的跨策略包含报警。"
     },
     {
-      "check": "A9",
-      "file": "ChinaIP.list",
-      "rule": "IP-CIDR,74.125.16.64/26",
-      "by": "IP-CIDR,74.125.0.0/16",
-      "by_file": "Google.list",
-      "reason": "R2-1/A9 上线基线（唯一跨策略项，结论正确）：74.125.16.64/26 是 APNIC 委派给 CN 的 Google 自有段，被 Google.list:686 的 74.125.0.0/16（Google-X-Meta-MS）前位吞掉。Google 在国内需走代理，该落点**正是**期望行为；ChinaIP.list 是机器生成层，无法单独剔除该 /26，故长期豁免。门禁只对新增的跨策略交叠报警。"
-    },
-    {
       "check": "A10",
       "file": "PrivateLAN.list",
       "kind": "single-label-special",
       "reason": "A10 基线：RFC6761/6762 特殊用途名 8 条（example/internal/invalid/lan/local/localdomain/localhost/test）。它们不进入公共 DNS，钉死在内网直连表是唯一正确做法；单标签形态是语义要求而非缺陷。",
-      "rule": "*"
-    },
-    {
-      "check": "A10",
-      "file": "ChinaDomain.list",
-      "kind": "single-label-tld",
-      "reason": "A10 基线：ChinaDomain.list 是机器生成层（约定零手改），其中 44 条整 TLD（11 ASCII + 33 IDN，含 .cn 与各 IDN 中文 TLD）全部在锁定的 IANA 根区表内。拆分与分级由 R3-5（ChinaTLDHeuristics.list）处理，本项只豁免 IANA 内的已知 TLD —— 若再生带回**不在**根区表里的单标签串，kind 会变成 single-label-unknown，本条豁免不生效、门禁照报。",
       "rule": "*"
     },
     {
@@ -372,13 +284,6 @@
     },
     {
       "check": "A10",
-      "file": "ProxyGFW.list",
-      "kind": "psl-*",
-      "reason": "A10 基线（advisor 裁决 9，整表豁免）：ProxyGFW.list 是全库最宽的代理兜底层，策略即 Final，多租户宽度在这一层是**设计**而非缺陷 —— 命中它只意味着「走代理」，不产生归属分裂。37 条 PSL 边界后缀（akamaihd.net / herokuapp.com / notion.site / 各 DDNS 族 …）按此整表登记，与 ChinaIP/ChinaDomain 的机器层整表豁免同一范式。",
-      "rule": "*"
-    },
-    {
-      "check": "A10",
       "file": "ChinaDomain.list",
       "kind": "psl-private",
       "reason": "A10 基线：ChinaDomain.list 是机器生成层（约定零手改）。11 条 PSL PRIVATE 后缀（1kapp.com / appchizi.com / applinzi.com / heiyu.space / mycloudnas.com / nett.to / nyat.app / vicp.fun / vipsinaapp.com / zicp.fun / zone.id）是国内动态 DNS 与 PaaS 的租户边界，上游整表带来、无法单独剔除；策略为 DIRECT，误伤面是「国内 DDNS 用户的域名一律直连」，与本表既有语义一致。收窄依赖 R3-2 再生管线。",
@@ -388,14 +293,14 @@
       "check": "A10",
       "file": "Google.list",
       "kind": "psl-private",
-      "reason": "A10 基线：13 条 Google 第一方 PSL PRIVATE 命名空间（appspot.com / blogspot.com / cloudfunctions.net / codespot.com / firebaseapp.com / googleapis.com / googlecode.com / pagespeedmobilizer.com / web.app / withgoogle.com，以及 0emm.com / gateway.dev / run.app 三条 `*.parent` 形态）。这些后缀确由 Google自持并向 PSL 提交，`Google 生态归 Google 组`是既有裁决；代价（第三方 App Engine / Cloud Run 租户一并走 Google 组）已知且接受。",
+      "reason": "A10 baseline: 12 Google-operated PSL PRIVATE namespaces remain intentional. The shared googleapis.com parent is explicitly forbidden and no longer part of this exemption.",
       "rule": "*"
     },
     {
       "check": "A10",
       "file": "Domestic.list",
       "kind": "psl-icann",
-      "reason": "A10 基线：ac.cn / com.cn / edu.cn / gov.cn / net.cn / org.cn 六条 `.cn` 二级注册边界。直连层刻意认领整个 `.cn` 二级空间（末位另有 ChinaDomain 的 `DOMAIN-SUFFIX,cn` 兜底），这是本架构的基础设计而非多租户误收。",
+      "reason": "A10 baseline: ac.cn / edu.cn / gov.cn / net.cn / org.cn are intentional CN regional boundaries. com.cn and the single-label cn catch-all are forbidden because they conflicted with explicit service owners.",
       "rule": "*"
     },
     {
@@ -477,14 +382,6 @@
     },
     {
       "check": "A10",
-      "file": "TencentCN.list",
-      "kind": "psl-icann",
-      "rule": "DOMAIN-SUFFIX,in.th",
-      "pending_decision": true,
-      "reason": "【待裁决 · A10 首轮唯一真信号】TencentCN.list:624 的 DOMAIN-SUFFIX,in.th 认领了整个泰国 in.th 二级注册边界（PSL ICANN 段），把所有泰国注册人的 *.in.th 域名一并打成 DIRECT。腾讯多半只需要自己的某个 <x>.in.th 主机。现状无 P0 后果（同层 ProxyGFW 的 bx.in.th 位次在前），但这是 R1-13 同一类缺陷。建议收窄为具体 DOMAIN 形态；需先抓包确认腾讯实际用的是哪个主机，故本轮先登记待裁决，不擅自删改（TencentCN.list 非本 worker 名下）。"
-    },
-    {
-      "check": "A10",
       "file": "Japan.list",
       "kind": "psl-*",
       "rule": "DOMAIN-SUFFIX,au.com",
@@ -493,6 +390,30 @@
     }
   ],
   "forbidden": [
+    {
+      "pattern": "DOMAIN-SUFFIX,cn",
+      "reason": "A single-label public suffix cannot encode service ownership; explicit CN domains and ChinaIP provide the fallback."
+    },
+    {
+      "pattern": "DOMAIN-SUFFIX,wang",
+      "reason": "A public gTLD cannot be assigned wholesale to one policy."
+    },
+    {
+      "pattern": "DOMAIN-SUFFIX,com.cn",
+      "reason": "The public registration boundary cannot override explicitly owned .com.cn services."
+    },
+    {
+      "pattern": "DOMAIN-SUFFIX,googleapis.com",
+      "reason": "googleapis.com is a shared API/tenant namespace; only explicit provider and service endpoints may be owned."
+    },
+    {
+      "pattern": "DOMAIN-SUFFIX,addons.mozilla.org",
+      "reason": "Mozilla add-on control and version-check endpoints have different verified owners; the parent must remain exact."
+    },
+    {
+      "pattern": "DOMAIN-SUFFIX,apple.com.edgekey.net",
+      "reason": "Apple TV has a specialized media child; the shared parent must not erase that boundary."
+    },
     {
       "pattern": "USER-AGENT,*",
       "reason": "D7 裁决（2026-08-30）：全库零 USER-AGENT——UA 规则全域生效会跨境错分流（Office 系 UA 曾把境外未收录域实证打成 DIRECT），且 Clash 派生会剔除该类型造成双端分叉。曾删除 Microsoft*/hide*/TeamViewer*/QQ*/TIM* 五条宽 UA，出现任何 UA 规则即为回流。"
@@ -1027,7 +948,7 @@
     },
     {
       "pattern": "DOMAIN-SUFFIX,sso.amazonaws.com",
-      "reason": "§8 裁决入表（R2-4 / W7-T02，34 条禁收缺口）：AI —— AWS IAM Identity Center 是通用云控制面，与 AI 会话无关；amazonaws.com 的兜底分层已由 ProxyGFW 承接。"
+      "reason": "AWS IAM Identity Center 是通用云控制面，与 AI 会话无关。宽 amazonaws.com 兜底已移除；需要分流时只能由经验证的精确租户端点认领。"
     },
     {
       "pattern": "DOMAIN-SUFFIX,sony.com",
@@ -1059,8 +980,7 @@
     },
     {
       "pattern": "DOMAIN-SUFFIX,microsoft.com",
-      "file": "Microsoft.list",
-      "reason": "§8 裁决入表（R2-4 / W7-T02，34 条禁收缺口）：Microsoft —— 整条宽后缀搬进 Microsoft.list 会一次性遮蔽 MicrosoftCN.list 的 45 条国内直连域（位次在后）。ProxyGFW.list 里的同名条目是刻意的 GFW 分层兜底，合法，故本条只在 Microsoft.list 内为禁令。"
+      "reason": "microsoft.com 下已按端点分属 Microsoft、MicrosoftCN 与 DownloadCDN；宽后缀会遮蔽 MicrosoftCN 当前 45 条可直连子树。Microsoft 只收明确主机/子树，任何表都不得恢复父后缀。"
     },
     {
       "pattern": "DOMAIN-SUFFIX,cloud.microsoft",
@@ -1152,13 +1072,11 @@
     },
     {
       "pattern": "DOMAIN-SUFFIX,akamaized.net",
-      "not_file": "ProxyGFW.list",
-      "reason": "§8 裁决入表（R2-4 / W7-T02，34 条禁收缺口）：Streaming —— Akamai 通用 CDN 边缘域，是纯粹的多租户边界：谁都可能在上面。按 advisor 对 §3.3④ 的裁决收敛为「禁止**新增**收录，存量 GFW 兜底条目按 D6 登记为刻意分层」⇒ 只在 ProxyGFW.list **之外**为禁令（ProxyGFW.list:243 的 akamaihd.net 属存量兜底，合法）。"
+      "reason": "Akamai 通用 CDN 边缘域是多租户边界，不能表示业务所有权或路由策略。宽后缀已从全库移除；所有表只能收录经验证的精确租户主机/子树。"
     },
     {
       "pattern": "DOMAIN-SUFFIX,akamaihd.net",
-      "not_file": "ProxyGFW.list",
-      "reason": "§8 裁决入表（R2-4 / W7-T02，34 条禁收缺口）：Streaming —— Akamai 通用 CDN 边缘域，是纯粹的多租户边界：谁都可能在上面。按 advisor 对 §3.3④ 的裁决收敛为「禁止**新增**收录，存量 GFW 兜底条目按 D6 登记为刻意分层」⇒ 只在 ProxyGFW.list **之外**为禁令（ProxyGFW.list:243 的 akamaihd.net 属存量兜底，合法）。"
+      "reason": "Akamai 通用 CDN 边缘域是多租户边界，不能表示业务所有权或路由策略。宽后缀已从全库移除；所有表只能收录经验证的精确租户主机/子树。"
     },
     {
       "pattern": "DOMAIN-SUFFIX,s3.*.amazonaws.com",
@@ -1390,8 +1308,25 @@
     },
     {
       "pattern": "DOMAIN-SUFFIX,live.com",
-      "file": "Microsoft.list",
-      "reason": "WB/Wave-1 交付 §3.1：R1-01 的窄豁免 onedrive.live.com 一旦被「简化」成宽后缀，会整体遮蔽 MicrosoftCN.list 的 45 条国内直连域（office.live.com / view.officeapps.live.com / g.live.com 必须仍 DIRECT）。窄豁免是刻意的，宽形态即回流。"
+      "reason": "live.com 下已按精确主机/子树拆分：onedrive.live.com / skydrive.live.com 归 Microsoft，office.live.com 与其他已验证主机归 MicrosoftCN。任何表恢复宽 live.com 后缀都会消除这个显式边界。"
+    },
+    {
+      "pattern": "DOMAIN-SUFFIX,sfx.ms",
+      "reason": "sfx.ms 下已按精确主机分流：oneclient.sfx.ms 归 MicrosoftCN，p.sfx.ms 归 Microsoft。宽后缀会遮蔽该分界，因此任何表都不得恢复。"
+    },
+    {
+      "pattern": "DOMAIN-SUFFIX,azure.com",
+      "reason": "azure.com 是多租户命名空间，当前只由 AI、Streaming 与 DownloadCDN 的经验证窄规则认领。宽后缀会遮蔽这些 owner 并吸收任意租户，因此全库禁止。"
+    },
+    {
+      "pattern": "DOMAIN-SUFFIX,live.net",
+      "not_file": "Microsoft.list",
+      "reason": "live.net is a unified Microsoft-owned service namespace; the broad suffix is valid only in Microsoft.list."
+    },
+    {
+      "pattern": "DOMAIN-SUFFIX,onenote.com",
+      "not_file": "Microsoft.list",
+      "reason": "onenote.com is unified under Microsoft; the broad suffix is valid only in Microsoft.list."
     },
     {
       "pattern": "IP-CIDR,108.177.8.0/21",

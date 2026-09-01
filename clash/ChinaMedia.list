@@ -286,7 +286,8 @@ DOMAIN-SUFFIX,biligo.com
 DOMAIN-SUFFIX,biliimg.com
 DOMAIN-SUFFIX,biliplus.com
 DOMAIN-SUFFIX,bilivideo.cn
-DOMAIN-SUFFIX,bilivideo.com
+DOMAIN,bilivideo.com
+DOMAIN-SUFFIX,upos-sz-mirrorcos.bilivideo.com
 DOMAIN-SUFFIX,bilivideo.net
 DOMAIN-SUFFIX,btei6pis99.com
 DOMAIN-SUFFIX,btzgamepkg.com
@@ -448,7 +449,10 @@ DOMAIN-SUFFIX,ipanda.cn
 DOMAIN-SUFFIX,ipanda.com
 DOMAIN-SUFFIX,ipanda.net
 DOMAIN-SUFFIX,ipqcrhf.com
-DOMAIN-SUFFIX,iqiyi.com
+DOMAIN,iqiyi.com
+DOMAIN,cache.video.iqiyi.com
+DOMAIN,data.video.iqiyi.com
+DOMAIN,www.iqiyi.com
 DOMAIN-SUFFIX,iqiyiedge.com
 DOMAIN-SUFFIX,iqiyiedge.net
 DOMAIN-SUFFIX,iqiyipic.com
@@ -763,7 +767,7 @@ DOMAIN-SUFFIX,shuoba.org
 DOMAIN-SUFFIX,siozqkt.com
 DOMAIN-SUFFIX,sk2cdsnw.cn
 DOMAIN-SUFFIX,smsvifv.com
-DOMAIN-SUFFIX,smtcdns.net
+DOMAIN,smtcdns.net
 DOMAIN-SUFFIX,snapplay.com
 DOMAIN-SUFFIX,snssdk.com
 DOMAIN-SUFFIX,sogoodtech1.cn

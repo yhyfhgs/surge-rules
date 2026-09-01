@@ -123,10 +123,36 @@ def op_collapse_cidr(step, by_type, params, other, log):
     return out
 
 
+def op_exclude_cidr(step, by_type, params, other, log):
+    excludes = [ipaddress.ip_network(value, strict=True)
+                for value in step.get("values", [])]
+    out = {}
+    for rule_type, networks in by_type.items():
+        current = list(networks)
+        for excluded in excludes:
+            if excluded.version != (4 if rule_type == "IP-CIDR" else 6):
+                continue
+            next_set = []
+            for network in current:
+                if not network.overlaps(excluded):
+                    next_set.append(network)
+                elif network.subnet_of(excluded):
+                    continue
+                elif excluded.subnet_of(network):
+                    next_set.extend(network.address_exclude(excluded))
+                else:
+                    raise RebuildError("非 CIDR 嵌套交叉：%s × %s" % (network, excluded))
+            current = next_set
+        out[rule_type] = list(ipaddress.collapse_addresses(current))
+    log.append("exclude_cidr  %s" % ", ".join(str(value) for value in excludes))
+    return out
+
+
 OPS = {
     "require_types": op_require_types,
     "require_param": op_require_param,
     "collapse_cidr": op_collapse_cidr,
+    "exclude_cidr": op_exclude_cidr,
 }
 
 

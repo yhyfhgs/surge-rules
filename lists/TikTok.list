@@ -1,6 +1,4 @@
-# TikTok — TikTok 国际版与字节海外域（上游 blackmatrix7 TikTok）；字节国内域归 ByteDanceCN.list / Domestic.list
-# 排序：规则类型分区，区内字母序
-# CNAME 展平形态用 DOMAIN-WILDCARD 带标签边界收敛，不用无边界 DOMAIN-KEYWORD
+# TikTok and ByteDance international services; bounded wildcards cover flattened CNAMEs.
 
 DOMAIN,lf16-campaign.ttlstatic.com
 DOMAIN,lf16-csp.oecstatic.com
@@ -41,6 +39,7 @@ DOMAIN-SUFFIX,ibyteimg.com
 DOMAIN-SUFFIX,ipstatp.com
 DOMAIN-SUFFIX,isnssdk.com
 DOMAIN-SUFFIX,larksuite.com
+DOMAIN-SUFFIX,larksuitecdn.com
 DOMAIN-SUFFIX,lemon8-app.com
 DOMAIN-SUFFIX,muscdn.com
 DOMAIN-SUFFIX,musical.ly

@@ -41,13 +41,13 @@
     ],
     "assert": {
       "same_policy": true,
-      "policy": "Final",
+      "policy": "Proxy",
       "no_dns_leak": true,
       "per_request": [
         {"host": "cdn.sstatic.net", "policy": "下载", "reason": "刻意保留：sstatic.net 是 DownloadCDN 的独立注册域，不在 FIX-D7『同注册域 Final|下载 分裂』作用域内；DownloadCDN 分层的既有代价（见 allowlist）。"}
       ]
     },
-    "note": "2026-08-25 F1：stack.imgur.com 已随 imgur.com 撤出 DownloadCDN，回到 Final。"
+    "note": "2026-08-25 F1：stack.imgur.com 已随 imgur.com 撤出 DownloadCDN，回到 GFW 兜底层。2026-09-01：用户把 ProxyGFW 从 Final 改挂独立 Proxy 组，stackoverflow.com 与 imgur.com 均命中 ProxyGFW，故期望由 Final 改为 Proxy——2026-09-01 起 ProxyGFW 独立挂 Proxy 组（与收尾 FINAL 解耦）。"
   },
   {
     "name": "medium_main_vs_cdn",
@@ -57,8 +57,8 @@
       {"host": "miro.medium.com"},
       {"host": "cdn-images-1.medium.com"}
     ],
-    "assert": {"same_policy": true, "policy": "Final", "no_dns_leak": true},
-    "note": "2026-08-25 F1 已修复：medium.com 的 5 个静态子域已撤出 DownloadCDN（FIX-D7）。"
+    "assert": {"same_policy": true, "policy": "Proxy", "no_dns_leak": true},
+    "note": "2026-08-25 F1 已修复：medium.com 的 5 个静态子域已撤出 DownloadCDN（FIX-D7）。2026-09-01：medium.com 命中 ProxyGFW，期望由 Final 改为 Proxy——2026-09-01 起 ProxyGFW 独立挂 Proxy 组（与收尾 FINAL 解耦）。"
   },
   {
     "name": "notion_main_vs_static",
@@ -71,28 +71,28 @@
     ],
     "assert": {
       "same_policy": true,
-      "policy": "Final",
+      "policy": "Proxy",
       "no_dns_leak": true,
       "per_request": [
         {"host": "notion-static.com", "policy": "下载", "reason": "刻意保留：独立注册域，不在 FIX-D7 作用域内。"},
-        {"host": "s3-us-west-2.amazonaws.com", "policy": "Final", "reason": "R1-12（2026-08-31 审计）推翻旧裁决：<bucket>.s3.<region>.amazonaws.com 是 PSL PRIVATE 注册边界，任何表都不得以 DOMAIN-SUFFIX 收录；280 条 S3 族已从 DownloadCDN.list 删除，退化到 ProxyGFW 的 amazonaws.com 兜底（Final）属预期。"}
+        {"host": "s3-us-west-2.amazonaws.com", "policy": "Final", "reason": "R1-12 删除 S3 多租户区域端点后，该共享 AWS 主机不再命中 DownloadCDN 或 ProxyGFW，落 FINAL 兜底。"}
       ]
     }
   },
   {
     "name": "slack_app_vs_edge",
-    "desc": "Slack：Web 客户端 + slack-edge 静态/表情资源",
+    "desc": "Slack 的动态工作区、消息与静态资产统一由 SocialOthers 保持同一出口。",
     "requests": [
       {"host": "slack.com"},
       {"host": "app.slack.com"},
       {"host": "a.slack-edge.com"}
     ],
     "assert": {
-      "same_policy": true,
-      "policy": "Final",
       "no_dns_leak": true,
       "per_request": [
-        {"host": "a.slack-edge.com", "policy": "下载", "reason": "刻意保留：slack-edge.com 是独立注册域，不在 FIX-D7 作用域内。"}
+        {"host": "slack.com", "policy": "社交媒体"},
+        {"host": "app.slack.com", "policy": "社交媒体"},
+        {"host": "a.slack-edge.com", "policy": "社交媒体"}
       ]
     }
   },
@@ -126,12 +126,13 @@
     ],
     "assert": {
       "same_policy": true,
-      "policy": "Final",
+      "policy": "Proxy",
       "no_dns_leak": true,
       "per_request": [
-        {"host": "cdn.shopify.com", "policy": "下载", "reason": "刻意保留：shopify.com 主域无 list 收录（靠 FINAL 兜底），不构成 FIX-D7 的同注册域分裂样本。"}
+        {"host": "cdn.shopify.com", "policy": "下载", "reason": "刻意保留：shopify.com 主域无 list 收录（靠 FINAL 兜底），不构成 FIX-D7 的同注册域分裂样本。"},
+        {"host": "www.shopify.com", "policy": "Final", "reason": "2026-09-01 起 ProxyGFW 独立挂 Proxy 组（与收尾 FINAL 解耦）：本场景的 imgur / unsplash 命中 ProxyGFW 落 Proxy，而 shopify.com 主域不在 ProxyGFW（无任何表收录）仍落 FINAL→Final。两者分属不同站点，「同页并行引用需同组」的真实信号只在同一注册域内成立，故用 per_request 把它移出 same_policy 分组而非放宽断言。"}
       ]
     },
-    "note": "2026-08-25 F1：i.imgur.com 与 images.unsplash.com 已撤出 DownloadCDN，回到 Final。"
+    "note": "2026-08-25 F1：i.imgur.com 与 images.unsplash.com 已撤出 DownloadCDN，回到 GFW 兜底层。2026-09-01：ProxyGFW 改挂独立 Proxy 组，imgur/unsplash 期望由 Final 改为 Proxy；shopify 主域未命中 GFW、仍落 FINAL→Final，见 per_request。"
   }
 ]

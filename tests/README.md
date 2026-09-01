@@ -8,7 +8,7 @@
 | --- | ---------------- | ---------- | ----------------------------------------------------- | -------- |
 | L0  | `engine.py`      | 否         | 这个域名会命中哪条规则、走哪个组、从哪个出口出去？    | < 1 秒   |
 | L1  | `audit.py`       | 否         | 规则表本身有没有毛病（DNS 泄漏面、重复、遮蔽、失联）？| ~5 秒    |
-| L2  | `runsuite.py`    | 否         | 189 个真实使用场景的 1233 条请求，分流结果符合预期吗？ | ~10 秒   |
+| L2  | `runsuite.py`    | 否         | 208 个真实使用场景的 1418 条请求，分流结果符合预期吗？ | ~10 秒   |
 | L3  | `live_check.py`  | **是**     | 真实网络里实际发生的，跟离线推演的一样吗？出口 IP 对吗？| 1–5 分钟 |
 | L4  | `realworld.py`   | 部分       | 真实浏览器/App 发出去会怎样？DNS、WebRTC、TUN、UA 分流真的生效吗？| 3–5 分钟 |
 
@@ -44,7 +44,7 @@ Surge HTTP API，见下方[开启 Surge HTTP API](#开启-surge-http-api)。
 
 ```
 rules/tests/
-├── engine.py            L0 规则语义引擎（解析 conf + 34 个 list（Reject 已启用），离线模拟匹配）
+├── engine.py            L0 规则语义引擎（解析 conf + 39 个 list，离线模拟匹配）
 ├── audit.py             L1 静态审计器（A1–A10 十项检查）
 ├── runsuite.py          L2 场景断言运行器
 ├── live_check.py        L3 在线实测（Surge HTTP API + 真实请求）
@@ -52,7 +52,7 @@ rules/tests/
 ├── realworld_targets.json  L4 的数据驱动配置（各组代表域 / 客户端画像 / STUN / UA 用例）
 ├── live_check_local.json   私有出口映射覆盖档（**已 gitignore**，勿入库；见下）
 ├── allowlist.json       审计豁免表（把「刻意设计」标出来，免得每次都报）
-├── scenarios/           场景数据集，22 个 .json，共 189 场景 / 1233 请求
+├── scenarios/           场景数据集，26 个 .json，共 208 场景 / 1418 请求
 │   ├── ai_overseas.json      海外独立 AI（OpenAI / Anthropic / Perplexity …）
 │   ├── ai_ecosystem.json     大厂 AI 生态一致性（Gemini / Copilot / Grok …）
 │   ├── ai_domestic.json      国内 AI 直连（DeepSeek / Kimi / 通义 …）
@@ -202,10 +202,10 @@ P3 风格建议。
   "exemptions": [
     {
       "check": ["A2", "A3", "A4"],
-      "file": "ProxyGFW.list",
-      "rule": "DOMAIN-SUFFIX,amazonaws.com",
+      "file": "Google.list",
+      "by_file": "YouTube.list",
       "preventive": true,
-      "reason": "AWS 兜底刻意放在最宽一层，具体子域由前位表分层承接"
+      "reason": "YouTube 专属资产由前位 YouTube.list 认领"
     }
   ],
   "forbidden": [
@@ -223,10 +223,9 @@ P3 风格建议。
   「无用豁免」。
 - `forbidden` 段**不吃豁免**：命中即 P0，`exemptions` 里写什么都盖不住它。
 
-`exemptions` 覆盖：`amazonaws.com` 的兜底与分层、大厂自有 AI 归各自生态、AI 组里的通用
-第三方组件、DownloadCDN 的保留类、机器层（ChinaDomain / ChinaIP）不可手改导致的重复、
-按整表登记的结构性豁免（同一范式也用于 ProxyGFW 的 PSL 边界），以及上游合并排除表在被
-误合并回来时的降噪。
+`exemptions` 只登记仍然允许存在的精确裁决，例如大厂自有 AI 归各自生态、
+已验证的下载/组件分界与上游回流降噪。ProxyGFW 的宽云后缀与 PSL 边界
+不再整表豁免；它们必须保持不存在。
 
 `forbidden` 覆盖四类：
 ① `USER-AGENT` / `PROCESS-NAME` / `URL-REGEX` 三类**全类型**禁令（D7）；
@@ -285,8 +284,8 @@ python3 runsuite.py --list-known-broken      # 只列当前的待修清单
 runsuite 会把它们单独统计成「待修清单」而不是测试失败——这样 CI 才有绿灯可言，
 同时待办也不会被忘掉。修好一条就把标记删掉。
 
-当前基线（2026-08-31 修复批次后）：189 场景 / 1233 请求 / 2269 断言，失败 0，已知待修 0 条；
-915 条 DNS 泄漏断言全通过，说明「零本地 DNS 解析」这条约束目前是成立的
+当前基线：208 场景 / 1418 请求 / 2639 断言，失败 0，已知待修 0 条；
+1100 条 DNS 泄漏断言全通过。
 （L4 的 `realworld.py --dns` 已用实网抽样二次确认，见下文）。
 
 ---
@@ -630,10 +629,9 @@ ARIN 的 RDAP 对家宽客户网段经常不返回 ASN（`originAS` 为空），
 那是待修清单，不是测试失败。`runsuite.py --list-known-broken` 能单独列出来。
 反过来，如果一个 `known_broken` 场景突然通过了，说明问题已经修好，把标记删掉。
 
-**9. 主站与静态资源分属不同组**
-`DownloadCDN.list` 的分层设计会让一部分场景出现「主站走 Final、静态资源走下载组」。
-这是既有架构取舍。如果确认要保留，把对应场景的期望改成 `same_policy: false` 并在
-`allowlist.json` 里登记，别让它一直占着待修清单。
+**9. 主站与资源面分属不同组**
+这不再是默认架构取舍。只有已证明与源 IP / cookie 无关的大文件端点才能脱离
+服务 owner；其余登录、API、静态与 CDN 伴生面应先保持同会话归属。
 
 **10. 这些是刻意设计，审计和场景都别报**
 
@@ -642,8 +640,7 @@ ARIN 的 RDAP 对家宽客户网段经常不返回 ASN（`originAS` 为空），
   Meta AI → Meta.list。conf 里 Google/Twitter/Meta 都排在 AI.list 之前。
 - 全库零 `USER-AGENT` / `PROCESS-NAME` / `URL-REGEX`（D7 裁决）：这三类已登记在
   `allowlist.json` 的 `forbidden` 段，由 A8 把守，出现即 P0 回流。
-- `DOMAIN-SUFFIX,amazonaws.com` 在 ProxyGFW 是 AWS 兜底，具体 CDN 子域在 DownloadCDN
-  分层处理，这是刻意分层。
+- `ProxyGFW` 只保留无专属 owner 且已验证需要代理的精确域名；宽云/多租户后缀禁收。
 - `Reject.list` 已在 conf 区 1 启用（REJECT，全链最前的拦截层）。
 
 **11. `AI.list` 那行带 `extended-matching`**

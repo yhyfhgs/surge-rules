@@ -91,7 +91,7 @@
   },
   {
     "name": "google_colab_notebook",
-    "desc": "Colab 运行 notebook：前端 + 运行时 + GCS 数据读取（DOMAIN-KEYWORD,colab 命中 Google.list）",
+    "desc": "Colab control surfaces stay with Google; the path-multiplexed GCS tenant endpoint remains neutral Final.",
     "requests": [
       {
         "host": "colab.research.google.com"
@@ -108,9 +108,13 @@
       }
     ],
     "assert": {
-      "same_policy": true,
-      "policy": "Google-X-Meta-MS",
-      "no_dns_leak": true
+      "no_dns_leak": true,
+      "per_request": [
+        {"host": "colab.research.google.com", "policy": "Google-X-Meta-MS"},
+        {"host": "storage.googleapis.com", "policy": "Final"},
+        {"host": "accounts.google.com", "policy": "Google-X-Meta-MS"},
+        {"host": "drive.google.com", "policy": "Google-X-Meta-MS"}
+      ]
     }
   },
   {

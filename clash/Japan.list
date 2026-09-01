@@ -1,8 +1,7 @@
 # AUTO-GENERATED — Clash(Mihomo) classical 规则，由 ../lists/Japan.list 派生
 # 勿手工编辑；修改 Surge 源后运行 python3 tools/surge2clash.py 重新生成
 
-# Japan — 日本区域服务（含 pixiv/pximg、LINE）；域名与 GEOIP/IP-ASN 同表自包含，整表刻意置于 Apple/微软/GFW 之后（前置会遮蔽它们的 IP 规则）
-# 排序：规则类型分区，区内字母序
+# Japan — 日本服务域名；IP/ASN fallback 见 JapanIP.list
 
 DOMAIN-SUFFIX,ahamo.com
 DOMAIN-SUFFIX,amazon.co.jp
@@ -17,6 +16,7 @@ DOMAIN-SUFFIX,cmoa.jp
 DOMAIN-SUFFIX,cocacola.co.jp
 DOMAIN-SUFFIX,cygames.jp
 DOMAIN-SUFFIX,dlsite.com
+DOMAIN-SUFFIX,dlsite.jp
 DOMAIN-SUFFIX,docomo.ne.jp
 DOMAIN-SUFFIX,dwango.jp
 DOMAIN-SUFFIX,e-hentai.org
@@ -39,6 +39,7 @@ DOMAIN-SUFFIX,kddi.com
 DOMAIN-SUFFIX,line-apps.com
 DOMAIN-SUFFIX,line-scdn.net
 DOMAIN-SUFFIX,line.me
+DOMAIN-SUFFIX,lin.ee
 DOMAIN-SUFFIX,linemo.jp
 DOMAIN-SUFFIX,melonbooks.co.jp
 DOMAIN-SUFFIX,mercari.com
@@ -47,6 +48,11 @@ DOMAIN-SUFFIX,mizuhobank.co.jp
 DOMAIN-SUFFIX,moneykit.net
 DOMAIN-SUFFIX,mufg.jp
 DOMAIN-SUFFIX,nimg.jp
+DOMAIN-SUFFIX,naver.jp
+DOMAIN-SUFFIX,niconico.com
+DOMAIN-SUFFIX,nicovideo.jp
+DOMAIN-SUFFIX,nhncorp.jp
+DOMAIN-SUFFIX,nikkei.com
 DOMAIN-SUFFIX,nxtv.jp
 DOMAIN-SUFFIX,paypay-bank.co.jp
 DOMAIN-SUFFIX,paypay.jp
@@ -63,6 +69,7 @@ DOMAIN-SUFFIX,rakuten-sec.co.jp
 DOMAIN-SUFFIX,rakuten-static.com
 DOMAIN-SUFFIX,rakuten.co.jp
 DOMAIN-SUFFIX,rakuten.ne.jp
+DOMAIN-SUFFIX,r10s.jp
 DOMAIN-SUFFIX,renta.papy.co.jp
 DOMAIN-SUFFIX,sbigroup.co.jp
 DOMAIN-SUFFIX,sbisec.co.jp
@@ -82,10 +89,4 @@ DOMAIN-SUFFIX,videopass.jp
 DOMAIN-SUFFIX,wowow.co.jp
 DOMAIN-SUFFIX,yahoo.co.jp
 DOMAIN-SUFFIX,yodobashi.com
-
-IP-ASN,17511,no-resolve
-IP-ASN,2497,no-resolve
-IP-ASN,2514,no-resolve
-IP-ASN,2516,no-resolve
-IP-ASN,4713,no-resolve
-GEOIP,JP,no-resolve
+DOMAIN-SUFFIX,zozotown.com

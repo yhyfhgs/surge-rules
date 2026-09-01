@@ -39,7 +39,7 @@
   },
   {
     "name": "s3_region_endpoints_not_download_v2",
-    "desc": "R1-12 负例：删除 280 条 s3[.-]*.amazonaws.com 区域端点后缀后，任意租户的任意 bucket 都不得再落「下载」组。<bucket>.s3.<region>.amazonaws.com 与已入 forbidden 的 <bucket>.s3.amazonaws.com 是同一 bucket 的两种寻址形式；PSL PRIVATE 段收录全部该形态 = 官方认定为注册边界。删后由 ProxyGFW 的 amazonaws.com 分层兜底承接（刻意保留），不断连",
+    "desc": "R1-12 负例：删除 280 条 s3[.-]*.amazonaws.com 区域端点后缀后，任意租户的任意 bucket 都不得再落「下载」或代理专用组。<bucket>.s3.<region>.amazonaws.com 与已入 forbidden 的 <bucket>.s3.amazonaws.com 是同一 bucket 的两种寻址形式；PSL PRIVATE 段收录全部该形态 = 官方认定为注册边界。删后由 FINAL 兜底，不断连",
     "requests": [
       {"host": "acme-prod-assets.s3.us-east-1.amazonaws.com", "note": "区域端点，任意 bucket"},
       {"host": "randomtenant7.s3.ap-northeast-1.amazonaws.com"},
@@ -60,11 +60,12 @@
       "per_request": [
         {"host": "ppl-ai-file-upload.s3.amazonaws.com", "policy": "AI"}
       ]
-    }
+    },
+    "note": "R1-12 删族后，任意租户桶由 FINAL 兜底；第一方 ppl-ai-file-upload.s3.amazonaws.com 仍由 AI.list 的精确规则承接。断言的真实内容是任意租户桶都不得再落「下载」或代理专用组。"
   },
   {
     "name": "s3_compat_multitenant_wildcards_removed_v2",
-    "desc": "R1-12b 家族闭合负例（收尾波）：裁决 3 删掉 10 条 s3.<region>.<厂商> 后缀后，Backblaze/Wasabi 的 6 个 host 仍被 DownloadCDN 的 3 条 DOMAIN-WILDCARD 接住（s3.*.backblazeb2.com / *.s3.*.backblazeb2.com / s3.*.wasabisys.com），意图只兑现 6/10，且制造出 s3.wasabisys.com→Final 而 s3.eu-central-2.wasabisys.com→下载 的同厂分叉。三条通配的 * 位落在 region 标签上、bucket 由最左标签（虚拟主机寻址）或首个路径段（路径寻址）承载，与被删的 10 条 DOMAIN-SUFFIX 同构，无任何第一方语义，故一并删除。边界：f00X.backblazeb2.com（B2 原生下载端点）与 s3.brave.com / s3-alpha.figma.com / s3-*.figma.com（单租户第一方主机）刻意保留在「下载」组，签名锚定厂商域、绝不写成 s3*",
+    "desc": "Shared S3 tenant wildcards remain absent; explicitly owned Backblaze, Brave, and Figma download endpoints stay in Download.",
     "requests": [
       {"host": "s3.wasabisys.com", "note": "裁决 3 已删的后缀本体，作为同厂一致性锚点"},
       {"host": "s3.eu-central-2.wasabisys.com", "note": "原被 DOMAIN-WILDCARD,s3.*.wasabisys.com 接住；闭合后必须与上一行同落"},

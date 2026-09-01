@@ -1,9 +1,7 @@
 # AUTO-GENERATED — Clash(Mihomo) classical 规则，由 ../lists/YouTube.list 派生
 # 勿手工编辑；修改 Surge 源后运行 python3 tools/surge2clash.py 重新生成
 
-# YouTube — YouTube / YouTube Music 全量，走流媒体组；位次刻意先于 Google.list
-# 精确后缀集对撞自上游 blackmatrix7 YouTube 表；2026-08-31 审计删除宽 DOMAIN-KEYWORD,youtube
-# 排序：规则类型分区，区内字母序
+# YouTube and YouTube Music; this specialized media list precedes Google.
 
 DOMAIN,jnn-pa.googleapis.com
 DOMAIN,yt3.ggpht.com

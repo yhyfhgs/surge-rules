@@ -1,6 +1,6 @@
-# Payment — 国际支付渠道（收单/钱包/BNPL/汇款/卡组织/订阅计费）；必须固定同一出口，跨出口易触发 3DS/风控/拒付
-# 排序：规则类型分区，区内字母序
-# 拒绝名单、「生态自有支付留原表」与「策略组不可用自动测速类」三条裁决见 docs/MAINTENANCE.md「裁决登记」
+# International payment services requiring a stable exit; ecosystem-owned payment surfaces stay with their owner.
+
+DOMAIN-SUFFIX,code.buywithprime.amazon.com
 
 DOMAIN-SUFFIX,2checkout.com
 DOMAIN-SUFFIX,2co.com

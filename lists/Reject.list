@@ -1,6 +1,4 @@
-# Reject — HTTPDNS/私有 DoH + 广告投放/网盟/流氓变现 SDK + 钓鱼恶意层（运营商劫持注入、假冒官网下载站、返利/推广劫持分发链、私服垃圾站、scareware）；策略 REJECT，位次全链最前，收录即抢占
-# 来源：SukkaW reject 逐行裁剪 + blackmatrix7 Hijacking.list/BlockHttpDNS.list + VirgilClyne GetSomeFries HTTPDNS.Block.list；规范化排序：规则类型分区，区内字母序
-# 埋点/统计/归因/推送/崩溃 APM/第三方效果监测/个性化推荐一律放行（打点失败会拖慢 App 启动、推荐失效伤体验）；IP 区只留 HTTPDNS 服务 IP，禁收宽后缀
+# Security-first blocking for HTTPDNS, hijacking, malicious advertising, phishing, and mining; analytics/APM are excluded.
 
 DOMAIN,aedns.weixin.qq.com
 DOMAIN,apidns-js.kwd.inkuai.com

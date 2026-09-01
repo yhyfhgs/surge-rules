@@ -1,14 +1,16 @@
 # AUTO-GENERATED — Clash(Mihomo) classical 规则，由 ../lists/Domestic.list 派生
 # 勿手工编辑；修改 Surge 源后运行 python3 tools/surge2clash.py 重新生成
 
-# Domestic — 国内服务直连手工层（含国内 AI/券商、NTP 与 captive 探测域）；上游未覆盖、需立刻生效的特例都加这里
-# 排序：规则类型分区，区内字母序
-# 兼作 CA 吊销/AIA 端点集中直连位（TLS 握手关键路径，soft-fail）；被 ProxyGFW 前位后缀遮蔽的端点收不进本表，去向见 docs/MAINTENANCE.md「裁决登记」
-# Google `-cn` 族 18 条 2026-08-31 由 Google.list 迁入（审计 R1-24）：与本表既有 `.cn` 镜像族
-#   （google.cn / googlecnapps.cn / gstatic.cn / gkecnapps.cn …）同基础设施，证书层已证实（同一张
-#   CN=*.google.cn 的 GTS 证书，SAN 同时列两族），CN 侧直连实测 0.37–0.60s 完成完整 HTTPS 往返。
-#   同批删除死条目 googleapis.cn（双侧无 A；删后仍由 ChinaDomain 的 `DOMAIN-SUFFIX,cn` 兜底 DIRECT，行为不变）。
-#   未迁入：googleadservices-cn.com（`www.` 在 CN 侧被置空）、gstatic-cn.com（存疑，留 Google.list 观察）。
+# Verified domestic services, CN mirrors, certificate endpoints, and network probes.
+
+DOMAIN-SUFFIX,admaster.com.cn
+DOMAIN-SUFFIX,flashcn.cn
+DOMAIN-SUFFIX,metaso.cn
+DOMAIN-SUFFIX,pkuecon.cn
+DOMAIN-SUFFIX,sensorsdata.cn
+DOMAIN-SUFFIX,univod.cn
+DOMAIN-SUFFIX,walmart.cn
+DOMAIN-SUFFIX,xfyun.cn
 
 DOMAIN,cn.download.nvidia.com
 DOMAIN,config.ubnt.com
@@ -160,7 +162,6 @@ DOMAIN-SUFFIX,cnblogs.com
 DOMAIN-SUFFIX,cnnic.cn
 DOMAIN-SUFFIX,cnspeedtest.cn
 DOMAIN-SUFFIX,coloros.com
-DOMAIN-SUFFIX,com.cn
 DOMAIN-SUFFIX,coolapk.com
 DOMAIN-SUFFIX,coolapkmarket.com
 DOMAIN-SUFFIX,coolapkmarket.net
@@ -368,7 +369,8 @@ DOMAIN-SUFFIX,linkedin.cn
 DOMAIN-SUFFIX,ljcdn.com
 DOMAIN-SUFFIX,lkcoffee.com
 DOMAIN-SUFFIX,lltskb.com
-DOMAIN-SUFFIX,longbridge.cn
+DOMAIN,longbridge.cn
+DOMAIN,www.longbridge.cn
 DOMAIN-SUFFIX,longportapp.cn
 DOMAIN-SUFFIX,luckincoffeecdn.com
 DOMAIN-SUFFIX,ludashi.com
@@ -390,7 +392,8 @@ DOMAIN-SUFFIX,meizu.cn
 DOMAIN-SUFFIX,meizu.com
 DOMAIN-SUFFIX,mi-fds.com
 DOMAIN-SUFFIX,mi-img.com
-DOMAIN-SUFFIX,mi.com
+DOMAIN,mi.com
+DOMAIN,www.mi.com
 DOMAIN-SUFFIX,mifile.cn
 DOMAIN-SUFFIX,migucloud.com
 DOMAIN-SUFFIX,mihayo.com
@@ -545,7 +548,6 @@ DOMAIN-SUFFIX,tapimg.com
 DOMAIN-SUFFIX,taptap.cn
 DOMAIN-SUFFIX,tianyancha.com
 DOMAIN-SUFFIX,tigerbbs.cn
-DOMAIN-SUFFIX,tnkjmec.com
 DOMAIN-SUFFIX,tongyi.com
 DOMAIN-SUFFIX,tool.lu
 DOMAIN-SUFFIX,tripcdn.cn

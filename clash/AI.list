@@ -1,9 +1,8 @@
 # AUTO-GENERATED — Clash(Mihomo) classical 规则，由 ../lists/AI.list 派生
 # 勿手工编辑；修改 Surge 源后运行 python3 tools/surge2clash.py 重新生成
 
-# AI — 独立 AI 服务商（OpenAI/Anthropic/Perplexity/Cursor 等）与 AI 基础设施；四大厂自有 AI 归各自生态表（Gemini→Google、Grok→Twitter、Copilot/GitHub→Microsoft、Meta AI→Meta）
-# 通用第三方组件（datadog/statsig/arkoselabs/turnstile/todesktop 等）刻意留本表——AI 会话同出口优先，逐条理由见 tests/allowlist.json；收录分档与禁收项见 docs/MAINTENANCE.md「裁决登记」
-# 排序：规则类型分区，区内字母序；两条 Azure 主机命名关键词已于 2026-08-31 审计改双向锚定 DOMAIN-WILDCARD
+# Independent AI services and session-bound infrastructure; vendor-owned AI remains with its ecosystem.
+# Shared components are admitted only when same-exit session behavior is documented in tests/allowlist.json.
 
 DOMAIN,anthropic-com.ghost.io
 DOMAIN,aws-language-servers.us-east-1.amazonaws.com
@@ -174,7 +173,8 @@ DOMAIN-SUFFIX,haiper.ai
 DOMAIN-SUFFIX,harpa.ai
 DOMAIN-SUFFIX,hedra.com
 DOMAIN-SUFFIX,heygen.com
-DOMAIN-SUFFIX,hf.co
+DOMAIN,hf.co
+DOMAIN-SUFFIX,api.hf.co
 DOMAIN-SUFFIX,higgsfield.ai
 DOMAIN-SUFFIX,huggingface.co
 DOMAIN-SUFFIX,hume.ai
@@ -389,14 +389,10 @@ DOMAIN-WILDCARD,openaicom-api-*.azurefd.net
 
 IP-CIDR,153.61.0.0/16,no-resolve
 IP-CIDR,160.79.104.0/21,no-resolve
-IP-CIDR,199.47.142.0/23,no-resolve
 IP-CIDR,216.73.216.0/22,no-resolve
 
 IP-CIDR6,2604:f20::/32,no-resolve
 IP-CIDR6,2607:6bc0::/32,no-resolve
 
 IP-ASN,399358,no-resolve
-IP-ASN,400243,no-resolve
 IP-ASN,401518,no-resolve
-IP-ASN,401551,no-resolve
-IP-ASN,401864,no-resolve

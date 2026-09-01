@@ -1,15 +1,6 @@
-# UK — 英国区域服务；域名与 GEOIP/IP-ASN 同表自包含，整表刻意置于 Apple/微软/GFW 之后（前置会遮蔽它们的 IP 规则）
-# 排序：规则类型分区，区内字母序
-# BBC 全族 2026-08-31 由 Streaming.list 迁入（审计 W4-01 方案 A）：iPlayer 属地锁需英国出口，
-#   而「流媒体」是全局单选组且无任何英国出口成员。DOMAIN-SUFFIX,bbc 是 BBC 独占的品牌 gTLD，随品牌同表。
-#   播放面的处置边界 2026-08-31 二次收敛（审计裁决 6）：判据从「注册域是否多租户」改为
-#   「**该 host 是否 BBC 专属**」—— 多租户的是注册域，不是主机名；把 BBC 独占的主机名留在
-#   一个没有英国出口的策略组里，iPlayer 的属地锁照样过不去。故按主机名归属拆开：
-#   · 迁入本表：9 条 `*-uk-live.akamaized.net`（uk-live = BBC 英国本土播放/字幕/缩略图面，
-#     命名即属地）与 `bbc.mp-pxcdn.com`（Piksel 多租户 CDN 上的 BBC 专属租户前缀）；
-#   · 留 Streaming：`*-ww-live.akamaized.net`（ww = worldwide，非属地锁面，全局出口即可）
-#     与 `bbcfmt.s.llnwi.net`（Limelight 租户前缀，同注册域另住 DAZN / HBO Max / Viki，
-#     整段处置须一致）。这条边界由 tests/scenarios/fix_regions_v2.json 与 kw_media.json 双向钉住。
+# UK — 英国服务域名；BBC 英国播放面归本表，IP fallback 见 UKIP.list
+
+DOMAIN-SUFFIX,bet365.com
 
 DOMAIN,aod-dash-uk-live.akamaized.net
 DOMAIN,aod-hls-uk-live.akamaized.net
@@ -35,6 +26,7 @@ DOMAIN-SUFFIX,bbci.co.uk
 DOMAIN-SUFFIX,bbcmedia.co.uk
 DOMAIN-SUFFIX,bbcpersian.com
 DOMAIN-SUFFIX,bbcverticals.com
+DOMAIN-SUFFIX,bbcchinese.com
 DOMAIN-SUFFIX,bfi.org.uk
 DOMAIN-SUFFIX,dailymail.co.uk
 DOMAIN-SUFFIX,ee.co.uk
@@ -67,5 +59,3 @@ DOMAIN-SUFFIX,virginmedia.com
 DOMAIN-SUFFIX,virginmediatvanywhere.com
 DOMAIN-SUFFIX,vodafone.co.uk
 DOMAIN-SUFFIX,voxi.co.uk
-
-GEOIP,GB,no-resolve

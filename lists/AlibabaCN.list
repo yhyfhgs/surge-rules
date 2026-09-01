@@ -152,7 +152,8 @@ DOMAIN-SUFFIX,aliyuncc.com
 DOMAIN-SUFFIX,aliyuncdn.com
 DOMAIN-SUFFIX,aliyuncdn.net
 DOMAIN-SUFFIX,aliyunceng.com
-DOMAIN-SUFFIX,aliyuncs.com
+DOMAIN,aliyuncs.com
+DOMAIN-SUFFIX,dashscope.aliyuncs.com
 DOMAIN-SUFFIX,aliyunddos0024.com
 DOMAIN-SUFFIX,aliyunddos1001.com
 DOMAIN-SUFFIX,aliyunddos1002.com
@@ -1257,4 +1258,3 @@ DOMAIN-SUFFIX,ztcexam.com
 DOMAIN-SUFFIX,zuodao.com
 DOMAIN-SUFFIX,zwmrxd.com
 DOMAIN-SUFFIX,zwtianshangm.com
-

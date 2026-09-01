@@ -1,24 +1,24 @@
 # AUTO-GENERATED — Clash(Mihomo) classical 规则，由 ../lists/Streaming.list 派生
 # 勿手工编辑；修改 Surge 源后运行 python3 tools/surge2clash.py 重新生成
 
-# Streaming — 国际流媒体聚合（Netflix/Disney/HBO/PrimeVideo/Hulu/Spotify/巴哈姆特/AbemaTV/Apple TV·Music·News，含 B 站国际版 bstar/biliintl）；国内流媒体归 ChinaMedia.list
-# 排序：规则类型分区，区内字母序
-# 不收：多租户共享组件（同意/AB/归因/标签管理）与云厂商通用区域后缀（execute-api 等）——只收第一方与专属 CDN 精确资产
-# BBC 品牌注册域（bbc / bbc.co / bbc.co.uk / bbc.in / bbc.net.uk / bbci.co / bbci.co.uk / bbcpersian.com / bbcverticals.com）
-#   2026-08-31 迁 UK.list：iPlayer 是英国属地锁，而本表策略组「流媒体」无任何英国出口成员（审计 W4-01 方案 A）。
-#   播放面 2026-08-31 二次收敛（审计裁决 6）：BBC **专属形态**随品牌迁 UK.list —— 9 条
-#   *-uk-live.akamaized.net（uk-live = 英国本土播放/字幕/缩略图面，命名即属地）与
-#   bbc.mp-pxcdn.com（Piksel CDN 上的 BBC 专属租户前缀）。
-#   本表只留**非属地锁 / 真多租户**两类：*-ww-live.akamaized.net（ww = worldwide，全局出口即可，
-#   现 2 条 DOMAIN + avod-dash-ww-live 后缀）与 bbcfmt.s.llnwi.net（Limelight 租户前缀，
-#   同注册域另住 DAZN / HBO Max / Viki，整段处置必须一致 —— 拆走单个租户会破坏该注册域的一致性）。
+# Streaming — 国际流媒体；属地锁服务优先归对应地区表
+
+DOMAIN-SUFFIX,kobo.com
+
+DOMAIN,ktpx.amazon.com
+DOMAIN-SUFFIX,atv-ext-eu.amazon.com
+DOMAIN-SUFFIX,atv-ext-fe.amazon.com
+DOMAIN-SUFFIX,atv-ext.amazon.com
+DOMAIN-SUFFIX,atv-ps-eu.amazon.com
+DOMAIN-SUFFIX,atv-ps-fe.amazon.com
+DOMAIN-SUFFIX,atv-ps.amazon.com
+DOMAIN-SUFFIX,fls-na.amazon.com
 
 DOMAIN,44wilhpljf.execute-api.ap-southeast-1.amazonaws.com
 DOMAIN,4gtvfreepcvod-cds.cdn.hinet.net
 DOMAIN,abematv.akamaized.net
 DOMAIN,ana.video.friday.tw
 DOMAIN,api.okzy.tv
-DOMAIN,athome.fandango.com
 DOMAIN,audio4-ak-spotify-com.akamaized.net
 DOMAIN,bahamut.akamaized.net
 DOMAIN,bcbolt446c5271-a.akamaihd.net
@@ -44,17 +44,15 @@ DOMAIN,e13252.dscg.akamaiedge.net
 DOMAIN,edge.cwtv-vod-ext.top.comcast.net
 DOMAIN,gamer-cds.cdn.hinet.net
 DOMAIN,gamer2-cds.cdn.hinet.net
-DOMAIN,h-netflix.online-metrix.net
 DOMAIN,hamifans.emome.net
 DOMAIN,heads-ak-spotify-com.akamaized.net
 DOMAIN,hulu.map.fastly.net
 DOMAIN,itvpnpmobile-a.akamaihd.net
-DOMAIN,ktpx.amazon.com
+DOMAIN,ni-assets.azureedge.net
 DOMAIN,linear-abematv.akamaized.net
 DOMAIN,live-mediashield-ava-hulustream-com.akamaized.net
 DOMAIN,news-client-search.apple.com
 DOMAIN,ocvideo.apple.com
-DOMAIN,prod-api.crackle.com
 DOMAIN,rpg.pic-imges.com
 DOMAIN,rthklive1-lh.akamaihd.net
 DOMAIN,rthklive2-lh.akamaihd.net
@@ -68,7 +66,6 @@ DOMAIN,video.friday.tw
 DOMAIN,vod-abematv.akamaized.net
 DOMAIN,vod-dash-ww-live.akamaized.net
 DOMAIN,vod-thumb-ww-live.akamaized.net
-DOMAIN,www.amazon.com
 
 DOMAIN-SUFFIX,112263.com
 DOMAIN-SUFFIX,20thcenturystudios.com.au
@@ -139,14 +136,7 @@ DOMAIN-SUFFIX,assetshuluimcom-a.akamaihd.net
 DOMAIN-SUFFIX,att.tv
 DOMAIN-SUFFIX,atttvnow.com
 DOMAIN-SUFFIX,attwatchtv.com
-DOMAIN-SUFFIX,atv-ext-eu.amazon.com
-DOMAIN-SUFFIX,atv-ext-fe.amazon.com
-DOMAIN-SUFFIX,atv-ext.amazon.com
 DOMAIN-SUFFIX,atv-ps-eu.amazon.co.uk
-DOMAIN-SUFFIX,atv-ps-eu.amazon.com
-DOMAIN-SUFFIX,atv-ps-fe.amazon.co.jp
-DOMAIN-SUFFIX,atv-ps-fe.amazon.com
-DOMAIN-SUFFIX,atv-ps.amazon.com
 DOMAIN-SUFFIX,audio-ak-spotify-com.akamaized.net
 DOMAIN-SUFFIX,avod-dash-ww-live.akamaized.net
 DOMAIN-SUFFIX,avodmp4s3ww-a.akamaihd.net
@@ -380,7 +370,6 @@ DOMAIN-SUFFIX,fanfox.net
 DOMAIN-SUFFIX,fast.com
 DOMAIN-SUFFIX,fetnet.net
 DOMAIN-SUFFIX,findyourlimits.com
-DOMAIN-SUFFIX,fls-na.amazon.com
 DOMAIN-SUFFIX,flxvpn.net
 DOMAIN-SUFFIX,forthethrone.com
 DOMAIN-SUFFIX,fox-corporation.com
@@ -802,6 +791,7 @@ DOMAIN-SUFFIX,nbcsports.h-cdn.com
 DOMAIN-SUFFIX,nbcudigitaladops.com
 DOMAIN-SUFFIX,nbys.tv
 DOMAIN-SUFFIX,nbys1.tv
+DOMAIN-SUFFIX,nba.com
 DOMAIN-SUFFIX,nebula.app
 DOMAIN-SUFFIX,netflix.ca
 DOMAIN-SUFFIX,netflix.com
@@ -838,9 +828,7 @@ DOMAIN-SUFFIX,nflxvideo.net
 DOMAIN-SUFFIX,ngeo.com
 DOMAIN-SUFFIX,nicodic.jp
 DOMAIN-SUFFIX,nicomanga.jp
-DOMAIN-SUFFIX,niconico.com
 DOMAIN-SUFFIX,nicoseiga.jp
-DOMAIN-SUFFIX,nicovideo.jp
 DOMAIN-SUFFIX,nikkei.co.jp
 DOMAIN-SUFFIX,nikkei.jp
 DOMAIN-SUFFIX,nivod.tv
@@ -1123,6 +1111,10 @@ DOMAIN-SUFFIX,zeetv.com
 DOMAIN-SUFFIX,zeeuk.com
 DOMAIN-SUFFIX,zeriamerikes.com
 DOMAIN-SUFFIX,zype.com
+DOMAIN-SUFFIX,crackle.com
+DOMAIN-SUFFIX,dailymotion.com
+DOMAIN-SUFFIX,livestream.com
+DOMAIN-SUFFIX,vimeo.com
 
 DOMAIN-WILDCARD,*nowtv100.*
 DOMAIN-WILDCARD,apiproxy-device-prod-nlb-*

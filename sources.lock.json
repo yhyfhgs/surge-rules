@@ -43,20 +43,21 @@
       "transform": [
         {"op": "require_types", "types": ["IP-CIDR", "IP-CIDR6"]},
         {"op": "require_param", "param": "no-resolve"},
-        {"op": "collapse_cidr", "tool": "tools/collapse_cidr.py"}
+        {"op": "collapse_cidr", "tool": "tools/collapse_cidr.py"},
+        {"op": "exclude_cidr", "values": ["74.125.16.64/26", "162.105.0.0/16"]}
       ],
       "expect": {
-        "rules": 11090,
-        "per_type": {"IP-CIDR": 7165, "IP-CIDR6": 3925},
+        "rules": 11088,
+        "per_type": {"IP-CIDR": 7163, "IP-CIDR6": 3925},
         "set_sha256": {
-          "IP-CIDR": "c6f4d115c40add9ef964cff1af927923715ac81fae2e27ec77fe387ec0037fdd",
+          "IP-CIDR": "f344f13337c82aec7d81a695c8b0ab793f100a4896c027949713b3befc375793",
           "IP-CIDR6": "47d5ecf01a4ed44194e32d7710076c8a9bf8b5080a4c1dfe81d7317c22588199"
         }
       },
       "verified": {
-        "at": "2026-08-31",
+        "at": "2026-09-01",
         "by": "tools/rebuild.py",
-        "result": "diff = 0（上游 pin 折叠后与 lists/ChinaIP.list 地址集合逐位相同）",
+        "result": "diff = 0（折叠并排除前位 Google/PKU 所有权网段后逐位相同）",
         "note": [
           "set_sha256 的定义 = tools/collapse_cidr.py:set_digest()：对 collapse_addresses()",
           "规范化后的网段逐行文本（末尾带换行）取 SHA-256。审计 §3.7 正文里另一组摘要",
