@@ -13,7 +13,7 @@
 | Repcz/Tool | 规则上游 | https://github.com/Repcz/Tool (分支 `X`) | 无本地快照 —— 早期按 URL 直取,未记录 revision | MIT | 初版本地化取材源:曾直引 `Surge/Rules/*.list` 13 条(YouTube / Twitter / TikTok / Spotify / PrimeVideo / OneDrive / Netflix / HBO / Facebook / Disney / Bahamut / AppleMedia / DownloadCDN_Global),现已并入 YouTube / Twitter / TikTok / Streaming / MicrosoftCN / DownloadCDN 等表 |
 | Loyalsoldier/surge-rules | 规则上游 | https://github.com/Loyalsoldier/surge-rules (分支 `release`) | 无本地快照 —— 早期按 URL 直取,未记录 revision | GPL-3.0 | 初版本地化取材源:曾以 `DOMAIN-SET` 直引 `private.txt`(内网/私有域)与 `icloud.txt`(iCloud 域),对应今 PrivateLAN.list 与 AppleCN.list 的部分覆盖面 |
 | Loyalsoldier/geoip | 运行时依赖 | https://github.com/Loyalsoldier/geoip (分支 `release`,`Country.mmdb`) | 无本地快照 —— 由客户端按 URL 拉取,随 release 滚动 | CC-BY-SA-4.0 | 不入本仓库。消费端 Surge 配置的 `geoip-maxmind-url` 指向它,是全链 `GEOIP,*` 判定(地区表 GEOIP 与收尾 `GEOIP,CN`)的实际数据源;离线引擎 `tests/engine.py` 不用它,而以 ChinaIP.list 近似 `GEOIP,CN` |
-| VPSDance/ai-proxy-rules | 规则上游 | https://github.com/VPSDance/ai-proxy-rules | 无本地快照 —— 早期按 URL 直取,未记录 revision | MIT | 初版 AI.list 的取材源之一(曾直引 `rules/surge/all.list`);现 AI.list 已按分档裁决重建,见 docs/MAINTENANCE.md §8 |
+| VPSDance/ai-proxy-rules | 规则上游 | https://github.com/VPSDance/ai-proxy-rules | 无本地快照 —— 早期按 URL 直取,未记录 revision | MIT | 初版 AI.list 的取材源之一(曾直引 `rules/surge/all.list`);现 AI.list 已按分档裁决重建,裁决见 CHANGELOG.md 对应日期条目 |
 | VirgilClyne/GetSomeFries | 规则上游 + 开发参考 | https://github.com/VirgilClyne/GetSomeFries | `reference/GetSomeFries` @ `b4aa767`(2026-08-29 浅克隆) | GPL-3.0 | 取材:Reject.list 的 HTTPDNS / 私有 DoH 层取自 `ruleset/HTTPDNS.Block.list` 的差集补充。参考:sgmodule 工程化与 `pre-matching` / `extended-matching` / `no-resolve` 修饰符用法 |
 | NobyDa/Script | 开发参考 | https://github.com/NobyDa/Script | `reference/NobyDa-Script` @ `0b8d083`(2026-08-29 浅克隆) | GPL-3.0 | 脚本参考:签到/面板类 sgmodule 与 JS 写法,不参与规则分发 |
 | chavyleung/scripts | 开发参考 | https://github.com/chavyleung/scripts | `reference/chavyleung-scripts` @ `3278838`(2026-08-29 浅克隆) | GPL-3.0 | 脚本参考:`Env.js` 框架(环境判定/持久化/通知),不参与规则分发 |
@@ -35,5 +35,5 @@
 - 这是**现状登记**,不是构建锁。除 `ios_rule_script@65e8adf` 外,规则上游多为「按 URL 直取后人工重组」,既没有逐表原始 SHA-256,也没有可复现的转换命令与排除清单;曾用作本地对照的那批浅克隆本身也是可变的,不适合直接充当供应链输入。
 - **逐表 revision 锁定、原始 checksum 与可一键重建的再生管线仍属 Phase 3 供应链工程**(依据见 `git show e03c530:docs/RULES_AUDIT_AND_OPTIMIZATION_2026-08-31.md` §13.2 / §13.7 / §14.4 与其 Phase 3 路线;该报告已于 2026-09-01 从 `docs/` 移除,结论见 CHANGELOG 2026-08-31 条目)。**2026-08-31 起已开工但未完工**:仓库根 `sources.lock.json` + `tools/fetch_locked.py` + `tools/rebuild.py` 落地了机器可读的锁层,其中 **ChinaIP 已做实**(pinned 到 `blackmatrix7/ios_rule_script@65e8adf`,折叠后与本地文件地址集合逐位相同,`rebuild.py` diff = 0);其余表按 provenance 如实标为 `observed`(未锁)。**在全部表转为 pinned 之前,不要把本文件或该 lock 当作「固定 revision 可逐字节重建全部分发物」的依据。**
 - 上表末两行的 PSL / IANA 快照**不是规则上游**,不参与 `lists/` 的任何内容,只作 `tests/audit.py` A10 的离线判据;它们是本仓库唯一逐字节锁定并入库的外部数据。
-- 各上游版权归原作者,遵循其各自仓库的 LICENSE。本仓库对上游内容做了裁剪、重组、去重与归属重裁,**不保证与任一上游语义等同**;上游的收录裁决与本库的偏离逐条登记在 docs/MAINTENANCE.md §8「裁决登记」。
+- 各上游版权归原作者,遵循其各自仓库的 LICENSE。本仓库对上游内容做了裁剪、重组、去重与归属重裁,**不保证与任一上游语义等同**;上游的收录裁决与本库的偏离逐条登记在 CHANGELOG.md 日期条目与 tests/allowlist.json 的 forbidden 段。
 - 本仓库自身尚未声明 LICENSE(同一报告 §13.7 同批建议,待裁决)。

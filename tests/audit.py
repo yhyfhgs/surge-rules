@@ -1156,8 +1156,8 @@ class Auditor(object):
                               "（classical provider 按逗号切分）会让整条规则或整个 "
                               "provider 加载失败。",
                               "删除该修饰符，或先确认 Surge 支持后再把它加进 "
-                              "audit.py 的 ALLOWED_MODIFIERS 并在 DEVELOPMENT.md "
-                              "登记行格式约定。", "high")
+                              "audit.py 的 ALLOWED_MODIFIERS 并在 MAINTENANCE.md "
+                              "的 Rule invariants 登记行格式约定。", "high")
                 elif low == "no-resolve" and sl.type not in IP_CLASS_TYPES:
                     n += 1
                     self._add("A10", "P1", "modifier", sl.file, sl.text[:80],
