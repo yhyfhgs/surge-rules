@@ -9,7 +9,7 @@ DOMAIN,appleworldwidedeveloper.hb-api.omtrdc.net
 DOMAIN,appleworldwidedeveloper.sc.omtrdc.net
 DOMAIN,beatselectronicsllc.tt.omtrdc.net
 DOMAIN,e16991.b.akamaiedge.net
-DOMAIN,edge.apple
+DOMAIN-SUFFIX,edge.apple
 DOMAIN,icons.axm-usercontent-apple.com
 DOMAIN,p-events-delivery.akamaized.net
 
@@ -132,7 +132,7 @@ DOMAIN-SUFFIX,apple.co.mz
 DOMAIN-SUFFIX,apple.co.nz
 DOMAIN-SUFFIX,apple.co.th
 DOMAIN-SUFFIX,apple.co.uk
-DOMAIN,apple.com
+DOMAIN-SUFFIX,apple.com
 DOMAIN,beta.apple.com
 DOMAIN,gs-loc.apple.com
 DOMAIN,init.itunes.apple.com

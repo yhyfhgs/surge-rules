@@ -1,6 +1,5 @@
 # MicrosoftCN — 已验证可直连的微软国内 CDN、更新与 Office 端点
 
-DOMAIN,1drv.com
 DOMAIN,al.msn.com
 DOMAIN,by3301-a.1drv.com
 DOMAIN,c.live.com
@@ -12,6 +11,7 @@ DOMAIN,mail.live.com
 DOMAIN,msn.com
 DOMAIN,ntp.msn.com
 DOMAIN,office.com
+DOMAIN,outlook.office.com
 DOMAIN,people.live.com
 DOMAIN,profile.live.com
 DOMAIN,res-1.cdn.office.net
@@ -27,6 +27,7 @@ DOMAIN,www.msn.com
 DOMAIN,www.office.com
 DOMAIN,sa.msn.com
 
+DOMAIN-SUFFIX,1drv.com
 DOMAIN-SUFFIX,1drv.ms
 DOMAIN-SUFFIX,azuremigrate.download.prss.microsoft.com
 DOMAIN-SUFFIX,azuremigratetest.download.prss.microsoft.com
@@ -39,6 +40,7 @@ DOMAIN-SUFFIX,collaborate.download.prss.microsoft.com
 DOMAIN-SUFFIX,collaborateppe.download.prss.microsoft.com
 DOMAIN-SUFFIX,crl.microsoft.com
 DOMAIN-SUFFIX,ctldl.windowsupdate.com
+DOMAIN-SUFFIX,delivery.mp.microsoft.com
 DOMAIN-SUFFIX,dl.delivery.mp.microsoft.com
 DOMAIN-SUFFIX,download.microsoft.com
 DOMAIN-SUFFIX,download.visualstudio.microsoft.com
@@ -67,14 +69,17 @@ DOMAIN-SUFFIX,ocsp.microsoft.com
 DOMAIN-SUFFIX,oemsoc.download.prss.microsoft.com
 DOMAIN-SUFFIX,oemsocuat.download.prss.microsoft.com
 DOMAIN-SUFFIX,office365.com
+DOMAIN-SUFFIX,officeapps.live.com
 DOMAIN-SUFFIX,officecdn.microsoft.com
 DOMAIN-SUFFIX,officemkt.download.prss.microsoft.com
 DOMAIN-SUFFIX,officemktuat.download.prss.microsoft.com
 DOMAIN-SUFFIX,office.live.com
+DOMAIN-SUFFIX,office.net
 DOMAIN-SUFFIX,oneclient.sfx.ms
 DOMAIN-SUFFIX,onedrive.com
 DOMAIN-SUFFIX,oneocsp.microsoft.com
 DOMAIN-SUFFIX,osrelease.download.prss.microsoft.com
+DOMAIN-SUFFIX,outlook.com
 DOMAIN-SUFFIX,rsm.download.prss.microsoft.com
 DOMAIN-SUFFIX,sdx.microsoft.com
 DOMAIN-SUFFIX,sharepoint.com
@@ -91,3 +96,4 @@ DOMAIN-SUFFIX,volic.download.prss.microsoft.com
 DOMAIN-SUFFIX,vscode.download.prss.microsoft.com
 DOMAIN-SUFFIX,vz.download.prss.microsoft.com
 DOMAIN-SUFFIX,windbg.download.prss.microsoft.com
+DOMAIN-SUFFIX,windowsupdate.com

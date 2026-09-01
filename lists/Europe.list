@@ -8,6 +8,7 @@ DOMAIN-SUFFIX,ard.de
 DOMAIN-SUFFIX,ardmediathek.de
 DOMAIN-SUFFIX,arte.tv
 DOMAIN-SUFFIX,asml.com
+DOMAIN-SUFFIX,bild.de
 DOMAIN-SUFFIX,bouyguestelecom.fr
 DOMAIN-SUFFIX,bunq.com
 DOMAIN-SUFFIX,canalplus.com
@@ -34,7 +35,9 @@ DOMAIN-SUFFIX,ionos.de
 DOMAIN-SUFFIX,joyn.de
 DOMAIN-SUFFIX,kpn.com
 DOMAIN-SUFFIX,m6.fr
+DOMAIN-SUFFIX,mail.ru
 DOMAIN-SUFFIX,n26.com
+DOMAIN-SUFFIX,ndr.de
 DOMAIN-SUFFIX,netcup.de
 DOMAIN-SUFFIX,netcup.eu
 DOMAIN-SUFFIX,nos.nl
@@ -42,7 +45,9 @@ DOMAIN-SUFFIX,npo.nl
 DOMAIN-SUFFIX,npostart.nl
 DOMAIN-SUFFIX,o2online.de
 DOMAIN-SUFFIX,odido.nl
+DOMAIN-SUFFIX,ok.ru
 DOMAIN-SUFFIX,orange.fr
+DOMAIN-SUFFIX,otto.de
 DOMAIN-SUFFIX,ovh.com
 DOMAIN-SUFFIX,ovhcloud.com
 DOMAIN-SUFFIX,prosieben.de
@@ -50,6 +55,7 @@ DOMAIN-SUFFIX,rabobank.nl
 DOMAIN-SUFFIX,rtl.de
 DOMAIN-SUFFIX,rtlxl.nl
 DOMAIN-SUFFIX,rts.ch
+DOMAIN-SUFFIX,rutube.ru
 DOMAIN-SUFFIX,sat1.de
 DOMAIN-SUFFIX,scalable.capital
 DOMAIN-SUFFIX,scaleway.com
@@ -57,6 +63,7 @@ DOMAIN-SUFFIX,sfr.fr
 DOMAIN-SUFFIX,spiegel.de
 DOMAIN-SUFFIX,srf.ch
 DOMAIN-SUFFIX,strato.de
+DOMAIN-SUFFIX,sueddeutsche.de
 DOMAIN-SUFFIX,swisscom.ch
 DOMAIN-SUFFIX,telekom.de
 DOMAIN-SUFFIX,tf1.fr
@@ -66,6 +73,7 @@ DOMAIN-SUFFIX,tvnow.de
 DOMAIN-SUFFIX,uva.nl
 DOMAIN-SUFFIX,videoland.com
 DOMAIN-SUFFIX,vodafone.de
+DOMAIN-SUFFIX,welt.de
 DOMAIN-SUFFIX,zdf-cdn.de
 DOMAIN-SUFFIX,zdf.de
 DOMAIN-SUFFIX,zeit.de

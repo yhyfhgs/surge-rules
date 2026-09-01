@@ -761,7 +761,7 @@ DOMAIN-SUFFIX,myelasticsearch.com
 DOMAIN-SUFFIX,mylightsite.com
 DOMAIN-SUFFIX,myoed.com
 DOMAIN-SUFFIX,myqcloud.cn
-DOMAIN,myqcloud.com
+DOMAIN-SUFFIX,myqcloud.com
 DOMAIN-SUFFIX,myqcloud.net
 DOMAIN-SUFFIX,myrtx.com
 DOMAIN-SUFFIX,mytencentes.com
@@ -1120,7 +1120,7 @@ DOMAIN-SUFFIX,sjwec-tencentclb.com
 DOMAIN-SUFFIX,sjwec-tencentclb.net
 DOMAIN-SUFFIX,sjwec-tencentclb.work
 DOMAIN-SUFFIX,smoba.net
-DOMAIN,smtcdns.com
+DOMAIN-SUFFIX,smtcdns.com
 DOMAIN-SUFFIX,snoba.net
 DOMAIN-SUFFIX,sogou-compress.com
 DOMAIN-SUFFIX,sogou-diskmgr.com
@@ -2068,7 +2068,7 @@ DOMAIN-SUFFIX,we-pass.com
 DOMAIN-SUFFIX,webacc.net
 DOMAIN-SUFFIX,websec1.com
 DOMAIN-SUFFIX,websec1.net
-DOMAIN,wechat.com
+DOMAIN-SUFFIX,wechat.com
 DOMAIN-SUFFIX,wechat.design
 DOMAIN-SUFFIX,wechat.me
 DOMAIN-SUFFIX,wechat.org

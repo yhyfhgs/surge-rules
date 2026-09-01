@@ -30,8 +30,11 @@ Consequences:
 3. If a narrow exception precedes a broad owner, list order is a semantic
    dependency.
 4. A broad registrable-domain suffix must not be used as an accidental default
-   when children are intentionally split. Enumerate the intended subtrees or
-   consolidate the service family.
+   when children are intentionally split *and the parent wins*. A broad parent
+   that sits behind every different-policy child is an ordered-safe split: each
+   child keeps its own policy by first match and the parent only restores the
+   fallback for the rest of the subtree. Enumerate the intended subtrees,
+   consolidate the service family, or prove the ordered-safe placement.
 
 The only general exception is the immutable security ordering: local/system rules
 and `Reject` precede ordinary routing owners.
@@ -55,8 +58,9 @@ local/security
 ```
 
 Regional domains therefore win before generic GFW routing. `ProxyGFW` is
-domain-only and contains neither shared-tenant public suffixes nor generic cloud
-CIDRs.
+domain-only and contains no PSL-boundary suffixes and no generic cloud CIDRs. It
+does hold whole multi-tenant namespaces whose platforms are blocked outright;
+see the contract below.
 
 ### IP phase
 
@@ -84,14 +88,25 @@ phase without local DNS resolution.
 
 - no specific ecosystem, service, regional, or domestic owner exists;
 - current evidence says proxying is required;
-- it is not a shared-cloud CIDR or a whole multi-tenant/public-suffix namespace;
+- it is not a shared-cloud CIDR;
 - it is not in `config/proxygfw-expired.txt`;
 - if children route elsewhere, the GFW rule is exact or explicitly narrowed, not
   a broad registrable-domain suffix.
 
+The multi-tenant clause is directional. A multi-tenant or public-suffix
+namespace must never be filed under a *single-service* owner list, because the
+tenants are unrelated parties. Keeping a blocked multi-tenant platform's whole
+namespace in `ProxyGFW` is the correct outcome, not a violation: `ProxyGFW` is
+the residual layer, not a service-ownership table. The registered namespaces
+held there are `wordpress.com`, `medium.com`, `substack.com`, `fc2.com`,
+`typepad.com`, `over-blog.com`, `weebly.com`, `squarespace.com`,
+`strikingly.com`, `angelfire.com`, `geocities.jp`, `geocities.co.jp`,
+`narod.ru`, `no-ip.com`, the `dynamicdns` family, `mixpanel.com`,
+`bitbucket.org`, and `imgur.com` — 18 entries.
+
 The relationship analyzer makes violations of the first-match contract visible;
 the release gate rejects active full shadows, conflicting equivalents, expired
-GFW re-entry, GFW IP rules, and GFW PSL-boundary suffixes.
+GFW re-entry, GFW IP rules, GFW PSL-boundary suffixes, and order-unsafe splits.
 
 ## Exhaustive analyzer
 
@@ -136,23 +151,33 @@ GFW re-entry, GFW IP rules, and GFW PSL-boundary suffixes.
 The pre-refactor and post-refactor measurements are recorded in
 [RULE_ANALYSIS_2026-09-01.md](RULE_ANALYSIS_2026-09-01.md).
 
-Final syntax verification accounts for 141,829 rules and 1,630 materialized
-relations (367 covers / 1,263 overlaps). The compact aggregate represents
-3,579,582 exact possible pairs in 960 records: 21,554 same-policy and 3,558,028
+Final syntax verification accounts for 141,679 rules and 1,739 materialized
+relations (476 covers / 1,263 overlaps). The compact aggregate represents
+3,575,469 exact possible pairs in 960 records: 21,406 same-policy and 3,554,063
 split-policy. These are syntactically possible matches, not observed traffic.
 
-Syntax topology has 80 order-dependent exceptions, 119 fragmented domains, and
-13 constraints with no cycles. Its 46 split apexes are all Reject/security
-exceptions; non-security split apexes, non-security broad parents, active shadows,
+Syntax topology has 159 order-dependent exceptions, 118 fragmented domains, and
+24 constraints with no cycles. Of its 59 split apexes, 46 are Reject/security
+exceptions and 13 are registered ordered-safe splits; `split_parent.jsonl` adds
+one non-apex ordered-safe parent, for 14. Order-unsafe splits, active shadows,
 and conflicting equivalents are zero. `split_parent.jsonl` is the general
 broad-parent gate for suffix, wildcard, and keyword rules; `split_apex.jsonl` is
-its registrable-domain view. The final relation classes include 287 redundant
+its registrable-domain view. The final relation classes include 317 redundant
 coverage relations, 256 same-policy overlaps, and 1,007 split-policy overlaps.
 
-The runtime MMDB expansion reports 3,304 relations (1,750 covers / 1,554
-overlaps), 1,414 order-dependent exceptions, 336 redundant coverage relations,
-293 same-policy overlaps, 1,261 split-policy overlaps, 119 fragmented domains,
-and 30 constraints. It has no cycles, active shadows, conflicting equivalents, or
+The 13 registered ordered-safe split apexes restore the FINAL funnel for
+`apple.com` (AppleCN), `aliyuncs.com` (AlibabaCN), `myqcloud.com`,
+`smtcdns.com`, `wechat.com` (TencentCN), `byteimg.com` (ByteDanceCN),
+`bilivideo.com`, `iqiyi.com`, `smtcdns.net` (ChinaMedia), `hf.co` (AI),
+`blizzard.com` (Games), and `1drv.com`, `office.net` (MicrosoftCN); the extra
+parent is `officeapps.live.com` (MicrosoftCN). Every different-policy child of
+each one is placed in an earlier list, so the topology constraints in
+`topology.json` are what keeps the split safe. Reordering those lists breaks it.
+
+The runtime MMDB expansion reports 3,413 relations (1,859 covers / 1,554
+overlaps), 1,493 order-dependent exceptions, 366 redundant coverage relations,
+293 same-policy overlaps, 1,261 split-policy overlaps, 118 fragmented domains,
+and 41 constraints. It has no cycles, active shadows, conflicting equivalents, or
 empty selectors.
 
 Database selection must match the running profile. When `geoip-maxmind-url` is
@@ -177,7 +202,7 @@ The routing closure is:
 4. `use-local-host-item-for-proxy` remains false and HTTPS/SVCB hints must not be
    allowed to bypass the hostname rule path.
 
-The scenario suite carries 1,100 explicit DNS-leak assertions.
+The scenario suite carries 1,326 explicit DNS-leak assertions.
 
 ## Clash derivation
 
@@ -196,7 +221,7 @@ connections.
 |---|---|---|
 | Relationship | `tools/analyze_rules.py ... --fail-on-shadow` | Exhaustive inventory and topology |
 | Static | `tests/audit.py --check all --fail-on P1` | Formatting, DNS, duplicates, PSL, forbidden rules |
-| Behavioral | `tests/runsuite.py` | 208 scenarios / 2,639 assertions |
+| Behavioral | `tests/runsuite.py` | 227 scenarios / 3,099 assertions |
 | Native syntax | `surge-cli --check <profile>` | Surge profile acceptance |
 | Derived | `tools/surge2clash.py --check` | Source/Clash equality and manifest order |
 | Live | `tests/realworld.py --crosscheck` | Running Surge semantics and GeoIP/ASN behavior |

@@ -764,6 +764,25 @@ def main() -> int:
         rule_id: children for rule_id, children in split_apex.items()
         if any(by_id[child].policy != "REJECT" for child in children)
     }
+
+    def ordered_safe(rule_id, children):
+        """True when every different-policy child wins by first match.
+
+        A broad parent that sits behind all of its different-policy children is
+        an ordered-safe split: the children keep their own policy and the parent
+        only restores the fallback for the rest of the subtree. Only a parent
+        that precedes a child actually kills it, and that case is already an
+        `active-shadow` in `shadowed`.
+        """
+        parent = by_id[rule_id].global_rank
+        return all(by_id[child].global_rank < parent for child in children)
+
+    unsafe_splits = {rule_id: children
+                     for rule_id, children in non_security_splits.items()
+                     if not ordered_safe(rule_id, children)}
+    unsafe_parents = {rule_id: children
+                      for rule_id, children in split_parent.items()
+                      if not ordered_safe(rule_id, children)}
     expired = {line.strip().lower() for line in args.expired.read_text(encoding="utf-8").splitlines()
                if line.strip() and not line.lstrip().startswith("#")}
     expired_reentries = [rule.id for rule in rules
@@ -859,6 +878,12 @@ def main() -> int:
                         "split_apex_rules": len(split_apex),
                         "non_security_split_apex": sorted(non_security_splits),
                         "non_security_split_parents": sorted(split_parent),
+                        "ordered_safe_split_apex": sorted(
+                            set(non_security_splits) - set(unsafe_splits)),
+                        "ordered_safe_split_parents": sorted(
+                            set(split_parent) - set(unsafe_parents)),
+                        "order_unsafe_split_apex": sorted(unsafe_splits),
+                        "order_unsafe_split_parents": sorted(unsafe_parents),
                         "fragmented_registrable_domains": len(fragmented),
                         "topology_constraints": len(constraints), "topology_cycles": cycles},
     }
@@ -870,7 +895,7 @@ def main() -> int:
         return 2
     if args.fail_on_shadow and (shadowed or expired_reentries
                                 or proxygfw_ip or proxygfw_psl
-                                or empty_selectors or non_security_splits or split_parent):
+                                or empty_selectors or unsafe_splits or unsafe_parents):
         return 1
     return 0
 

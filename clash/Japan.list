@@ -25,13 +25,16 @@ DOMAIN-SUFFIX,exhentai.org
 DOMAIN-SUFFIX,fanbox.cc
 DOMAIN-SUFFIX,fanza.com
 DOMAIN-SUFFIX,fate-go.jp
+DOMAIN-SUFFIX,fril.jp
 DOMAIN-SUFFIX,fujitv.co.jp
 DOMAIN-SUFFIX,gorin.jp
 DOMAIN-SUFFIX,granbluefantasy.jp
 DOMAIN-SUFFIX,happyon.jp
 DOMAIN-SUFFIX,hjholdings.jp
+DOMAIN-SUFFIX,hmv.co.jp
 DOMAIN-SUFFIX,hulu.jp
 DOMAIN-SUFFIX,iijmio.jp
+DOMAIN-SUFFIX,japantimes.co.jp
 DOMAIN-SUFFIX,jcom.co.jp
 DOMAIN-SUFFIX,jp-bank.japanpost.jp
 DOMAIN-SUFFIX,kadokawa.co.jp
@@ -44,9 +47,11 @@ DOMAIN-SUFFIX,linemo.jp
 DOMAIN-SUFFIX,melonbooks.co.jp
 DOMAIN-SUFFIX,mercari.com
 DOMAIN-SUFFIX,mercari.jp
+DOMAIN-SUFFIX,mixi.jp
 DOMAIN-SUFFIX,mizuhobank.co.jp
 DOMAIN-SUFFIX,moneykit.net
 DOMAIN-SUFFIX,mufg.jp
+DOMAIN-SUFFIX,nhk-ondemand.jp
 DOMAIN-SUFFIX,nimg.jp
 DOMAIN-SUFFIX,naver.jp
 DOMAIN-SUFFIX,niconico.com
@@ -54,6 +59,7 @@ DOMAIN-SUFFIX,nicovideo.jp
 DOMAIN-SUFFIX,nhncorp.jp
 DOMAIN-SUFFIX,nikkei.com
 DOMAIN-SUFFIX,nxtv.jp
+DOMAIN-SUFFIX,oricon.co.jp
 DOMAIN-SUFFIX,paypay-bank.co.jp
 DOMAIN-SUFFIX,paypay.jp
 DOMAIN-SUFFIX,paypay.ne.jp
@@ -73,6 +79,7 @@ DOMAIN-SUFFIX,r10s.jp
 DOMAIN-SUFFIX,renta.papy.co.jp
 DOMAIN-SUFFIX,sbigroup.co.jp
 DOMAIN-SUFFIX,sbisec.co.jp
+DOMAIN-SUFFIX,shadowverse.jp
 DOMAIN-SUFFIX,simg.jp
 DOMAIN-SUFFIX,smartstream.ne.jp
 DOMAIN-SUFFIX,smbc.co.jp
@@ -89,4 +96,5 @@ DOMAIN-SUFFIX,videopass.jp
 DOMAIN-SUFFIX,wowow.co.jp
 DOMAIN-SUFFIX,yahoo.co.jp
 DOMAIN-SUFFIX,yodobashi.com
+DOMAIN-SUFFIX,yomiuri.co.jp
 DOMAIN-SUFFIX,zozotown.com

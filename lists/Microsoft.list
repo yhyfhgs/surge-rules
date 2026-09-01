@@ -29,13 +29,16 @@ DOMAIN,xpaywalletcdn.azureedge.net
 DOMAIN,api.msn.com
 DOMAIN,copilot.cloud.microsoft
 DOMAIN,copilotprodattachments.blob.core.windows.net
+DOMAIN,graph.microsoft.com
 DOMAIN,location.microsoft.com
 DOMAIN,login.live.com
+DOMAIN,login.microsoft.com
 DOMAIN,login.microsoftonline.com
 DOMAIN,m365.cloud.microsoft
 DOMAIN,odc.officeapps.live.com
 DOMAIN,self.events.data.microsoft.com
 DOMAIN,substrate.office.com
+DOMAIN,teams.microsoft.com
 
 DOMAIN-SUFFIX,assets.msn.com
 DOMAIN-SUFFIX,bing.com

@@ -120,17 +120,24 @@ request counts, or production traffic.
 | Active shadows / conflicting equivalents | 3 | **0** |
 | Order-dependent exceptions | 741 | **80** |
 | Split registrable-domain apexes | 200 | **46** |
-| Non-security split apexes | not separately classified | **0** |
-| Non-security broad parents | not separately classified | **0** |
+| Non-security split apexes | not separately classified | **0** (superseded, see below) |
+| Non-security broad parents | not separately classified | **0** (superseded, see below) |
 | Fragmented registrable domains | 228 | **119** |
 | List topology constraints | 60 | **13** |
 | Topology cycles | 0 | **0** |
 
-All remaining 46 split apexes are `Reject`/security exceptions. There are zero
-non-security split apexes; service, download, regional, CN, and ProxyGFW ownership
-no longer depends on a broad mixed-policy parent. The generalized
+All remaining 46 split apexes are `Reject`/security exceptions. The generalized
 `split_parent.jsonl` gate covers suffix, wildcard, and keyword parents;
 `split_apex.jsonl` is its registrable-domain projection.
+
+**The "zero non-security split apexes" target is superseded.** Driving that
+number to zero meant demoting apex suffixes to exact `DOMAIN` rules, which cut
+the FINAL funnel for whole subtrees — `appleid.apple.com`,
+`oss-cn-beijing.aliyuncs.com`, `cos.ap-guangzhou.myqcloud.com`, `api.iqiyi.com`
+and many more stopped matching any rule at all. The invariant is now stated in
+terms of order, not shape: a non-security split is permitted when the broad
+parent sits behind every different-policy child, so first match still gives each
+child its own policy. See the follow-up section.
 
 Install the pinned analysis dependency before reproducing the final MMDB run:
 
@@ -151,7 +158,7 @@ The final expanded run reports **3,304 relations** (**1,750 covers / 1,554
 overlaps**), **1,414 order-dependent exceptions**, **336 redundant coverage
 relations**, **293 same-policy overlaps**, **1,261 split-policy overlaps**, **119
 fragmented domains**, and **30 topology constraints**. It has zero active shadows,
-conflicting equivalents, empty selectors, cycles, or non-security broad parents.
+conflicting equivalents, empty selectors, or cycles.
 The verified order is service-owned IP → ChinaIP → regional ASN/GEOIP
 fallback.
 
@@ -172,8 +179,51 @@ Additional enforced results:
 - `ProxyGFW` is a domain-only residual after dead domains, tenant/public-suffix
   rules, shared-cloud CIDRs, and classifiable service assets were deleted or
   migrated.
-- All 208 scenarios / 1,418 requests / 2,639 assertions pass, including 1,100
-  DNS-leak assertions.
+- All scenarios pass; the count grew to 227 scenarios / 1,644 requests / 3,099
+  assertions, including 1,326 DNS-leak assertions, after the follow-up below.
+
+## Follow-up: 2026-09-01 ordered-safe correction
+
+Post-refactor verification found that the apex demotions above had removed the
+fallback for entire service subtrees. Sixteen exact apexes were re-promoted to
+`DOMAIN-SUFFIX` after proving, one at a time, that every different-policy rule
+under the registrable domain lives in an earlier list; the same criterion
+rejected `qcloud.com`, `mi.com`, `naver.com`, and `azure.com`, which each keep a
+later different-policy child.
+
+The release gate was re-scoped to match: `tools/analyze_rules.py` still reports
+every non-security split, but `--fail-on-shadow` now fails only on
+`order_unsafe_split_apex` / `order_unsafe_split_parents`, alongside the existing
+active-shadow, expired-re-entry, GFW-IP, and PSL-boundary checks. The
+ordered-safe entries are listed separately in `summary.json`.
+
+| Diagnostic | 09-01 refactor | After correction |
+|---|---:|---:|
+| Source rules | 141,829 | **141,679** |
+| Materialized relations | 1,630 (367 covers) | **1,739 (476 covers)** |
+| Order-dependent exceptions | 80 | **159** |
+| Split registrable-domain apexes | 46 | **59** (46 security + 13 ordered-safe) |
+| Order-unsafe splits | not classified | **0** |
+| Fragmented registrable domains | 119 | **118** |
+| List topology constraints | 13 | **24** |
+| Active shadows / conflicting equivalents | 0 | **0** |
+| MMDB relations | 3,304 (1,750 covers) | **3,413 (1,859 covers)** |
+| MMDB order-dependent exceptions | 1,414 | **1,493** |
+| MMDB topology constraints | 30 | **41** |
+| Scenario assertions | 2,639 | **3,099** |
+
+Order-dependent exceptions roughly doubled by construction: each ordered-safe
+apex turns its pre-placed children into recorded order dependencies. That is the
+mechanism working, not drift — but it does mean `topology.json` constraints are
+now load-bearing, and reordering a constrained list pair would silently kill the
+children it protects.
+
+The same batch migrated 49 rules out of `ProxyGFW` (Longbridge OpenAPI to
+`Domestic`, Google `.new` shortcuts to `Google`, the Aylo family to `Streaming`,
+and regional media/commerce to `Japan`/`UK`/`Europe`/`US`) and removed 169 more:
+167 DNS-dead domains registered in `config/proxygfw-expired.txt` (766 → 933),
+plus `clipfish.de` (301 to `watchbox.de`) and `prosiben.de` (a misspelling whose
+correct form was already in `Europe`).
 
 ## Policy separation and target topology
 
@@ -214,14 +264,14 @@ The analyzer identifies candidates; it does not infer business ownership from sy
 
 | Category | Refactoring rule | Examples/evidence to verify |
 |---|---|---|
-| Intentional apex splits | Remove a broad apex/suffix from the losing layer when a narrower subdomain split is required; retain exact hosts or anchored wildcards. | The pre-refactor 200 records are reduced to 46 Reject/security exceptions; non-security split apexes are zero. |
+| Intentional apex splits | Remove a broad apex/suffix only from a layer that *precedes* the narrower split; a parent placed behind all of its different-policy children may stay. | The pre-refactor 200 records are reduced to 46 Reject/security exceptions plus 13 registered ordered-safe splits. |
 | Public multi-tenant download suffixes | Remove generic `cloudfront.net`, `s3.amazonaws.com`, `github.io`, `vercel.app`, `workers.dev`, and similar platform-wide suffixes from download policy; retain only exact, proven data endpoints. | DownloadCDN’s shared-platform matches and the cross-policy containment records. |
 | Download/session companions | Move authentication, API, account, payment, telemetry, and site-control hosts out of a generic download/data-plane list into their owning service or Payment/shared layer. | Final fragmented-domain review units: 119. |
 | Region-locked service families | Keep login/control/playback hosts that require a country together in the region list; split only an independently verified, session-independent byte-delivery endpoint. | BBC/UK playback hosts, DLsite, Telegraph, Cygames, and Niconico/Dwango are high-confidence review families from the prior evidence set. |
 | CN vs international vendor surfaces | Use exact host or vendor-CN rules for proven direct endpoints; do not let a broad CN apex capture known international subdomains. | Microsoft `live.com`/OneDrive boundary and Google `-cn` mirror vs `.cn` endpoint evidence. |
 | Payment and anti-fraud chain | Keep checkout, authentication, 3DS, and fraud-decision dependencies on the same stable policy. | ThreatMetrix/`h.online-metrix.net` is a Payment candidate; generic analytics remains separate unless the session evidence says otherwise. |
 | Shared cloud IP/ASN selectors | Remove or quarantine shared-provider ranges unless first-party ownership is proven; use expiry metadata for dynamic single-IP rules. | Google Cloud, AWS, Tencent Cloud, and other provider-wide ranges in IP relation output. |
-| ProxyGFW reclassification | Move a rule to a dedicated owner/region/CN/Payment list when evidence supports that category. Keep it in ProxyGFW only when no narrower category applies and proxying is definite. | Final contract: zero GFW IP, PSL-boundary, or expired rules; zero active/conflicting relationships and zero non-security broad parents. |
+| ProxyGFW reclassification | Move a rule to a dedicated owner/region/CN/Payment list when evidence supports that category. Keep it in ProxyGFW only when no narrower category applies and proxying is definite. | Final contract: zero GFW IP, PSL-boundary, or expired rules; zero active/conflicting relationships. |
 
 Every migration must be checked in the actual sequential flow: the old winner, new winner, all narrower descendants, and the deletion fallback must be recorded. A syntactically equivalent move is not sufficient if it changes a login/payment/session exit.
 

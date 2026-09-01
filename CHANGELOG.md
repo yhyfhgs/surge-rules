@@ -4,6 +4,96 @@
 
 ---
 
+## [2026-09-01·复验] FINAL 漏斗回归纠正 + ProxyGFW 迁移清理
+
+**回归来源**:同日「Deterministic topology」重构把「非安全分裂顶点归零」当成硬指标,
+做法是把一批注册域顶点从 `DOMAIN-SUFFIX` 降级为精确 `DOMAIN`。指标确实归零了,
+代价是整片子树失去兜底——`appleid.apple.com`、`itunes.apple.com`、
+`oss-cn-beijing.aliyuncs.com`、`cos.ap-guangzhou.myqcloud.com`、`api.iqiyi.com`、
+`p3-pc.byteimg.com` 等主机不再命中任何规则,直接掉进 FINAL。
+
+**纠正口径**:分裂的危害取决于**顺序**而非**形态**。宽父规则排在**所有**异策略窄子
+之后时,首次匹配仍然让每个窄子拿到自己的策略,父规则只为子树其余部分恢复兜底——
+这是 ordered-safe split,不是遮蔽。真正要拒的是「宽父在前吃掉窄子」(active shadow)。
+
+### Fixed
+- **13 个精确顶点恢复为 `DOMAIN-SUFFIX`**:`apple.com`、`edge.apple`(AppleCN)、
+  `aliyuncs.com`(AlibabaCN)、`myqcloud.com`/`smtcdns.com`/`wechat.com`(TencentCN)、
+  `byteimg.com`(ByteDanceCN)、`bilivideo.com`/`iqiyi.com`/`smtcdns.net`(ChinaMedia)、
+  `hf.co`(AI)、`blizzard.com`(Games)、`1drv.com`(MicrosoftCN)。每一条都逐条核过
+  `config/routing.json` 表序:该注册域下全部异策略规则的表序号必须小于目标表,
+  一条不满足即不升级。
+- **判据未通过、按原样保留的顶点**:`qcloud.com`(ProxyGFW 持后置
+  `shortconn.im.qcloud.com`)、`mi.com`(后置 `c.mi.com`)、`naver.com`(Streaming 持后置
+  `tv.naver.com`)、`azure.com`(Streaming/DownloadCDN 共 5 条后置异策略子项)。
+  这四条连同 `longbridge.cn`、`microsoft.com`、`live.com`、`msn.com`、`office.com`
+  由新场景 `funnel_deferred_apexes_unchanged` 锁成回归护栏。
+- **`googleapis.com` 整段后缀仍然禁收**:`tests/allowlist.json` 的 forbidden 段把它
+  锁死为共享 API/租户命名空间(A8 判 P0 且不可豁免)。改以显式服务端点承接长尾:
+  新增 `android` / `fcm` / `play` / `safebrowsing.googleapis.com` 四条;
+  `storage.googleapis.com` 因 `ai_ecosystem` 与 `fix_ecosystem_v2` 已锁成 Final,
+  本批次不动。
+- **`googleusercontent.com` / `ggpht.com` / `steampowered.com` 三个顶点不升级**:
+  `google_steam_secondary` 已把 `unknown.*` 子域锁成 Final,升级即推翻已锁裁决。
+- **缺失归属补录**:`clients1`–`clients5.google.com`(与在册 `clients6` 同侧)、
+  Domestic 的 `googleapis.cn`(Google CN 镜像域,与 `google.cn` 同侧)与
+  `sina.com.cn`(注册域而非 PSL 边界,与 `sina.cn`/`sina.com` 同段)。
+- **Microsoft FINAL 漏斗补录 9 条**:MicrosoftCN 收 `officeapps.live.com`、
+  `office.net`、`outlook.com`、`outlook.office.com`、`windowsupdate.com`、
+  `delivery.mp.microsoft.com`;Microsoft 收 `graph`/`teams`/`login.microsoft.com`。
+  既有混合形态一条未动——需代理的子域全部已在前置的 Microsoft(10) 或 DownloadCDN(17)
+  占位,`odc.officeapps.live.com`、`content.office.net`、`files.1drv.com`、
+  `attachments.office.net` 等负例逐条断言。
+
+### Changed
+- **ProxyGFW 迁移 47 条**(移动而非复制,目标表不留双份):Longbridge 三条 openapi
+  子域经 DNS 实测落境内阿里云 ALB → Domestic;13 个 Google 文档快捷域
+  (`deck`/`doc`/`docs`/`form`/`forms`/`presentation`/`sheet`/`sheets`/`site`/`sites`/
+  `slides`/`spreadsheet`/`website.new`)302 实测全落 docs/sites.google.com,按
+  `meet.new` 先例 → Google(`repo.new`、`whats.new` 非 Google 资产不迁);Aylo 集团
+  10 域加 `virtualrealporn.com` → Streaming;德/俄、英、日、美地区面共 20 条 →
+  对应地区表(`dw.de`/`dw-world.de`/`deutsche-welle.de` 是国际广播非本地面,保留;
+  `amazon.com`/`www.amazon.com` 因 `vendor_family_unification` 已锁 Proxy,保留)。
+- **ProxyGFW 清理 170 条**:167 条死域按 A/B/C 三档证据删除并登记
+  `config/proxygfw-expired.txt`(766 → 933)——A 档 12 条无 NS、B 档 10 条停放在注册商
+  停放 NS、C 档 145 条顶点/`www`/21 个常见子域均无 A 记录;执行前另抽 5 条经
+  `dns.google` DoH 复核确认,防探测窗口期误判。另删 `clipfish.de`(301 迁
+  `watchbox.de`)与 `prosiben.de`(拼写残留,正确拼写早在 Europe),这两条属服务迁移
+  与拼写问题而非 DNS 死亡,**不**登记进 expired 名单。删 `pg2dhpc3p5ec22g3.jkforum.net`
+  (抓包生成的一次性 hash 子域),父域 `jkforum.net` 与 `www` 归属不变。
+  `avtb` 三条按族聚合排序移到 `avoision.com` 之后。
+- **发布闸门口径同步**:`tools/analyze_rules.py` 仍然报告全部非安全分裂,但
+  `--fail-on-shadow` 改为只对 `order_unsafe_split_apex` / `order_unsafe_split_parents`
+  失败,与 active shadow、expired 回流、GFW IP、PSL 边界四项并列。ordered-safe 条目
+  单独列在 `summary.json`,不再一刀切拒。**这使 `topology.json` 的表序约束变成承重
+  结构:重排受约束的表对会静默杀死它保护的窄子。**
+- **ProxyGFW 契约措辞精化**:多租户条款是**有方向**的——多租户/公共后缀命名空间
+  不得归入**单一服务专表**,但被墙平台的整命名空间留在 ProxyGFW 属正确行为
+  (残差表不是服务归属表)。当前登记 18 条:`wordpress.com`、`medium.com`、
+  `substack.com`、`fc2.com`、`typepad.com`、`over-blog.com`、`weebly.com`、
+  `squarespace.com`、`strikingly.com`、`angelfire.com`、`geocities.jp`、
+  `geocities.co.jp`、`narod.ru`、`no-ip.com`、`dynamicdns` 族、`mixpanel.com`、
+  `bitbucket.org`、`imgur.com`。
+- **未决项恢复可见性**:08-31 的 pending_decision 豁免被清除后,Streaming 的 1,983 条
+  IP 面与 OneDrive 数据面深归属失去了显式跟踪。两项连同 Microsoft 会话面归一登记进
+  `docs/MAINTENANCE.md` 的「Open decisions」节,各自写明「需要什么证据才能重裁」。
+
+### Verified
+- 规则总数 141,829 → **141,679**(−150:迁移互相抵消,净减来自 170 条清理与 20 条补录)。
+- 语法关系 1,630 → **1,739**(covers 367 → 476,overlaps 1,263 不变);
+  顺序依赖例外 80 → **159**;分裂顶点 46 → **59**(46 条安全例外 + 13 条 ordered-safe);
+  order-unsafe **0**;碎片注册域 119 → **118**;表序约束 13 → **24**,无环。
+- 运行时 MMDB 展开:关系 3,304 → **3,413**(covers 1,750 → 1,859),顺序依赖例外
+  1,414 → **1,493**,表序约束 30 → **41**,无环、无 active shadow、无空选择器。
+- 场景断言 2,639 → **3,099**(新增 `tests/scenarios/fix_final_funnel.json`,19 个场景
+  460 条断言:每条修复一组正例,每个升级顶点一组前置占位负例);DNS 泄漏断言
+  1,100 → **1,326**;**既有断言一条未改未删,全部仍通过**。
+- 静态审计 A1–A10 exit 0(A4 跨表遮蔽 0 条、A8 禁止回流 0 条;新增的 A3 同表冗余
+  均为同策略同族窄条,P2,不达发布阈值);`render_surge_rules.py --check` 确认
+  `[Rule]` 段与 manifest 一致、Surge.conf 未改动;`collapse_cidr --check` 无漂移;
+  Clash 派生 `--check` 通过。
+- 影子复验:49 个目标域名落点全部达成,68 条护栏域名落点逐条不变,回归 0 条。
+
 ## [2026-09-01] Deterministic topology and residual-GFW refactor
 
 - Added exhaustive domain/CIDR/ASN/GEOIP relationship analysis with runtime-MMDB

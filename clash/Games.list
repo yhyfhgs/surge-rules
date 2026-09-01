@@ -46,7 +46,7 @@ DOMAIN-SUFFIX,bethsoft.com
 DOMAIN-SUFFIX,bioware.com
 DOMAIN-SUFFIX,biowarestore.com
 DOMAIN-SUFFIX,blackboxgames.com
-DOMAIN,blizzard.com
+DOMAIN-SUFFIX,blizzard.com
 DOMAIN,www.blizzard.com
 DOMAIN-SUFFIX,blizzard.gcdn.cloudn.co.kr
 DOMAIN-SUFFIX,blizzard.nefficient.co.kr

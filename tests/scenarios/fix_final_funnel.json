@@ -1,0 +1,567 @@
+[
+  {
+    "name": "funnel_apple_apex_restored",
+    "desc": "FINAL 漏斗回归纠正（R1）：09-01 重构把 AppleCN 的 apple.com 从后缀降级为精确顶点，导致 appleid/idmsa/itunes/apps/swcdn 等一整片会话面掉进 FINAL。恢复 DOMAIN-SUFFIX,apple.com 后这些主机回到 DIRECT；同时 Streaming(15) 位次早于 AppleCN(19)，music/tv/news/podcasts 的流媒体归属由前置占位保住，属 ordered-safe split 而非 active shadow。",
+    "requests": [
+      {"host": "apple.com"},
+      {"host": "appleid.apple.com", "note": "Apple ID 会话面，原落 FINAL"},
+      {"host": "idmsa.apple.com"},
+      {"host": "itunes.apple.com"},
+      {"host": "apps.apple.com"},
+      {"host": "amp-api.apps.apple.com"},
+      {"host": "swcdn.apple.com", "note": "系统更新分发"},
+      {"host": "gsp-ssl.ls.apple.com"},
+      {"host": "configuration.apple.com"},
+      {"host": "www.apple.com"},
+      {"host": "ocsp.apple.com"},
+      {"host": "music.apple.com", "note": "前置占位负例：Streaming 先于 AppleCN"},
+      {"host": "tv.apple.com"},
+      {"host": "podcasts.apple.com"},
+      {"host": "news-client.apple.com"},
+      {"host": "ocvideo.apple.com"},
+      {"host": "blobstore.apple.com"}
+    ],
+    "assert": {
+      "no_dns_leak": true,
+      "per_request": [
+        {"host": "music.apple.com", "policy": "流媒体", "reason": "前置占位：Streaming.list DOMAIN-SUFFIX,music.apple.com"},
+        {"host": "tv.apple.com", "policy": "流媒体", "reason": "前置占位：Streaming.list DOMAIN-SUFFIX,tv.apple.com"},
+        {"host": "podcasts.apple.com", "policy": "流媒体", "reason": "前置占位：Streaming.list DOMAIN-SUFFIX,podcasts.apple.com"},
+        {"host": "news-client.apple.com", "policy": "流媒体", "reason": "前置占位：Streaming.list DOMAIN-SUFFIX,news-client.apple.com"},
+        {"host": "ocvideo.apple.com", "policy": "流媒体", "reason": "前置占位：Streaming.list DOMAIN,ocvideo.apple.com"},
+        {"host": "blobstore.apple.com", "policy": "流媒体", "reason": "前置占位：Streaming.list DOMAIN-SUFFIX,blobstore.apple.com"}
+      ],
+      "same_policy": true,
+      "policy": "DIRECT"
+    }
+  },
+  {
+    "name": "funnel_apple_edge_tld_apex",
+    "desc": "R1 附带：AppleCN 的 edge.apple（.apple 品牌 gTLD 下的注册域）同样恢复为后缀，子域不再掉 FINAL。全表无任何异策略子项，升级零风险。",
+    "requests": [
+      {"host": "edge.apple"},
+      {"host": "cdn.edge.apple"},
+      {"host": "static.edge.apple"}
+    ],
+    "assert": {
+      "no_dns_leak": true,
+      "same_policy": true,
+      "policy": "DIRECT"
+    }
+  },
+  {
+    "name": "funnel_alibaba_oss_cn_vs_overseas",
+    "desc": "R4a：AlibabaCN 恢复 DOMAIN-SUFFIX,aliyuncs.com，境内 OSS 区域端点回到直连。三类前置占位必须全部守住——Reject(3) 的 httpdns 拦截、DownloadCDN(17) 的海外 OSS 区、Games(16) 的雀魂香港日志端点。",
+    "requests": [
+      {"host": "aliyuncs.com"},
+      {"host": "oss-cn-beijing.aliyuncs.com", "note": "原落 FINAL"},
+      {"host": "oss-cn-hangzhou.aliyuncs.com"},
+      {"host": "oss-cn-shanghai.aliyuncs.com"},
+      {"host": "dashscope.aliyuncs.com"},
+      {"host": "httpdns.aliyuncs.com", "note": "前置占位负例：Reject"},
+      {"host": "oss-ap-northeast-1.aliyuncs.com", "note": "前置占位负例：海外 OSS 归下载"},
+      {"host": "oss-cn-hongkong.aliyuncs.com"},
+      {"host": "oss-ap-southeast-1.aliyuncs.com"},
+      {"host": "majsoul-hk-client.cn-hongkong.log.aliyuncs.com", "note": "前置占位负例：Games"}
+    ],
+    "assert": {
+      "no_dns_leak": true,
+      "per_request": [
+        {"host": "httpdns.aliyuncs.com", "policy": "REJECT", "reason": "前置占位：Reject.list DOMAIN-SUFFIX,httpdns.aliyuncs.com"},
+        {"host": "oss-ap-northeast-1.aliyuncs.com", "policy": "下载", "reason": "前置占位：DownloadCDN 海外 OSS 区"},
+        {"host": "oss-cn-hongkong.aliyuncs.com", "policy": "下载", "reason": "前置占位：DownloadCDN 海外 OSS 区"},
+        {"host": "oss-ap-southeast-1.aliyuncs.com", "policy": "下载", "reason": "前置占位：DownloadCDN 海外 OSS 区"},
+        {"host": "majsoul-hk-client.cn-hongkong.log.aliyuncs.com", "policy": "游戏", "reason": "前置占位：Games.list 雀魂日志端点"}
+      ],
+      "same_policy": true,
+      "policy": "DIRECT"
+    }
+  },
+  {
+    "name": "funnel_tencent_apex_restored",
+    "desc": "R4b/R4c 一线：TencentCN 恢复 myqcloud.com、smtcdns.com、wechat.com 三个后缀。前置占位为 DownloadCDN 的海外 cos.* 区、GameDownloadCN 的 Epic 分发桶、Reject 的 dns.wechat.com 与 Streaming 的 v.smtcdns.com。qcloud.com 未升级（ProxyGFW 持有后置的 shortconn.im.qcloud.com），单列在 funnel_deferred_apexes。",
+    "requests": [
+      {"host": "myqcloud.com"},
+      {"host": "cos.ap-guangzhou.myqcloud.com", "note": "原落 FINAL"},
+      {"host": "cos.ap-beijing.myqcloud.com"},
+      {"host": "vod.myqcloud.com"},
+      {"host": "smtcdns.com"},
+      {"host": "api.smtcdns.com"},
+      {"host": "wechat.com"},
+      {"host": "cdn.wechat.com"},
+      {"host": "cos.ap-hongkong.myqcloud.com", "note": "前置占位负例：DownloadCDN"},
+      {"host": "cos.na-ashburn.myqcloud.com"},
+      {"host": "epicgames-download1-1251447533.file.myqcloud.com", "note": "前置占位负例：GameDownloadCN"},
+      {"host": "dns.wechat.com", "note": "前置占位负例：Reject"},
+      {"host": "dl.wechat.com", "note": "前置占位负例：DownloadCDN"},
+      {"host": "v.smtcdns.com", "note": "前置占位负例：Streaming"}
+    ],
+    "assert": {
+      "no_dns_leak": true,
+      "per_request": [
+        {"host": "cos.ap-hongkong.myqcloud.com", "policy": "下载", "reason": "前置占位：DownloadCDN 海外 COS 区"},
+        {"host": "cos.na-ashburn.myqcloud.com", "policy": "下载", "reason": "前置占位：DownloadCDN 海外 COS 区"},
+        {"host": "dns.wechat.com", "policy": "REJECT", "reason": "前置占位：Reject.list DOMAIN,dns.wechat.com"},
+        {"host": "dl.wechat.com", "policy": "下载", "reason": "前置占位：DownloadCDN.list DOMAIN-SUFFIX,dl.wechat.com"},
+        {"host": "v.smtcdns.com", "policy": "流媒体", "reason": "前置占位：Streaming.list DOMAIN-SUFFIX,v.smtcdns.com"}
+      ],
+      "same_policy": true,
+      "policy": "DIRECT"
+    }
+  },
+  {
+    "name": "funnel_bytedance_byteimg_vs_tiktok",
+    "desc": "R5：ByteDanceCN 恢复 DOMAIN-SUFFIX,byteimg.com，国内图床子域回直连；TikTok(12) 位次早于 ByteDanceCN(29)，p1-tt/p3-tt/p9-tt/p26-tt 等国际面仍走社交媒体组。",
+    "requests": [
+      {"host": "byteimg.com"},
+      {"host": "p3-pc.byteimg.com", "note": "原落 FINAL"},
+      {"host": "p6-pc.byteimg.com"},
+      {"host": "lf3-static.byteimg.com"},
+      {"host": "p1-tt.byteimg.com", "note": "前置占位负例：TikTok"},
+      {"host": "p9-tt.byteimg.com"},
+      {"host": "p26-tt.byteimg.com"},
+      {"host": "p3-tt-ipv6.byteimg.com"}
+    ],
+    "assert": {
+      "no_dns_leak": true,
+      "per_request": [
+        {"host": "p1-tt.byteimg.com", "policy": "社交媒体", "reason": "前置占位：TikTok.list DOMAIN,p1-tt.byteimg.com"},
+        {"host": "p9-tt.byteimg.com", "policy": "社交媒体", "reason": "前置占位：TikTok.list DOMAIN,p9-tt.byteimg.com"},
+        {"host": "p26-tt.byteimg.com", "policy": "社交媒体", "reason": "前置占位：TikTok.list DOMAIN,p26-tt.byteimg.com"},
+        {"host": "p3-tt-ipv6.byteimg.com", "policy": "社交媒体", "reason": "前置占位：TikTok.list DOMAIN,p3-tt-ipv6.byteimg.com"}
+      ],
+      "same_policy": true,
+      "policy": "DIRECT"
+    }
+  },
+  {
+    "name": "funnel_chinamedia_apex_restored",
+    "desc": "R6/R8a：ChinaMedia 恢复 bilivideo.com、iqiyi.com、smtcdns.net 三个后缀。前置占位为 Reject 的 httpdns/dns/doh 拦截、Streaming 的 B 站海外镜像 upos-sz-mirroralibstar1/upos-sz-mirrorcosbstar1 与爱奇艺国际站 intl.*。",
+    "requests": [
+      {"host": "bilivideo.com"},
+      {"host": "cn-hk-eq-bcache-01.bilivideo.com", "note": "原落 FINAL"},
+      {"host": "upos-sz-mirrorcos.bilivideo.com"},
+      {"host": "iqiyi.com"},
+      {"host": "api.iqiyi.com", "note": "原落 FINAL"},
+      {"host": "www.iqiyi.com"},
+      {"host": "smtcdns.net"},
+      {"host": "api.smtcdns.net"},
+      {"host": "httpdns.bilivideo.com", "note": "前置占位负例：Reject"},
+      {"host": "upos-sz-mirroralibstar1.bilivideo.com", "note": "前置占位负例：Streaming"},
+      {"host": "upos-sz-mirrorcosbstar1.bilivideo.com"},
+      {"host": "dns.iqiyi.com", "note": "前置占位负例：Reject"},
+      {"host": "doh.iqiyi.com"},
+      {"host": "intl.iqiyi.com", "note": "前置占位负例：Streaming 国际站"},
+      {"host": "inter.iqiyi.com"},
+      {"host": "v.smtcdns.net", "note": "前置占位负例：Streaming"}
+    ],
+    "assert": {
+      "no_dns_leak": true,
+      "per_request": [
+        {"host": "httpdns.bilivideo.com", "policy": "REJECT", "reason": "前置占位：Reject.list DOMAIN,httpdns.bilivideo.com"},
+        {"host": "upos-sz-mirroralibstar1.bilivideo.com", "policy": "流媒体", "reason": "前置占位：Streaming.list 海外回源镜像"},
+        {"host": "upos-sz-mirrorcosbstar1.bilivideo.com", "policy": "流媒体", "reason": "前置占位：Streaming.list 海外回源镜像"},
+        {"host": "dns.iqiyi.com", "policy": "REJECT", "reason": "前置占位：Reject.list DOMAIN,dns.iqiyi.com"},
+        {"host": "doh.iqiyi.com", "policy": "REJECT", "reason": "前置占位：Reject.list DOMAIN,doh.iqiyi.com"},
+        {"host": "intl.iqiyi.com", "policy": "流媒体", "reason": "前置占位：Streaming.list DOMAIN-SUFFIX,intl.iqiyi.com"},
+        {"host": "inter.iqiyi.com", "policy": "流媒体", "reason": "前置占位：Streaming.list DOMAIN-SUFFIX,inter.iqiyi.com"},
+        {"host": "v.smtcdns.net", "policy": "流媒体", "reason": "前置占位：Streaming.list DOMAIN-SUFFIX,v.smtcdns.net"}
+      ],
+      "same_policy": true,
+      "policy": "DIRECT"
+    }
+  },
+  {
+    "name": "funnel_ai_hfco_vs_model_cdn",
+    "desc": "sweep 扩展：AI.list 恢复 DOMAIN-SUFFIX,hf.co。ModelDownloadCDN(5) 位次远早于 AI(11)，cdn-lfs/xethub 等权重面仍走下载组，会话面回 AI 组。",
+    "requests": [
+      {"host": "hf.co"},
+      {"host": "api.hf.co"},
+      {"host": "datasets.hf.co", "note": "原落 FINAL"},
+      {"host": "cdn-lfs.hf.co", "note": "前置占位负例：ModelDownloadCDN"},
+      {"host": "cdn-lfs-us-1.hf.co"},
+      {"host": "cdn-lfs-eu-1.hf.co"},
+      {"host": "xethub.hf.co"},
+      {"host": "aws.cdn.hf.co"}
+    ],
+    "assert": {
+      "no_dns_leak": true,
+      "per_request": [
+        {"host": "cdn-lfs.hf.co", "policy": "下载", "reason": "前置占位：ModelDownloadCDN.list"},
+        {"host": "cdn-lfs-us-1.hf.co", "policy": "下载", "reason": "前置占位：ModelDownloadCDN.list"},
+        {"host": "cdn-lfs-eu-1.hf.co", "policy": "下载", "reason": "前置占位：ModelDownloadCDN.list"},
+        {"host": "xethub.hf.co", "policy": "下载", "reason": "前置占位：ModelDownloadCDN.list"},
+        {"host": "aws.cdn.hf.co", "policy": "下载", "reason": "前置占位：ModelDownloadCDN.list"}
+      ],
+      "same_policy": true,
+      "policy": "AI"
+    }
+  },
+  {
+    "name": "funnel_blizzard_apex_vs_cn_download",
+    "desc": "sweep 扩展：Games 恢复 DOMAIN-SUFFIX,blizzard.com；GameDownloadCN(4) 的 download.blizzard.com 保持国内直连大流量分发。steampowered.com 不升级——google_steam_secondary 已把 unknown.steampowered.com 锁成 Final。",
+    "requests": [
+      {"host": "blizzard.com"},
+      {"host": "www.blizzard.com"},
+      {"host": "news.blizzard.com", "note": "原落 FINAL"},
+      {"host": "us.battle.blizzard.com"},
+      {"host": "download.blizzard.com", "note": "前置占位负例：GameDownloadCN"}
+    ],
+    "assert": {
+      "no_dns_leak": true,
+      "per_request": [
+        {"host": "download.blizzard.com", "policy": "DIRECT", "reason": "前置占位：GameDownloadCN.list DOMAIN-SUFFIX,download.blizzard.com"}
+      ],
+      "same_policy": true,
+      "policy": "游戏"
+    }
+  },
+  {
+    "name": "funnel_microsoft_cn_office_faces",
+    "desc": "§3 MicrosoftCN FINAL 漏斗补录：officeapps.live.com / office.net / outlook.com / outlook.office.com / windowsupdate.com / delivery.mp.microsoft.com / 1drv.com 七条归入 MicrosoftCN(20)。全部前置占位在 Microsoft(10) 或 DownloadCDN(17)，既有混合形态不变。",
+    "requests": [
+      {"host": "officeapps.live.com"},
+      {"host": "view.officeapps.live.com"},
+      {"host": "excel.officeapps.live.com", "note": "原落 FINAL"},
+      {"host": "cdn.office.net", "note": "原落 FINAL"},
+      {"host": "res.cdn.office.net"},
+      {"host": "statics.teams.cdn.office.net"},
+      {"host": "outlook.com"},
+      {"host": "mail.outlook.com"},
+      {"host": "outlook.office.com"},
+      {"host": "outlook.office365.com"},
+      {"host": "windowsupdate.com"},
+      {"host": "download.windowsupdate.com"},
+      {"host": "ctldl.windowsupdate.com"},
+      {"host": "delivery.mp.microsoft.com"},
+      {"host": "dl.delivery.mp.microsoft.com"},
+      {"host": "1drv.com"},
+      {"host": "by3301-a.1drv.com"},
+      {"host": "odc.officeapps.live.com", "note": "前置占位负例：Microsoft 全球面"},
+      {"host": "content.office.net"},
+      {"host": "cdn.designerapp.osi.office.net"},
+      {"host": "files.1drv.com"},
+      {"host": "attachments.office.net", "note": "前置占位负例：DownloadCDN"},
+      {"host": "shell.cdn.office.net"}
+    ],
+    "assert": {
+      "no_dns_leak": true,
+      "per_request": [
+        {"host": "odc.officeapps.live.com", "policy": "Google-X-Meta-MS", "reason": "前置占位：Microsoft.list DOMAIN,odc.officeapps.live.com"},
+        {"host": "content.office.net", "policy": "Google-X-Meta-MS", "reason": "前置占位：Microsoft.list DOMAIN-SUFFIX,content.office.net"},
+        {"host": "cdn.designerapp.osi.office.net", "policy": "Google-X-Meta-MS", "reason": "前置占位：Microsoft.list"},
+        {"host": "files.1drv.com", "policy": "Google-X-Meta-MS", "reason": "前置占位：Microsoft.list DOMAIN-SUFFIX,files.1drv.com"},
+        {"host": "attachments.office.net", "policy": "下载", "reason": "前置占位：DownloadCDN.list DOMAIN-SUFFIX,attachments.office.net"},
+        {"host": "shell.cdn.office.net", "policy": "下载", "reason": "前置占位：DownloadCDN.list DOMAIN-SUFFIX,shell.cdn.office.net"}
+      ],
+      "same_policy": true,
+      "policy": "DIRECT"
+    }
+  },
+  {
+    "name": "funnel_microsoft_global_session_faces",
+    "desc": "§3 Microsoft(10) 补录：graph / teams / login.microsoft.com 三条全球会话与 API 面，与既有 login.microsoftonline.com、account.microsoft.com 同侧；不改动 microsoft.com 顶点的精确形态（会话面归一留待连通性实测）。",
+    "requests": [
+      {"host": "graph.microsoft.com"},
+      {"host": "teams.microsoft.com"},
+      {"host": "login.microsoft.com"},
+      {"host": "login.microsoftonline.com"},
+      {"host": "account.microsoft.com"}
+    ],
+    "assert": {
+      "no_dns_leak": true,
+      "same_policy": true,
+      "policy": "Google-X-Meta-MS"
+    }
+  },
+  {
+    "name": "funnel_google_api_endpoints_and_cn_mirror",
+    "desc": "§2 R3a/R3d/R3e：googleapis.com 是共享 API 租户命名空间（allowlist forbidden 段锁死整段后缀），因此以显式服务端点形态收编 android/fcm/play/safebrowsing 四条，并补齐 clients1–5.google.com；googleapis.cn 与 google.cn 同侧直连。YouTube(6) 的 youtubei/youtube/jnn-pa 前置占位不受影响。",
+    "requests": [
+      {"host": "android.googleapis.com"},
+      {"host": "fcm.googleapis.com"},
+      {"host": "play.googleapis.com"},
+      {"host": "safebrowsing.googleapis.com"},
+      {"host": "clients1.google.com"},
+      {"host": "clients2.google.com"},
+      {"host": "clients3.google.com"},
+      {"host": "clients4.google.com"},
+      {"host": "clients5.google.com"},
+      {"host": "clients6.google.com"},
+      {"host": "googleapis.cn", "note": "Google CN 镜像域"},
+      {"host": "storage.googleapis.cn"},
+      {"host": "google.cn"},
+      {"host": "youtubei.googleapis.com", "note": "前置占位负例：YouTube"},
+      {"host": "youtube.googleapis.com"},
+      {"host": "jnn-pa.googleapis.com"},
+      {"host": "storage.googleapis.com", "note": "锁定负例：共享租户命名空间不整段收编，保持 FINAL"}
+    ],
+    "assert": {
+      "no_dns_leak": true,
+      "per_request": [
+        {"host": "android.googleapis.com", "policy": "Google-X-Meta-MS", "reason": "显式服务端点"},
+        {"host": "fcm.googleapis.com", "policy": "Google-X-Meta-MS", "reason": "显式服务端点"},
+        {"host": "play.googleapis.com", "policy": "Google-X-Meta-MS", "reason": "显式服务端点"},
+        {"host": "safebrowsing.googleapis.com", "policy": "Google-X-Meta-MS", "reason": "显式服务端点"},
+        {"host": "clients1.google.com", "policy": "Google-X-Meta-MS", "reason": "与在册 clients6 同侧"},
+        {"host": "clients2.google.com", "policy": "Google-X-Meta-MS", "reason": "与在册 clients6 同侧"},
+        {"host": "clients3.google.com", "policy": "Google-X-Meta-MS", "reason": "与在册 clients6 同侧"},
+        {"host": "clients4.google.com", "policy": "Google-X-Meta-MS", "reason": "与在册 clients6 同侧"},
+        {"host": "clients5.google.com", "policy": "Google-X-Meta-MS", "reason": "与在册 clients6 同侧"},
+        {"host": "clients6.google.com", "policy": "Google-X-Meta-MS", "reason": "既有条目，形态不变"},
+        {"host": "googleapis.cn", "policy": "DIRECT", "reason": "Domestic.list DOMAIN-SUFFIX,googleapis.cn"},
+        {"host": "storage.googleapis.cn", "policy": "DIRECT", "reason": "CN 镜像域整段直连"},
+        {"host": "google.cn", "policy": "DIRECT", "reason": "既有条目，形态不变"},
+        {"host": "youtubei.googleapis.com", "policy": "流媒体", "reason": "前置占位：YouTube.list"},
+        {"host": "youtube.googleapis.com", "policy": "流媒体", "reason": "前置占位：YouTube.list"},
+        {"host": "jnn-pa.googleapis.com", "policy": "流媒体", "reason": "前置占位：YouTube.list"},
+        {"host": "storage.googleapis.com", "policy": "Final", "reason": "锁定裁决：googleapis.com 为共享 API/租户命名空间，只认领显式端点"}
+      ]
+    }
+  },
+  {
+    "name": "funnel_domestic_sina_com_cn",
+    "desc": "§2 R7：sina.com.cn 是注册域而非 PSL 边界（com.cn 才是公共后缀），与在册 sina.cn / sina.com 同段，补进 Domestic 后整片新浪国内面不再掉 FINAL。",
+    "requests": [
+      {"host": "sina.com.cn"},
+      {"host": "photo.sina.com.cn"},
+      {"host": "news.sina.com.cn"},
+      {"host": "sina.cn"},
+      {"host": "sina.com"}
+    ],
+    "assert": {
+      "no_dns_leak": true,
+      "same_policy": true,
+      "policy": "DIRECT"
+    }
+  },
+  {
+    "name": "gfw_longbridge_openapi_migrated",
+    "desc": "§4 G1：openapi / openapi-quote / openapi-trade.longbridge.cn 三条经 DNS 实测落境内阿里云 ALB（深圳/上海），自 ProxyGFW 迁入 Domestic 直连；longbridge.cn 顶点的精确形态不动，国际域 longbridge.com/.hk/.sg 仍留 ProxyGFW。",
+    "requests": [
+      {"host": "openapi.longbridge.cn"},
+      {"host": "openapi-quote.longbridge.cn"},
+      {"host": "openapi-trade.longbridge.cn"},
+      {"host": "longbridge.cn"},
+      {"host": "www.longbridge.cn"},
+      {"host": "longbridge.com", "note": "国际域仍留 GFW"},
+      {"host": "longbridge.hk"},
+      {"host": "longbridge.sg"}
+    ],
+    "assert": {
+      "no_dns_leak": true,
+      "per_request": [
+        {"host": "longbridge.com", "policy": "Proxy", "reason": "国际域归属不变"},
+        {"host": "longbridge.hk", "policy": "Proxy", "reason": "国际域归属不变"},
+        {"host": "longbridge.sg", "policy": "Proxy", "reason": "国际域归属不变"}
+      ],
+      "same_policy": true,
+      "policy": "DIRECT"
+    }
+  },
+  {
+    "name": "gfw_google_new_shortcuts_migrated",
+    "desc": "§4 G2：13 个 Google 文档快捷域（deck/doc/docs/form/forms/presentation/sheet/sheets/site/sites/slides/spreadsheet/website.new）302 实测全部落 docs/sites.google.com，按 meet.new 先例迁入 Google.list。repo.new（GitHub）与 whats.new 非 Google 资产，保留 ProxyGFW。",
+    "requests": [
+      {"host": "deck.new"},
+      {"host": "doc.new"},
+      {"host": "docs.new"},
+      {"host": "form.new"},
+      {"host": "forms.new"},
+      {"host": "meet.new"},
+      {"host": "presentation.new"},
+      {"host": "sheet.new"},
+      {"host": "sheets.new"},
+      {"host": "site.new"},
+      {"host": "sites.new"},
+      {"host": "slides.new"},
+      {"host": "spreadsheet.new"},
+      {"host": "website.new"},
+      {"host": "repo.new", "note": "负例：非 Google 资产"},
+      {"host": "whats.new", "note": "负例：非 Google 资产"}
+    ],
+    "assert": {
+      "no_dns_leak": true,
+      "per_request": [
+        {"host": "repo.new", "policy": "Proxy", "reason": "GitHub 快捷域，不属 Google 资产，保留 ProxyGFW"},
+        {"host": "whats.new", "policy": "Proxy", "reason": "非 Google 资产，保留 ProxyGFW"}
+      ],
+      "same_policy": true,
+      "policy": "Google-X-Meta-MS"
+    }
+  },
+  {
+    "name": "gfw_aylo_family_migrated_to_streaming",
+    "desc": "§4 G3：Aylo 集团 10 个站点域加 virtualrealporn.com 迁入 Streaming，与已在册的 pornhub.com / pornhubpremium.com 同组（归属决策树第 4 条：存在专属服务表即不留残差表）。hardsextube.com 不在集团清单内，保留 ProxyGFW。",
+    "requests": [
+      {"host": "brazzers.com"},
+      {"host": "gaytube.com"},
+      {"host": "pornhubdeutsch.net"},
+      {"host": "realitykings.com"},
+      {"host": "redtube.com"},
+      {"host": "thumbzilla.com"},
+      {"host": "tube8.com"},
+      {"host": "virtualrealporn.com"},
+      {"host": "xtube.com"},
+      {"host": "youporn.com"},
+      {"host": "youporngay.com"},
+      {"host": "pornhub.com"},
+      {"host": "hardsextube.com", "note": "负例：不在迁移清单"}
+    ],
+    "assert": {
+      "no_dns_leak": true,
+      "per_request": [
+        {"host": "hardsextube.com", "policy": "Proxy", "reason": "不在 Aylo 集团迁移清单，保留 ProxyGFW"}
+      ],
+      "same_policy": true,
+      "policy": "流媒体"
+    }
+  },
+  {
+    "name": "gfw_regional_backfill_europe_uk",
+    "desc": "§4 G4：德国媒体/电商与俄语平台迁 Europe，英国报刊/彩票/券商迁 UK。出口自 Proxy 变为对应地区组，正是地区分流的设计意图。dw.de / dw-world.de / deutsche-welle.de 是国际广播而非德国本地面，保留 ProxyGFW。",
+    "requests": [
+      {"host": "bild.de"},
+      {"host": "ndr.de"},
+      {"host": "otto.de"},
+      {"host": "sueddeutsche.de"},
+      {"host": "welt.de"},
+      {"host": "mail.ru"},
+      {"host": "ok.ru"},
+      {"host": "rutube.ru"},
+      {"host": "national-lottery.co.uk"},
+      {"host": "schwab.co.uk"},
+      {"host": "standard.co.uk"},
+      {"host": "dw.de", "note": "负例：国际广播保留 GFW"},
+      {"host": "dw-world.de"},
+      {"host": "deutsche-welle.de"},
+      {"host": "prosieben.de", "note": "正确拼写早已在 Europe；ProxyGFW 的 prosiben.de 拼写残留本批次删除"}
+    ],
+    "assert": {
+      "no_dns_leak": true,
+      "per_request": [
+        {"host": "bild.de", "policy": "🇪🇺欧洲节点", "reason": "德国本地媒体"},
+        {"host": "ndr.de", "policy": "🇪🇺欧洲节点", "reason": "德国公共广播"},
+        {"host": "otto.de", "policy": "🇪🇺欧洲节点", "reason": "德国电商"},
+        {"host": "sueddeutsche.de", "policy": "🇪🇺欧洲节点", "reason": "德国本地媒体"},
+        {"host": "welt.de", "policy": "🇪🇺欧洲节点", "reason": "德国本地媒体"},
+        {"host": "mail.ru", "policy": "🇪🇺欧洲节点", "reason": "俄语平台，与在册 yandex.ru 同表"},
+        {"host": "ok.ru", "policy": "🇪🇺欧洲节点", "reason": "俄语平台"},
+        {"host": "rutube.ru", "policy": "🇪🇺欧洲节点", "reason": "俄语平台"},
+        {"host": "national-lottery.co.uk", "policy": "🇬🇧英国节点", "reason": "英国本地服务"},
+        {"host": "schwab.co.uk", "policy": "🇬🇧英国节点", "reason": "英国本地券商面；schwab.com 仍归 US"},
+        {"host": "standard.co.uk", "policy": "🇬🇧英国节点", "reason": "英国本地报刊"},
+        {"host": "dw.de", "policy": "Proxy", "reason": "国际广播，非德国本地面"},
+        {"host": "dw-world.de", "policy": "Proxy", "reason": "国际广播，非德国本地面"},
+        {"host": "deutsche-welle.de", "policy": "Proxy", "reason": "国际广播，非德国本地面"},
+        {"host": "prosieben.de", "policy": "🇪🇺欧洲节点", "reason": "既有条目，形态不变"}
+      ]
+    }
+  },
+  {
+    "name": "gfw_regional_backfill_japan_us",
+    "desc": "§4 G4 续：日本报刊/唱片/游戏/二手交易迁 Japan，theblaze.com 迁 US。amazon.com / www.amazon.com 保留 ProxyGFW——vendor_family_unification 已把 www.amazon.com 锁成 Proxy，本批次不推翻该裁决。",
+    "requests": [
+      {"host": "fril.jp"},
+      {"host": "hmv.co.jp"},
+      {"host": "japantimes.co.jp"},
+      {"host": "mixi.jp"},
+      {"host": "nhk-ondemand.jp"},
+      {"host": "oricon.co.jp"},
+      {"host": "shadowverse.jp"},
+      {"host": "yomiuri.co.jp"},
+      {"host": "theblaze.com"},
+      {"host": "amazon.com", "note": "负例：锁定裁决保留 GFW"},
+      {"host": "www.amazon.com"},
+      {"host": "d2c.aws.amazon.com"}
+    ],
+    "assert": {
+      "no_dns_leak": true,
+      "per_request": [
+        {"host": "theblaze.com", "policy": "🇺🇸美国节点", "reason": "美国本地媒体"},
+        {"host": "amazon.com", "policy": "Proxy", "reason": "锁定裁决：amazon 主站保留 ProxyGFW"},
+        {"host": "www.amazon.com", "policy": "Proxy", "reason": "锁定裁决：vendor_family_unification 已锁 Proxy"},
+        {"host": "d2c.aws.amazon.com", "policy": "Proxy", "reason": "既有条目，形态不变"}
+      ],
+      "same_policy": true,
+      "policy": "🇯🇵日本节点"
+    }
+  },
+  {
+    "name": "gfw_dead_domain_sweep_removed",
+    "desc": "§4 G5/G6：167 条死域（A 档无 NS / B 档停放 / C 档无任何 A 记录）自 ProxyGFW 删除并登记 config/proxygfw-expired.txt（766→933），另删 clipfish.de（301 迁 watchbox.de）与 prosiben.de（拼写残留）；G6 删除抓包生成的一次性 hash 子域 pg2dhpc3p5ec22g3.jkforum.net（同族只有两条精确规则，实测该子域删除后回落 FINAL，非 FIX_SPEC 描述的「被父后缀覆盖」），父域 jkforum.net 与 www 归属不变。删除后这些域一律回落 FINAL 而非改道。",
+    "requests": [
+      {"host": "666pool.cn", "note": "A 档：无 NS"},
+      {"host": "megalodon.jp", "note": "A 档：NXDOMAIN"},
+      {"host": "bitshare.com", "note": "B 档：停放 NS"},
+      {"host": "12vpn.net", "note": "C 档：有 NS 无 A"},
+      {"host": "alhayat.com", "note": "C 档：有 NS 无 A"},
+      {"host": "clipfish.de", "note": "服务迁移至 watchbox.de"},
+      {"host": "prosiben.de", "note": "拼写残留"},
+      {"host": "pg2dhpc3p5ec22g3.jkforum.net", "note": "G6 抓包残留"},
+      {"host": "jkforum.net", "note": "负例：父域归属不变"},
+      {"host": "www.jkforum.net"}
+    ],
+    "assert": {
+      "no_dns_leak": true,
+      "per_request": [
+        {"host": "pg2dhpc3p5ec22g3.jkforum.net", "policy": "Final", "reason": "抓包生成的一次性 hash 子域，条目删除后回落 FINAL；同族只有 DOMAIN,jkforum.net 与 DOMAIN,www.jkforum.net 两条精确规则，不覆盖子域"},
+        {"host": "jkforum.net", "policy": "Proxy", "reason": "父域精确条目保留"},
+        {"host": "www.jkforum.net", "policy": "Proxy", "reason": "既有条目，形态不变"}
+      ]
+    }
+  },
+  {
+    "name": "funnel_deferred_apexes_unchanged",
+    "desc": "本批次判据未通过、按 §0.2 不升级的顶点，全部保持原有精确形态与落点：qcloud.com（ProxyGFW 持后置 shortconn.im.qcloud.com）、mi.com（ProxyGFW 持后置 c.mi.com）、naver.com（Streaming 持后置 tv.naver.com）、azure.com（Streaming/DownloadCDN 共 5 条后置异策略子项）、longbridge.cn / microsoft.com / live.com / msn.com / office.com（锁定裁决或留用户决策）。该场景是这些顶点的回归护栏。",
+    "requests": [
+      {"host": "qcloud.com"},
+      {"host": "unknown.qcloud.com"},
+      {"host": "shortconn.im.qcloud.com"},
+      {"host": "mi.com"},
+      {"host": "unknown.mi.com"},
+      {"host": "c.mi.com"},
+      {"host": "naver.com"},
+      {"host": "unknown.naver.com"},
+      {"host": "tv.naver.com"},
+      {"host": "azure.com"},
+      {"host": "monitor.azure.com"},
+      {"host": "ai.azure.com"},
+      {"host": "pkgs.dev.azure.com"},
+      {"host": "microsoft.com"},
+      {"host": "unknown.microsoft.com"},
+      {"host": "live.com"},
+      {"host": "unknown.live.com"},
+      {"host": "msn.com"},
+      {"host": "unknown.msn.com"},
+      {"host": "office.com"},
+      {"host": "unknown.office.com"}
+    ],
+    "assert": {
+      "no_dns_leak": true,
+      "per_request": [
+        {"host": "qcloud.com", "policy": "DIRECT", "reason": "精确顶点形态不变"},
+        {"host": "unknown.qcloud.com", "policy": "Final", "reason": "未升级，未知子域仍走 FINAL"},
+        {"host": "shortconn.im.qcloud.com", "policy": "Proxy", "reason": "ProxyGFW 后置异策略子项，正是不升级的原因"},
+        {"host": "mi.com", "policy": "DIRECT", "reason": "精确顶点形态不变"},
+        {"host": "unknown.mi.com", "policy": "Final", "reason": "未升级，未知子域仍走 FINAL"},
+        {"host": "c.mi.com", "policy": "Proxy", "reason": "ProxyGFW 后置异策略子项，正是不升级的原因"},
+        {"host": "naver.com", "policy": "社交媒体", "reason": "精确顶点形态不变"},
+        {"host": "unknown.naver.com", "policy": "Final", "reason": "未升级，未知子域仍走 FINAL"},
+        {"host": "tv.naver.com", "policy": "流媒体", "reason": "Streaming 后置异策略子项，正是不升级的原因"},
+        {"host": "azure.com", "policy": "Final", "reason": "未收编：azure.cn 直连边界与 5 条后置异策略子项"},
+        {"host": "monitor.azure.com", "policy": "下载", "reason": "DownloadCDN 后置条目，正是不收编整段的原因"},
+        {"host": "ai.azure.com", "policy": "流媒体", "reason": "Streaming 后置条目"},
+        {"host": "pkgs.dev.azure.com", "policy": "下载", "reason": "DownloadCDN 后置条目"},
+        {"host": "microsoft.com", "policy": "Google-X-Meta-MS", "reason": "会话面归一留用户决策，顶点形态不变"},
+        {"host": "unknown.microsoft.com", "policy": "Final", "reason": "未升级"},
+        {"host": "live.com", "policy": "DIRECT", "reason": "MicrosoftCN 既有混合形态不变"},
+        {"host": "unknown.live.com", "policy": "Final", "reason": "未升级"},
+        {"host": "msn.com", "policy": "DIRECT", "reason": "MicrosoftCN 既有混合形态不变"},
+        {"host": "unknown.msn.com", "policy": "Final", "reason": "未升级"},
+        {"host": "office.com", "policy": "DIRECT", "reason": "MicrosoftCN 既有混合形态不变"},
+        {"host": "unknown.office.com", "policy": "Final", "reason": "未升级"}
+      ]
+    }
+  }
+]

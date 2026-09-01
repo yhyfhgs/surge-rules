@@ -260,6 +260,7 @@ DOMAIN-SUFFIX,goofish.com
 DOMAIN-SUFFIX,google-analytics-cn.com
 DOMAIN-SUFFIX,google.cn
 DOMAIN-SUFFIX,googleapis-cn.com
+DOMAIN-SUFFIX,googleapis.cn
 DOMAIN-SUFFIX,googleapps-cn.com
 DOMAIN-SUFFIX,googlecnapps.cn
 DOMAIN-SUFFIX,googleflights-cn.net
@@ -368,6 +369,9 @@ DOMAIN-SUFFIX,lkcoffee.com
 DOMAIN-SUFFIX,lltskb.com
 DOMAIN,longbridge.cn
 DOMAIN,www.longbridge.cn
+DOMAIN-SUFFIX,openapi-quote.longbridge.cn
+DOMAIN-SUFFIX,openapi-trade.longbridge.cn
+DOMAIN-SUFFIX,openapi.longbridge.cn
 DOMAIN-SUFFIX,longportapp.cn
 DOMAIN-SUFFIX,luckincoffeecdn.com
 DOMAIN-SUFFIX,ludashi.com
@@ -512,6 +516,7 @@ DOMAIN-SUFFIX,sharepoint.cn
 DOMAIN-SUFFIX,siliconflow.cn
 DOMAIN-SUFFIX,sina.cn
 DOMAIN-SUFFIX,sina.com
+DOMAIN-SUFFIX,sina.com.cn
 DOMAIN-SUFFIX,sinaapp.com
 DOMAIN-SUFFIX,sinaedge.com
 DOMAIN-SUFFIX,sinaimg.cn
