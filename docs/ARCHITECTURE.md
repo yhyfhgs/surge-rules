@@ -73,7 +73,6 @@ see the contract below.
 
 ```text
 service-owned IP/ASN rules
-→ JapanServiceIP
 → ChinaIP
 → regional ASN/GEOIP fallbacks
 → built-in LAN/GEOIP CN
@@ -82,8 +81,10 @@ service-owned IP/ASN rules
 
 The ChinaIP-before-GeoIP order is deliberate. The pinned Surge GeoLite databases
 contain regional selectors that intersect ChinaIP-owned ranges; placing regional
-GeoIP first would send those CN ranges abroad. Verified LINE/LY ranges remain
-ahead of ChinaIP in `JapanServiceIP`.
+GeoIP first would send those CN ranges abroad. The LINE/LY ranges are kept as
+explicit CIDRs inside `JapanIP` — ahead of that list's own ASN/GEOIP fallback, so
+a GeoIP-database drift cannot lose them — and they have zero intersection with
+ChinaIP, a property the A9 cross-policy gate keeps guarded.
 
 All IP-class rules use `no-resolve`. A domain request therefore skips the IP
 phase without local DNS resolution.

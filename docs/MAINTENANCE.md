@@ -108,9 +108,14 @@ python3 tools/collapse_cidr.py lists/ChinaIP.list --check
 python3 tools/rebuild.py --id blackmatrix7_china_ip
 ```
 
-Explicit service ranges may precede ChinaIP. ChinaIP itself precedes regional
-GeoIP fallback because pinned GeoLite regional selectors intersect ChinaIP-owned
-ranges.
+ChinaIP precedes regional GeoIP fallback because pinned GeoLite regional
+selectors intersect ChinaIP-owned ranges. A verified service range only needs its
+own list ahead of ChinaIP when the two actually intersect; when they are disjoint
+the range belongs in the regional list it shares a policy with, as an explicit
+CIDR ahead of that list's ASN/GEOIP bucket. The LINE/LY ranges are the worked
+example — 12 CIDRs, zero intersection with all 11,088 ChinaIP segments, so they
+live in `JapanIP` rather than in a list of their own. Recompute that disjointness
+before moving any CIDR across the ChinaIP boundary; A9 rejects a regression.
 
 ### ProxyGFW expiry
 

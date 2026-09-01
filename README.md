@@ -6,13 +6,13 @@ order, policies, `extended-matching`, and `no-resolve` metadata.
 
 Current verified baseline:
 
-- 39 lists and 141,679 source rules.
-- 1,739 materialized syntax relations: 476 `covers` and 1,263 `overlaps`.
-- 3,575,469 exact keyword/wildcard↔suffix intersection pairs represented compactly
-  in 960 weighted records: 21,406 same-policy and 3,554,063 split-policy.
+- 38 lists and 141,651 source rules.
+- 1,711 materialized syntax relations: 448 `covers` and 1,263 `overlaps`.
+- 3,575,213 exact keyword/wildcard↔suffix intersection pairs represented compactly
+  in 960 weighted records: 21,406 same-policy and 3,553,807 split-policy.
 - Syntax topology: 159 order-dependent exceptions, 59 split apexes (46
   Reject/security, 13 ordered-safe), 118 fragmented domains, and 24 constraints.
-- Runtime MMDB: 3,413 relations (1,859 `covers` / 1,554 `overlaps`), 1,493
+- Runtime MMDB: 3,385 relations (1,831 `covers` / 1,554 `overlaps`), 1,493
   order-dependent exceptions, 118 fragmented domains, and 41 constraints.
 - Both analyses have zero active shadows, conflicting equivalents, cycles, or
   order-unsafe splits, and runtime selectors are all non-empty. Non-security
@@ -34,9 +34,8 @@ phases:
 | Regional domains | Japan, UK, Europe, US | Region-bound sites before generic proxy fallback |
 | Residual proxy | ProxyGFW | Domain-only rules that are verified to require proxying and fit no owner list |
 | Machine domain fallback | ChinaDomain | Generated domestic long tail after explicit proxy exceptions |
-| Service IP | JapanServiceIP | Verified first-party ranges before generic geography |
 | CN IP | ChinaIP | Authoritative CN ranges before GeoLite regional fallback |
-| Regional IP fallback | JapanIP, UKIP, EuropeIP, USIP | ASN/GEOIP routing for remaining literal-IP traffic |
+| Regional IP fallback | JapanIP, UKIP, EuropeIP, USIP | ASN/GEOIP routing for remaining literal-IP traffic; `JapanIP` also carries the verified LINE/LY CIDRs, which are disjoint from ChinaIP |
 | Terminal | LAN, GEOIP CN, FINAL | Built-in safety and unmatched traffic |
 
 `ProxyGFW` uses `Proxy`; terminal `FINAL` uses `Final`. They are deliberately

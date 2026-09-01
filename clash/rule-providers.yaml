@@ -262,13 +262,6 @@ rule-providers:
     url: https://cdn.jsdelivr.net/gh/yhyfhgs/surge-rules@main/clash/ChinaDomain.list
     path: ./rule-sets/surge-rules/ChinaDomain.list
     interval: 86400
-  JapanServiceIP:
-    type: http
-    behavior: classical
-    format: text
-    url: https://cdn.jsdelivr.net/gh/yhyfhgs/surge-rules@main/clash/JapanServiceIP.list
-    path: ./rule-sets/surge-rules/JapanServiceIP.list
-    interval: 86400
   ChinaIP:
     type: http
     behavior: classical
@@ -343,7 +336,6 @@ rule-providers:
 #  - RULE-SET,US,🇺🇸美国节点
 #  - RULE-SET,ProxyGFW,Proxy
 #  - RULE-SET,ChinaDomain,DIRECT
-#  - RULE-SET,JapanServiceIP,🇯🇵日本节点,no-resolve
 #  - RULE-SET,ChinaIP,DIRECT,no-resolve
 #  - RULE-SET,JapanIP,🇯🇵日本节点,no-resolve
 #  - RULE-SET,UKIP,🇬🇧英国节点,no-resolve

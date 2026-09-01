@@ -4,6 +4,87 @@
 
 ---
 
+## [2026-09-01·日本 IP 合并] `JapanServiceIP` 并入 `JapanIP`:表数 39 → 38
+
+**动机**:`JapanServiceIP` 与 `JapanIP` 是同一个策略(`🇯🇵日本节点`)、同一个修饰符
+(`no-resolve`)、同一个语义面(日本 IP)的两张表,拆开只为了让 12 条 LINE/LY 实测
+网段排在 `ChinaIP` 之前。但这个「之前」是空的:**这 12 条 CIDR 与 `ChinaIP` 的全部
+11,088 段地址空间交集为 0**,`ChinaIP` 根本没有机会抢跑,所以把它们挪到 `ChinaIP`
+之后不改变任何一条落点。一张只为不存在的冲突而存在的表,是分发链上多出来的一个
+`RULE-SET` 往返、一份 CDN 产物和一条要维护的 manifest 条目。
+
+**唯一语义改动**:12 条 `IP-CIDR` 从 `JapanServiceIP` 移入 `JapanIP` 的 `IP-CIDR`
+桶(桶序由 `sort_lists.py` 决定,CIDR 在 `IP-ASN`/`GEOIP` 之前),`JapanServiceIP`
+整表删除。**规则内容一条未增未删未改写**;12 条 CIDR **保留显式网段、不折叠成
+ASN/GEOIP**——GeoIP 库是上游漂移面,把实测网段化进 `GEOIP,JP` 等于把 LINE 段的
+命中权交给一个会变的第三方数据库。
+
+### Changed
+- **`lists/JapanIP.list`**:12 条 LINE/LY `IP-CIDR` 并入(`103.2.28.0/22`、
+  `119.235.224.0/21`、`119.235.232.0/23`、`119.235.235.0/24`、`125.6.146.0/24`、
+  `125.6.149.0/24`、`125.6.190.0/24`、`147.92.128.0/17`、`203.104.103.0/24`、
+  `203.104.128.0/19`、`203.174.66.64/26`、`203.174.77.0/24`),头注释改为
+  「JapanIP — 日本服务网段与 ASN/GEOIP fallback」。`lists/JapanServiceIP.list` 删除。
+- **`config/routing.json`**:删 `JapanServiceIP` 条目,分区 8 只剩 `ChinaIP`,
+  `section` 由「服务与国内 IP」更名为「国内 IP」。其余 37 条条目的
+  `name`/`policy`/`extended_matching`/`no_resolve`/`section` 逐条比对全等,顺序未动。
+- **`Surge.conf` `[Rule]` 段重渲染**:少 1 行 `RULE-SET`、分区 8 注释更名。
+  顺带修正一处**发布链遗留漂移**:磁盘上的活动 profile 停留在 c5cebe9 之前的
+  11 段旧序(`render_surge_rules --check` 在 HEAD 上本就退出 1),本次重渲染把
+  c5cebe9 的聚类重排与本批次一并落到 profile,`--check` 恢复退出 0。
+- **`clash/` 随 manifest 再生**:`JapanIP.list` 更新、`JapanServiceIP.list` 与
+  `rule-providers.yaml` 对应 provider 块删除,事务式替换报告「更新 2、未变 37、
+  删除陈旧 1」,`--check` 报 38 表 141,651 条一致。
+- **文档同步**:`docs/ARCHITECTURE.md` 的 IP phase 图删去 `JapanServiceIP` 层,
+  「Verified LINE/LY ranges remain ahead of ChinaIP」改写为 LINE/LY 段以显式 CIDR
+  留在 `JapanIP`、与 `ChinaIP` 零交集且由 A9 跨策略门禁看守;`docs/MAINTENANCE.md`
+  的 ChinaIP 节把「显式服务网段可以排在 ChinaIP 之前」改写为**判据**:只有真的
+  与 ChinaIP 相交才需要独立前置表,不交就并入同策略地区表,并要求跨 ChinaIP 边界
+  移动 CIDR 前先复算交集;`README.md` 路由模型表删 Service IP 行。
+
+### Verified
+证据落盘 `verify-20260901/J-merge-slim/`:
+- **零交集证明(执行前复算)**:12 条 CIDR × `ChinaIP` 11,088 段(7,163 条 IPv4 +
+  3,925 条 IPv6)= **133,056 对穷尽两两判定,相交 0 对**;另做一次不依赖该结果的
+  地址空间核算——用 `collapse_addresses` 折叠 `ChinaIP` 后逐条 `address_exclude`,
+  12 条 CIDR 的**每一个地址都不被 `ChinaIP` 覆盖**(残余 = 全量)。见
+  `intersection_proof.json`。
+- **关系集恒等**:plain analyzer 的 `topology.json`、`relationships.jsonl`、
+  `relationship_aggregates.jsonl`、`split_apex.jsonl`、`split_parent.jsonl`、
+  `fragmented_domains.jsonl` **6 份合并前后逐字节相同**。MMDB analyzer 6 份中
+  5 份逐字节相同,`relationships.jsonl` 的差异经**按规则内容而非 file:line 位次
+  归一化后比对**,3,385 条关系的多重集**完全相同**——差异只是
+  `JapanServiceIP.list:N` → `JapanIP.list:M` 的重编号。
+- **合并后全闸门**:`analyze_rules --fail-on-shadow` plain 与 MMDB 均退出 0,
+  规则 **141,651 条不变**、表数 39 → 38,plain 1,711 条关系(448 covers /
+  1,263 overlaps)、MMDB 3,385 条(1,831 / 1,554)、拓扑约束 24 / 41、
+  `shadowed_or_conflicting_rules` 0、`order_unsafe_split_*` 均空、无环。
+  `audit.py` 退出 0,输出**除 conf 路径外与合并前逐字节相同**:141,687 条、
+  A3=1 / A6=7 / **A9=144** / A10=59,未豁免 3 条全 P3、已豁免 63、
+  `allowlist_unused` 0 —— **A9 零漂移,allowlist 一条未改**。
+  `runsuite.py` 退出 0:227 场景 / 1,644 请求 / **3,099 断言全绿**,
+  DNS 泄漏断言 1,326 条 0 失败;**`tests/scenarios/` 无一条断言引用
+  `JapanServiceIP` 表名,故本批次零改动、零机械重命名**。
+  `render_surge_rules --check`、`sort_lists --check`(38/38)、
+  `surge2clash --check`、`surge-cli --check` 均退出 0。
+- **落点抽测**:对 12 条 CIDR **逐条**取代表 IP(含 `103.2.28.1`、`147.92.128.1`)
+  跑 `tests/engine.py match`,合并前后策略与物理出口同为
+  `🇯🇵日本节点` / `🇯🇵日本GLBB家宽`,命中规则同为原 CIDR,只有 `source` 由
+  `JapanServiceIP.list` 变为 `JapanIP.list`——**12/12 落点不变**。
+- **残留清零**:`rg --no-ignore --hidden JapanServiceIP` 在 `lists/`、`clash/`、
+  `config/`、`tools/`、`tests/`(含 `scenarios/`、`allowlist.json`)、`docs/`、
+  `README.md`、`Surge.conf` 全部无命中。
+
+**顺带修正的既有文档漂移**(非本次合并所致):`README.md`「Current verified
+baseline」块自 311f7cd 起未随 41c07af、c5cebe9 更新,3 项数字与实测不符,本次一并
+校正到实测值——源规则数 141,679 → **141,651**,plain 关系 1,739(476 covers)→
+**1,711(448)**,MMDB 关系 3,413(1,859 covers)→ **3,385(1,831)**;交集对数
+3,575,469 → 3,575,213、split-policy 3,554,063 → 3,553,807。同块其余数字
+(159 序依赖例外、59 split apex、118 碎片域、24 / 41 约束、227 场景 / 3,099 断言)
+实测一致,未动。
+
+未跑 `update.sh`,未推送,未触发 CDN purge。
+
 ## [2026-09-01·聚类重排] 表间聚类:9 张国内直连表连成一段,地区域名整体后移
 
 **动机**:`config/routing.json` 里 DIRECT 表被地区表劈成两半——`AppleCN`/`MicrosoftCN`
