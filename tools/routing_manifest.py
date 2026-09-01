@@ -7,7 +7,8 @@ import re
 
 _NAME_RE = re.compile(r"^[A-Za-z][A-Za-z0-9]*$")
 _ROOT_FIELDS = {"version", "rulesets"}
-_RULESET_FIELDS = {"name", "policy", "extended_matching", "no_resolve"}
+_RULESET_FIELDS = {"name", "policy", "extended_matching", "no_resolve", "section"}
+_REQUIRED_RULESET_FIELDS = {"name", "policy", "section"}
 
 
 def _reject_duplicate_keys(pairs):
@@ -48,13 +49,14 @@ def load_routing_manifest(path, rules_dir=None):
         if not isinstance(raw, dict):
             raise ValueError("routing manifest rulesets[%d] must be an object" % (position - 1))
         unknown = sorted(set(raw) - _RULESET_FIELDS)
-        missing = sorted({"name", "policy"} - set(raw))
+        missing = sorted(_REQUIRED_RULESET_FIELDS - set(raw))
         if unknown or missing:
             raise ValueError("routing manifest rulesets[%d] fields invalid: missing=%s unknown=%s"
                              % (position - 1, missing, unknown))
 
         name = raw["name"]
         policy = raw["policy"]
+        section = raw["section"]
         if not isinstance(name, str) or not _NAME_RE.fullmatch(name):
             raise ValueError("routing manifest rulesets[%d].name is invalid: %r"
                              % (position - 1, name))
@@ -64,11 +66,24 @@ def load_routing_manifest(path, rules_dir=None):
         if (not isinstance(policy, str) or not policy or policy != policy.strip()
                 or any(char in policy for char in ",\r\n")):
             raise ValueError("routing manifest policy for %s is invalid: %r" % (name, policy))
+        if (not isinstance(section, str) or not section or section != section.strip()
+                or any(char in section for char in "\r\n")):
+            raise ValueError("routing manifest section for %s is invalid: %r" % (name, section))
         for flag in ("extended_matching", "no_resolve"):
             if flag in raw and not isinstance(raw[flag], bool):
                 raise ValueError("routing manifest %s.%s must be boolean" % (name, flag))
         seen[name] = position
         entries.append(dict(raw))
+
+    # Sections are rendered as one comment per switch, so a section must occupy a
+    # single contiguous run; a reappearing name would emit two headers for it.
+    runs = []
+    for entry in entries:
+        if not runs or runs[-1] != entry["section"]:
+            runs.append(entry["section"])
+    repeated = sorted({name for name in runs if runs.count(name) > 1})
+    if repeated:
+        raise ValueError("routing manifest sections must be contiguous: %s" % repeated)
 
     if rules_dir is not None:
         if not os.path.isdir(rules_dir):

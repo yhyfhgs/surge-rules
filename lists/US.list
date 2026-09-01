@@ -1,12 +1,5 @@
 # US — 美国服务域名；IP fallback 见 USIP.list
 
-DOMAIN-SUFFIX,cmu.edu
-DOMAIN-SUFFIX,cnet.com
-DOMAIN-SUFFIX,mit.edu
-DOMAIN-SUFFIX,nasa.gov
-DOMAIN-SUFFIX,uchicago.edu
-DOMAIN-SUFFIX,umich.edu
-
 DOMAIN-SUFFIX,att.com
 DOMAIN-SUFFIX,att.net
 DOMAIN-SUFFIX,bankofamerica.com
@@ -20,6 +13,8 @@ DOMAIN-SUFFIX,cbsnews.com
 DOMAIN-SUFFIX,chase.com
 DOMAIN-SUFFIX,chasecdn.com
 DOMAIN-SUFFIX,citi.com
+DOMAIN-SUFFIX,cmu.edu
+DOMAIN-SUFFIX,cnet.com
 DOMAIN-SUFFIX,costco.com
 DOMAIN-SUFFIX,creditkarma.com
 DOMAIN-SUFFIX,cricketwireless.com
@@ -37,6 +32,8 @@ DOMAIN-SUFFIX,iheart.com
 DOMAIN-SUFFIX,irs.gov
 DOMAIN-SUFFIX,microcenter.com
 DOMAIN-SUFFIX,mintmobile.com
+DOMAIN-SUFFIX,mit.edu
+DOMAIN-SUFFIX,nasa.gov
 DOMAIN-SUFFIX,nbc.com
 DOMAIN-SUFFIX,nbcnews.com
 DOMAIN-SUFFIX,newegg.com
@@ -51,7 +48,9 @@ DOMAIN-SUFFIX,t-mobile.com
 DOMAIN-SUFFIX,target.com
 DOMAIN-SUFFIX,theblaze.com
 DOMAIN-SUFFIX,transunion.com
+DOMAIN-SUFFIX,uchicago.edu
 DOMAIN-SUFFIX,ultramobile.com
+DOMAIN-SUFFIX,umich.edu
 DOMAIN-SUFFIX,usa.gov
 DOMAIN-SUFFIX,usmobile.com
 DOMAIN-SUFFIX,usps.com

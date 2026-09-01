@@ -3,61 +3,6 @@
 
 # Verified bulk-download endpoints; shared tenant platforms and ordinary site assets are excluded.
 
-DOMAIN-SUFFIX,1passwordusercontent.ca
-DOMAIN-SUFFIX,1passwordusercontent.com
-DOMAIN-SUFFIX,1passwordusercontent.eu
-DOMAIN-SUFFIX,downloads.1password.com
-
-DOMAIN-SUFFIX,adblockplus.org
-DOMAIN-SUFFIX,apkmirror.com
-DOMAIN-SUFFIX,apkpure.com
-DOMAIN-SUFFIX,aptoide.com
-DOMAIN-SUFFIX,cocoapods.org
-DOMAIN-SUFFIX,dropboxusercontent.com
-DOMAIN-SUFFIX,ibiblio.org
-DOMAIN-SUFFIX,maven.org
-DOMAIN-SUFFIX,mediafire.com
-DOMAIN-SUFFIX,mypikpak.com
-DOMAIN-SUFFIX,neoforged.net
-DOMAIN-SUFFIX,npmjs.org
-DOMAIN-SUFFIX,osmand.net
-
-DOMAIN-SUFFIX,archive.mozilla.org
-DOMAIN-SUFFIX,aus5.mozilla.org
-DOMAIN-SUFFIX,cdn.redhat.com
-DOMAIN-SUFFIX,componentupdater.brave.com
-DOMAIN-SUFFIX,debian.csie.ntu.edu.tw
-DOMAIN-SUFFIX,desktop.parallels.com
-DOMAIN-SUFFIX,dl.nssurge.com
-DOMAIN-SUFFIX,download.mozilla.org
-DOMAIN-SUFFIX,download.parallels.com
-DOMAIN-SUFFIX,download.typora.io
-DOMAIN-SUFFIX,downloads.openwrt.org
-DOMAIN-SUFFIX,extensionupdater.brave.com
-DOMAIN-SUFFIX,go-updater.brave.com
-DOMAIN-SUFFIX,ipfs.infura.io
-DOMAIN-SUFFIX,jac.yahoosandbox.com
-DOMAIN-SUFFIX,mirror-cdn.xtom.com
-DOMAIN-SUFFIX,mirror.xtom.com
-DOMAIN-SUFFIX,mirrors.xtom.com
-DOMAIN-SUFFIX,ovo.wxw.moe
-DOMAIN-SUFFIX,pcdn-my.pcloud.com
-DOMAIN-SUFFIX,pcdn-www.pcloud.com
-DOMAIN-SUFFIX,pgl.yoyo.org
-DOMAIN-SUFFIX,planet.openstreetmap.org
-DOMAIN-SUFFIX,repo.anaconda.com
-DOMAIN-SUFFIX,repo.maven.apache.org
-DOMAIN-SUFFIX,s3.acg.mn
-DOMAIN-SUFFIX,s3.brave.com
-DOMAIN-SUFFIX,share.riseup.net
-DOMAIN-SUFFIX,static.rust-lang.org
-DOMAIN-SUFFIX,update.greasyfork.org
-DOMAIN-SUFFIX,update.parallels.com
-DOMAIN-SUFFIX,update.sleazyfork.org
-DOMAIN-SUFFIX,versioncheck-bg.addons.mozilla.org
-DOMAIN-SUFFIX,versioncheck.addons.mozilla.org
-DOMAIN-SUFFIX,zzz.wxw.moe
-
 DOMAIN,afdshield-or.download.prss.microsoft.com
 DOMAIN,azurestackreleases.download.prss.microsoft.com
 DOMAIN,cdn-msp.jmcomic-zzz.one
@@ -72,6 +17,9 @@ DOMAIN,db.download.prss.microsoft.com
 DOMAIN,flg-main.aws.blue-protocol.com
 DOMAIN,g-ahpatch-prod.blue-protocol.com
 DOMAIN,gog-cdn-lumen.secure2.footprint.net
+DOMAIN,h-cdn.com
+DOMAIN,imgix.net
+DOMAIN,jwpsrv.com
 DOMAIN,masterdata-main.aws.blue-protocol.com
 DOMAIN,mbsuat.download.prss.microsoft.com
 DOMAIN,msconnect.download.prss.microsoft.com
@@ -82,15 +30,23 @@ DOMAIN,object-bnolauncher-pf.bandainamco-ol.jp
 DOMAIN,object-web.blue-protocol.com
 DOMAIN,object-web.gundamevolution.jp
 DOMAIN,object.gundamevolution.jp
+DOMAIN,playwright-akamai.azureedge.net
+DOMAIN,playwright.azureedge.net
 DOMAIN,rsmuat.download.prss.microsoft.com
 DOMAIN,software-static.download.prss.microsoft.com
+DOMAIN,trekcdnprod.azureedge.net
+DOMAIN,typescript.azureedge.net
 DOMAIN,visualstudio.download.prss.microsoft.com
 DOMAIN,vod-adaptive.akamaized.net
+DOMAIN,yimg.jp
 
 DOMAIN-SUFFIX,0x0.st
 DOMAIN-SUFFIX,1a-1791.com
 DOMAIN-SUFFIX,1fichier.com
 DOMAIN-SUFFIX,1fichier.info
+DOMAIN-SUFFIX,1passwordusercontent.ca
+DOMAIN-SUFFIX,1passwordusercontent.com
+DOMAIN-SUFFIX,1passwordusercontent.eu
 DOMAIN-SUFFIX,2024cdn.sx
 DOMAIN-SUFFIX,2025cdn.sx
 DOMAIN-SUFFIX,2026cdn.sx
@@ -120,6 +76,7 @@ DOMAIN-SUFFIX,abebookscdn.com
 DOMAIN-SUFFIX,account-cdn.svc.ui.com
 DOMAIN-SUFFIX,account-widget-mfe.gcore.com
 DOMAIN-SUFFIX,acdn.mercury.com
+DOMAIN-SUFFIX,adblockplus.org
 DOMAIN-SUFFIX,addons.business
 DOMAIN-SUFFIX,adguardcdn.com
 DOMAIN-SUFFIX,adkit.9pub.io
@@ -224,6 +181,8 @@ DOMAIN-SUFFIX,api.weather.com
 DOMAIN-SUFFIX,api.web3.storage
 DOMAIN-SUFFIX,apichatwidget.usepylon.com
 DOMAIN-SUFFIX,apim.m3pd.com
+DOMAIN-SUFFIX,apkmirror.com
+DOMAIN-SUFFIX,apkpure.com
 DOMAIN-SUFFIX,app-api.vidjet.io
 DOMAIN-SUFFIX,app-cdn.logo.com
 DOMAIN-SUFFIX,app-spm.com
@@ -259,12 +218,14 @@ DOMAIN-SUFFIX,appstatico.electronic.us
 DOMAIN-SUFFIX,apt.izzysoft.de
 DOMAIN-SUFFIX,apt.tetaneutral.net
 DOMAIN-SUFFIX,apt.xpipe.io
+DOMAIN-SUFFIX,aptoide.com
 DOMAIN-SUFFIX,archive-4.kali.org
 DOMAIN-SUFFIX,archive.cs.uu.nl
 DOMAIN-SUFFIX,archive.debian.org
 DOMAIN-SUFFIX,archive.g4t1.pro
 DOMAIN-SUFFIX,archive.kali.org
 DOMAIN-SUFFIX,archive.linux.duke.edu
+DOMAIN-SUFFIX,archive.mozilla.org
 DOMAIN-SUFFIX,archive.org
 DOMAIN-SUFFIX,archive.raspberrypi.com
 DOMAIN-SUFFIX,archive.ubuntu.com
@@ -458,6 +419,7 @@ DOMAIN-SUFFIX,assetscdn-wchat.eu.freshchat.com
 DOMAIN-SUFFIX,assettype.com
 DOMAIN-SUFFIX,atl-global.atlassian.com
 DOMAIN-SUFFIX,attachments.office.net
+DOMAIN-SUFFIX,aus5.mozilla.org
 DOMAIN-SUFFIX,autoupdate.termius.com
 DOMAIN-SUFFIX,autoupdatesvc.delivery.autodesk.com
 DOMAIN-SUFFIX,avatar.freepik.com
@@ -978,6 +940,7 @@ DOMAIN-SUFFIX,cdn.rauno.me
 DOMAIN-SUFFIX,cdn.readme.io
 DOMAIN-SUFFIX,cdn.ready-market.com.tw
 DOMAIN-SUFFIX,cdn.rebuyengine.com
+DOMAIN-SUFFIX,cdn.redhat.com
 DOMAIN-SUFFIX,cdn.redoc.ly
 DOMAIN-SUFFIX,cdn.redwap.xyz
 DOMAIN-SUFFIX,cdn.repo.cloudeka.id
@@ -1274,6 +1237,7 @@ DOMAIN-SUFFIX,cms.typenetwork.com
 DOMAIN-SUFFIX,cms.worldpokerdeals.com
 DOMAIN-SUFFIX,cmtycdn.powerpages.microsoft.com
 DOMAIN-SUFFIX,cnbetacdn.com
+DOMAIN-SUFFIX,cocoapods.org
 DOMAIN-SUFFIX,code.benco.io
 DOMAIN-SUFFIX,code.highcharts.com
 DOMAIN-SUFFIX,code.iconify.design
@@ -1292,6 +1256,7 @@ DOMAIN-SUFFIX,components.clever-cloud.com
 DOMAIN-SUFFIX,components.cyclingfactory.be
 DOMAIN-SUFFIX,components.justanswer.com
 DOMAIN-SUFFIX,components.trynow.net
+DOMAIN-SUFFIX,componentupdater.brave.com
 DOMAIN-SUFFIX,conf.config-security.com
 DOMAIN-SUFFIX,connect.getflowbox.com
 DOMAIN-SUFFIX,connect.nosto.com
@@ -1457,6 +1422,7 @@ DOMAIN-SUFFIX,debian.charite.de
 DOMAIN-SUFFIX,debian.connesi.it
 DOMAIN-SUFFIX,debian.cs.binghamton.edu
 DOMAIN-SUFFIX,debian.cs.nycu.edu.tw
+DOMAIN-SUFFIX,debian.csie.ntu.edu.tw
 DOMAIN-SUFFIX,debian.dynamica.it
 DOMAIN-SUFFIX,debian.ethz.ch
 DOMAIN-SUFFIX,debian.grena.ge
@@ -1517,6 +1483,7 @@ DOMAIN-SUFFIX,design.keyoxide.org
 DOMAIN-SUFFIX,design.mayoclinic.org
 DOMAIN-SUFFIX,designsystem.brevo.com
 DOMAIN-SUFFIX,desktop.figma.com
+DOMAIN-SUFFIX,desktop.parallels.com
 DOMAIN-SUFFIX,desktop.wifiman.com
 DOMAIN-SUFFIX,detectportal.brave-http-only.com
 DOMAIN-SUFFIX,dev.visualwebsiteoptimizer.com
@@ -1556,6 +1523,7 @@ DOMAIN-SUFFIX,dl.iina.io
 DOMAIN-SUFFIX,dl.imobie.com
 DOMAIN-SUFFIX,dl.min.io
 DOMAIN-SUFFIX,dl.motrix.app
+DOMAIN-SUFFIX,dl.nssurge.com
 DOMAIN-SUFFIX,dl.nwjs.io
 DOMAIN-SUFFIX,dl.orangefox.download
 DOMAIN-SUFFIX,dl.pikpak.io
@@ -1633,11 +1601,13 @@ DOMAIN-SUFFIX,download.mersenne.ca
 DOMAIN-SUFFIX,download.mikrotik.com
 DOMAIN-SUFFIX,download.minecraft.net
 DOMAIN-SUFFIX,download.mokeedev.com
+DOMAIN-SUFFIX,download.mozilla.org
 DOMAIN-SUFFIX,download.mxfast.com
 DOMAIN-SUFFIX,download.nektony.com
 DOMAIN-SUFFIX,download.nust.na
 DOMAIN-SUFFIX,download.onlyoffice.com
 DOMAIN-SUFFIX,download.opensuse.org
+DOMAIN-SUFFIX,download.parallels.com
 DOMAIN-SUFFIX,download.pixelexperience.org
 DOMAIN-SUFFIX,download.projectbluefin.io
 DOMAIN-SUFFIX,download.proxyman.com
@@ -1646,13 +1616,16 @@ DOMAIN-SUFFIX,download.sketch.com
 DOMAIN-SUFFIX,download.snipaste.com
 DOMAIN-SUFFIX,download.sysinternals.com
 DOMAIN-SUFFIX,download.technitium.com
+DOMAIN-SUFFIX,download.typora.io
 DOMAIN-SUFFIX,download.umbrel.com
 DOMAIN-SUFFIX,download01.logi.com
+DOMAIN-SUFFIX,downloads.1password.com
 DOMAIN-SUFFIX,downloads.broadcom.com
 DOMAIN-SUFFIX,downloads.cloudflareclient.com
 DOMAIN-SUFFIX,downloads.coindesk.com
 DOMAIN-SUFFIX,downloads.majestic.com
 DOMAIN-SUFFIX,downloads.marketplace.jetbrains.com
+DOMAIN-SUFFIX,downloads.openwrt.org
 DOMAIN-SUFFIX,downloads.portainer.io
 DOMAIN-SUFFIX,downloads.raspberrypi.com
 DOMAIN-SUFFIX,downloads.wordpress.org
@@ -1665,6 +1638,7 @@ DOMAIN-SUFFIX,drivecdn.com
 DOMAIN-SUFFIX,drmirror.physi.uni-heidelberg.de
 DOMAIN-SUFFIX,drop.ndtv.com
 DOMAIN-SUFFIX,dropboxstatic.com
+DOMAIN-SUFFIX,dropboxusercontent.com
 DOMAIN-SUFFIX,drtst.com
 DOMAIN-SUFFIX,dsc.cloud
 DOMAIN-SUFFIX,dubassets.com
@@ -1755,6 +1729,7 @@ DOMAIN-SUFFIX,evt.24.com
 DOMAIN-SUFFIX,exbd.ex.co
 DOMAIN-SUFFIX,exp-tas.com
 DOMAIN-SUFFIX,experience-ap.piano.io
+DOMAIN-SUFFIX,extensionupdater.brave.com
 DOMAIN-SUFFIX,externulls.com
 DOMAIN-SUFFIX,ezocdn.com
 DOMAIN-SUFFIX,f-cdn.com
@@ -2124,6 +2099,7 @@ DOMAIN-SUFFIX,gnu.askapache.com
 DOMAIN-SUFFIX,gnu.c3sl.ufpr.br
 DOMAIN-SUFFIX,gnualpha.uib.no
 DOMAIN-SUFFIX,gnuftp.uib.no
+DOMAIN-SUFFIX,go-updater.brave.com
 DOMAIN-SUFFIX,go.imperva.com
 DOMAIN-SUFFIX,go.yaml.in
 DOMAIN-SUFFIX,gog-cdn-fastly-cp77.gog.com
@@ -2148,7 +2124,6 @@ DOMAIN-SUFFIX,gtranslate.io
 DOMAIN-SUFFIX,gtranslate.net
 DOMAIN-SUFFIX,gw3.io
 DOMAIN-SUFFIX,h-cdn.co
-DOMAIN,h-cdn.com
 DOMAIN-SUFFIX,hackerone-user-content.com
 DOMAIN-SUFFIX,hanime-cdn.com
 DOMAIN-SUFFIX,haproxy.org
@@ -2251,6 +2226,7 @@ DOMAIN-SUFFIX,i18n.prismlauncher.org
 DOMAIN-SUFFIX,i2.hentaifox.com
 DOMAIN-SUFFIX,i2.xiaoyakankan.com
 DOMAIN-SUFFIX,i3.xiaoyakankan.com
+DOMAIN-SUFFIX,ibiblio.org
 DOMAIN-SUFFIX,icdn.javxx.com
 DOMAIN-SUFFIX,icdn.missav123.to
 DOMAIN-SUFFIX,icfcdn.com
@@ -2544,7 +2520,6 @@ DOMAIN-SUFFIX,imgfile.shop
 DOMAIN-SUFFIX,imgikuncdn.com
 DOMAIN-SUFFIX,imgikzy.com
 DOMAIN-SUFFIX,imgimg.cc
-DOMAIN,imgix.net
 DOMAIN-SUFFIX,imgix.setapp.com
 DOMAIN-SUFFIX,imglink.win
 DOMAIN-SUFFIX,imgmrplay.xyz
@@ -2600,6 +2575,7 @@ DOMAIN-SUFFIX,ipfs.fooock.com
 DOMAIN-SUFFIX,ipfs.funnychain.co
 DOMAIN-SUFFIX,ipfs.genenetwork.org
 DOMAIN-SUFFIX,ipfs.greyh.at
+DOMAIN-SUFFIX,ipfs.infura.io
 DOMAIN-SUFFIX,ipfs.io
 DOMAIN-SUFFIX,ipfs.jbb.one
 DOMAIN-SUFFIX,ipfs.kaleido.art
@@ -2638,6 +2614,7 @@ DOMAIN-SUFFIX,iso.reactos.org
 DOMAIN-SUFFIX,iterm2.com
 DOMAIN-SUFFIX,itsre-sumo.mozilla.net
 DOMAIN-SUFFIX,itvstatic.com
+DOMAIN-SUFFIX,jac.yahoosandbox.com
 DOMAIN-SUFFIX,javcdn.li
 DOMAIN-SUFFIX,javcdn.vip
 DOMAIN-SUFFIX,javhucdn.com
@@ -2702,7 +2679,6 @@ DOMAIN-SUFFIX,jssdkcdns.mparticle.com
 DOMAIN-SUFFIX,jstatic.xyz
 DOMAIN-SUFFIX,jw-cdn.org
 DOMAIN-SUFFIX,jwpcdn.com
-DOMAIN,jwpsrv.com
 DOMAIN-SUFFIX,k8s.io
 DOMAIN-SUFFIX,kakaocdn.net
 DOMAIN-SUFFIX,kali.cs.nycu.edu.tw
@@ -2828,6 +2804,7 @@ DOMAIN-SUFFIX,marketing.thingiverse.com
 DOMAIN-SUFFIX,marketplace-web-assets.vinted.com
 DOMAIN-SUFFIX,maven.fabricmc.net
 DOMAIN-SUFFIX,maven.is-quite.gay
+DOMAIN-SUFFIX,maven.org
 DOMAIN-SUFFIX,mcr.microsoft.com
 DOMAIN-SUFFIX,mcusercontent.com
 DOMAIN-SUFFIX,media-cdn.atlassian.com
@@ -2908,6 +2885,7 @@ DOMAIN-SUFFIX,media3.giphy.com
 DOMAIN-SUFFIX,media4.giphy.com
 DOMAIN-SUFFIX,mediadecathlon.com
 DOMAIN-SUFFIX,mediadelivery.net
+DOMAIN-SUFFIX,mediafire.com
 DOMAIN-SUFFIX,medias.meow.social
 DOMAIN-SUFFIX,medium-media.vgm.io
 DOMAIN-SUFFIX,meetupstatic.com
@@ -2928,6 +2906,7 @@ DOMAIN-SUFFIX,mintcdn.com
 DOMAIN-SUFFIX,mintlify.b-cdn.net
 DOMAIN-SUFFIX,mir.linux.kg
 DOMAIN-SUFFIX,miroir.univ-lorraine.fr
+DOMAIN-SUFFIX,mirror-cdn.xtom.com
 DOMAIN-SUFFIX,mirror-gw.elastis.id
 DOMAIN-SUFFIX,mirror-hk.koddos.net
 DOMAIN-SUFFIX,mirror-media.xyz
@@ -3350,6 +3329,7 @@ DOMAIN-SUFFIX,mirror.xenyth.net
 DOMAIN-SUFFIX,mirror.xeonbd.com
 DOMAIN-SUFFIX,mirror.xmission.com
 DOMAIN-SUFFIX,mirror.xtom.au
+DOMAIN-SUFFIX,mirror.xtom.com
 DOMAIN-SUFFIX,mirror.xtom.com.hk
 DOMAIN-SUFFIX,mirror.xtom.de
 DOMAIN-SUFFIX,mirror.xtom.ee
@@ -3488,6 +3468,7 @@ DOMAIN-SUFFIX,mirrors.xmission.com
 DOMAIN-SUFFIX,mirrors.xmissions.com
 DOMAIN-SUFFIX,mirrors.xservers.ro
 DOMAIN-SUFFIX,mirrors.xtom.au
+DOMAIN-SUFFIX,mirrors.xtom.com
 DOMAIN-SUFFIX,mirrors.xtom.com.hk
 DOMAIN-SUFFIX,mirrors.xtom.de
 DOMAIN-SUFFIX,mirrors.xtom.ee
@@ -3542,6 +3523,7 @@ DOMAIN-SUFFIX,myanalytics.cdn.office.net
 DOMAIN-SUFFIX,myavlive.com
 DOMAIN-SUFFIX,mycdn.me
 DOMAIN-SUFFIX,myfilebase.com
+DOMAIN-SUFFIX,mypikpak.com
 DOMAIN-SUFFIX,mypinata.cloud
 DOMAIN-SUFFIX,myshopapps.com
 DOMAIN-SUFFIX,myspacecdn.com
@@ -3557,6 +3539,7 @@ DOMAIN-SUFFIX,nel.bgptools-agent-cf.com
 DOMAIN-SUFFIX,nel.cloudflare.com
 DOMAIN-SUFFIX,nel.measure.office.net
 DOMAIN-SUFFIX,nelreports.net
+DOMAIN-SUFFIX,neoforged.net
 DOMAIN-SUFFIX,nest.land
 DOMAIN-SUFFIX,net-fe-static-assets.network-controller.svc.ui.com
 DOMAIN-SUFFIX,net.anydesk.com
@@ -3597,6 +3580,7 @@ DOMAIN-SUFFIX,npm.jsr.io
 DOMAIN-SUFFIX,npmcdn.com
 DOMAIN-SUFFIX,npmfs.com
 DOMAIN-SUFFIX,npmjs.com
+DOMAIN-SUFFIX,npmjs.org
 DOMAIN-SUFFIX,npms.io
 DOMAIN-SUFFIX,ns-cdn.neustar.biz
 DOMAIN-SUFFIX,nsimg.net
@@ -3642,6 +3626,7 @@ DOMAIN-SUFFIX,organizer.bizzabo.com
 DOMAIN-SUFFIX,os-cdn.virtfusion.net
 DOMAIN-SUFFIX,osint.digitalside.it
 DOMAIN-SUFFIX,osl.ugr.es
+DOMAIN-SUFFIX,osmand.net
 DOMAIN-SUFFIX,oss-accelerate-overseas.aliyuncs.com
 DOMAIN-SUFFIX,oss-ap-northeast-1.aliyuncs.com
 DOMAIN-SUFFIX,oss-ap-northeast-2.aliyuncs.com
@@ -3665,6 +3650,7 @@ DOMAIN-SUFFIX,oss.ypt.com
 DOMAIN-SUFFIX,ossmirror.mycloud.services
 DOMAIN-SUFFIX,ossplanet.org
 DOMAIN-SUFFIX,otstatic.com
+DOMAIN-SUFFIX,ovo.wxw.moe
 DOMAIN-SUFFIX,p-cdnstatic.svc.litv.tv
 DOMAIN-SUFFIX,p-smith.com
 DOMAIN-SUFFIX,p.depot.dev
@@ -3698,12 +3684,15 @@ DOMAIN-SUFFIX,patterns.hiive.cloud
 DOMAIN-SUFFIX,payloadcms.app
 DOMAIN-SUFFIX,pbs-prod.linustechtips.com
 DOMAIN-SUFFIX,pbs.floatplane.com
+DOMAIN-SUFFIX,pcdn-my.pcloud.com
+DOMAIN-SUFFIX,pcdn-www.pcloud.com
 DOMAIN-SUFFIX,pcdn.co
 DOMAIN-SUFFIX,pcz.javidol.org
 DOMAIN-SUFFIX,perf-na1.hsforms.com
 DOMAIN-SUFFIX,perf.hsforms.com
 DOMAIN-SUFFIX,permaweb.eu.org
 DOMAIN-SUFFIX,permaweb.io
+DOMAIN-SUFFIX,pgl.yoyo.org
 DOMAIN-SUFFIX,ph.northflank.com
 DOMAIN-SUFFIX,ph.tryprofound.com
 DOMAIN-SUFFIX,pha-prx.ops.cloud.nx.app
@@ -3761,6 +3750,7 @@ DOMAIN-SUFFIX,placehold.jp
 DOMAIN-SUFFIX,placeholder.pics
 DOMAIN-SUFFIX,placekitten.com
 DOMAIN-SUFFIX,placewaifu.com
+DOMAIN-SUFFIX,planet.openstreetmap.org
 DOMAIN-SUFFIX,platforms.makemytrip.com
 DOMAIN-SUFFIX,play.d.tube
 DOMAIN-SUFFIX,play.gotolstoy.com
@@ -3773,8 +3763,6 @@ DOMAIN-SUFFIX,player.cnevids.com
 DOMAIN-SUFFIX,player.interactivity.brightcove.com
 DOMAIN-SUFFIX,player.svc.litv.tv
 DOMAIN-SUFFIX,playgroundcdn.typescriptlang.org
-DOMAIN,playwright-akamai.azureedge.net
-DOMAIN,playwright.azureedge.net
 DOMAIN-SUFFIX,plug-mirror.rcac.purdue.edu
 DOMAIN-SUFFIX,plugins-artifacts.gradle.org
 DOMAIN-SUFFIX,plugins.dprint.dev
@@ -3922,6 +3910,7 @@ DOMAIN-SUFFIX,releases.whatpulse.org
 DOMAIN-SUFFIX,renderer-assets.typeform.com
 DOMAIN-SUFFIX,rep-ubuntu-il.upress.io
 DOMAIN-SUFFIX,replicateassets.com
+DOMAIN-SUFFIX,repo.anaconda.com
 DOMAIN-SUFFIX,repo.carbon.sh
 DOMAIN-SUFFIX,repo.debiancn.org
 DOMAIN-SUFFIX,repo.extreme-ix.org
@@ -3931,6 +3920,7 @@ DOMAIN-SUFFIX,repo.ialab.dsu.edu
 DOMAIN-SUFFIX,repo.ifca.es
 DOMAIN-SUFFIX,repo.jztkft.hu
 DOMAIN-SUFFIX,repo.linuxmirrors.ir
+DOMAIN-SUFFIX,repo.maven.apache.org
 DOMAIN-SUFFIX,repo.morgan.kr
 DOMAIN-SUFFIX,repo.nextdns.io
 DOMAIN-SUFFIX,repo.powerdns.com
@@ -4031,8 +4021,10 @@ DOMAIN-SUFFIX,s3-alpha.figma.com
 DOMAIN-SUFFIX,s3-figma-force-client-reloads-production.figma.com
 DOMAIN-SUFFIX,s3-figma-plugin-images-production-sig.figma.com
 DOMAIN-SUFFIX,s3.2233778.xyz
+DOMAIN-SUFFIX,s3.acg.mn
 DOMAIN-SUFFIX,s3.anilist.co
 DOMAIN-SUFFIX,s3.arkjp.net
+DOMAIN-SUFFIX,s3.brave.com
 DOMAIN-SUFFIX,s3.c.im
 DOMAIN-SUFFIX,s3.cointelegraph.com
 DOMAIN-SUFFIX,s3.documentcloud.org
@@ -4117,6 +4109,7 @@ DOMAIN-SUFFIX,sftcdn.net
 DOMAIN-SUFFIX,sg-mirrors.vhost.vn
 DOMAIN-SUFFIX,share-assets.fe.garmin.com
 DOMAIN-SUFFIX,share.chessbase.com
+DOMAIN-SUFFIX,share.riseup.net
 DOMAIN-SUFFIX,shell.cdn.office.net
 DOMAIN-SUFFIX,shgcdn.com
 DOMAIN-SUFFIX,shields.io
@@ -4387,6 +4380,7 @@ DOMAIN-SUFFIX,static.reo.dev
 DOMAIN-SUFFIX,static.replay.io
 DOMAIN-SUFFIX,static.returngo.ai
 DOMAIN-SUFFIX,static.roboflow.com
+DOMAIN-SUFFIX,static.rust-lang.org
 DOMAIN-SUFFIX,static.salidzini.lv
 DOMAIN-SUFFIX,static.scarf.sh
 DOMAIN-SUFFIX,static.sdkassets.chime.aws
@@ -4670,7 +4664,6 @@ DOMAIN-SUFFIX,trackerslist.com
 DOMAIN-SUFFIX,tracking.inflection.io
 DOMAIN-SUFFIX,trafficdeposit.com
 DOMAIN-SUFFIX,transcend-cdn.com
-DOMAIN,trekcdnprod.azureedge.net
 DOMAIN-SUFFIX,tripcdn.com
 DOMAIN-SUFFIX,trustless-gateway.link
 DOMAIN-SUFFIX,ttcache.com
@@ -4691,7 +4684,6 @@ DOMAIN-SUFFIX,twenty-icons.com
 DOMAIN-SUFFIX,typedoc.org
 DOMAIN-SUFFIX,typeless-static.com
 DOMAIN-SUFFIX,typescript-eslint.io
-DOMAIN,typescript.azureedge.net
 DOMAIN-SUFFIX,typescript.visualstudio.com
 DOMAIN-SUFFIX,typography.com
 DOMAIN-SUFFIX,u.keka.io
@@ -4788,7 +4780,10 @@ DOMAIN-SUFFIX,unsubscribe-imgs.leavemealone.com
 DOMAIN-SUFFIX,uos-support-files.svc.ui.com
 DOMAIN-SUFFIX,update.code.visualstudio.com
 DOMAIN-SUFFIX,update.cyberduck.io
+DOMAIN-SUFFIX,update.greasyfork.org
 DOMAIN-SUFFIX,update.microsoft.com
+DOMAIN-SUFFIX,update.parallels.com
+DOMAIN-SUFFIX,update.sleazyfork.org
 DOMAIN-SUFFIX,updateinfo.devmate.com
 DOMAIN-SUFFIX,updater.snipaste.com
 DOMAIN-SUFFIX,updates-cdn.bravesoftware.com
@@ -4846,6 +4841,8 @@ DOMAIN-SUFFIX,vcmdiawe.com
 DOMAIN-SUFFIX,vectorified.com
 DOMAIN-SUFFIX,version.cyberduck.io
 DOMAIN-SUFFIX,versionbadg.es
+DOMAIN-SUFFIX,versioncheck-bg.addons.mozilla.org
+DOMAIN-SUFFIX,versioncheck.addons.mozilla.org
 DOMAIN-SUFFIX,vesta.informatik.rwth-aachen.de
 DOMAIN-SUFFIX,vetted.ai
 DOMAIN-SUFFIX,vfat.classicreload.com
@@ -5003,7 +5000,6 @@ DOMAIN-SUFFIX,yarnpkg.com
 DOMAIN-SUFFIX,yastatic.net
 DOMAIN-SUFFIX,yelpcdn.com
 DOMAIN-SUFFIX,yimg.com
-DOMAIN,yimg.jp
 DOMAIN-SUFFIX,ymq.cool
 DOMAIN-SUFFIX,yourimageshare.com
 DOMAIN-SUFFIX,ypcdn.com
@@ -5029,6 +5025,7 @@ DOMAIN-SUFFIX,zohowebstatic.com
 DOMAIN-SUFFIX,zorocdn.xyz
 DOMAIN-SUFFIX,zpi.cx
 DOMAIN-SUFFIX,zpicdn.lol
+DOMAIN-SUFFIX,zzz.wxw.moe
 
 DOMAIN-WILDCARD,*-assets.worldsex.com
 DOMAIN-WILDCARD,*-cdn.eporner.com

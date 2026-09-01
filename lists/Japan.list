@@ -36,10 +36,10 @@ DOMAIN-SUFFIX,jcom.co.jp
 DOMAIN-SUFFIX,jp-bank.japanpost.jp
 DOMAIN-SUFFIX,kadokawa.co.jp
 DOMAIN-SUFFIX,kddi.com
+DOMAIN-SUFFIX,lin.ee
 DOMAIN-SUFFIX,line-apps.com
 DOMAIN-SUFFIX,line-scdn.net
 DOMAIN-SUFFIX,line.me
-DOMAIN-SUFFIX,lin.ee
 DOMAIN-SUFFIX,linemo.jp
 DOMAIN-SUFFIX,melonbooks.co.jp
 DOMAIN-SUFFIX,mercari.com
@@ -48,13 +48,13 @@ DOMAIN-SUFFIX,mixi.jp
 DOMAIN-SUFFIX,mizuhobank.co.jp
 DOMAIN-SUFFIX,moneykit.net
 DOMAIN-SUFFIX,mufg.jp
-DOMAIN-SUFFIX,nhk-ondemand.jp
-DOMAIN-SUFFIX,nimg.jp
 DOMAIN-SUFFIX,naver.jp
+DOMAIN-SUFFIX,nhk-ondemand.jp
+DOMAIN-SUFFIX,nhncorp.jp
 DOMAIN-SUFFIX,niconico.com
 DOMAIN-SUFFIX,nicovideo.jp
-DOMAIN-SUFFIX,nhncorp.jp
 DOMAIN-SUFFIX,nikkei.com
+DOMAIN-SUFFIX,nimg.jp
 DOMAIN-SUFFIX,nxtv.jp
 DOMAIN-SUFFIX,oricon.co.jp
 DOMAIN-SUFFIX,paypay-bank.co.jp
@@ -64,6 +64,7 @@ DOMAIN-SUFFIX,pixiv.net
 DOMAIN-SUFFIX,povo.jp
 DOMAIN-SUFFIX,priconne-redive.jp
 DOMAIN-SUFFIX,pximg.net
+DOMAIN-SUFFIX,r10s.jp
 DOMAIN-SUFFIX,radiko.jp
 DOMAIN-SUFFIX,radiko.net
 DOMAIN-SUFFIX,rakuten-bank.co.jp
@@ -72,7 +73,6 @@ DOMAIN-SUFFIX,rakuten-sec.co.jp
 DOMAIN-SUFFIX,rakuten-static.com
 DOMAIN-SUFFIX,rakuten.co.jp
 DOMAIN-SUFFIX,rakuten.ne.jp
-DOMAIN-SUFFIX,r10s.jp
 DOMAIN-SUFFIX,renta.papy.co.jp
 DOMAIN-SUFFIX,sbigroup.co.jp
 DOMAIN-SUFFIX,sbisec.co.jp

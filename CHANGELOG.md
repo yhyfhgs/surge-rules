@@ -4,6 +4,74 @@
 
 ---
 
+## [2026-09-01·重排] 表内类型分组 + conf 分区呈现
+
+**动机**:单张 `.list` 里 `DOMAIN` 与 `DOMAIN-SUFFIX` 历来交错书写(ProxyGFW 按注册域族
+聚合、Reject 按来源批次追加),人读时要在同一屏里跳着分辨类型;`Surge.conf` 的 `[Rule]`
+段则是 39 行同构的 `RULE-SET`,看不出分流的层次。本批次只改**书写顺序与呈现**,
+不增删、不改写任何一条规则。
+
+**无损口径**:Surge 的表内匹配不看行序——同一张 rule-set 只有一个策略,落点只取决于
+「该表是否包含匹配项」;行序只在 `config/routing.json` 的**表间顺序**上有意义,而那里
+一条未动。证明有二:重排前后每张表的「规则行多重集 sha256」逐表相同(39/39);
+analyzer 的 relationships / aggregates / split_apex / split_parent / fragmented_domains /
+topology 在把行号引用换回规则原文、剥掉 `line`/`global_rank` 等位置标签后**集合完全
+相同**(plain 与 MMDB 两侧各验一次)。
+
+### Added
+- **`tools/sort_lists.py`**:表内重排器。类型桶固定为 `DOMAIN → DOMAIN-SUFFIX →
+  DOMAIN-WILDCARD → DOMAIN-KEYWORD → IP-CIDR → IP-CIDR6 → IP-ASN → GEOIP`,
+  此列表之外的类型**报错退出**,不静默放行;桶内域名类按规则值字典序(大小写归一)、
+  IP-CIDR/IP-CIDR6 按网络地址数值序、IP-ASN 按 ASN 数值序、GEOIP 按国家码字典序;
+  行尾注释(如 Telegram 的 `# last_verified=…`)与 `,no-resolve` 尾参随行逐字节保留,
+  文件头注释块原样留在顶部,桶间恰好一个空行。`--check` 作闸门并打印首个偏差、
+  `--write` 就地重排、`--selftest` 内置 8 项自检(桶序、注释保留、幂等、多重集守恒、
+  未知类型/行间注释/非法 CIDR 报错等)。排序稳定,写后即查必然通过。
+- **`tests/analyze_rules_selftest.py` 增两个用例(5 → 7)**:同样两张表、只调换 conf 里的
+  引用顺序——ordered-safe(宽父排在异策略窄子之后)跑完整 `--fail-on-shadow` 退出 0,
+  该父规则落进 `ordered_safe_split_parents`,`shadowed` 为空;order-unsafe(宽父在前)
+  退出 1,落进 `order_unsafe_split_parents`。把「分裂的危害取决于顺序而非形态」
+  这条口径钉成回归护栏。既有 5 个用例一字未动。
+
+### Changed
+- **37 张手工表按新形态重排**,其中 22 张实际改动:AI、AlibabaCN、AppleCN、ChinaMedia、
+  Domestic、DownloadCDN、Europe、GameDownloadCN、Games、Google、Japan、JapanIP、
+  Microsoft、MicrosoftCN、PKU、Payment、ProxyGFW、SocialOthers、Streaming、TencentCN、
+  UK、US;其余 15 张本就规范。文本层面净减 13 行,全部是多余空行(PKU 的双空行、
+  按服务分组留下的段间空行)被归一;注释行一字未改,规则行一条未增删。
+- **机器管理层零改动**:`ChinaIP`(IP-CIDR 段 → IP-CIDR6 段)与 `ChinaDomain`
+  (DOMAIN 171 条 → DOMAIN-SUFFIX 106,206 条)本就是分组形态,`sort_lists.py --check`
+  直接通过,两个文件未被写入。
+- **`config/routing.json` 每条 ruleset 增加 `section` 字段**,共 11 个分区:
+  0 局域与校园、1 拒绝层、2 下载与数据面例外、3 服务生态、4 厂商 CN 端点、5 地区域名、
+  6 国内直连、7 代理残差、8 国内长尾、9 服务与国内 IP、10 地区 IP 兜底。
+  rulesets 的相对顺序一条未变——那是上一批次逐条验证过的拓扑序。
+- **`tools/routing_manifest.py`**:`section` 进入允许字段并成为必填,校验为去空白后非空、
+  不含换行的字符串;另校验分区必须**连续**——同名分区分成两段会让渲染为它输出两行
+  分区注释,直接拒。
+- **`tools/render_surge_rules.py`**:分区切换处输出一行 `# <序号> <分区名>`,序号由首次
+  出现顺序推导而不写进 manifest,因此不会与之漂移。`--check` 逐行比对时注释行同样参与。
+  分区注释是注释:Surge、analyzer、audit 引擎、场景引擎在解析前都会丢弃 `#` 行,
+  匹配语义为零变化。
+- **`../Surge.conf` 重渲染**:`[Rule]` 段净增 11 行分区注释、删 0 行,
+  `[General]`/`[Proxy]`/`[Proxy Group]`/`[MITM]` 四段逐字节未动。
+- **`clash/` 22 张表随 `lists/` 再生**,39 表 141,679 条规则守恒。
+
+### Verified
+- `sort_lists --check` 39/39 绿(写后即查,幂等);`sort_lists --selftest` 8/8 通过。
+- 每表规则行多重集 sha256 逐表比对:39 张表全等,总数 141,679 不变。
+- analyzer plain:141,679 规则 / 1,739 关系 / 159 order-dependent / 59 split apex /
+  118 碎片注册域 / 24 拓扑约束、无环;MMDB 展开:3,413 关系 / 1,493 order-dependent /
+  41 约束。两侧逐项与重排前相等,`--fail-on-shadow` 退出 0;输出差异只有行号引用与
+  conf sha256。
+- `tests/audit.py` 退出 0,输出与重排前逐字节相同(A1=0 A2=0 A3=29 A4=0 A5=0 A6=7
+  A7=0 A8=0 A9=144 A10=59;未豁免 14 条 P0=0/P1=0/P2=11/P3=3,已豁免 62 条)。
+  A9 顺序感知口径无漂移。
+- `tests/runsuite.py` 227 场景 / 1,644 请求 / **3,099 断言全绿**,DNS 泄漏断言 1,326 条
+  0 失败,输出与重排前逐字节相同。
+- `rebuild.py --diff-out` diff=0、`collapse_cidr --check` 无漂移、`surge2clash --check`
+  一致、`render_surge_rules --check` 一致、`surge-cli --check` OK。
+
 ## [2026-09-01·复验] FINAL 漏斗回归纠正 + ProxyGFW 迁移清理
 
 **回归来源**:同日「Deterministic topology」重构把「非安全分裂顶点归零」当成硬指标,

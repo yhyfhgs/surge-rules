@@ -1,9 +1,9 @@
 # JapanIP — 日本 ASN/GEOIP fallback
 
-IP-ASN,17511,no-resolve
 IP-ASN,2497,no-resolve
 IP-ASN,2514,no-resolve
 IP-ASN,2516,no-resolve
 IP-ASN,4713,no-resolve
+IP-ASN,17511,no-resolve
 
 GEOIP,JP,no-resolve

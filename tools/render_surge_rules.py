@@ -17,8 +17,21 @@ BASE_URL = "https://cdn.jsdelivr.net/gh/yhyfhgs/surge-rules@main/lists"
 
 
 def render_rules(entries):
+    """Render the [Rule] block, one ``# <index> <section>`` header per section.
+
+    Sections are the manifest's own grouping (validated contiguous there); the
+    index is derived from the order of first appearance so the numbers can never
+    drift out of sync with the manifest. The headers are comments, so they change
+    nothing about matching: Surge, the analyzer, the audit engine, and the
+    scenario engine all drop ``#`` lines before parsing.
+    """
     lines = ["[Rule]", "RULE-SET,SYSTEM,DIRECT"]
+    section, index = None, -1
     for entry in entries:
+        if entry["section"] != section:
+            section = entry["section"]
+            index += 1
+            lines.append("# %d %s" % (index, section))
         parts = ["RULE-SET", "%s/%s.list" % (BASE_URL, entry["name"]), entry["policy"]]
         if entry.get("extended_matching"):
             parts.append("extended-matching")

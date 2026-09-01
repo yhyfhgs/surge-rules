@@ -18,6 +18,7 @@ DOMAIN,res-1.cdn.office.net
 DOMAIN,res-2.cdn.office.net
 DOMAIN,res-h3.public.cdn.office.net
 DOMAIN,res.cdn.office.net
+DOMAIN,sa.msn.com
 DOMAIN,statics.teams.cdn.office.net
 DOMAIN,storage.live.com
 DOMAIN,support.office.com
@@ -25,7 +26,6 @@ DOMAIN,templates.office.com
 DOMAIN,view.officeapps.live.com
 DOMAIN,www.msn.com
 DOMAIN,www.office.com
-DOMAIN,sa.msn.com
 
 DOMAIN-SUFFIX,1drv.com
 DOMAIN-SUFFIX,1drv.ms
@@ -68,13 +68,13 @@ DOMAIN-SUFFIX,myvs.download.prss.microsoft.com
 DOMAIN-SUFFIX,ocsp.microsoft.com
 DOMAIN-SUFFIX,oemsoc.download.prss.microsoft.com
 DOMAIN-SUFFIX,oemsocuat.download.prss.microsoft.com
+DOMAIN-SUFFIX,office.live.com
+DOMAIN-SUFFIX,office.net
 DOMAIN-SUFFIX,office365.com
 DOMAIN-SUFFIX,officeapps.live.com
 DOMAIN-SUFFIX,officecdn.microsoft.com
 DOMAIN-SUFFIX,officemkt.download.prss.microsoft.com
 DOMAIN-SUFFIX,officemktuat.download.prss.microsoft.com
-DOMAIN-SUFFIX,office.live.com
-DOMAIN-SUFFIX,office.net
 DOMAIN-SUFFIX,oneclient.sfx.ms
 DOMAIN-SUFFIX,onedrive.com
 DOMAIN-SUFFIX,oneocsp.microsoft.com

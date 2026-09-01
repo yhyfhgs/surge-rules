@@ -3,8 +3,9 @@
 ## Sources of truth
 
 - `lists/*.list`: rule content.
-- `config/routing.json`: complete list order, policy, `extended_matching`, and
-  list-level `no_resolve` metadata.
+- `config/routing.json`: complete list order, policy, `extended_matching`,
+  list-level `no_resolve` metadata, and the contiguous `section` grouping the
+  renderer prints as `[Rule]` partition comments.
 - `clash/`: generated output; never edit it directly.
 - The active Surge profile: local proxy-group definitions and the rendered
   `[Rule]` section.
@@ -219,6 +220,7 @@ connections.
 
 | Layer | Command | Purpose |
 |---|---|---|
+| Shape | `tools/sort_lists.py --check` | Canonical in-list type buckets and ordering |
 | Relationship | `tools/analyze_rules.py ... --fail-on-shadow` | Exhaustive inventory and topology |
 | Static | `tests/audit.py --check all --fail-on P1` | Formatting, DNS, duplicates, PSL, forbidden rules |
 | Behavioral | `tests/runsuite.py` | 227 scenarios / 3,099 assertions |

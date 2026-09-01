@@ -42,6 +42,7 @@ DOMAIN-SUFFIX,antspace.dev
 DOMAIN-SUFFIX,anyscale.com
 DOMAIN-SUFFIX,anysphere.co
 DOMAIN-SUFFIX,anythingllm.com
+DOMAIN-SUFFIX,api.hf.co
 DOMAIN-SUFFIX,api.statsig.com
 DOMAIN-SUFFIX,arcade.dev
 DOMAIN-SUFFIX,arena.ai
@@ -174,7 +175,6 @@ DOMAIN-SUFFIX,harpa.ai
 DOMAIN-SUFFIX,hedra.com
 DOMAIN-SUFFIX,heygen.com
 DOMAIN-SUFFIX,hf.co
-DOMAIN-SUFFIX,api.hf.co
 DOMAIN-SUFFIX,higgsfield.ai
 DOMAIN-SUFFIX,huggingface.co
 DOMAIN-SUFFIX,hume.ai

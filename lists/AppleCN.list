@@ -2,13 +2,23 @@
 # 排序：规则类型分区，区内字母序
 
 DOMAIN,apple-events.akamaized.net
+DOMAIN,apple.com.edgekey.net
 DOMAIN,appleworldwidedeveloper.hb-api.omtrdc.net
 DOMAIN,appleworldwidedeveloper.sc.omtrdc.net
 DOMAIN,beatselectronicsllc.tt.omtrdc.net
+DOMAIN,beta.apple.com
 DOMAIN,e16991.b.akamaiedge.net
-DOMAIN-SUFFIX,edge.apple
+DOMAIN,gs-loc.apple.com
 DOMAIN,icons.axm-usercontent-apple.com
+DOMAIN,init.itunes.apple.com
+DOMAIN,ocsp.apple.com
+DOMAIN,ocsp2.apple.com
 DOMAIN,p-events-delivery.akamaized.net
+DOMAIN,smp-device.apple.com
+DOMAIN,testflight.apple.com
+DOMAIN,time.apple.com
+DOMAIN,www.apple.com
+DOMAIN,www.apple.com.edgekey.net
 
 DOMAIN-SUFFIX,100beatscheap.com
 DOMAIN-SUFFIX,12diasdepresentesdeitunes.com
@@ -130,16 +140,6 @@ DOMAIN-SUFFIX,apple.co.nz
 DOMAIN-SUFFIX,apple.co.th
 DOMAIN-SUFFIX,apple.co.uk
 DOMAIN-SUFFIX,apple.com
-DOMAIN,beta.apple.com
-DOMAIN,gs-loc.apple.com
-DOMAIN,init.itunes.apple.com
-DOMAIN,ocsp.apple.com
-DOMAIN,ocsp2.apple.com
-DOMAIN,smp-device.apple.com
-DOMAIN,testflight.apple.com
-DOMAIN,time.apple.com
-DOMAIN,www.apple.com
-DOMAIN-SUFFIX,smoot.apple.com
 DOMAIN-SUFFIX,apple.com.af
 DOMAIN-SUFFIX,apple.com.akadns.net
 DOMAIN-SUFFIX,apple.com.au
@@ -150,8 +150,6 @@ DOMAIN-SUFFIX,apple.com.cn
 DOMAIN-SUFFIX,apple.com.co
 DOMAIN-SUFFIX,apple.com.de
 DOMAIN-SUFFIX,apple.com.do
-DOMAIN,apple.com.edgekey.net
-DOMAIN,www.apple.com.edgekey.net
 DOMAIN-SUFFIX,apple.com.gr
 DOMAIN-SUFFIX,apple.com.gy
 DOMAIN-SUFFIX,apple.com.jm
@@ -920,6 +918,7 @@ DOMAIN-SUFFIX,ebookforipad.com
 DOMAIN-SUFFIX,ebuyheadphones.com
 DOMAIN-SUFFIX,ecgapp.com.cn
 DOMAIN-SUFFIX,ecgapp.net
+DOMAIN-SUFFIX,edge.apple
 DOMAIN-SUFFIX,edu-research.org
 DOMAIN-SUFFIX,emac.co.in
 DOMAIN-SUFFIX,emac.in
@@ -1446,6 +1445,7 @@ DOMAIN-SUFFIX,shopping-days.net
 DOMAIN-SUFFIX,shoppinguheadphones.com
 DOMAIN-SUFFIX,simplyipod.com
 DOMAIN-SUFFIX,siri.com
+DOMAIN-SUFFIX,smoot.apple.com
 DOMAIN-SUFFIX,sneaker666.com
 DOMAIN-SUFFIX,sneakerpage.net
 DOMAIN-SUFFIX,sneakerskick.com

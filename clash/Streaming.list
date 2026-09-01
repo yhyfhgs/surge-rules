@@ -3,17 +3,6 @@
 
 # Streaming — 国际流媒体；属地锁服务优先归对应地区表
 
-DOMAIN-SUFFIX,kobo.com
-
-DOMAIN,ktpx.amazon.com
-DOMAIN-SUFFIX,atv-ext-eu.amazon.com
-DOMAIN-SUFFIX,atv-ext-fe.amazon.com
-DOMAIN-SUFFIX,atv-ext.amazon.com
-DOMAIN-SUFFIX,atv-ps-eu.amazon.com
-DOMAIN-SUFFIX,atv-ps-fe.amazon.com
-DOMAIN-SUFFIX,atv-ps.amazon.com
-DOMAIN-SUFFIX,fls-na.amazon.com
-
 DOMAIN,44wilhpljf.execute-api.ap-southeast-1.amazonaws.com
 DOMAIN,4gtvfreepcvod-cds.cdn.hinet.net
 DOMAIN,abematv.akamaized.net
@@ -48,10 +37,11 @@ DOMAIN,hamifans.emome.net
 DOMAIN,heads-ak-spotify-com.akamaized.net
 DOMAIN,hulu.map.fastly.net
 DOMAIN,itvpnpmobile-a.akamaihd.net
-DOMAIN,ni-assets.azureedge.net
+DOMAIN,ktpx.amazon.com
 DOMAIN,linear-abematv.akamaized.net
 DOMAIN,live-mediashield-ava-hulustream-com.akamaized.net
 DOMAIN,news-client-search.apple.com
+DOMAIN,ni-assets.azureedge.net
 DOMAIN,ocvideo.apple.com
 DOMAIN,rpg.pic-imges.com
 DOMAIN,rthklive1-lh.akamaihd.net
@@ -136,7 +126,13 @@ DOMAIN-SUFFIX,assetshuluimcom-a.akamaihd.net
 DOMAIN-SUFFIX,att.tv
 DOMAIN-SUFFIX,atttvnow.com
 DOMAIN-SUFFIX,attwatchtv.com
+DOMAIN-SUFFIX,atv-ext-eu.amazon.com
+DOMAIN-SUFFIX,atv-ext-fe.amazon.com
+DOMAIN-SUFFIX,atv-ext.amazon.com
 DOMAIN-SUFFIX,atv-ps-eu.amazon.co.uk
+DOMAIN-SUFFIX,atv-ps-eu.amazon.com
+DOMAIN-SUFFIX,atv-ps-fe.amazon.com
+DOMAIN-SUFFIX,atv-ps.amazon.com
 DOMAIN-SUFFIX,audio-ak-spotify-com.akamaized.net
 DOMAIN-SUFFIX,avod-dash-ww-live.akamaized.net
 DOMAIN-SUFFIX,avodmp4s3ww-a.akamaihd.net
@@ -200,6 +196,7 @@ DOMAIN-SUFFIX,cobuz.fr
 DOMAIN-SUFFIX,cobuzz.fr
 DOMAIN-SUFFIX,conviva.com
 DOMAIN-SUFFIX,coronavirusnow.com
+DOMAIN-SUFFIX,crackle.com
 DOMAIN-SUFFIX,crunchyroll.com
 DOMAIN-SUFFIX,cstatic.net
 DOMAIN-SUFFIX,curbed.com
@@ -211,6 +208,7 @@ DOMAIN-SUFFIX,d2wy8f7a9ursnm.cloudfront.net
 DOMAIN-SUFFIX,d9.flashtalking.com
 DOMAIN-SUFFIX,dai.ly
 DOMAIN-SUFFIX,dai3fd1oh325y.cloudfront.net
+DOMAIN-SUFFIX,dailymotion.com
 DOMAIN-SUFFIX,dandalinvoa.com
 DOMAIN-SUFFIX,darivoa.com
 DOMAIN-SUFFIX,daumkakao.io
@@ -371,6 +369,7 @@ DOMAIN-SUFFIX,fanfox.net
 DOMAIN-SUFFIX,fast.com
 DOMAIN-SUFFIX,fetnet.net
 DOMAIN-SUFFIX,findyourlimits.com
+DOMAIN-SUFFIX,fls-na.amazon.com
 DOMAIN-SUFFIX,flxvpn.net
 DOMAIN-SUFFIX,forthethrone.com
 DOMAIN-SUFFIX,fox-corporation.com
@@ -713,10 +712,12 @@ DOMAIN-SUFFIX,kktix.com
 DOMAIN-SUFFIX,kktv.com.tw
 DOMAIN-SUFFIX,kktv.me
 DOMAIN-SUFFIX,kmplayer.com
+DOMAIN-SUFFIX,kobo.com
 DOMAIN-SUFFIX,kobuz.fr
 DOMAIN-SUFFIX,ktvu.com
 DOMAIN-SUFFIX,linetv.tw
 DOMAIN-SUFFIX,litix.io
+DOMAIN-SUFFIX,livestream.com
 DOMAIN-SUFFIX,llnwd.net
 DOMAIN-SUFFIX,location-plus.nhk.jp
 DOMAIN-SUFFIX,londonreal.tv
@@ -786,6 +787,7 @@ DOMAIN-SUFFIX,mytvsuperlimited.sc.omtrdc.net
 DOMAIN-SUFFIX,natgeomaps.com
 DOMAIN-SUFFIX,nationalgeographic.com
 DOMAIN-SUFFIX,nationalgeographicpartners.com
+DOMAIN-SUFFIX,nba.com
 DOMAIN-SUFFIX,nbc-sports.go-vip.net
 DOMAIN-SUFFIX,nbc.co
 DOMAIN-SUFFIX,nbcsports.com
@@ -793,7 +795,6 @@ DOMAIN-SUFFIX,nbcsports.h-cdn.com
 DOMAIN-SUFFIX,nbcudigitaladops.com
 DOMAIN-SUFFIX,nbys.tv
 DOMAIN-SUFFIX,nbys1.tv
-DOMAIN-SUFFIX,nba.com
 DOMAIN-SUFFIX,nebula.app
 DOMAIN-SUFFIX,netflix.ca
 DOMAIN-SUFFIX,netflix.com
@@ -1053,6 +1054,7 @@ DOMAIN-SUFFIX,viki.net
 DOMAIN-SUFFIX,vikiplatform.com
 DOMAIN-SUFFIX,vimeo-staging.com
 DOMAIN-SUFFIX,vimeo-staging2.com
+DOMAIN-SUFFIX,vimeo.com
 DOMAIN-SUFFIX,vimeo.fr
 DOMAIN-SUFFIX,vimeobusiness.com
 DOMAIN-SUFFIX,vimeogoods.com
@@ -1122,10 +1124,6 @@ DOMAIN-SUFFIX,zeetv.com
 DOMAIN-SUFFIX,zeeuk.com
 DOMAIN-SUFFIX,zeriamerikes.com
 DOMAIN-SUFFIX,zype.com
-DOMAIN-SUFFIX,crackle.com
-DOMAIN-SUFFIX,dailymotion.com
-DOMAIN-SUFFIX,livestream.com
-DOMAIN-SUFFIX,vimeo.com
 
 DOMAIN-WILDCARD,*nowtv100.*
 DOMAIN-WILDCARD,apiproxy-device-prod-nlb-*

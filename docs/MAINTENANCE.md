@@ -55,6 +55,32 @@ If the service has redirects, login, API, media, and CDN endpoints, treat them a
 one session family first. Split only source-IP-independent bulk data or a proven
 region-specific surface.
 
+## List sort order
+
+Every `lists/*.list` is stored in one canonical shape, produced and enforced by
+`tools/sort_lists.py`:
+
+- rules are grouped into type buckets, in this order — `DOMAIN`,
+  `DOMAIN-SUFFIX`, `DOMAIN-WILDCARD`, `DOMAIN-KEYWORD`, `IP-CIDR`, `IP-CIDR6`,
+  `IP-ASN`, `GEOIP`. Any other type is an error; give a new type a bucket here
+  and in the script before using it;
+- inside a bucket: domain values sort lexicographically (case-folded), CIDRs by
+  numeric network address, `IP-ASN` by ASN number, `GEOIP` by country code;
+- trailing comments and `,no-resolve` travel with their rule, byte for byte; the
+  header comment block stays on top; buckets are separated by exactly one blank
+  line.
+
+Order inside a list carries no routing meaning — a rule-set has a single policy,
+so matching only asks whether the list contains the value. Only the list order in
+`config/routing.json` is load-bearing. Do not hand-sort: run
+`python3 tools/sort_lists.py --write` and let `--check` gate it.
+
+`config/routing.json` also groups the rulesets into contiguous named `section`s;
+`tools/render_surge_rules.py` prints one `# <index> <section>` comment per switch
+into the profile's `[Rule]` block. The index is derived from first appearance, so
+it cannot drift from the manifest. Sections are presentation only: reordering the
+manifest is still the only thing that changes routing.
+
 ## Generated machine layers
 
 ### ChinaDomain
@@ -105,6 +131,8 @@ surge-cli --check /tmp/Surge.candidate.conf
 Run all offline gates:
 
 ```bash
+python3 tools/sort_lists.py --check
+
 python3 tools/analyze_rules.py \
   --conf /tmp/Surge.candidate.conf --rules lists \
   --out /tmp/rule-analysis --fail-on-shadow

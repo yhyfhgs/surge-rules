@@ -52,6 +52,7 @@ config/proxygfw-expired.txt     dead-domain re-entry denylist
 lists/*.list                    Surge sources
 clash/*.list                    generated Mihomo sources
 tools/analyze_rules.py          exhaustive relationship analyzer
+tools/sort_lists.py             in-list type-bucket sorter and its gate
 tools/render_surge_rules.py     render manifest order into a Surge profile
 tools/surge2clash.py            regenerate Clash outputs
 tests/audit.py                  structural checks
@@ -64,6 +65,9 @@ docs/RULE_ANALYSIS_2026-09-01.md evidence and refactor record
 ## Verify
 
 ```bash
+# Every list is in canonical type-bucket order.
+python3 tools/sort_lists.py --check
+
 # Render and validate a candidate profile without touching the active profile.
 python3 tools/render_surge_rules.py ../Surge.conf /tmp/Surge.candidate.conf
 surge-cli --check /tmp/Surge.candidate.conf

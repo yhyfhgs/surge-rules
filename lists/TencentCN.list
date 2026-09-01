@@ -1,6 +1,7 @@
 # TencentCN — 腾讯系国内域直连（上游 blackmatrix7 Tencent + WeChat）；纯域名表，不设 IP 区——原 14 条腾讯云海外 /24 已于 2026-08-31 (R1-17) 删除，全部被 ChinaIP.list 覆盖且同为 DIRECT
 # 排序：规则类型分区，区内字母序
 
+DOMAIN,qcloud.com
 DOMAIN,slife.xy-asia.com
 
 DOMAIN-SUFFIX,001dl.cn
@@ -852,7 +853,6 @@ DOMAIN-SUFFIX,qcdntest.net
 DOMAIN-SUFFIX,qclivecdn.cn
 DOMAIN-SUFFIX,qclivecdn.com
 DOMAIN-SUFFIX,qcloud-edumall.com
-DOMAIN,qcloud.com
 DOMAIN-SUFFIX,qcloud.la
 DOMAIN-SUFFIX,qcloudapps.com
 DOMAIN-SUFFIX,qcloudcdn.cn

@@ -1,14 +1,5 @@
 # Verified domestic services, CN mirrors, certificate endpoints, and network probes.
 
-DOMAIN-SUFFIX,admaster.com.cn
-DOMAIN-SUFFIX,flashcn.cn
-DOMAIN-SUFFIX,metaso.cn
-DOMAIN-SUFFIX,pkuecon.cn
-DOMAIN-SUFFIX,sensorsdata.cn
-DOMAIN-SUFFIX,univod.cn
-DOMAIN-SUFFIX,walmart.cn
-DOMAIN-SUFFIX,xfyun.cn
-
 DOMAIN,cn.download.nvidia.com
 DOMAIN,config.ubnt.com
 DOMAIN,detectportal.firefox.com
@@ -16,13 +7,17 @@ DOMAIN,dl.ubnt.com
 DOMAIN,gstore.val.manlaxy.com
 DOMAIN,i.dell.com
 DOMAIN,kms.03k.org
+DOMAIN,longbridge.cn
 DOMAIN,lv.queniujq.cn
 DOMAIN,media.cdn.queniuqe.com
+DOMAIN,mi.com
 DOMAIN,ocsp.globalsign.com
 DOMAIN,ocsp2.globalsign.com
 DOMAIN,time.windows.com
 DOMAIN,www.intel.cn
 DOMAIN,www.layuicdn.com
+DOMAIN,www.longbridge.cn
+DOMAIN,www.mi.com
 
 DOMAIN-SUFFIX,10010.com
 DOMAIN-SUFFIX,10086.cn
@@ -86,6 +81,7 @@ DOMAIN-SUFFIX,9xiu.com
 DOMAIN-SUFFIX,abchina.com
 DOMAIN-SUFFIX,ac.cn
 DOMAIN-SUFFIX,addlink.cn
+DOMAIN-SUFFIX,admaster.com.cn
 DOMAIN-SUFFIX,admob-cn.com
 DOMAIN-SUFFIX,aicdn.com
 DOMAIN-SUFFIX,aicoinstorge.com
@@ -235,6 +231,7 @@ DOMAIN-SUFFIX,eudic.net
 DOMAIN-SUFFIX,fang.com
 DOMAIN-SUFFIX,feng.com
 DOMAIN-SUFFIX,fengkongcloud.com
+DOMAIN-SUFFIX,flashcn.cn
 DOMAIN-SUFFIX,flyme.cn
 DOMAIN-SUFFIX,flyme.com
 DOMAIN-SUFFIX,frdic.com
@@ -367,11 +364,6 @@ DOMAIN-SUFFIX,linkedin.cn
 DOMAIN-SUFFIX,ljcdn.com
 DOMAIN-SUFFIX,lkcoffee.com
 DOMAIN-SUFFIX,lltskb.com
-DOMAIN,longbridge.cn
-DOMAIN,www.longbridge.cn
-DOMAIN-SUFFIX,openapi-quote.longbridge.cn
-DOMAIN-SUFFIX,openapi-trade.longbridge.cn
-DOMAIN-SUFFIX,openapi.longbridge.cn
 DOMAIN-SUFFIX,longportapp.cn
 DOMAIN-SUFFIX,luckincoffeecdn.com
 DOMAIN-SUFFIX,ludashi.com
@@ -391,10 +383,9 @@ DOMAIN-SUFFIX,meitustat.com
 DOMAIN-SUFFIX,meixincdn.com
 DOMAIN-SUFFIX,meizu.cn
 DOMAIN-SUFFIX,meizu.com
+DOMAIN-SUFFIX,metaso.cn
 DOMAIN-SUFFIX,mi-fds.com
 DOMAIN-SUFFIX,mi-img.com
-DOMAIN,mi.com
-DOMAIN,www.mi.com
 DOMAIN-SUFFIX,mifile.cn
 DOMAIN-SUFFIX,migucloud.com
 DOMAIN-SUFFIX,mihayo.com
@@ -437,6 +428,9 @@ DOMAIN-SUFFIX,okr.com
 DOMAIN-SUFFIX,oneplus.cn
 DOMAIN-SUFFIX,oneplusbbs.com
 DOMAIN-SUFFIX,onlinedown.com
+DOMAIN-SUFFIX,openapi-quote.longbridge.cn
+DOMAIN-SUFFIX,openapi-trade.longbridge.cn
+DOMAIN-SUFFIX,openapi.longbridge.cn
 DOMAIN-SUFFIX,openinstall.io
 DOMAIN-SUFFIX,oppo.cn
 DOMAIN-SUFFIX,oppo.com
@@ -462,6 +456,7 @@ DOMAIN-SUFFIX,pinduoduo.com
 DOMAIN-SUFFIX,pinduoduo.net
 DOMAIN-SUFFIX,pingan.com
 DOMAIN-SUFFIX,pingwest.com
+DOMAIN-SUFFIX,pkuecon.cn
 DOMAIN-SUFFIX,pool.ntp.org
 DOMAIN-SUFFIX,ppio.cn
 DOMAIN-SUFFIX,ppio.com
@@ -511,6 +506,7 @@ DOMAIN-SUFFIX,sankuai.com
 DOMAIN-SUFFIX,saxyit.com
 DOMAIN-SUFFIX,secure.globalsign.com
 DOMAIN-SUFFIX,segmentfault.com
+DOMAIN-SUFFIX,sensorsdata.cn
 DOMAIN-SUFFIX,sevencdn.com
 DOMAIN-SUFFIX,sharepoint.cn
 DOMAIN-SUFFIX,siliconflow.cn
@@ -560,6 +556,7 @@ DOMAIN-SUFFIX,udache.com
 DOMAIN-SUFFIX,udesk.cn
 DOMAIN-SUFFIX,udqqimg.com
 DOMAIN-SUFFIX,unionpay.com
+DOMAIN-SUFFIX,univod.cn
 DOMAIN-SUFFIX,upaiyun.com
 DOMAIN-SUFFIX,upyun.com
 DOMAIN-SUFFIX,variflight.com
@@ -570,6 +567,7 @@ DOMAIN-SUFFIX,vmall.com
 DOMAIN-SUFFIX,vmallres.com
 DOMAIN-SUFFIX,volcvideo.com
 DOMAIN-SUFFIX,wallstreetcn.com
+DOMAIN-SUFFIX,walmart.cn
 DOMAIN-SUFFIX,wangsu.com
 DOMAIN-SUFFIX,weathercn.com
 DOMAIN-SUFFIX,webank.com
@@ -588,6 +586,7 @@ DOMAIN-SUFFIX,wpscdn.cn
 DOMAIN-SUFFIX,wpscdn.com
 DOMAIN-SUFFIX,wscn.net
 DOMAIN-SUFFIX,x3322.net
+DOMAIN-SUFFIX,xfyun.cn
 DOMAIN-SUFFIX,xhscdn.com
 DOMAIN-SUFFIX,xiachufang.com
 DOMAIN-SUFFIX,xiaoaiassist.com

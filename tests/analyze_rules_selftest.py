@@ -2,6 +2,9 @@
 """Small regression checks for topology and ChinaDomain ownership helpers."""
 
 from pathlib import Path
+import contextlib
+import io
+import json
 import sys
 import tempfile
 import unittest
@@ -91,6 +94,64 @@ class AnalyzeRulesSelfTest(unittest.TestCase):
                     "Parent.list:3": ["Child.list:3"],
                 },
             )
+
+    # A broad parent plus a different-policy child is safe or fatal purely by
+    # list order, so both cases use the same two files and differ only in the
+    # order the profile references them.
+    SPLIT_CHILD = ("Child.list", "Download", "DOMAIN,versioncheck.addons.mozilla.org\n")
+    SPLIT_PARENT = ("Parent.list", "Proxy", "DOMAIN-SUFFIX,addons.mozilla.org\n")
+
+    def run_shadow_gate(self, tmp, listing):
+        """Run the full --fail-on-shadow gate over a temp profile.
+
+        `listing` is [(list name, policy, body)] in profile order. Returns the
+        analyzer exit code and the summary diagnostics.
+        """
+        root = Path(tmp)
+        rules_dir = root / "lists"
+        rules_dir.mkdir()
+        for name, _policy, body in listing:
+            (rules_dir / name).write_text(body, encoding="utf-8")
+        conf = root / "Surge.conf"
+        conf.write_text(
+            "[Rule]\n"
+            + "".join("RULE-SET,https://rules.example/%s,%s\n" % (name, policy)
+                      for name, policy, _body in listing)
+            + "FINAL,Final\n",
+            encoding="utf-8")
+        expired = root / "expired.txt"
+        expired.write_text("", encoding="utf-8")
+        out = root / "out"
+        argv = ["analyze_rules.py", "--conf", str(conf), "--rules", str(rules_dir),
+                "--psl", str(ROOT / "tests/data/public_suffix_list.dat"),
+                "--expired", str(expired), "--out", str(out), "--fail-on-shadow"]
+        saved = sys.argv
+        sys.argv = argv
+        try:
+            with contextlib.redirect_stdout(io.StringIO()):
+                code = analyze_rules.main()
+        finally:
+            sys.argv = saved
+        summary = json.loads((out / "summary.json").read_text(encoding="utf-8"))
+        return code, summary["diagnostics"]
+
+    def test_ordered_safe_split_passes_shadow_gate(self):
+        with tempfile.TemporaryDirectory(prefix="ordered-safe-selftest-") as tmp:
+            code, diagnostics = self.run_shadow_gate(
+                tmp, [self.SPLIT_CHILD, self.SPLIT_PARENT])
+            self.assertEqual(code, 0)
+            self.assertEqual(diagnostics["ordered_safe_split_parents"], ["Parent.list:1"])
+            self.assertEqual(diagnostics["order_unsafe_split_parents"], [])
+            self.assertEqual(diagnostics["shadowed_or_conflicting_rules"], 0)
+
+    def test_order_unsafe_split_fails_shadow_gate(self):
+        with tempfile.TemporaryDirectory(prefix="order-unsafe-selftest-") as tmp:
+            code, diagnostics = self.run_shadow_gate(
+                tmp, [self.SPLIT_PARENT, self.SPLIT_CHILD])
+            self.assertEqual(code, 1)
+            self.assertEqual(diagnostics["order_unsafe_split_parents"], ["Parent.list:1"])
+            self.assertEqual(diagnostics["ordered_safe_split_parents"], [])
+            self.assertEqual(diagnostics["shadowed_or_conflicting_rules"], 1)
 
     def test_f2_rejects_broad_suffixes_owned_by_non_direct_rules(self):
         with tempfile.TemporaryDirectory(prefix="regen-ownership-selftest-") as tmp:

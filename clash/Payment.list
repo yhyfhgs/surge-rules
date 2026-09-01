@@ -3,8 +3,6 @@
 
 # International payment services requiring a stable exit; ecosystem-owned payment surfaces stay with their owner.
 
-DOMAIN-SUFFIX,code.buywithprime.amazon.com
-
 DOMAIN-SUFFIX,2checkout.com
 DOMAIN-SUFFIX,2co.com
 DOMAIN-SUFFIX,adyen.com
@@ -23,6 +21,7 @@ DOMAIN-SUFFIX,chargebee.com
 DOMAIN-SUFFIX,chargebeestaticv2.com
 DOMAIN-SUFFIX,checkout.com
 DOMAIN-SUFFIX,clearpay.co.uk
+DOMAIN-SUFFIX,code.buywithprime.amazon.com
 DOMAIN-SUFFIX,discover.com
 DOMAIN-SUFFIX,discovercard.com
 DOMAIN-SUFFIX,discoverglobalnetwork.com
