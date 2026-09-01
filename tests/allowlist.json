@@ -241,6 +241,13 @@
       "reason": "B2/2026-08-30 裁决（AI 会话同出口优先于组件归属）：todesktop.com 是通用 Electron 应用打包/更新分发平台，但本机在用的 AI 桌面端（Cursor 等）用它做增量更新，与应用本体同出口更稳。刻意留在 AI 组。"
     },
     {
+      "check": "A3",
+      "file": "MicrosoftCN.list",
+      "rule": "DOMAIN,view.officeapps.live.com",
+      "by": "DOMAIN-SUFFIX,officeapps.live.com",
+      "reason": "裁决锚点：CHANGELOG 2026-08-31 OneDrive 投毒止血，禁删；行为由 ms_boundary 断言锁定。2026-09-01 批次 3 清理同表冗余时，本条是唯一保留的被覆盖窄条目——它显式记录「office 系 live.com 子树仍 DIRECT」这一与 Microsoft.list 的 onedrive.live.com 窄豁免相对的边界，删掉会让该边界只剩隐式表达。同表同策略，保留无分流代价。"
+    },
+    {
       "check": "A9",
       "file": "ChinaIP.list",
       "by_file": "AppleCN.list",

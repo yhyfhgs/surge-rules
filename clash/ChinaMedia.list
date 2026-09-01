@@ -57,8 +57,6 @@ DOMAIN,3geauymtsgrzdrcbzfahuk.ourdvsss.com
 DOMAIN,4go41hcjtgazdoctqge4o.ourdvsss.com
 DOMAIN,apd-pcdnvodstat.teg.tencent-cloud.net
 DOMAIN,aqqmusic.tc.qq.com
-DOMAIN,cache.video.iqiyi.com
-DOMAIN,data.video.iqiyi.com
 DOMAIN,dldir1.qq.com
 DOMAIN,iacc.qq.com
 DOMAIN,ins-eeww7kom.ias.tencent-cloud.net
@@ -70,7 +68,6 @@ DOMAIN,v.streaming.qq.com
 DOMAIN,video-public-1258344701.shiply-cdn.qq.com
 DOMAIN,video-search-1258344701.shiply-cdn.qq.com
 DOMAIN,video-vip-1258344701.shiply-cdn.qq.com
-DOMAIN,www.iqiyi.com
 DOMAIN,yoo.gtimg.com
 
 DOMAIN-SUFFIX,00y9334535.com
@@ -830,7 +827,6 @@ DOMAIN-SUFFIX,uoevtxmx.com
 DOMAIN-SUFFIX,uomrcipa.com
 DOMAIN-SUFFIX,upeaoktc.com
 DOMAIN-SUFFIX,upos-hz-mirrorakam.akamaized.net
-DOMAIN-SUFFIX,upos-sz-mirrorcos.bilivideo.com
 DOMAIN-SUFFIX,uposdash-302-bilivideo.yfcdn.net
 DOMAIN-SUFFIX,urmuyhz.com
 DOMAIN-SUFFIX,urpwcei.com

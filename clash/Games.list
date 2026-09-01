@@ -12,7 +12,6 @@ DOMAIN,pf-cdn-content-prod.azureedge.net
 DOMAIN,steampipe-partner.secure2.footprint.net
 DOMAIN,steampowered.com
 DOMAIN,store-images.s-microsoft.com
-DOMAIN,www.blizzard.com
 
 DOMAIN-SUFFIX,100classicbooks.com
 DOMAIN-SUFFIX,ac-pocketcamp.com

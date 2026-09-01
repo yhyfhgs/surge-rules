@@ -4,6 +4,62 @@
 
 ---
 
+## [2026-09-01·冗余清理] 同表冗余收尾:删 28 条被同表宽父完全覆盖的窄条目
+
+**来源**:同日「FINAL 漏斗回归纠正」把 13 个注册域顶点升回 `DOMAIN-SUFFIX` 后,
+这些表里原有的窄枚举条目就被**同一张表内**的宽父完全吞掉了——两条同策略、同表,
+靠前者生效、另一条永不单独生效。audit 的 A3 因此报出 11 组 P2 同表冗余(共 29 条)。
+行为上无害,但它们白占规则表体积、扩大合并冲突面,本批次一次性清掉。
+
+**口径**:被删域名的落点由同表宽父原样承接,分流结果零变化;行为锚点历来由
+`tests/scenarios/` 的场景断言承担,不由冗余行承担,故断言一条未改未删,
+3,099 条全绿且输出与清理前逐字节相同。
+
+### Removed
+- **28 条同表冗余条目**,逐表分布:`AppleCN` 10 条(`beta`/`gs-loc`/`init.itunes`/
+  `ocsp`/`ocsp2`/`smp-device`/`testflight`/`time`/`www.apple.com` 九条 `DOMAIN`
+  与 `DOMAIN-SUFFIX,smoot.apple.com`,均由 `DOMAIN-SUFFIX,apple.com` 覆盖);
+  `MicrosoftCN` 11 条(`office.net` 覆盖 7 条、`windowsupdate.com` 覆盖 2 条、
+  `1drv.com` / `delivery.mp.microsoft.com` 各覆盖 1 条);`ChinaMedia` 4 条
+  (`iqiyi.com` 覆盖 3 条、`bilivideo.com` 覆盖 1 条);`AI` 1 条
+  (`api.hf.co` ⊂ `hf.co`);`Games` 1 条(`www.blizzard.com` ⊂ `blizzard.com`);
+  `AlibabaCN` 1 条(`dashscope.aliyuncs.com` ⊂ `aliyuncs.com`)。
+  按类型计:`DOMAIN` −19、`DOMAIN-SUFFIX` −9,IP 面一条未动。
+- **`clash/` 6 张表随 `lists/` 再生**,39 表 **141,679 → 141,651 条**。
+
+### Kept
+- **`MicrosoftCN.list` 的 `DOMAIN,view.officeapps.live.com` 保留**,是 11 组里唯一的
+  例外。依据 2026-08-31「OneDrive 投毒止血」裁决明文「**禁止扩宽为 `live.com`,
+  禁止删除**」:该条与 `Microsoft.list` 的窄豁免 `onedrive.live.com` 互为对照,
+  显式记录「office 系 `live.com` 子树仍 DIRECT」这条边界,删掉就只剩隐式表达。
+  行为由 `ms_boundary` 断言锁定。
+- 为它在 `tests/allowlist.json` 新增 A3 豁免一条(exemptions 43 → 44),
+  匹配三元组 `A3 / MicrosoftCN.list / DOMAIN,view.officeapps.live.com`,
+  并以 `by: DOMAIN-SUFFIX,officeapps.live.com` 收窄豁免面,理由里写明裁决锚点。
+  非 `preventive`——它每次运行都应命中,`allowlist_unused` 仍为 0。
+
+### Verified
+- `audit.py` 退出 0:A3 原始命中 29 → 1(即保留的那条),经豁免后 **A3 未豁免归零**;
+  全库未豁免 14 → **3 条,且全部为 P3**(A6 两条、A9 一条,与清理前同一组),
+  P0/P1/P2 均为 0;已豁免 62 → 63,`allowlist_unused` 0、`allowlist_pending` 空。
+- `runsuite.py` 退出 0:227 场景 / 1,644 请求 / **3,099 断言全绿**,
+  DNS 泄漏断言 1,326 条 0 失败,输出与清理前逐字节相同(仅 conf 路径行不同)。
+- `analyze_rules --fail-on-shadow` plain 与 MMDB 两侧均退出 0。规则 141,679 → 141,651
+  (−28,与实际删除数吻合)。拓扑面变化只有三处,且都是删冗余的定义性后果:
+  `covers` 关系 476 → 448(plain)/ 1,859 → 1,831(MMDB),
+  `redundant-coverage` 317 → 289(plain)/ 366 → 338(MMDB),各减 28——
+  每条被删规则原本恰好贡献一条「被同表宽父覆盖」关系;
+  聚合权重 `aggregate_pairs` 3,575,469 → 3,575,213(−256)是 Reject / TikTok(各 10 条
+  关键词与通配规则)、Streaming(6 条)、DownloadCDN、ProxyGFW 与被删的 9 条
+  `DOMAIN-SUFFIX` 之间的句法交集逐条消失,拆解后恰好 90+90+54+13+9=256,
+  属计数面而非拓扑面。
+  其余逐项相等:`shadowed_or_conflicting_rules` 0、`split_apex_rules` 59、
+  拓扑约束 24(plain)/ 41(MMDB)、无环、碎片注册域 118、
+  `order_unsafe_split_apex` / `order_unsafe_split_parents` 均空,
+  ordered-safe 顶点仍是同一组 13 / 14 条(行号引用随删行上移,规则原文逐条比对全等)。
+- `sort_lists --check` 39/39 绿——只删行,类型桶结构与桶间空行未受影响;
+  `surge2clash --check` 一致、`render_surge_rules --check` 一致。
+
 ## [2026-09-01·重排] 表内类型分组 + conf 分区呈现
 
 **动机**:单张 `.list` 里 `DOMAIN` 与 `DOMAIN-SUFFIX` 历来交错书写(ProxyGFW 按注册域族

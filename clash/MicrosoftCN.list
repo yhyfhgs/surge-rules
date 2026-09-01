@@ -4,7 +4,6 @@
 # MicrosoftCN — 已验证可直连的微软国内 CDN、更新与 Office 端点
 
 DOMAIN,al.msn.com
-DOMAIN,by3301-a.1drv.com
 DOMAIN,c.live.com
 DOMAIN,config.office.com
 DOMAIN,g.live.com
@@ -17,12 +16,7 @@ DOMAIN,office.com
 DOMAIN,outlook.office.com
 DOMAIN,people.live.com
 DOMAIN,profile.live.com
-DOMAIN,res-1.cdn.office.net
-DOMAIN,res-2.cdn.office.net
-DOMAIN,res-h3.public.cdn.office.net
-DOMAIN,res.cdn.office.net
 DOMAIN,sa.msn.com
-DOMAIN,statics.teams.cdn.office.net
 DOMAIN,storage.live.com
 DOMAIN,support.office.com
 DOMAIN,templates.office.com
@@ -36,21 +30,16 @@ DOMAIN-SUFFIX,azuremigrate.download.prss.microsoft.com
 DOMAIN-SUFFIX,azuremigratetest.download.prss.microsoft.com
 DOMAIN-SUFFIX,azurestackhub.download.prss.microsoft.com
 DOMAIN-SUFFIX,azurestackhubuat.download.prss.microsoft.com
-DOMAIN-SUFFIX,b.c2r.ts.cdn.office.net
 DOMAIN-SUFFIX,cbdstest.download.prss.microsoft.com
 DOMAIN-SUFFIX,cn.windowssearch.com
 DOMAIN-SUFFIX,collaborate.download.prss.microsoft.com
 DOMAIN-SUFFIX,collaborateppe.download.prss.microsoft.com
 DOMAIN-SUFFIX,crl.microsoft.com
-DOMAIN-SUFFIX,ctldl.windowsupdate.com
 DOMAIN-SUFFIX,delivery.mp.microsoft.com
-DOMAIN-SUFFIX,dl.delivery.mp.microsoft.com
 DOMAIN-SUFFIX,download.microsoft.com
 DOMAIN-SUFFIX,download.visualstudio.microsoft.com
-DOMAIN-SUFFIX,download.windowsupdate.com
 DOMAIN-SUFFIX,dreamspark.download.prss.microsoft.com
 DOMAIN-SUFFIX,dreamsparkuat.download.prss.microsoft.com
-DOMAIN-SUFFIX,f.c2r.ts.cdn.office.net
 DOMAIN-SUFFIX,itacademy.download.prss.microsoft.com
 DOMAIN-SUFFIX,itacademyuat.download.prss.microsoft.com
 DOMAIN-SUFFIX,lex.download.prss.microsoft.com
