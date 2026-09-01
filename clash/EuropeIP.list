@@ -1,9 +1,0 @@
-# AUTO-GENERATED — Clash(Mihomo) classical 规则，由 ../lists/EuropeIP.list 派生
-# 勿手工编辑；修改 Surge 源后运行 python3 tools/surge2clash.py 重新生成
-
-# EuropeIP — 欧洲 IP fallback（当前可用出口：CH/DE/FR/NL）
-
-GEOIP,CH,no-resolve
-GEOIP,DE,no-resolve
-GEOIP,FR,no-resolve
-GEOIP,NL,no-resolve

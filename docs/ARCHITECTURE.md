@@ -40,54 +40,42 @@ Consequences:
 The only general exception is the immutable security ordering: local/system rules
 and `Reject` precede ordinary routing owners.
 
-## Domain and IP phases
+## Section topology
 
-Mixed regional lists caused regional domains to sit behind `ProxyGFW` merely to
-protect earlier exact IP rules. The topology now separates those concerns.
-
-### Domain phase
+The manifest groups the 34 lists into six user-defined sections. Order across
+sections is load-bearing; order inside a policy-uniform run is not.
 
 ```text
-local/security
-→ precise download/media exceptions
-→ service owners
-→ domestic direct
-   (verified Apple/Microsoft CN endpoints, then curated domestic lists)
-→ regional domains
-→ residual ProxyGFW
-→ generated ChinaDomain
+0 局域直连        PrivateLAN, PKU
+1 广告/恶意拦截    Reject
+2 下载            GameDownloadCN, ModelDownloadCDN, DownloadCDN
+3 代理            service owners (YouTube … Payment), then residual ProxyGFW
+4 国内直连        AppleCN … NetEaseCN, generated ChinaDomain, ChinaIP
+5 地区分流        Japan, US, UK, Europe   (each a domain + IP hybrid list)
+→ built-in LAN / GEOIP,CN / FINAL
 ```
 
-The nine domestic-direct lists form one contiguous run. The vendor CN endpoints
-and the curated domestic lists share a policy and had no ordering constraint
-against the regional lists that once sat between them, so the split was
-decorative; clustering them keeps the phase boundary where a policy actually
-changes. Order within each run is unchanged.
+Download-plane lists precede the service owners because their narrow rules must
+beat broader service suffixes (`GameDownloadCN` < `Games`, `ModelDownloadCDN` <
+`AI`). `ProxyGFW` closes the proxy section: it is domain-only, holds no
+PSL-boundary suffixes or cloud CIDRs, has no cross-policy intersection with the
+domestic or regional lists that follow it, and still precedes `ChinaDomain`,
+which is what the poisoned-domain protection actually requires. It does hold
+whole multi-tenant namespaces whose platforms are blocked outright; see the
+contract below.
 
-Regional domains therefore win before generic GFW routing. `ProxyGFW` is
-domain-only and contains no PSL-boundary suffixes and no generic cloud CIDRs. It
-does hold whole multi-tenant namespaces whose platforms are blocked outright;
-see the contract below.
-
-### IP phase
-
-```text
-service-owned IP/ASN rules
-→ ChinaIP
-→ regional ASN/GEOIP fallbacks
-→ built-in LAN/GEOIP CN
-→ FINAL
-```
-
-The ChinaIP-before-GeoIP order is deliberate. The pinned Surge GeoLite databases
-contain regional selectors that intersect ChinaIP-owned ranges; placing regional
-GeoIP first would send those CN ranges abroad. The LINE/LY ranges are kept as
-explicit CIDRs inside `JapanIP` — ahead of that list's own ASN/GEOIP fallback, so
-a GeoIP-database drift cannot lose them — and they have zero intersection with
+Each regional list carries both its domains and its IP fallback (explicit CIDRs,
+then ASN, then GEOIP — every IP line with `no-resolve`). The regional section
+sits after `ChinaIP` deliberately: the pinned GeoLite databases contain regional
+selectors that intersect ChinaIP-owned ranges, and placing regional GeoIP first
+would send those CN ranges abroad. Within the section `Japan` leads, because
+MaxMind marks part of the verified LINE/LY CIDRs as US and `GEOIP,US` would
+otherwise capture them. Those LINE/LY ranges stay as explicit CIDRs inside
+`Japan` — immune to GeoIP-database drift — and have zero intersection with
 ChinaIP, a property the A9 cross-policy gate keeps guarded.
 
-All IP-class rules use `no-resolve`. A domain request therefore skips the IP
-phase without local DNS resolution.
+All IP-class rules use `no-resolve`. A domain request therefore skips every IP
+rule without local DNS resolution.
 
 ## `ProxyGFW` contract
 

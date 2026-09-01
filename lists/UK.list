@@ -1,4 +1,4 @@
-# UK — 英国服务域名；BBC 英国播放面归本表，IP fallback 见 UKIP.list
+# UK — 英国服务域名与 IP 兜底；BBC 英国播放面归本表
 
 DOMAIN,aod-dash-uk-live.akamaized.net
 DOMAIN,aod-hls-uk-live.akamaized.net
@@ -61,3 +61,5 @@ DOMAIN-SUFFIX,virginmedia.com
 DOMAIN-SUFFIX,virginmediatvanywhere.com
 DOMAIN-SUFFIX,vodafone.co.uk
 DOMAIN-SUFFIX,voxi.co.uk
+
+GEOIP,GB,no-resolve

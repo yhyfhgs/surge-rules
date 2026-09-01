@@ -1,4 +1,4 @@
-# US — 美国服务域名；IP fallback 见 USIP.list
+# US — 美国服务域名与 IP 兜底
 
 DOMAIN-SUFFIX,att.com
 DOMAIN-SUFFIX,att.net
@@ -59,3 +59,5 @@ DOMAIN-SUFFIX,verizonwireless.com
 DOMAIN-SUFFIX,visible.com
 DOMAIN-SUFFIX,walmart.com
 DOMAIN-SUFFIX,wellsfargo.com
+
+GEOIP,US,no-resolve

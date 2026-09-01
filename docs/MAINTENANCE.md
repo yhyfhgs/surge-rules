@@ -114,8 +114,10 @@ own list ahead of ChinaIP when the two actually intersect; when they are disjoin
 the range belongs in the regional list it shares a policy with, as an explicit
 CIDR ahead of that list's ASN/GEOIP bucket. The LINE/LY ranges are the worked
 example — 12 CIDRs, zero intersection with all 11,088 ChinaIP segments, so they
-live in `JapanIP` rather than in a list of their own. Recompute that disjointness
-before moving any CIDR across the ChinaIP boundary; A9 rejects a regression.
+live in `Japan` rather than in a list of their own; `Japan` also leads the
+regional section because MaxMind marks part of those CIDRs as US. Recompute that
+disjointness before moving any CIDR across the ChinaIP boundary; A9 rejects a
+regression.
 
 ### ProxyGFW expiry
 

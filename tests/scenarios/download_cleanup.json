@@ -491,10 +491,6 @@
         "note": "正例：*-files.gitbook.io（GitBook 文件面）"
       },
       {
-        "host": "image-res.cloudinary.com",
-        "note": "正例：*-res.cloudinary.com"
-      },
-      {
         "host": "99avcdn.com",
         "note": "正例：99avcdn* 左锚定命名族"
       },
@@ -572,10 +568,6 @@
         },
         {
           "host": "docs-files.gitbook.io",
-          "policy": "下载"
-        },
-        {
-          "host": "image-res.cloudinary.com",
           "policy": "下载"
         },
         {

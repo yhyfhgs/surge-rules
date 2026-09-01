@@ -4,6 +4,48 @@
 
 ---
 
+## [2026-09-01·用户排法] 六分区聚类 + 地区表域名/IP 合并(34 表),吸收用户手写 conf 排法
+
+**来源与事故披露**:用户曾直接手改活动 `Surge.conf` 的 `[Rule]` 段(六个自命名分区、
+按国家配对地区表、下载聚合、ProxyGFW 收进代理区尾),该版本在上一批次被误判为
+「渲染滞后」而覆盖 —— 备份存于 `Profiles/Backup/Surge.conf.user-edit-20260901.bak`。
+经用户裁决,本批次把该排法**正式吸收进 `config/routing.json`**(manifest 是 `[Rule]`
+的唯一真源,手改 conf 无法存续,这也是事故根源)。
+
+### Changed
+- **manifest 重排为用户六分区**:局域直连 → 广告/恶意拦截 → 下载(GameDownloadCN,
+  ModelDownloadCDN,**DownloadCDN 提前**) → 代理(服务生态 13 张,**ProxyGFW 收尾**) →
+  国内直连(AppleCN…NetEaseCN,ChinaDomain,ChinaIP 共 11 张连续 DIRECT) →
+  地区分流(Japan,US,UK,Europe)。72 个翻转表对经关系检索:仅 6 组有跨策略记录,
+  其中 4 组(270 条)为 wildcard×wildcard 的纯语法假想交集,零现实风险。
+- **地区表合并为域名+IP 混合表**(用户指示):JapanIP(18 条,含 LINE/LY 12 CIDR)、
+  USIP、UKIP、EuropeIP 并入对应地区表的 IP 桶后删除,**39→34 表**;行级
+  `no-resolve` 原样保留(A1 红线),manifest 不再需要表级 `no_resolve`(Streaming
+  混合表先例)。**区内 Japan 居首**:MaxMind 把部分 LINE CIDR 判为 US,若 US 在前
+  `GEOIP,US` 会抢走属地锁段;Japan 居首同时让日本运营商 ASN 的全球段维持既有落点,
+  本批次地区 IP 行为零变化。
+- **删除 2 条多租户 wildcard(翻转冲突的真实来源)**:`DownloadCDN` 的
+  `*-res.cloudinary.com`(翻转后会抢走 AI 的 `pplx-res.cloudinary.com`,且与 S3
+  租户边界判例同构)与 `cdn.*.office.net`(会抢走 Microsoft 的
+  `cdn.designerapp.osi.office.net`;office CDN 长尾由 MicrosoftCN 的 `office.net`
+  承接,落点从「下载(可切)」收敛为恒 DIRECT,与 res*.cdn 锁死判例一致)。
+  **随动断言**:`download_cleanup` 中该 wildcard 的正例一对
+  (`image-res.cloudinary.com`)随规则删除而移除 —— 正例的存在意义就是验证该规则;
+  防伪造负例(`image-res.cloudinary.com.thief.net`→Final)保留。
+- conf 重渲染落盘(mtime 实证)+ `render --check` 通过;clash/ 再生(34 表,删 4 个
+  陈旧派生)。
+
+### Verified
+- analyzer plain+MMDB `--fail-on-shadow` 双 exit 0:141,649 条(141,651−2)全 accounted,
+  **order_unsafe 全零**(翻转安全性的机器兜底),shadow/cycles/GFW 三闸门全空,
+  约束 24/41,ordered-safe 顶点仍为同一组(13/14);runsuite 227 场景/1,643 请求/
+  **3,097 断言全绿**(3,099−2,即随动删除的一对),DNS 泄漏 1,325 条 0 失败;
+  audit 未豁免仍 3 条 P3;sort_lists 34/34;surge2clash 守恒;surge-cli OK。
+- 落点抽测 16/16:翻转修复生效(pplx-res→AI、designerapp→Microsoft)、
+  护栏保持(music.apple.com→流媒体、odc.officeapps→Google-X-Meta-MS、
+  storage.googleapis.com→Final)、地区表后置仍做功(welt.de/mixi.jp/standard.co.uk)、
+  LINE IP `103.2.28.1`→日本节点、既有修复零回退。
+
 ## [2026-09-01·仓库精简] 删历史诊断文档与 module/script 脚手架,tests/README 减 70%
 
 **动机**:仓库里堆着三类没有消费者的东西 —— 结论已经进 `ARCHITECTURE`/`CHANGELOG` 的

@@ -1,7 +1,7 @@
 # AUTO-GENERATED — Clash(Mihomo) classical 规则，由 ../lists/US.list 派生
 # 勿手工编辑；修改 Surge 源后运行 python3 tools/surge2clash.py 重新生成
 
-# US — 美国服务域名；IP fallback 见 USIP.list
+# US — 美国服务域名与 IP 兜底
 
 DOMAIN-SUFFIX,att.com
 DOMAIN-SUFFIX,att.net
@@ -62,3 +62,5 @@ DOMAIN-SUFFIX,verizonwireless.com
 DOMAIN-SUFFIX,visible.com
 DOMAIN-SUFFIX,walmart.com
 DOMAIN-SUFFIX,wellsfargo.com
+
+GEOIP,US,no-resolve

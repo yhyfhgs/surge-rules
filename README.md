@@ -22,20 +22,16 @@ Current verified baseline:
 
 ## Routing model
 
-Surge is first-match-wins. The manifest orders rules into explicit domain and IP
-phases:
+Surge is first-match-wins. The manifest groups the 34 lists into six sections:
 
-| Phase | Lists | Purpose |
+| Section | Lists | Purpose |
 |---|---|---|
-| Local/security | PrivateLAN, PKU, Reject | Local traffic and global reject overrides |
-| Precise exceptions | GameDownloadCN, ModelDownloadCDN, YouTube | Narrow rules before their broader owners |
-| Service owners | Google, Twitter, Meta, Microsoft, AI, TikTok, SocialOthers, Telegram, Streaming, Games, DownloadCDN, Payment | Stable service/session ownership |
-| Domestic direct | AppleCN, MicrosoftCN, Domestic, ChinaMedia, TencentCN, AlibabaCN, ByteDanceCN, BaiduCN, NetEaseCN | Explicit CN-reachable vendor endpoints and curated domestic ownership, in one contiguous DIRECT run |
-| Regional domains | Japan, UK, Europe, US | Region-bound sites before generic proxy fallback |
-| Residual proxy | ProxyGFW | Domain-only rules that are verified to require proxying and fit no owner list |
-| Machine domain fallback | ChinaDomain | Generated domestic long tail after explicit proxy exceptions |
-| CN IP | ChinaIP | Authoritative CN ranges before GeoLite regional fallback |
-| Regional IP fallback | JapanIP, UKIP, EuropeIP, USIP | ASN/GEOIP routing for remaining literal-IP traffic; `JapanIP` also carries the verified LINE/LY CIDRs, which are disjoint from ChinaIP |
+| 局域直连 | PrivateLAN, PKU | Local and campus traffic |
+| 广告/恶意拦截 | Reject | Global reject overrides |
+| 下载 | GameDownloadCN, ModelDownloadCDN, DownloadCDN | Bulk-download planes whose narrow rules must beat broader service owners |
+| 代理 | YouTube, Google, Twitter, Meta, Microsoft, AI, TikTok, SocialOthers, Telegram, Streaming, Games, Payment, ProxyGFW | Service/session ownership, closed by the domain-only proxy residual |
+| 国内直连 | AppleCN, MicrosoftCN, Domestic, ChinaMedia, TencentCN, AlibabaCN, ByteDanceCN, BaiduCN, NetEaseCN, ChinaDomain, ChinaIP | One contiguous DIRECT run: vendor CN endpoints, curated domestic, generated long tail, authoritative CN ranges |
+| 地区分流 | Japan, US, UK, Europe | Region-bound domains plus each region's IP fallback in one hybrid list; sits after ChinaIP so GeoLite selectors cannot pull CN ranges abroad, with Japan first so `GEOIP,US` cannot capture the LINE/LY CIDRs |
 | Terminal | LAN, GEOIP CN, FINAL | Built-in safety and unmatched traffic |
 
 `ProxyGFW` uses `Proxy`; terminal `FINAL` uses `Final`. They are deliberately
