@@ -1,0 +1,445 @@
+[
+  {
+    "name": "dev_supabase_backend_cloud",
+    "desc": "Supabase 现代化 Backend-as-a-Service 云端控制台与 API",
+    "requests": [
+      {
+        "host": "supabase.com",
+        "note": "Supabase 官网与控制台 (ProxyGFW)"
+      },
+      {
+        "host": "api.supabase.com",
+        "note": "Supabase API 服务 (ProxyGFW)"
+      },
+      {
+        "host": "app.supabase.com",
+        "note": "Supabase 控制面板 (ProxyGFW)"
+      },
+      {
+        "host": "docs.supabase.com",
+        "note": "Supabase 官方文档 (ProxyGFW)"
+      },
+      {
+        "host": "auth.supabase.com",
+        "note": "Supabase Auth 鉴权服务 (ProxyGFW)"
+      }
+    ],
+    "assert": {
+      "same_policy": true,
+      "policy": "Proxy",
+      "no_dns_leak": true
+    }
+  },
+  {
+    "name": "dev_vercel_edge_and_storage",
+    "desc": "Vercel 前端云平台：主站走 Proxy 代理，框架 API 与 Blob 大文件存储走 DownloadCDN",
+    "requests": [
+      {
+        "host": "vercel.com",
+        "note": "Vercel 官网与控制台"
+      },
+      {
+        "host": "api-frameworks.vercel.sh",
+        "note": "Vercel 框架构建 API (DownloadCDN)"
+      },
+      {
+        "host": "public.blob.vercel-storage.com",
+        "note": "Vercel Blob 对象存储 (DownloadCDN)"
+      },
+      {
+        "host": "openapi.vercel.sh",
+        "note": "Vercel OpenAPI 规范 (DownloadCDN)"
+      }
+    ],
+    "assert": {
+      "same_policy": false,
+      "no_dns_leak": true,
+      "per_request": [
+        {
+          "host": "vercel.com",
+          "policy": "Proxy",
+          "reason": "ProxyGFW.list 代理出站"
+        },
+        {
+          "host": "api-frameworks.vercel.sh",
+          "policy": "下载",
+          "reason": "DownloadCDN.list 下载加速"
+        },
+        {
+          "host": "public.blob.vercel-storage.com",
+          "policy": "下载",
+          "reason": "DownloadCDN.list 下载加速"
+        },
+        {
+          "host": "openapi.vercel.sh",
+          "policy": "下载",
+          "reason": "DownloadCDN.list 下载加速"
+        }
+      ]
+    }
+  },
+  {
+    "name": "dev_jetbrains_ecosystem_fine_split",
+    "desc": "JetBrains 开发者工具链：AI 助手走 AI，安装包与插件市场走下载，国内加速走直连",
+    "requests": [
+      {
+        "host": "jetbrains.ai",
+        "note": "JetBrains AI Assistant 专有模型服务"
+      },
+      {
+        "host": "download.jetbrains.com",
+        "note": "IDE 主程序安装包下载"
+      },
+      {
+        "host": "downloads.marketplace.jetbrains.com",
+        "note": "插件市场分发 CDN"
+      },
+      {
+        "host": "cdn.jetbrains.com",
+        "note": "国内直连静态前端 CDN"
+      }
+    ],
+    "assert": {
+      "same_policy": false,
+      "no_dns_leak": true,
+      "per_request": [
+        {
+          "host": "jetbrains.ai",
+          "policy": "AI",
+          "reason": "AI.list 专属 AI 策略组"
+        },
+        {
+          "host": "download.jetbrains.com",
+          "policy": "下载",
+          "reason": "DownloadCDN.list 下载策略组"
+        },
+        {
+          "host": "downloads.marketplace.jetbrains.com",
+          "policy": "下载",
+          "reason": "DownloadCDN.list 下载策略组"
+        },
+        {
+          "host": "cdn.jetbrains.com",
+          "policy": "DIRECT",
+          "reason": "ChinaDomain.list 国内直连"
+        }
+      ]
+    }
+  },
+  {
+    "name": "dev_pypi_and_python_ecosystem",
+    "desc": "Python 开发者生态：包索引与下载分发走 DownloadCDN，官网与文档走 Proxy",
+    "requests": [
+      {
+        "host": "pypi.org",
+        "note": "PyPI 官方包索引"
+      },
+      {
+        "host": "files.pythonhosted.org",
+        "note": "Python Wheel/Tarball 源码分发 CDN"
+      },
+      {
+        "host": "python.org",
+        "note": "Python 官方主站"
+      },
+      {
+        "host": "docs.python.org",
+        "note": "Python 官方在线文档"
+      }
+    ],
+    "assert": {
+      "same_policy": false,
+      "no_dns_leak": true,
+      "per_request": [
+        {
+          "host": "pypi.org",
+          "policy": "下载",
+          "reason": "DownloadCDN.list 下载加速"
+        },
+        {
+          "host": "files.pythonhosted.org",
+          "policy": "下载",
+          "reason": "DownloadCDN.list 下载加速"
+        },
+        {
+          "host": "python.org",
+          "policy": "Proxy",
+          "reason": "ProxyGFW.list 代理出站"
+        },
+        {
+          "host": "docs.python.org",
+          "policy": "Proxy",
+          "reason": "ProxyGFW.list 代理出站"
+        }
+      ]
+    }
+  },
+  {
+    "name": "dev_crates_io_and_rust_toolchain",
+    "desc": "Rust 语言生态：Crates.io 包索引、Rustup 工具链分发与 Docs.rs 在线文档",
+    "requests": [
+      {
+        "host": "crates.io",
+        "note": "Cargo 官方包索引"
+      },
+      {
+        "host": "static.rust-lang.org",
+        "note": "Rustup 编译器静态包下载"
+      },
+      {
+        "host": "docs.rs",
+        "note": "Rust Crates 自动构建文档托管"
+      }
+    ],
+    "assert": {
+      "same_policy": true,
+      "policy": "下载",
+      "no_dns_leak": true
+    }
+  },
+  {
+    "name": "dev_npmjs_javascript_registry",
+    "desc": "Node.js npm 全球包管理器注册表与分发网络",
+    "requests": [
+      {
+        "host": "npmjs.org",
+        "note": "npm 官方主站"
+      },
+      {
+        "host": "npmjs.com",
+        "note": "npm Web 门户"
+      },
+      {
+        "host": "registry.npmjs.org",
+        "note": "npm CLI 核心包下载端点"
+      }
+    ],
+    "assert": {
+      "same_policy": true,
+      "policy": "下载",
+      "no_dns_leak": true
+    }
+  },
+  {
+    "name": "dev_docker_hub_container_registry",
+    "desc": "Docker Hub 容器镜像仓库：认证中心、镜像层拉取与 Web 门户",
+    "requests": [
+      {
+        "host": "docker.com",
+        "note": "Docker 官网"
+      },
+      {
+        "host": "docker.io",
+        "note": "Docker 镜像引用根"
+      },
+      {
+        "host": "registry-1.docker.io",
+        "note": "Docker Daemon 镜像层下载"
+      },
+      {
+        "host": "hub.docker.com",
+        "note": "Docker Hub 网页仓库"
+      }
+    ],
+    "assert": {
+      "same_policy": true,
+      "policy": "下载",
+      "no_dns_leak": true
+    }
+  },
+  {
+    "name": "dev_github_microsoft_ecosystem",
+    "desc": "GitHub 代码托管平台：Web 界面、API、静态资产与 Raw 原始代码仓库",
+    "requests": [
+      {
+        "host": "github.com",
+        "note": "GitHub 网页版"
+      },
+      {
+        "host": "api.github.com",
+        "note": "GitHub REST/GraphQL API"
+      },
+      {
+        "host": "githubassets.com",
+        "note": "GitHub UI 静态资产"
+      },
+      {
+        "host": "raw.githubusercontent.com",
+        "note": "GitHub Raw 代码内容"
+      },
+      {
+        "host": "gist.github.com",
+        "note": "GitHub Gist 代码片段"
+      },
+      {
+        "host": "avatars.githubusercontent.com",
+        "note": "GitHub 用户头像"
+      }
+    ],
+    "assert": {
+      "same_policy": true,
+      "policy": "Google-X-Meta-MS",
+      "no_dns_leak": true
+    }
+  },
+  {
+    "name": "dev_gitlab_devops_platform",
+    "desc": "GitLab DevOps 平台：官方云端托管与在线文档",
+    "requests": [
+      {
+        "host": "gitlab.com",
+        "note": "GitLab SaaS 主站"
+      },
+      {
+        "host": "about.gitlab.com",
+        "note": "GitLab 介绍与门户"
+      },
+      {
+        "host": "docs.gitlab.com",
+        "note": "GitLab 官方文档"
+      }
+    ],
+    "assert": {
+      "same_policy": true,
+      "policy": "Proxy",
+      "no_dns_leak": true
+    }
+  },
+  {
+    "name": "dev_homebrew_macos_package_manager",
+    "desc": "macOS Homebrew 包管理器：官网与 Formulas 元数据索引",
+    "requests": [
+      {
+        "host": "brew.sh",
+        "note": "Homebrew 官网"
+      },
+      {
+        "host": "formulae.brew.sh",
+        "note": "Homebrew Formulae 索引"
+      }
+    ],
+    "assert": {
+      "same_policy": true,
+      "policy": "下载",
+      "no_dns_leak": true
+    }
+  },
+  {
+    "name": "dev_multi_language_package_ecosystem",
+    "desc": "多语言包管理器与分发源：RubyGems, PHP Packagist, Deno, Anaconda",
+    "requests": [
+      {
+        "host": "rubygems.org",
+        "note": "Ruby Gems 官方仓库"
+      },
+      {
+        "host": "packagist.org",
+        "note": "PHP Composer 官方包索引"
+      },
+      {
+        "host": "deno.land",
+        "note": "Deno 模块托管"
+      },
+      {
+        "host": "repo.anaconda.com",
+        "note": "Anaconda Python 科学计算发行版"
+      }
+    ],
+    "assert": {
+      "same_policy": true,
+      "policy": "下载",
+      "no_dns_leak": true
+    }
+  },
+  {
+    "name": "dev_cloud_vps_infrastructure",
+    "desc": "云基础设施与 VPS 提供商：DigitalOcean, Vultr, Bitbucket (ProxyGFW)",
+    "requests": [
+      {
+        "host": "digitalocean.com",
+        "note": "DigitalOcean 云平台"
+      },
+      {
+        "host": "vultr.com",
+        "note": "Vultr 云服务器"
+      },
+      {
+        "host": "bitbucket.org",
+        "note": "Bitbucket 源码托管"
+      }
+    ],
+    "assert": {
+      "same_policy": true,
+      "policy": "Proxy",
+      "no_dns_leak": true
+    }
+  },
+  {
+    "name": "dev_golang_ecosystem_and_proxy",
+    "desc": "Go 语言官方生态：golang.org 官网与 go.dev 开发者门户",
+    "requests": [
+      {
+        "host": "golang.org",
+        "note": "Golang 官方主站"
+      },
+      {
+        "host": "go.dev",
+        "note": "Go 官方开发者门户"
+      }
+    ],
+    "assert": {
+      "same_policy": true,
+      "policy": "Google-X-Meta-MS",
+      "no_dns_leak": true
+    }
+  },
+  {
+    "name": "dev_hashicorp_release_distribution",
+    "desc": "HashiCorp 基础设施工具链官方二进制分发",
+    "requests": [
+      {
+        "host": "releases.hashicorp.com",
+        "note": "Terraform / Vault 二进制安装包 (DownloadCDN)"
+      },
+      {
+        "host": "github.com",
+        "note": "HashiCorp 开源仓库 (Microsoft.list)"
+      }
+    ],
+    "assert": {
+      "same_policy": false,
+      "no_dns_leak": true,
+      "per_request": [
+        {
+          "host": "releases.hashicorp.com",
+          "policy": "下载",
+          "reason": "DownloadCDN.list 下载加速"
+        },
+        {
+          "host": "github.com",
+          "policy": "Google-X-Meta-MS",
+          "reason": "Microsoft.list 代理"
+        }
+      ]
+    }
+  },
+  {
+    "name": "dev_tech_media_and_publishing",
+    "desc": "技术媒体与深度博客平台：Medium 开发者专栏",
+    "requests": [
+      {
+        "host": "medium.com",
+        "note": "Medium 技术博客主站"
+      },
+      {
+        "host": "miro.medium.com",
+        "note": "Medium 图片分发 CDN"
+      }
+    ],
+    "assert": {
+      "same_policy": true,
+      "policy": "Proxy",
+      "no_dns_leak": true
+    }
+  }
+]

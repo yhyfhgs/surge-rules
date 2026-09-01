@@ -58,6 +58,45 @@
       }
     },
     {
+      "id": "chrome_mobile",
+      "desc": "Android Chrome 140 移动端（Client Hints 完整结构）",
+      "ua": "Mozilla/5.0 (Linux; Android 14; Pixel 8 Pro) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Mobile Safari/537.36",
+      "http": "2",
+      "headers": {
+        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
+        "Accept-Language": "zh-CN,zh;q=0.9,en-US;q=0.8,en;q=0.7",
+        "Accept-Encoding": "gzip, deflate, br, zstd",
+        "sec-ch-ua": "\"Chromium\";v=\"140\", \"Not=A?Brand\";v=\"24\", \"Google Chrome\";v=\"140\"",
+        "sec-ch-ua-mobile": "?1",
+        "sec-ch-ua-platform": "\"Android\"",
+        "sec-ch-ua-platform-version": "\"14.0.0\"",
+        "sec-ch-ua-model": "\"Pixel 8 Pro\"",
+        "Sec-Fetch-Dest": "document",
+        "Sec-Fetch-Mode": "navigate",
+        "Sec-Fetch-Site": "none",
+        "Sec-Fetch-User": "?1",
+        "Upgrade-Insecure-Requests": "1"
+      }
+    },
+    {
+      "id": "firefox_desktop",
+      "desc": "桌面端 Firefox 136（DoH canary 联动 + Sec-Fetch 元数据）",
+      "ua": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:136.0) Gecko/20100101 Firefox/136.0",
+      "http": "2",
+      "headers": {
+        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+        "Accept-Language": "zh-CN,zh;q=0.8,zh-TW;q=0.7,zh-HK;q=0.5,en-US;q=0.3,en;q=0.2",
+        "Accept-Encoding": "gzip, deflate, br, zstd",
+        "Sec-Fetch-Dest": "document",
+        "Sec-Fetch-Mode": "navigate",
+        "Sec-Fetch-Site": "none",
+        "Sec-Fetch-User": "?1",
+        "Upgrade-Insecure-Requests": "1",
+        "TE": "trailers"
+      },
+      "doh_canary": "use-application-dns.net"
+    },
+    {
       "id": "ios_safari",
       "desc": "iPhone Safari（移动端网页）",
       "ua": "Mozilla/5.0 (iPhone; CPU iPhone OS 18_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.5 Mobile/15E148 Safari/604.1",
@@ -75,6 +114,29 @@
       "headers": {
         "Accept": "application/json",
         "Accept-Language": "zh-CN;q=1.0"
+      }
+    },
+    {
+      "id": "android_okhttp",
+      "desc": "Android OkHttp 4.12 客户端形态（连接池复用 + HTTPDNS 降级）",
+      "ua": "okhttp/4.12.0",
+      "http": "2",
+      "headers": {
+        "Accept": "application/json, text/plain, */*",
+        "Accept-Language": "zh-CN,zh;q=0.9,en-US;q=0.8",
+        "Accept-Encoding": "gzip, deflate",
+        "Connection": "keep-alive"
+      },
+      "emulation": {
+        "connection_pool": {
+          "max_idle": 5,
+          "keep_alive_sec": 300,
+          "reuse_test": true
+        },
+        "httpdns_fallback": {
+          "enabled": true,
+          "fallback_host_header": true
+        }
       }
     },
     {
@@ -98,6 +160,39 @@
       }
     },
     {
+      "id": "electron_desktop",
+      "desc": "Electron 桌面端形态（gRPC 帧头 + WebSocket WSS 链路画像）",
+      "ua": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Slack/4.38.125 Chrome/134.0.6998.205 Electron/35.0.0 Safari/537.36",
+      "http": "2",
+      "headers": {
+        "Accept": "application/json, text/plain, */*",
+        "Accept-Language": "zh-CN,en-US;q=0.9",
+        "Accept-Encoding": "gzip, deflate, br"
+      },
+      "profiles": {
+        "grpc": {
+          "desc": "gRPC over HTTP/2 framing profile",
+          "headers": {
+            "Content-Type": "application/grpc",
+            "TE": "trailers",
+            "grpc-encoding": "identity",
+            "grpc-accept-encoding": "identity,deflate,gzip",
+            "grpc-timeout": "10S"
+          }
+        },
+        "websocket": {
+          "desc": "WebSocket WSS connection profile",
+          "headers": {
+            "Upgrade": "websocket",
+            "Connection": "Upgrade",
+            "Sec-WebSocket-Version": "13",
+            "Sec-WebSocket-Key": "dGhlIHNhbXBsZSBub25jZQ==",
+            "Sec-WebSocket-Extensions": "permessage-deflate; client_max_window_bits"
+          }
+        }
+      }
+    },
+    {
       "id": "telegram_app",
       "desc": "Telegram iOS 客户端形态",
       "ua": "Telegram-iOS/11.5 (iPhone; iOS 18.5; Scale/3.00)",
@@ -114,7 +209,8 @@
       "clients": [
         "chatgpt_app",
         "claude_app",
-        "safari_macos"
+        "safari_macos",
+        "electron_desktop"
       ],
       "hosts": [
         {
@@ -139,6 +235,8 @@
       "desc": "Google / X / Meta / Microsoft 合并组",
       "clients": [
         "chrome_macos",
+        "chrome_mobile",
+        "firefox_desktop",
         "ios_safari"
       ],
       "hosts": [
@@ -164,7 +262,9 @@
       "desc": "TikTok / SocialOthers",
       "clients": [
         "ios_native_app",
-        "chrome_macos"
+        "chrome_macos",
+        "chrome_mobile",
+        "electron_desktop"
       ],
       "hosts": [
         {
@@ -188,7 +288,8 @@
       "group": "Telegram",
       "desc": "Telegram.list",
       "clients": [
-        "telegram_app"
+        "telegram_app",
+        "curl_baseline"
       ],
       "hosts": [
         {
@@ -207,7 +308,8 @@
       "group": "Payment",
       "desc": "Payment.list（刻意不做自动测速，出口 IP 要稳）",
       "clients": [
-        "safari_macos"
+        "safari_macos",
+        "firefox_desktop"
       ],
       "hosts": [
         {
@@ -227,7 +329,8 @@
       "desc": "Streaming.list + YouTube.list",
       "clients": [
         "ios_native_app",
-        "safari_macos"
+        "safari_macos",
+        "android_okhttp"
       ],
       "hosts": [
         {
@@ -251,7 +354,8 @@
       "group": "游戏",
       "desc": "Games.list",
       "clients": [
-        "curl_baseline"
+        "curl_baseline",
+        "electron_desktop"
       ],
       "hosts": [
         {
@@ -270,7 +374,8 @@
       "group": "下载",
       "desc": "DownloadCDN.list",
       "clients": [
-        "curl_baseline"
+        "curl_baseline",
+        "android_okhttp"
       ],
       "hosts": [
         {
@@ -289,7 +394,8 @@
       "group": "🇯🇵日本节点",
       "desc": "Japan.list",
       "clients": [
-        "ios_safari"
+        "ios_safari",
+        "safari_macos"
       ],
       "hosts": [
         {
@@ -308,7 +414,8 @@
       "group": "🇬🇧英国节点",
       "desc": "UK.list",
       "clients": [
-        "safari_macos"
+        "safari_macos",
+        "firefox_desktop"
       ],
       "hosts": [
         {
@@ -322,7 +429,8 @@
       "group": "🇪🇺欧洲节点",
       "desc": "Europe.list",
       "clients": [
-        "safari_macos"
+        "safari_macos",
+        "chrome_macos"
       ],
       "hosts": [
         {
@@ -336,7 +444,8 @@
       "group": "🇺🇸美国节点",
       "desc": "US.list",
       "clients": [
-        "safari_macos"
+        "safari_macos",
+        "chrome_macos"
       ],
       "hosts": [
         {
@@ -351,7 +460,8 @@
       "desc": "国内直连（本组出口 IP 即本机真实出口，作为所有泄漏判定的基准值）",
       "clients": [
         "ios_native_app",
-        "chrome_macos"
+        "chrome_macos",
+        "android_okhttp"
       ],
       "hosts": [
         {
@@ -372,7 +482,8 @@
       "desc": "不在任何 list → FINAL",
       "clients": [
         "curl_baseline",
-        "chrome_macos"
+        "chrome_macos",
+        "firefox_desktop"
       ],
       "hosts": [
         {
@@ -399,22 +510,50 @@
         "host": "stun.miwifi.com",
         "port": 3478,
         "expect_group": "DIRECT",
+        "provider": "Xiaomi / Baseline",
         "baseline": true
       },
       {
         "host": "stun.l.google.com",
         "port": 19302,
-        "expect_group": "Google-X-Meta-MS"
+        "expect_group": "Google-X-Meta-MS",
+        "provider": "Google"
+      },
+      {
+        "host": "stun.apple.com",
+        "port": 3478,
+        "expect_group": "DIRECT",
+        "provider": "Apple"
+      },
+      {
+        "host": "worldaz.turn.teams.microsoft.com",
+        "port": 3478,
+        "expect_group": "Google-X-Meta-MS",
+        "provider": "Microsoft Teams"
+      },
+      {
+        "host": "stun.zoom.us",
+        "port": 3478,
+        "expect_group": "社交媒体",
+        "provider": "Zoom"
+      },
+      {
+        "host": "stun.discord.media",
+        "port": 3478,
+        "expect_group": "社交媒体",
+        "provider": "Discord"
       },
       {
         "host": "stun.cloudflare.com",
         "port": 3478,
-        "expect_group": "Final"
+        "expect_group": "Final",
+        "provider": "Cloudflare"
       },
       {
         "host": "stun.nextcloud.com",
         "port": 3478,
-        "expect_group": "Final"
+        "expect_group": "Final",
+        "provider": "Nextcloud"
       }
     ]
   },

@@ -19,3 +19,6 @@ report.md
 # tools/fetch_locked.py 的默认输出目录（build/upstream/ 下是上游整表副本，~800KB）。
 # update.sh 走 `git add -A`，不排除就会把上游快照提交进本仓库。
 build/
+
+# 多智能体编排残留(含渲染候选配置,绝不可发布)
+.agents/

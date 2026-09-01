@@ -3,64 +3,165 @@
     "name": "dnsleak_ai_group_domains",
     "desc": "DNS 泄漏专项 · 第 1 组（AI 组代理域 10 个）：断言匹配路径上不存在缺 no-resolve 的 IP 类规则。一旦某条 IP 规则丢了 no-resolve，这些域名就会先被国内 DNS(223.5.5.5/119.29.29.29)解析，等于把访问 AI 服务的意图暴露给国内递归",
     "requests": [
-      {"host": "chatgpt.com"},
-      {"host": "api.openai.com"},
-      {"host": "claude.ai"},
-      {"host": "api.anthropic.com"},
-      {"host": "www.perplexity.ai"},
-      {"host": "chat.mistral.ai"},
-      {"host": "huggingface.co"},
-      {"host": "api.groq.com"},
-      {"host": "openrouter.ai"},
-      {"host": "poe.com"}
+      {
+        "host": "chatgpt.com"
+      },
+      {
+        "host": "api.openai.com"
+      },
+      {
+        "host": "claude.ai"
+      },
+      {
+        "host": "api.anthropic.com"
+      },
+      {
+        "host": "www.perplexity.ai"
+      },
+      {
+        "host": "chat.mistral.ai"
+      },
+      {
+        "host": "huggingface.co"
+      },
+      {
+        "host": "api.groq.com"
+      },
+      {
+        "host": "openrouter.ai"
+      },
+      {
+        "host": "poe.com"
+      }
     ],
-    "assert": {"same_policy": true, "policy": "AI", "no_dns_leak": true}
+    "assert": {
+      "same_policy": true,
+      "policy": "AI",
+      "no_dns_leak": true
+    }
   },
   {
     "name": "dnsleak_ecosystem_group_domains",
     "desc": "DNS 泄漏专项 · 第 2 组（Google/X/Meta 生态代理域 10 个）",
     "requests": [
-      {"host": "www.google.com"},
-      {"host": "accounts.google.com"},
-      {"host": "gemini.google.com"},
-      {"host": "fonts.gstatic.com"},
-      {"host": "lh3.googleusercontent.com"},
-      {"host": "x.com"},
-      {"host": "pbs.twimg.com"},
-      {"host": "grok.com"},
-      {"host": "www.facebook.com"},
-      {"host": "www.instagram.com"}
+      {
+        "host": "www.google.com"
+      },
+      {
+        "host": "accounts.google.com"
+      },
+      {
+        "host": "gemini.google.com"
+      },
+      {
+        "host": "fonts.gstatic.com"
+      },
+      {
+        "host": "lh3.googleusercontent.com"
+      },
+      {
+        "host": "x.com"
+      },
+      {
+        "host": "pbs.twimg.com"
+      },
+      {
+        "host": "grok.com"
+      },
+      {
+        "host": "www.facebook.com"
+      },
+      {
+        "host": "www.instagram.com"
+      }
     ],
-    "assert": {"same_policy": true, "policy": "Google-X-Meta-MS", "no_dns_leak": true}
+    "assert": {
+      "same_policy": true,
+      "policy": "Google-X-Meta-MS",
+      "no_dns_leak": true
+    }
   },
   {
     "name": "dnsleak_misc_proxy_domains",
     "desc": "DNS 泄漏专项 · 第 3 组（其余各代理组代理域 10 个：流媒体/社交/Telegram/游戏/下载/Final）",
     "requests": [
-      {"host": "www.youtube.com"},
-      {"host": "www.netflix.com"},
-      {"host": "open.spotify.com"},
-      {"host": "www.reddit.com"},
-      {"host": "discord.com"},
-      {"host": "web.telegram.org"},
-      {"host": "store.steampowered.com"},
-      {"host": "cdn.jsdelivr.net"},
-      {"host": "github.com"},
-      {"host": "en.wikipedia.org"}
+      {
+        "host": "www.youtube.com"
+      },
+      {
+        "host": "www.netflix.com"
+      },
+      {
+        "host": "open.spotify.com"
+      },
+      {
+        "host": "www.reddit.com"
+      },
+      {
+        "host": "discord.com"
+      },
+      {
+        "host": "web.telegram.org"
+      },
+      {
+        "host": "store.steampowered.com"
+      },
+      {
+        "host": "cdn.jsdelivr.net"
+      },
+      {
+        "host": "github.com"
+      },
+      {
+        "host": "en.wikipedia.org"
+      }
     ],
     "assert": {
-      "same_policy": false, "no_dns_leak": true,
+      "same_policy": false,
+      "no_dns_leak": true,
       "per_request": [
-        {"host": "www.youtube.com", "policy": "流媒体"},
-        {"host": "www.netflix.com", "policy": "流媒体"},
-        {"host": "open.spotify.com", "policy": "流媒体"},
-        {"host": "www.reddit.com", "policy": "社交媒体"},
-        {"host": "discord.com", "policy": "社交媒体"},
-        {"host": "web.telegram.org", "policy": "Telegram"},
-        {"host": "store.steampowered.com", "policy": "游戏"},
-        {"host": "cdn.jsdelivr.net", "policy": "下载"},
-        {"host": "github.com", "policy": "Google-X-Meta-MS", "reason": "2026-08-29 用户裁决：GitHub 平台域归 Microsoft.list（微软生态），撤销 2026-08-25 的 FIX-B。"},
-        {"host": "en.wikipedia.org", "policy": "Proxy", "reason": "命中 ProxyGFW 的 wikipedia.org；2026-09-01 起 ProxyGFW 独立挂 Proxy 组（与收尾 FINAL 解耦）"}
+        {
+          "host": "www.youtube.com",
+          "policy": "流媒体"
+        },
+        {
+          "host": "www.netflix.com",
+          "policy": "流媒体"
+        },
+        {
+          "host": "open.spotify.com",
+          "policy": "流媒体"
+        },
+        {
+          "host": "www.reddit.com",
+          "policy": "社交媒体"
+        },
+        {
+          "host": "discord.com",
+          "policy": "社交媒体"
+        },
+        {
+          "host": "web.telegram.org",
+          "policy": "Telegram"
+        },
+        {
+          "host": "store.steampowered.com",
+          "policy": "游戏"
+        },
+        {
+          "host": "cdn.jsdelivr.net",
+          "policy": "下载"
+        },
+        {
+          "host": "github.com",
+          "policy": "Google-X-Meta-MS",
+          "reason": "2026-08-29 用户裁决：GitHub 平台域归 Microsoft.list（微软生态），撤销 2026-08-25 的 FIX-B。"
+        },
+        {
+          "host": "en.wikipedia.org",
+          "policy": "Proxy",
+          "reason": "命中 ProxyGFW 的 wikipedia.org；2026-09-01 起 ProxyGFW 独立挂 Proxy 组（与收尾 FINAL 解耦）"
+        }
       ]
     }
   },
@@ -68,17 +169,271 @@
     "name": "direct_domains_local_dns_allowed",
     "desc": "对照组：国内直连域名允许（且应当）由本地国内 DNS 解析。本场景刻意不断言 no_dns_leak，只断言命中 DIRECT——这些域名在 live_check 的 --dns-leak 里应当出现在本地 DNS 记录中",
     "requests": [
-      {"host": "www.baidu.com"},
-      {"host": "www.taobao.com"},
-      {"host": "mp.weixin.qq.com"},
-      {"host": "www.bilibili.com"},
-      {"host": "www.douyin.com"},
-      {"host": "music.163.com"},
-      {"host": "www.jd.com"},
-      {"host": "www.zhihu.com"},
-      {"host": "www.gov.cn"},
-      {"host": "www.pku.edu.cn"}
+      {
+        "host": "www.baidu.com"
+      },
+      {
+        "host": "www.taobao.com"
+      },
+      {
+        "host": "mp.weixin.qq.com"
+      },
+      {
+        "host": "www.bilibili.com"
+      },
+      {
+        "host": "www.douyin.com"
+      },
+      {
+        "host": "music.163.com"
+      },
+      {
+        "host": "www.jd.com"
+      },
+      {
+        "host": "www.zhihu.com"
+      },
+      {
+        "host": "www.gov.cn"
+      },
+      {
+        "host": "www.pku.edu.cn"
+      }
     ],
-    "assert": {"same_policy": true, "policy": "DIRECT"}
+    "assert": {
+      "same_policy": true,
+      "policy": "DIRECT"
+    }
+  },
+  {
+    "name": "dnsleak_fintech_and_banking_domains",
+    "desc": "DNS 泄漏专项 · 第 4 组（金融支付组 10 个）：确保 Adyen, Stripe, Wise, PayPal, Square 等跨境金融 API 绝不在本地国内 DNS 触发解析，防范交易意图与金融账号泄漏",
+    "requests": [
+      {
+        "host": "adyen.com"
+      },
+      {
+        "host": "api.stripe.com"
+      },
+      {
+        "host": "wise.com"
+      },
+      {
+        "host": "www.paypal.com"
+      },
+      {
+        "host": "squareup.com"
+      },
+      {
+        "host": "airwallex.com"
+      },
+      {
+        "host": "klarna.com"
+      },
+      {
+        "host": "checkout.com"
+      },
+      {
+        "host": "paddle.com"
+      },
+      {
+        "host": "braintreepayments.com"
+      }
+    ],
+    "assert": {
+      "same_policy": true,
+      "policy": "Payment",
+      "no_dns_leak": true
+    }
+  },
+  {
+    "name": "dnsleak_gaming_platforms_and_launchers",
+    "desc": "DNS 泄漏专项 · 第 5 组（国际游戏服务 8 个）：PlayStation, Xbox, Nintendo, Riot, Battle.net, EA, Epic, Steam",
+    "requests": [
+      {
+        "host": "playstation.com"
+      },
+      {
+        "host": "xbox.com"
+      },
+      {
+        "host": "nintendo.com"
+      },
+      {
+        "host": "riotgames.com"
+      },
+      {
+        "host": "battle.net"
+      },
+      {
+        "host": "ea.com"
+      },
+      {
+        "host": "epicgames.com"
+      },
+      {
+        "host": "steampowered.com"
+      }
+    ],
+    "assert": {
+      "same_policy": true,
+      "policy": "游戏",
+      "no_dns_leak": true
+    }
+  },
+  {
+    "name": "dnsleak_global_streaming_platforms",
+    "desc": "DNS 泄漏专项 · 第 6 组（全球流媒体服务 8 个）：Disney+, Max, Prime Video, Netflix, Hulu, Crunchyroll, Spotify, AbemaTV",
+    "requests": [
+      {
+        "host": "disneyplus.com"
+      },
+      {
+        "host": "max.com"
+      },
+      {
+        "host": "primevideo.com"
+      },
+      {
+        "host": "netflix.com"
+      },
+      {
+        "host": "hulu.com"
+      },
+      {
+        "host": "crunchyroll.com"
+      },
+      {
+        "host": "spotify.com"
+      },
+      {
+        "host": "abema.tv"
+      }
+    ],
+    "assert": {
+      "same_policy": true,
+      "policy": "流媒体",
+      "no_dns_leak": true
+    }
+  },
+  {
+    "name": "dnsleak_developer_platforms_and_cloud",
+    "desc": "DNS 泄漏专项 · 第 7 组（开发者与云端基础设施 6 个）：GitHub, Supabase, Vercel, GitLab, DigitalOcean, Vultr",
+    "requests": [
+      {
+        "host": "github.com"
+      },
+      {
+        "host": "supabase.com"
+      },
+      {
+        "host": "vercel.com"
+      },
+      {
+        "host": "gitlab.com"
+      },
+      {
+        "host": "digitalocean.com"
+      },
+      {
+        "host": "vultr.com"
+      }
+    ],
+    "assert": {
+      "same_policy": false,
+      "no_dns_leak": true,
+      "per_request": [
+        {
+          "host": "github.com",
+          "policy": "Google-X-Meta-MS",
+          "reason": "Microsoft.list 代理"
+        },
+        {
+          "host": "supabase.com",
+          "policy": "Proxy",
+          "reason": "ProxyGFW.list 代理"
+        },
+        {
+          "host": "vercel.com",
+          "policy": "Proxy",
+          "reason": "ProxyGFW.list 代理"
+        },
+        {
+          "host": "gitlab.com",
+          "policy": "Proxy",
+          "reason": "ProxyGFW.list 代理"
+        },
+        {
+          "host": "digitalocean.com",
+          "policy": "Proxy",
+          "reason": "ProxyGFW.list 代理"
+        },
+        {
+          "host": "vultr.com",
+          "policy": "Proxy",
+          "reason": "ProxyGFW.list 代理"
+        }
+      ]
+    }
+  },
+  {
+    "name": "dnsleak_collaboration_and_messaging",
+    "desc": "DNS 泄漏专项 · 第 8 组（协同办公与即时通讯 6 个）：Slack, Zoom, Discord, Telegram, Notion, Reddit",
+    "requests": [
+      {
+        "host": "slack.com"
+      },
+      {
+        "host": "zoom.us"
+      },
+      {
+        "host": "discord.com"
+      },
+      {
+        "host": "telegram.org"
+      },
+      {
+        "host": "notion.so"
+      },
+      {
+        "host": "reddit.com"
+      }
+    ],
+    "assert": {
+      "same_policy": false,
+      "no_dns_leak": true,
+      "per_request": [
+        {
+          "host": "slack.com",
+          "policy": "社交媒体",
+          "reason": "SocialOthers 策略组"
+        },
+        {
+          "host": "zoom.us",
+          "policy": "社交媒体",
+          "reason": "SocialOthers 策略组"
+        },
+        {
+          "host": "discord.com",
+          "policy": "社交媒体",
+          "reason": "SocialOthers 策略组"
+        },
+        {
+          "host": "telegram.org",
+          "policy": "Telegram",
+          "reason": "Telegram 专有策略组"
+        },
+        {
+          "host": "notion.so",
+          "policy": "Proxy",
+          "reason": "ProxyGFW 策略组"
+        },
+        {
+          "host": "reddit.com",
+          "policy": "社交媒体",
+          "reason": "SocialOthers 策略组"
+        }
+      ]
+    }
   }
 ]

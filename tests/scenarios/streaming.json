@@ -1,0 +1,430 @@
+[
+  {
+    "name": "streaming_disney_plus_ecosystem",
+    "desc": "Disney+ 全球流媒体平台：客户端播放、DSS OTT、BAMGrid 视频底层与地区分流",
+    "requests": [
+      {
+        "host": "disneyplus.com",
+        "note": "Disney+ 官网"
+      },
+      {
+        "host": "disney-plus.net",
+        "note": "Disney+ 媒体 API"
+      },
+      {
+        "host": "dssott.com",
+        "note": "Disney Streaming Services OTT 网关"
+      },
+      {
+        "host": "disneystreaming.com",
+        "note": "Disney 流媒体核心"
+      },
+      {
+        "host": "bamgrid.com",
+        "note": "BAMGrid 视频切片分发"
+      },
+      {
+        "host": "disney.com",
+        "note": "迪士尼国际主站"
+      },
+      {
+        "host": "disney.com.tw",
+        "note": "迪士尼台湾"
+      },
+      {
+        "host": "disney.co.jp",
+        "note": "迪士尼日本"
+      },
+      {
+        "host": "disney-studio.com",
+        "note": "迪士尼制片厂"
+      }
+    ],
+    "assert": {
+      "same_policy": true,
+      "policy": "流媒体",
+      "no_dns_leak": true
+    }
+  },
+  {
+    "name": "streaming_max_hbo_global_platform",
+    "desc": "Max (原 HBO Max) 与 WarnerMedia 流媒体视频播放链路",
+    "requests": [
+      {
+        "host": "max.com",
+        "note": "Max 官网"
+      },
+      {
+        "host": "hbomax.com",
+        "note": "HBO Max 服务"
+      },
+      {
+        "host": "hbo.com",
+        "note": "HBO 主站"
+      },
+      {
+        "host": "cinemax.com",
+        "note": "Cinemax 影院"
+      },
+      {
+        "host": "warnermediacdn.com",
+        "note": "华纳媒体静态 CDN"
+      }
+    ],
+    "assert": {
+      "same_policy": true,
+      "policy": "流媒体",
+      "no_dns_leak": true
+    }
+  },
+  {
+    "name": "streaming_amazon_prime_video_multidomain",
+    "desc": "Amazon Prime Video 视频播放、ATV 扩展与 AIV/PV 视频切片 CDN",
+    "requests": [
+      {
+        "host": "primevideo.com",
+        "note": "Prime Video 主站"
+      },
+      {
+        "host": "atv-ext.amazon.com",
+        "note": "Amazon TV 扩展服务"
+      },
+      {
+        "host": "aiv-cdn.net",
+        "note": "Amazon Instant Video CDN"
+      },
+      {
+        "host": "pv-cdn.net",
+        "note": "Prime Video 视频分发 CDN"
+      }
+    ],
+    "assert": {
+      "same_policy": true,
+      "policy": "流媒体",
+      "no_dns_leak": true
+    }
+  },
+  {
+    "name": "streaming_netflix_video_and_assets",
+    "desc": "Netflix 视频播放器、UI 资产、视频流分发与网络测速",
+    "requests": [
+      {
+        "host": "netflix.com",
+        "note": "Netflix 主站"
+      },
+      {
+        "host": "netflix.net",
+        "note": "Netflix 核心服务"
+      },
+      {
+        "host": "nflximg.net",
+        "note": "Netflix 封面与图片 CDN"
+      },
+      {
+        "host": "nflxvideo.net",
+        "note": "Netflix 视频流加速 CDN"
+      },
+      {
+        "host": "nflxext.com",
+        "note": "Netflix 扩展资源"
+      },
+      {
+        "host": "nflxso.net",
+        "note": "Netflix 交付网络"
+      }
+    ],
+    "assert": {
+      "same_policy": true,
+      "policy": "流媒体",
+      "no_dns_leak": true
+    }
+  },
+  {
+    "name": "streaming_hulu_live_tv_and_vod",
+    "desc": "Hulu 电视直播与点播平台多域名链路",
+    "requests": [
+      {
+        "host": "hulu.com",
+        "note": "Hulu 官网"
+      },
+      {
+        "host": "huluim.com",
+        "note": "Hulu 图片静态资源"
+      },
+      {
+        "host": "hulustream.com",
+        "note": "Hulu 视频流媒体分发"
+      }
+    ],
+    "assert": {
+      "same_policy": true,
+      "policy": "流媒体",
+      "no_dns_leak": true
+    }
+  },
+  {
+    "name": "streaming_crunchyroll_and_vrv_anime",
+    "desc": "Crunchyroll 欧美主流日本动漫流媒体平台与 VRV",
+    "requests": [
+      {
+        "host": "crunchyroll.com",
+        "note": "Crunchyroll 动漫主站"
+      },
+      {
+        "host": "vrv.co",
+        "note": "VRV 影音聚合平台"
+      }
+    ],
+    "assert": {
+      "same_policy": true,
+      "policy": "流媒体",
+      "no_dns_leak": true
+    }
+  },
+  {
+    "name": "streaming_bahamut_anime_crazy_tw",
+    "desc": "巴哈姆特动画疯 (Bahamut) 台湾正版日本新番流媒体",
+    "requests": [
+      {
+        "host": "gamer.com.tw",
+        "note": "巴哈姆特电玩疯主站"
+      },
+      {
+        "host": "bahamut.com.tw",
+        "note": "巴哈姆特核心服务"
+      }
+    ],
+    "assert": {
+      "same_policy": true,
+      "policy": "流媒体",
+      "no_dns_leak": true
+    }
+  },
+  {
+    "name": "streaming_abema_tv_and_tver_japan",
+    "desc": "AbemaTV、CyberAgent Ameba 与 TVer 日本民放电视台官方 OTT 平台",
+    "requests": [
+      {
+        "host": "abema.tv",
+        "note": "AbemaTV 直播与点播"
+      },
+      {
+        "host": "abema.io",
+        "note": "Abema API 鉴权"
+      },
+      {
+        "host": "ameba.jp",
+        "note": "CyberAgent Ameba 博客与账号"
+      },
+      {
+        "host": "tver.jp",
+        "note": "TVer 民放电视联合点播"
+      },
+      {
+        "host": "dmm.com",
+        "note": "DMM 日本综合流媒体"
+      }
+    ],
+    "assert": {
+      "same_policy": true,
+      "policy": "流媒体",
+      "no_dns_leak": true
+    }
+  },
+  {
+    "name": "streaming_spotify_music_and_cdns",
+    "desc": "Spotify 音乐流媒体客户端、Web 播放器与专辑封面 CDN",
+    "requests": [
+      {
+        "host": "spotify.com",
+        "note": "Spotify 官网与账户"
+      },
+      {
+        "host": "scdn.co",
+        "note": "Spotify 专辑封面与静态 CDN"
+      },
+      {
+        "host": "spotifycdn.com",
+        "note": "Spotify 媒体资源分发"
+      }
+    ],
+    "assert": {
+      "same_policy": true,
+      "policy": "流媒体",
+      "no_dns_leak": true
+    }
+  },
+  {
+    "name": "streaming_japanese_niconico_regional",
+    "desc": "Niconico 动画与弹幕视频平台（Japan.list 专属日本节点地区分流）",
+    "requests": [
+      {
+        "host": "nicovideo.jp",
+        "note": "Niconico 动画主站"
+      },
+      {
+        "host": "nimg.jp",
+        "note": "Niconico 静态图片与缩略图 CDN"
+      }
+    ],
+    "assert": {
+      "same_policy": true,
+      "policy": "🇯🇵日本节点",
+      "no_dns_leak": true
+    }
+  },
+  {
+    "name": "streaming_peacock_and_paramount_plus",
+    "desc": "NBCUniversal Peacock 与 Paramount+ 欧美主流影视点播",
+    "requests": [
+      {
+        "host": "peacocktv.com",
+        "note": "Peacock TV 官网"
+      },
+      {
+        "host": "paramountplus.com",
+        "note": "Paramount+ 流媒体服务"
+      }
+    ],
+    "assert": {
+      "same_policy": true,
+      "policy": "流媒体",
+      "no_dns_leak": true
+    }
+  },
+  {
+    "name": "streaming_uk_commercial_broadcasters_itv_ch4",
+    "desc": "英国独立电视台 ITV 与 Channel 4 点播服务（Streaming.list）",
+    "requests": [
+      {
+        "host": "itv.com",
+        "note": "ITV 英国独立电视"
+      },
+      {
+        "host": "channel4.com",
+        "note": "Channel 4 官网与点播"
+      }
+    ],
+    "assert": {
+      "same_policy": true,
+      "policy": "流媒体",
+      "no_dns_leak": true
+    }
+  },
+  {
+    "name": "streaming_hifi_music_tidal_deezer_soundcloud",
+    "desc": "无损高保真音乐与音频流媒体：Tidal, Deezer, SoundCloud, DAZN",
+    "requests": [
+      {
+        "host": "tidal.com",
+        "note": "Tidal Hi-Fi 高保真音乐"
+      },
+      {
+        "host": "deezer.com",
+        "note": "Deezer 法国音乐流媒体"
+      },
+      {
+        "host": "soundcloud.com",
+        "note": "SoundCloud 独立音乐社区"
+      },
+      {
+        "host": "dazn.com",
+        "note": "DAZN 国际体育赛事直播"
+      }
+    ],
+    "assert": {
+      "same_policy": true,
+      "policy": "流媒体",
+      "no_dns_leak": true
+    }
+  },
+  {
+    "name": "streaming_disney_regional_localized_sites",
+    "desc": "迪士尼多国本地化官网与区域门户一致性流媒体策略",
+    "requests": [
+      {
+        "host": "disney.ca",
+        "note": "迪士尼加拿大"
+      },
+      {
+        "host": "disney.co.uk",
+        "note": "迪士尼英国"
+      },
+      {
+        "host": "disney.de",
+        "note": "迪士尼德国"
+      },
+      {
+        "host": "disney.fr",
+        "note": "迪士尼法国"
+      },
+      {
+        "host": "disney.es",
+        "note": "迪士尼西班牙"
+      },
+      {
+        "host": "disney.it",
+        "note": "迪士尼意大利"
+      },
+      {
+        "host": "disney.com.au",
+        "note": "迪士尼澳大利亚"
+      },
+      {
+        "host": "disney.sg",
+        "note": "迪士尼新加坡"
+      }
+    ],
+    "assert": {
+      "same_policy": true,
+      "policy": "流媒体",
+      "no_dns_leak": true
+    }
+  },
+  {
+    "name": "streaming_dmm_fanza_japan_portal",
+    "desc": "DMM 与 FANZA 日本综合影音流媒体平台",
+    "requests": [
+      {
+        "host": "dmm.com",
+        "note": "DMM 综合门户"
+      },
+      {
+        "host": "dmm.co.jp",
+        "note": "DMM 日本本域"
+      }
+    ],
+    "assert": {
+      "same_policy": true,
+      "policy": "流媒体",
+      "no_dns_leak": true
+    }
+  },
+  {
+    "name": "streaming_us_cable_fast_channels",
+    "desc": "美区主流免费广告流媒体 (FAST) 与有线电视点播：Tubi TV, Pluto TV, Discovery+, Showtime",
+    "requests": [
+      {
+        "host": "tubitv.com",
+        "note": "Tubi TV 免费流媒体"
+      },
+      {
+        "host": "pluto.tv",
+        "note": "Pluto TV 派拉蒙 FAST 平台"
+      },
+      {
+        "host": "discoveryplus.com",
+        "note": "Discovery+ 纪实探索"
+      },
+      {
+        "host": "showtime.com",
+        "note": "Showtime 经典剧集点播"
+      }
+    ],
+    "assert": {
+      "same_policy": true,
+      "policy": "流媒体",
+      "no_dns_leak": true
+    }
+  }
+]

@@ -1,0 +1,470 @@
+[
+  {
+    "name": "browser_doh_canary_firefox",
+    "desc": "Firefox DoH Canary 探测：use-application-dns.net 在无特定规则时落入 Final，由 Surge 决定是否允许浏览器接管 DoH",
+    "requests": [
+      {
+        "host": "use-application-dns.net",
+        "note": "Mozilla DoH canary 域名"
+      }
+    ],
+    "assert": {
+      "policy": "Final",
+      "no_dns_leak": true
+    }
+  },
+  {
+    "name": "browser_doh_public_resolvers",
+    "desc": "主流公共 DoH 解析器：Google/Cloudflare/AliDNS/DNSPod/360 差异化分流与防 DNS 泄漏",
+    "requests": [
+      {
+        "host": "dns.google",
+        "note": "Google DoH"
+      },
+      {
+        "host": "cloudflare-dns.com",
+        "note": "Cloudflare DoH"
+      },
+      {
+        "host": "dns.alidns.com",
+        "note": "阿里 DoH"
+      },
+      {
+        "host": "doh.pub",
+        "note": "腾讯 DNSPod DoH"
+      },
+      {
+        "host": "doh.360.cn",
+        "note": "360 安全 DoH"
+      }
+    ],
+    "assert": {
+      "same_policy": false,
+      "no_dns_leak": true,
+      "per_request": [
+        {
+          "host": "dns.google",
+          "policy": "Google-X-Meta-MS",
+          "reason": "Google.list 专有策略组"
+        },
+        {
+          "host": "cloudflare-dns.com",
+          "policy": "Proxy",
+          "reason": "ProxyGFW.list 代理出站"
+        },
+        {
+          "host": "dns.alidns.com",
+          "policy": "DIRECT",
+          "reason": "AlibabaCN.list 直连"
+        },
+        {
+          "host": "doh.pub",
+          "policy": "DIRECT",
+          "reason": "TencentCN.list 直连"
+        },
+        {
+          "host": "doh.360.cn",
+          "policy": "DIRECT",
+          "reason": "Domestic.list 直连"
+        }
+      ]
+    }
+  },
+  {
+    "name": "browser_webrtc_stun_matrix",
+    "desc": "WebRTC STUN/TURN 服务器打洞与 NAT 探测矩阵：国内大厂直连、国外通讯服务走代理/社交",
+    "requests": [
+      {
+        "host": "stun.qq.com",
+        "note": "腾讯 WebRTC STUN"
+      },
+      {
+        "host": "stun.miwifi.com",
+        "note": "小米局域/公网 STUN"
+      },
+      {
+        "host": "global.stun.twilio.com",
+        "note": "Twilio WebRTC STUN"
+      },
+      {
+        "host": "stun.zoom.us",
+        "note": "Zoom WebRTC STUN"
+      }
+    ],
+    "assert": {
+      "same_policy": false,
+      "no_dns_leak": true,
+      "per_request": [
+        {
+          "host": "stun.qq.com",
+          "policy": "DIRECT",
+          "reason": "TencentCN 直连"
+        },
+        {
+          "host": "stun.miwifi.com",
+          "policy": "DIRECT",
+          "reason": "PrivateLAN 直连"
+        },
+        {
+          "host": "global.stun.twilio.com",
+          "policy": "Proxy",
+          "reason": "ProxyGFW 代理"
+        },
+        {
+          "host": "stun.zoom.us",
+          "policy": "社交媒体",
+          "reason": "SocialOthers 策略组"
+        }
+      ]
+    }
+  },
+  {
+    "name": "browser_chrome_navigation_client_hints",
+    "desc": "Chrome 桌面/移动端现代请求栈（Sec-Fetch 元数据与 Client Hints 请求链路）在 Google 生态内的连贯性",
+    "requests": [
+      {
+        "host": "www.google.com",
+        "note": "主站导航导航模式 (Sec-Fetch-Mode: navigate)"
+      },
+      {
+        "host": "fonts.googleapis.com",
+        "note": "Web 字体资源 (Sec-Fetch-Dest: font)"
+      },
+      {
+        "host": "ssl.gstatic.com",
+        "note": "静态脚本与样式 (Sec-Fetch-Dest: script)"
+      },
+      {
+        "host": "play.google.com",
+        "note": "Web 应用与 Client Hints 协商"
+      },
+      {
+        "host": "apis.google.com",
+        "note": "Google Sign-In API 跨域调用 (Sec-Fetch-Site: cross-site)"
+      },
+      {
+        "host": "lh3.googleusercontent.com",
+        "note": "用户头像 CDN"
+      }
+    ],
+    "assert": {
+      "same_policy": true,
+      "policy": "Google-X-Meta-MS",
+      "no_dns_leak": true
+    }
+  },
+  {
+    "name": "browser_safari_private_browsing_ecosystem",
+    "desc": "Safari 浏览器 Private Relay / iCloud 服务与 AppleCN 生态连贯直连",
+    "requests": [
+      {
+        "host": "mask.icloud.com",
+        "note": "Safari Private Relay 入口节点"
+      },
+      {
+        "host": "mask-h2.icloud.com",
+        "note": "Safari Private Relay HTTP/2 出口节点"
+      },
+      {
+        "host": "mask-api.icloud.com",
+        "note": "Safari Private Relay 证书与控制 API"
+      },
+      {
+        "host": "www.apple.com.cn",
+        "note": "Apple 中国主站"
+      },
+      {
+        "host": "appleid.apple.com",
+        "note": "Apple ID 统一登录鉴权"
+      },
+      {
+        "host": "weather-data.apple.com",
+        "note": "Safari 起始页天气组件"
+      }
+    ],
+    "assert": {
+      "same_policy": true,
+      "policy": "DIRECT",
+      "no_dns_leak": true
+    }
+  },
+  {
+    "name": "browser_firefox_addons_vs_services",
+    "desc": "Firefox 浏览器 Add-ons 商店（ProxyGFW）与 Mozilla 基础服务分流",
+    "requests": [
+      {
+        "host": "addons.mozilla.org",
+        "note": "Firefox 扩展商店 (ProxyGFW 代理)"
+      },
+      {
+        "host": "versioncheck.addons.mozilla.org",
+        "note": "Firefox 扩展版本更新 (DownloadCDN 下载)"
+      },
+      {
+        "host": "download.mozilla.org",
+        "note": "Firefox 安装包下载 (DownloadCDN 下载)"
+      }
+    ],
+    "assert": {
+      "same_policy": false,
+      "no_dns_leak": true,
+      "per_request": [
+        {
+          "host": "addons.mozilla.org",
+          "policy": "Proxy",
+          "reason": "ProxyGFW.list 收录"
+        },
+        {
+          "host": "versioncheck.addons.mozilla.org",
+          "policy": "下载",
+          "reason": "DownloadCDN.list 收录"
+        },
+        {
+          "host": "download.mozilla.org",
+          "policy": "下载",
+          "reason": "DownloadCDN.list 收录"
+        }
+      ]
+    }
+  },
+  {
+    "name": "browser_cross_site_oauth_auth0_flow",
+    "desc": "现代 Web 浏览器跨域 OAuth / SAML 认证与管理后台同策略出站",
+    "requests": [
+      {
+        "host": "auth0.com",
+        "note": "Auth0 认证主站"
+      },
+      {
+        "host": "cdn.auth0.com",
+        "note": "Auth0 Universal Login 前端 CDN"
+      },
+      {
+        "host": "manage.auth0.com",
+        "note": "Auth0 租户管理后台"
+      },
+      {
+        "host": "guardian.auth0.com",
+        "note": "Auth0 MFA Guardian 验证"
+      },
+      {
+        "host": "login.auth0.com",
+        "note": "Auth0 集中登录端点"
+      }
+    ],
+    "assert": {
+      "same_policy": true,
+      "policy": "Proxy",
+      "no_dns_leak": true
+    }
+  },
+  {
+    "name": "browser_android_okhttp_mobile_traffic",
+    "desc": "Android OkHttp 4.x 移动端网络栈复合分流（国内直连与海外代理）",
+    "requests": [
+      {
+        "host": "api.github.com",
+        "note": "GitHub REST API"
+      },
+      {
+        "host": "api.bilibili.com",
+        "note": "Bilibili 移动端 API"
+      },
+      {
+        "host": "api.weibo.cn",
+        "note": "微博移动端网关"
+      }
+    ],
+    "assert": {
+      "same_policy": false,
+      "no_dns_leak": true,
+      "per_request": [
+        {
+          "host": "api.github.com",
+          "policy": "Google-X-Meta-MS",
+          "reason": "Microsoft.list 代理"
+        },
+        {
+          "host": "api.bilibili.com",
+          "policy": "DIRECT",
+          "reason": "ChinaMedia.list 直连"
+        },
+        {
+          "host": "api.weibo.cn",
+          "policy": "DIRECT",
+          "reason": "Domestic.list 直连"
+        }
+      ]
+    }
+  },
+  {
+    "name": "browser_webrtc_discord_voice_signaling",
+    "desc": "Discord WebRTC 语音信令、网关与客户端静态 CDN 一致性策略",
+    "requests": [
+      {
+        "host": "discord.com",
+        "note": "Discord 主站"
+      },
+      {
+        "host": "discordapp.com",
+        "note": "Discord 应用服务"
+      },
+      {
+        "host": "discord.gg",
+        "note": "Discord 邀请短链"
+      },
+      {
+        "host": "discordapp.net",
+        "note": "Discord 媒体 CDN"
+      },
+      {
+        "host": "gateway.discord.gg",
+        "note": "Discord WebSocket 信令网关"
+      }
+    ],
+    "assert": {
+      "same_policy": true,
+      "policy": "社交媒体",
+      "no_dns_leak": true
+    }
+  },
+  {
+    "name": "browser_client_hints_sec_ch_ua_microsoft",
+    "desc": "Edge / Chrome 访问微软服务时的 Client Hints 与身份鉴权链路",
+    "requests": [
+      {
+        "host": "login.live.com",
+        "note": "微软个人账号登录"
+      },
+      {
+        "host": "login.microsoftonline.com",
+        "note": "Azure AD 企业登录"
+      },
+      {
+        "host": "account.live.com",
+        "note": "Live 账号中心"
+      },
+      {
+        "host": "auth.gfx.ms",
+        "note": "微软认证静态图标 CDN"
+      }
+    ],
+    "assert": {
+      "same_policy": true,
+      "policy": "Google-X-Meta-MS",
+      "no_dns_leak": true
+    }
+  },
+  {
+    "name": "browser_http2_push_and_multiplex_domestic",
+    "desc": "国内主流 Web 站点 HTTP/2 多路复用与子资源加载（淘宝、京东、腾讯）",
+    "requests": [
+      {
+        "host": "www.taobao.com",
+        "note": "淘宝首页"
+      },
+      {
+        "host": "g.alicdn.com",
+        "note": "阿里前端统一 CDN"
+      },
+      {
+        "host": "www.jd.com",
+        "note": "京东商城主站"
+      },
+      {
+        "host": "img10.360buyimg.com",
+        "note": "京东商品图片 CDN"
+      },
+      {
+        "host": "www.qq.com",
+        "note": "腾讯网首页"
+      },
+      {
+        "host": "mat1.gtimg.com",
+        "note": "腾讯静态素材 CDN"
+      }
+    ],
+    "assert": {
+      "same_policy": true,
+      "policy": "DIRECT",
+      "no_dns_leak": true
+    }
+  },
+  {
+    "name": "browser_sec_fetch_metadata_navigation_isolation",
+    "desc": "Sec-Fetch 跨站点隔离策略：Wikipedia 国际百科全书与多语言门户",
+    "requests": [
+      {
+        "host": "www.wikipedia.org",
+        "note": "维基百科多语言门户"
+      },
+      {
+        "host": "en.wikipedia.org",
+        "note": "维基百科英文版"
+      },
+      {
+        "host": "zh.wikipedia.org",
+        "note": "维基百科中文版"
+      },
+      {
+        "host": "upload.wikimedia.org",
+        "note": "维基媒体图片多媒体 CDN"
+      }
+    ],
+    "assert": {
+      "same_policy": true,
+      "policy": "Proxy",
+      "no_dns_leak": true
+    }
+  },
+  {
+    "name": "browser_public_frontend_open_source_cdns",
+    "desc": "现代前端开源公共 CDN 资源库（cdnjs, unpkg, jsdelivr）下载加速一致性",
+    "requests": [
+      {
+        "host": "cdnjs.cloudflare.com",
+        "note": "Cloudflare cdnjs 前端库"
+      },
+      {
+        "host": "unpkg.com",
+        "note": "unpkg npm CDN 托管"
+      },
+      {
+        "host": "cdn.jsdelivr.net",
+        "note": "jsDelivr 全球加速 CDN"
+      },
+      {
+        "host": "fastly.jsdelivr.net",
+        "note": "jsDelivr Fastly 节点"
+      }
+    ],
+    "assert": {
+      "same_policy": true,
+      "policy": "下载",
+      "no_dns_leak": true
+    }
+  },
+  {
+    "name": "browser_cookie_session_and_security_headers",
+    "desc": "浏览器会话管理、Cookie 验证与安全报告服务一致性",
+    "requests": [
+      {
+        "host": "www.cloudflare.com",
+        "note": "Cloudflare 官网"
+      },
+      {
+        "host": "dash.cloudflare.com",
+        "note": "Cloudflare 控制台"
+      },
+      {
+        "host": "api.cloudflare.com",
+        "note": "Cloudflare 开发者 API"
+      }
+    ],
+    "assert": {
+      "same_policy": true,
+      "policy": "Final",
+      "no_dns_leak": true
+    }
+  }
+]

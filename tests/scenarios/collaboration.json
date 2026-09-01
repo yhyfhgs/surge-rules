@@ -1,0 +1,326 @@
+[
+  {
+    "name": "collab_slack_realtime_messaging",
+    "desc": "Slack 协同办公平台：客户端主站、边缘接入点、实时消息服务与表情图片 CDN",
+    "requests": [
+      {
+        "host": "slack.com",
+        "note": "Slack 官网与工作区"
+      },
+      {
+        "host": "slack-edge.com",
+        "note": "Slack Edge 边缘接入点"
+      },
+      {
+        "host": "slack-msgs.com",
+        "note": "Slack 实时消息传输"
+      },
+      {
+        "host": "slack-imgs.com",
+        "note": "Slack 附件与图片 CDN"
+      }
+    ],
+    "assert": {
+      "same_policy": true,
+      "policy": "社交媒体",
+      "no_dns_leak": true
+    }
+  },
+  {
+    "name": "collab_zoom_video_conferencing",
+    "desc": "Zoom 视频会议系统：国际版主站与政企合规端点",
+    "requests": [
+      {
+        "host": "zoom.us",
+        "note": "Zoom 国际版官网与控制台"
+      },
+      {
+        "host": "zoomgov.com",
+        "note": "Zoom Gov 政府合规服务"
+      }
+    ],
+    "assert": {
+      "same_policy": true,
+      "policy": "社交媒体",
+      "no_dns_leak": true
+    }
+  },
+  {
+    "name": "collab_discord_voice_and_chat",
+    "desc": "Discord 社区通讯：主站、API、邀请短链与媒体资源 CDN",
+    "requests": [
+      {
+        "host": "discord.com",
+        "note": "Discord 官网与客户端"
+      },
+      {
+        "host": "discordapp.com",
+        "note": "Discord 应用服务"
+      },
+      {
+        "host": "discord.gg",
+        "note": "Discord 社区邀请短链"
+      },
+      {
+        "host": "discordapp.net",
+        "note": "Discord 媒体与表情 CDN"
+      }
+    ],
+    "assert": {
+      "same_policy": true,
+      "policy": "社交媒体",
+      "no_dns_leak": true
+    }
+  },
+  {
+    "name": "collab_microsoft_teams_vs_office365",
+    "desc": "微软办公协作分流：Teams 会议走海外专线，Office 365 / Office.com 走国内直连",
+    "requests": [
+      {
+        "host": "teams.microsoft.com",
+        "note": "Microsoft Teams 会议与协作网关 (Microsoft.list 代理)"
+      },
+      {
+        "host": "office.com",
+        "note": "Office 365 网页版 (MicrosoftCN.list 直连)"
+      },
+      {
+        "host": "office365.com",
+        "note": "Office 365 云端服务 (MicrosoftCN.list 直连)"
+      }
+    ],
+    "assert": {
+      "same_policy": false,
+      "no_dns_leak": true,
+      "per_request": [
+        {
+          "host": "teams.microsoft.com",
+          "policy": "Google-X-Meta-MS",
+          "reason": "Microsoft.list 代理"
+        },
+        {
+          "host": "office.com",
+          "policy": "DIRECT",
+          "reason": "MicrosoftCN.list 国内直连"
+        },
+        {
+          "host": "office365.com",
+          "policy": "DIRECT",
+          "reason": "MicrosoftCN.list 国内直连"
+        }
+      ]
+    }
+  },
+  {
+    "name": "collab_notion_workspace",
+    "desc": "Notion 现代知识库与协作工作区",
+    "requests": [
+      {
+        "host": "notion.so",
+        "note": "Notion 主站与控制台"
+      },
+      {
+        "host": "api.notion.so",
+        "note": "Notion 开放 API"
+      },
+      {
+        "host": "www.notion.so",
+        "note": "Notion 客户端入口"
+      }
+    ],
+    "assert": {
+      "same_policy": true,
+      "policy": "Proxy",
+      "no_dns_leak": true
+    }
+  },
+  {
+    "name": "collab_telegram_messenger_clients",
+    "desc": "Telegram 桌面与移动端通讯生态：Web 端、短链、Telegraph 文章与主站",
+    "requests": [
+      {
+        "host": "telegram.org",
+        "note": "Telegram 官网"
+      },
+      {
+        "host": "web.telegram.org",
+        "note": "Telegram Web 客户端"
+      },
+      {
+        "host": "t.me",
+        "note": "Telegram 频道/用户短链"
+      },
+      {
+        "host": "telegra.ph",
+        "note": "Telegraph 匿名长文发布"
+      },
+      {
+        "host": "telegram.me",
+        "note": "Telegram 个人主页短链"
+      }
+    ],
+    "assert": {
+      "same_policy": true,
+      "policy": "Telegram",
+      "no_dns_leak": true
+    }
+  },
+  {
+    "name": "collab_social_networks_threads_and_instagram",
+    "desc": "Meta 旗下社交矩阵：Threads, Instagram, WhatsApp",
+    "requests": [
+      {
+        "host": "threads.net",
+        "note": "Threads 社交主站"
+      },
+      {
+        "host": "instagram.com",
+        "note": "Instagram 官网"
+      },
+      {
+        "host": "cdninstagram.com",
+        "note": "Instagram 图片 CDN"
+      },
+      {
+        "host": "whatsapp.com",
+        "note": "WhatsApp 官网与 Web 端"
+      },
+      {
+        "host": "whatsapp.net",
+        "note": "WhatsApp 媒体交付网络"
+      }
+    ],
+    "assert": {
+      "same_policy": true,
+      "policy": "Google-X-Meta-MS",
+      "no_dns_leak": true
+    }
+  },
+  {
+    "name": "collab_x_twitter_realtime_feed",
+    "desc": "X (Twitter) 社交媒体与实时信息流",
+    "requests": [
+      {
+        "host": "x.com",
+        "note": "X 官网"
+      },
+      {
+        "host": "twitter.com",
+        "note": "Twitter 经典域名"
+      },
+      {
+        "host": "twimg.com",
+        "note": "Twitter 图片媒体 CDN"
+      },
+      {
+        "host": "t.co",
+        "note": "Twitter 官方短链接服务"
+      },
+      {
+        "host": "grok.com",
+        "note": "xAI Grok 对话平台"
+      }
+    ],
+    "assert": {
+      "same_policy": true,
+      "policy": "Google-X-Meta-MS",
+      "no_dns_leak": true
+    }
+  },
+  {
+    "name": "collab_reddit_community_and_media",
+    "desc": "Reddit 社区论坛、短链接与媒体静态分发 CDN",
+    "requests": [
+      {
+        "host": "reddit.com",
+        "note": "Reddit 社区主站"
+      },
+      {
+        "host": "redd.it",
+        "note": "Reddit 短链接服务"
+      },
+      {
+        "host": "redditmedia.com",
+        "note": "Reddit 媒体 CDN"
+      },
+      {
+        "host": "redditstatic.com",
+        "note": "Reddit 静态前端资源"
+      }
+    ],
+    "assert": {
+      "same_policy": true,
+      "policy": "社交媒体",
+      "no_dns_leak": true
+    }
+  },
+  {
+    "name": "collab_tiktok_global_short_video",
+    "desc": "TikTok 海外短视频客户端与媒体切片加速 CDN",
+    "requests": [
+      {
+        "host": "tiktok.com",
+        "note": "TikTok 国际版官网"
+      },
+      {
+        "host": "tiktokcdn.com",
+        "note": "TikTok 视频与图片 CDN"
+      },
+      {
+        "host": "tiktokv.com",
+        "note": "TikTok 视频网关"
+      }
+    ],
+    "assert": {
+      "same_policy": true,
+      "policy": "社交媒体",
+      "no_dns_leak": true
+    }
+  },
+  {
+    "name": "collab_meta_facebook_and_messenger",
+    "desc": "Meta Facebook 主站与 Messenger 即时通讯",
+    "requests": [
+      {
+        "host": "facebook.com",
+        "note": "Facebook 官网"
+      },
+      {
+        "host": "messenger.com",
+        "note": "Messenger 桌面与 Web 客户端"
+      },
+      {
+        "host": "fbcdn.net",
+        "note": "Facebook 媒体 CDN"
+      }
+    ],
+    "assert": {
+      "same_policy": true,
+      "policy": "Google-X-Meta-MS",
+      "no_dns_leak": true
+    }
+  },
+  {
+    "name": "collab_pinterest_and_tumblr_visual_social",
+    "desc": "视觉灵感与轻博客社交平台：Pinterest, Tumblr (SocialOthers.list)",
+    "requests": [
+      {
+        "host": "pinterest.com",
+        "note": "Pinterest 官网"
+      },
+      {
+        "host": "pinimg.com",
+        "note": "Pinterest 图片 CDN"
+      },
+      {
+        "host": "tumblr.com",
+        "note": "Tumblr 社交平台"
+      }
+    ],
+    "assert": {
+      "same_policy": true,
+      "policy": "社交媒体",
+      "no_dns_leak": true
+    }
+  }
+]

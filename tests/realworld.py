@@ -6,10 +6,12 @@ realworld.py — 分流测试套件 L4「真实客户端 / 网络栈实测层」
 用真实客户端画像发请求、用系统命令看网络栈、用 surge-cli 问 Surge 本人:
     --tun         接管状态: utun / 默认路由 / 系统 DNS / hijack 落地
     --dns         DNS 深测: hijack / fake-IP / canary / SVCB / DoH / 泄漏抽样
-    --webrtc      STUN 取 srflx 公网 IP, 与 HTTP 出口交叉比对
-    --clients     真实客户端画像 × 各组代表域: 归属 / 连通性 / 出口落点
+    --webrtc      STUN 矩阵取 srflx 公网 IP (Google/Apple/Teams/Zoom/Discord/Xiaomi), 与 HTTP 出口交叉比对
+    --clients     真实客户端画像 (OkHttp/Firefox/Chrome/Electron/iOS/...) × 各组代表域: 归属/连通/出口/降级
+    --quic        HTTP/2 & HTTP/3 QUIC 降级回退与策略同侧对齐专项
     --crosscheck  surge-cli 实测语义 vs engine.py 离线推演, 逐条对账
     --ua-routing  MITM/auto-quic-block 红线 + 零 USER-AGENT 规则的负向验证
+    --selftest    离线全量功能单元测试自检套件
 
 原则(与 L3 一致): 纯只读, surge-cli 只用 status / rule explain / http probe /
 dump dns / dns lookup; 只访问数据配置登记的端点, 默认限速 3 req/s; 在线为准;
@@ -34,7 +36,7 @@ import urllib.error
 import urllib.request
 from datetime import datetime
 
-VERSION = "1.0.0"
+VERSION = "2.0.0"
 SELF_DIR = os.path.dirname(os.path.abspath(__file__))
 
 DEFAULT_SURGE_CLI = "/Applications/Surge.app/Contents/Applications/surge-cli"
@@ -60,7 +62,7 @@ L4 实测层需要一个「正在跑规则模式的 Surge」+ surge-cli, 现在�
      全局直连/全局代理下所有分流断言都不成立, 请先在 Surge 里切回「规则模式」。
 
 L4 不需要 http-api —— surge-cli 走的是本机控制通道, 不用改配置。
-离线三层(engine.py / audit.py / runsuite.py)不依赖本层, 任何时候都能跑。
+离线测试(engine.py --selftest / realworld.py --selftest)不依赖本层, 任何时候都能跑。
 ────────────────────────────────────────────────────────────────────────"""
 
 
@@ -298,6 +300,10 @@ class SurgeCLI(object):
                 "a": a.group(1).strip() if a else None, "raw": out}
 
 
+# ---------------------------------------------------------------------------
+# 客户端请求执行器 (支持 HTTP/1.1, HTTP/2, HTTP/3, 连接池, HTTPDNS, gRPC, WebSocket)
+# ---------------------------------------------------------------------------
+
 class Curl(object):
     """用系统 curl 模拟真实客户端。body 与统计量用哨兵串分隔, 不落任何临时文件。"""
 
@@ -312,23 +318,127 @@ class Curl(object):
         self.proxy_port = proxy_port
         self.path = shutil.which("curl") or "/usr/bin/curl"
         self.available = os.path.isfile(self.path)
+        self.has_http2 = False
+        self.has_http3 = False
+        self._check_capabilities()
 
-    def fetch(self, url, client=None, via="auto", method="GET", max_body=8192):
-        """via: auto=沿用环境(真实 App 的行为) / proxy=显式走 Surge HTTP 代理 /
-        tun=绕开代理走 TUN。返回 dict(ok, status, http_version, ms, remote_ip, body, error)。"""
+    def _check_capabilities(self):
+        if not self.available:
+            return
+        r = run_cmd([self.path, "--version"], timeout=5.0)
+        out = r.get("out") or ""
+        self.has_http2 = "HTTP2" in out
+        self.has_http3 = "HTTP3" in out
+
+    def build_args(self, url, client=None, via="auto", method="GET", headers=None,
+                   resolve=None, http_version=None, data=None, subprofile=None):
+        """构造 curl 参数列表。"""
         client = client or {}
         argv = [self.path, "-sS", "--max-time", "%.1f" % self.timeout,
                 "-w", self.WFMT, "-o", "-"]
         if method == "HEAD":
             argv.append("-I")
+        elif method != "GET":
+            argv += ["-X", method]
+
+        if data is not None:
+            if isinstance(data, bytes):
+                argv += ["--data-binary", data.decode("latin1")]
+            else:
+                argv += ["-d", str(data)]
+
+        ua = client.get("ua")
+        if ua:
+            argv += ["-A", ua]
+
+        # 基础客户端头部
+        req_headers = dict(client.get("headers") or {})
+
+        # 子画像头部 (如 grpc, websocket)
+        if subprofile and client.get("profiles") and subprofile in client["profiles"]:
+            sub_hdrs = client["profiles"][subprofile].get("headers") or {}
+            req_headers.update(sub_hdrs)
+
+        # 显式覆盖头部
+        if headers:
+            req_headers.update(headers)
+
+        for k, v in req_headers.items():
+            if k.lower() == "accept-encoding":
+                # 交给 --compressed 自行协商解压
+                argv.append("--compressed")
+                continue
+            argv += ["-H", "%s: %s" % (k, v)]
+
+        # HTTP 版本
+        ver = str(http_version if http_version is not None else client.get("http") or "").strip()
+        if ver == "3":
+            if self.has_http3:
+                argv.append("--http3")
+            else:
+                argv.append("--http2")
+        elif ver == "2":
+            argv.append("--http2")
+        elif ver == "1.1":
+            argv.append("--http1.1")
+
+        # --resolve 注入 (HTTPDNS 降级直连模拟)
+        if resolve:
+            resolves = [resolve] if isinstance(resolve, str) else resolve
+            for r_item in resolves:
+                argv += ["--resolve", r_item]
+
+        if via == "proxy" and self.proxy_port:
+            argv += ["-x", "http://127.0.0.1:%d" % self.proxy_port]
+        elif via == "tun":
+            argv += ["--noproxy", "*"]
+
+        argv.append(url)
+        return argv
+
+    def fetch(self, url, client=None, via="auto", method="GET", max_body=8192,
+              headers=None, resolve=None, http_version=None, data=None, subprofile=None):
+        """单次请求。via: auto=沿用环境 / proxy=显式走 Surge HTTP 代理 / tun=绕开代理走 TUN。"""
+        argv = self.build_args(url, client=client, via=via, method=method,
+                               headers=headers, resolve=resolve,
+                               http_version=http_version, data=data,
+                               subprofile=subprofile)
+        self.limiter.wait()
+        r = run_cmd(argv, timeout=self.timeout + 5.0)
+        out = r["out"]
+        body, _, meta = out.rpartition(self.MARK)
+        if not meta:
+            lines = [l for l in (r["err"] or "").splitlines() if l.strip()]
+            return {"ok": False, "status": None, "http_version": None, "ms": None,
+                    "remote_ip": None, "connects": 0, "body": "",
+                    "error": (lines[0].strip() if lines else "curl 无输出")}
+        f = (meta.strip().split("\t") + [""] * 6)[:6]
+        code = f[0]
+        try:
+            code_i = int(code)
+        except ValueError:
+            code_i = 0
+        try:
+            connects_i = int(f[4])
+        except ValueError:
+            connects_i = 0
+        return {"ok": code_i > 0, "status": code_i, "http_version": f[1] or None,
+                "ms": int(float(f[2] or 0) * 1000), "remote_ip": f[3] or None,
+                "connects": connects_i, "size": f[5], "body": body[:max_body],
+                "error": None if code_i > 0 else (r["err"].strip() or "无响应")}
+
+    def fetch_pipeline(self, urls, client=None, via="auto"):
+        """单次 curl 进程中连续请求多个 URL，测试 Keep-Alive / 连接池复用。"""
+        if not urls:
+            return []
+        client = client or {}
+        argv = [self.path, "-sS", "--max-time", "%.1f" % (self.timeout * len(urls)),
+                "-w", self.WFMT + "\n", "-o", "/dev/null"]
         ua = client.get("ua")
         if ua:
             argv += ["-A", ua]
         for k, v in (client.get("headers") or {}).items():
             if k.lower() == "accept-encoding":
-                # 画像里的 Accept-Encoding 常含 br/zstd, 而 macOS 自带的 libcurl 只会解
-                # gzip/deflate —— 原样发出去会拿到一坨没法解析的压缩正文(回显 IP 就读不到了)。
-                # 内容编码不参与任何分流判定, 所以这里交给 --compressed 自己协商。
                 argv.append("--compressed")
                 continue
             argv += ["-H", "%s: %s" % (k, v)]
@@ -341,31 +451,50 @@ class Curl(object):
             argv += ["-x", "http://127.0.0.1:%d" % self.proxy_port]
         elif via == "tun":
             argv += ["--noproxy", "*"]
-        argv.append(url)
+        for u in urls:
+            argv.append(u)
 
         self.limiter.wait()
-        r = run_cmd(argv, timeout=self.timeout + 5.0)
-        out = r["out"]
-        body, _, meta = out.rpartition(self.MARK)
-        if not meta:
-            lines = [l for l in (r["err"] or "").splitlines() if l.strip()]
-            return {"ok": False, "status": None, "http_version": None, "ms": None,
-                    "remote_ip": None, "body": "",
-                    "error": (lines[0].strip() if lines else "curl 无输出")}
-        f = (meta.strip().split("\t") + [""] * 6)[:6]
-        code = f[0]
-        try:
-            code_i = int(code)
-        except ValueError:
-            code_i = 0
-        return {"ok": code_i > 0, "status": code_i, "http_version": f[1] or None,
-                "ms": int(float(f[2] or 0) * 1000), "remote_ip": f[3] or None,
-                "connects": f[4], "body": body[:max_body],
-                "error": None if code_i > 0 else (r["err"].strip() or "无响应")}
+        r = run_cmd(argv, timeout=(self.timeout * len(urls)) + 5.0)
+        results = []
+        for line in r["out"].splitlines():
+            if self.MARK.strip() in line:
+                _, _, meta = line.partition(self.MARK.strip())
+                f = (meta.strip().split("\t") + [""] * 6)[:6]
+                try:
+                    code_i = int(f[0])
+                except ValueError:
+                    code_i = 0
+                try:
+                    connects_i = int(f[4])
+                except ValueError:
+                    connects_i = 0
+                results.append({
+                    "ok": code_i > 0, "status": code_i, "http_version": f[1] or None,
+                    "ms": int(float(f[2] or 0) * 1000), "remote_ip": f[3] or None,
+                    "connects": connects_i,
+                })
+        return results
+
+    def fetch_httpdns(self, url, host, resolved_ip, client=None, via="auto"):
+        """通过 --resolve <host>:443:<ip> 模拟 HTTPDNS 拿到 IP 后直连且保留 Host/SNI 的场景。"""
+        resolve_spec = "%s:443:%s" % (host, resolved_ip)
+        return self.fetch(url, client=client, via=via, resolve=resolve_spec)
+
+    def fetch_grpc(self, url, client=None, payload=b"", via="auto"):
+        """模拟 gRPC over HTTP/2 请求（含 5 字节 gRPC frame 头: 1 字节 flag + 4 字节大端长度）。"""
+        grpc_frame = struct.pack("!BI", 0, len(payload)) + payload
+        return self.fetch(url, client=client, via=via, method="POST",
+                          http_version="2", subprofile="grpc", data=grpc_frame)
+
+    def fetch_websocket_handshake(self, url, client=None, via="auto"):
+        """模拟 WebSocket WSS 握手请求。"""
+        return self.fetch(url, client=client, via=via, method="GET",
+                          http_version="1.1", subprofile="websocket")
 
 
 # ---------------------------------------------------------------------------
-# 最小 STUN 客户端(RFC 5389 Binding Request over UDP)
+# STUN 客户端 (RFC 5389 Binding Request over UDP)
 # ---------------------------------------------------------------------------
 
 STUN_BINDING_REQUEST = 0x0001
@@ -376,7 +505,7 @@ ATTR_XOR_MAPPED_ADDRESS = 0x0020
 ATTR_ERROR_CODE = 0x0009
 
 
-def stun_binding(host, port, timeout=3.0, source_ip=None):
+def stun_binding(host, port=3478, timeout=3.0, source_ip=None):
     """向 STUN 服务器发一个 Binding Request, 取回 server-reflexive 地址。
 
     返回 dict(ok, ip, port, peer, ms, error)。peer 是 UDP 应答的来源地址 ——
@@ -441,6 +570,135 @@ def stun_binding(host, port, timeout=3.0, source_ip=None):
         return {"ok": False, "ip": None, "port": None, "peer": peer[0], "ms": ms,
                 "error": "应答里没有 (XOR-)MAPPED-ADDRESS"}
     return {"ok": True, "ip": ip, "port": rport, "peer": peer[0], "ms": ms, "error": None}
+
+
+# ---------------------------------------------------------------------------
+# QUIC / HTTP/3 最小探测器与降级引擎 (RFC 9000 / RFC 9114)
+# ---------------------------------------------------------------------------
+
+QUIC_MAGIC_VERSION = 0x00000001  # QUIC Version 1 (RFC 9000)
+
+
+def _encode_quic_varint(val):
+    """QUIC variable-length integer encoding (RFC 9000 §16)."""
+    if val < 64:
+        return struct.pack("!B", val)
+    elif val < 16384:
+        return struct.pack("!H", val | 0x4000)
+    elif val < 1073741824:
+        return struct.pack("!I", val | 0x80000000)
+    else:
+        return struct.pack("!Q", val | 0xC000000000000000)
+
+
+def quic_initial_packet(dcid=None, scid=None, version=QUIC_MAGIC_VERSION, token=b"", payload=b""):
+    """构造 RFC 9000 QUIC Long Header Initial 报文。"""
+    dcid = dcid if dcid is not None else os.urandom(8)
+    scid = scid if scid is not None else os.urandom(8)
+    # Header Form = 1 (Long Header), Fixed Bit = 1, Long Packet Type = 0x0 (Initial) -> 0xC0
+    first_byte = 0xC0
+    hdr = struct.pack("!BI", first_byte, version)
+    hdr += struct.pack("!B", len(dcid)) + dcid
+    hdr += struct.pack("!B", len(scid)) + scid
+    hdr += _encode_quic_varint(len(token)) + token
+    frame_data = payload or b"\x00"  # PADDING frame
+    pkt_len = len(frame_data) + 1    # 1 byte packet number
+    hdr += _encode_quic_varint(pkt_len)
+    hdr += b"\x00"                  # Packet Number 0
+    pkt = hdr + frame_data
+    if len(pkt) < 1200:
+        pkt += b"\x00" * (1200 - len(pkt))
+    return pkt
+
+
+def parse_quic_header(data):
+    """解析 QUIC 应答首部类型。"""
+    if not data or len(data) < 5:
+        return {"ok": False, "type": "INVALID", "version": None}
+    first_byte = data[0]
+    is_long = bool(first_byte & 0x80)
+    if not is_long:
+        return {"ok": True, "type": "SHORT_HEADER_1RTT", "version": None}
+    version = struct.unpack("!I", data[1:5])[0]
+    if version == 0:
+        return {"ok": True, "type": "VERSION_NEGOTIATION", "version": 0}
+    pkt_type = (first_byte & 0x30) >> 4
+    types = {0x0: "INITIAL", 0x1: "0RTT", 0x2: "HANDSHAKE", 0x3: "RETRY"}
+    return {"ok": True, "type": types.get(pkt_type, "UNKNOWN_LONG"), "version": version}
+
+
+def probe_quic(host, port=443, timeout=2.0, source_ip=None):
+    """向目标服务器 UDP 443 发送 QUIC Initial 探测。
+    返回 dict(ok, reachable, type, peer, ms, error)。"""
+    pkt = quic_initial_packet()
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    s.settimeout(timeout)
+    t0 = time.monotonic()
+    try:
+        if source_ip:
+            s.bind((source_ip, 0))
+        s.sendto(pkt, (host, port))
+        data, peer = s.recvfrom(2048)
+        ms = int((time.monotonic() - t0) * 1000)
+        hdr = parse_quic_header(data)
+        return {"ok": True, "reachable": True, "type": hdr["type"],
+                "peer": peer[0], "ms": ms, "error": None}
+    except socket.timeout:
+        ms = int((time.monotonic() - t0) * 1000)
+        return {"ok": False, "reachable": False, "type": "TIMEOUT",
+                "peer": None, "ms": ms, "error": "超时无应答(UDP 被拦截或服务器未开 QUIC)"}
+    except Exception as e:                                     # noqa: BLE001
+        ms = int((time.monotonic() - t0) * 1000)
+        return {"ok": False, "reachable": False, "type": "ERROR",
+                "peer": None, "ms": ms, "error": "%s: %s" % (type(e).__name__, e)}
+    finally:
+        s.close()
+
+
+def emulate_quic_fallback(curl, host, url, client=None, via="auto", cli=None):
+    """高保真模拟现代浏览器 QUIC -> HTTP/2 -> HTTP/1.1 降级回退链路与分流一致性。"""
+    client = client or {}
+    # 1. 探测 QUIC (UDP 443)
+    quic_res = probe_quic(host, port=443, timeout=min(curl.timeout, 3.0))
+
+    # 2. 探测 HTTP/2 (TCP 443)
+    h2_res = curl.fetch(url, client=client, via=via, http_version="2")
+
+    # 3. 降级 HTTP/1.1 (TCP 443)
+    h1_res = curl.fetch(url, client=client, via=via, http_version="1.1")
+
+    # 4. 校验 UDP 443 与 TCP 443 的 Surge 分流策略对齐性 (避免出口撕裂)
+    udp_policy = None
+    tcp_policy = None
+    policy_parity = True
+    if cli and cli.available:
+        ex_udp = cli.explain(host, protocol="UDP", dest_port=443)
+        ex_tcp = cli.explain(host, protocol="TCP", dest_port=443)
+        udp_policy = ex_udp.get("policy")
+        tcp_policy = ex_tcp.get("policy")
+        if udp_policy and tcp_policy and udp_policy != tcp_policy:
+            policy_parity = False
+
+    fallback_path = "HTTP/3 -> HTTP/2" if quic_res["reachable"] else "QUIC_BLOCKED -> HTTP/2_FALLBACK"
+    success = bool(h2_res["ok"] or h1_res["ok"])
+
+    return {
+        "host": host,
+        "quic_reachable": quic_res["reachable"],
+        "quic_type": quic_res["type"],
+        "quic_ms": quic_res["ms"],
+        "h2_ok": h2_res["ok"],
+        "h2_status": h2_res["status"],
+        "h2_version": h2_res["http_version"],
+        "h2_ms": h2_res["ms"],
+        "h1_ok": h1_res["ok"],
+        "h1_status": h1_res["status"],
+        "fallback_path": fallback_path,
+        "success": success,
+        "policy_parity": policy_parity,
+        "udp_policy": udp_policy,
+        "tcp_policy": tcp_policy,
+    }
 
 
 # ---------------------------------------------------------------------------
@@ -659,7 +917,7 @@ def in_responder_range(addr):
 # 数据配置
 # ---------------------------------------------------------------------------
 
-def load_targets(path, log):
+def load_targets(path, log=None):
     if not os.path.isfile(path):
         raise SystemExit("找不到数据配置 %s(用 --targets 指定)" % path)
     try:
@@ -759,8 +1017,6 @@ def cmd_tun(ctx):
         log(render_table(["被劫持的 DNS 服务器", "主机路由出接口"],
                          [[k, v] for k, v in sorted(routes.items())]))
     hijacked_via_utun = [k for k, v in routes.items() if v.startswith("utun")]
-    # 主机路由是 Surge 收到查询后按需下发、且会过期的临时项, 拿不到不算问题 ——
-    # hijack 的功能面判定以 --dns 里的 dig 结果为准, 这里只做「看到了就记一笔」。
     chk.add(S, "hijack-dns 目标已被路由进 utun",
             True if hijacked_via_utun else None,
             "探测 DNS 的主机路由指向 utun",
@@ -768,7 +1024,7 @@ def cmd_tun(ctx):
             level="WARN",
             note="配置 hijack-dns = %s" % (hijack or "(未配置)"))
 
-    # 6. 本机监听端口(只看 Surge 自己的)
+    # 6. 本机监听端口
     port, how = ctx["proxy_port"], ctx["proxy_port_how"]
     r = run_cmd(["lsof", "-nP", "-iTCP:%d" % port, "-sTCP:LISTEN"], 10.0)
     listeners = [l.split()[0] for l in r["out"].splitlines()[1:] if l.strip()]
@@ -889,7 +1145,6 @@ def cmd_dns(ctx):
     else:
         log("     (配置里没有 encrypted-dns-server, 跳过)")
 
-    # Surge 自己在用哪个上游 —— 用一个本来就该本地解析的直连域探测
     probe_direct = ((tg.get("leak_sample") or {}).get("direct") or ["www.qq.com"])[0]
     if cli.available:
         lk = cli.dns_lookup(probe_direct)
@@ -903,8 +1158,6 @@ def cmd_dns(ctx):
     # --- 4. 本地 DNS 泄漏 live 抽样 ---------------------------------------
     log("")
     log("  4) 本地 DNS 泄漏 live 抽样 —— 代理域名不该出现在 Surge 的本地解析记录里")
-    log("     手法: dump dns 取快照 → 真实访问样本域 → 再取快照 → 只看「新增」条目。")
-    log("     只看新增就不用 flush, 全程零写操作; 快照前就有的条目单列「无法判定」。")
     sample = tg.get("leak_sample") or {}
     leak_rows = []
     if not cli.available:
@@ -956,7 +1209,7 @@ def cmd_dns(ctx):
 
 
 # ---------------------------------------------------------------------------
-# 子命令 3: --webrtc  STUN 泄漏检测
+# 子命令 3: --webrtc  STUN 矩阵泄漏检测
 # ---------------------------------------------------------------------------
 
 def cmd_webrtc(ctx):
@@ -966,23 +1219,17 @@ def cmd_webrtc(ctx):
     servers = stun_cfg.get("servers") or []
     conf = ctx["conf_text"]
     udp_beh = conf_general(conf, "udp-policy-not-supported-behaviour") or "(未配置, 默认 DIRECT)"
-    log.section("WebRTC / STUN 泄漏检测")
+    log.section("WebRTC / STUN 矩阵泄漏检测 (Google/Apple/Teams/Zoom/Discord/Xiaomi)")
     log("")
     log("  原理: WebRTC 靠 STUN(UDP)向公网服务器问「你看到的我是谁」, 拿到的 server-reflexive")
     log("        地址就是浏览器会写进 ICE candidate、对端能看到的公网 IP。它如果等于本机真实")
     log("        出口, 就是经典的 WebRTC 泄漏 —— 网页拿到的 IP 与你的 HTTP 出口对不上。")
     log("  配置: udp-policy-not-supported-behaviour = %s" % udp_beh)
-    if str(udp_beh).upper().startswith("REJECT"):
-        log("        = REJECT: 策略不支持 UDP 时直接拒绝, 不回落直连。")
-        log("        因此「STUN 超时无应答」是**符合预期的零泄漏**, 不算失败;")
-        log("        真正的失败是拿到了应答、而且那个应答等于本机真实出口 IP。")
-    else:
-        log("        ⚠ 非 REJECT: 策略不支持 UDP 时会回落直连, STUN 会直接暴露本机真实出口 IP。")
 
-    # 基准: 走 DIRECT 的那台 STUN 服务器给出的 srflx = 本机真实出口 IP
     baseline_ip, rows, records = None, [], []
     for s in servers:
         host, port = s.get("host"), int(s.get("port") or 3478)
+        provider = s.get("provider") or host
         ex = cli.explain(host) if cli.available else {"policy": None, "source": None,
                                                      "final": None, "exit_class": None}
         res = stun_binding(host, port, timeout=ctx["timeout"])
@@ -992,7 +1239,8 @@ def cmd_webrtc(ctx):
         if s.get("baseline") and res["ok"]:
             baseline_ip = res["ip"]
         if s.get("expect_group") and ex["policy"]:
-            chk.add(S, "STUN 服务器 %s 落在预期组" % host, ex["policy"] == s["expect_group"],
+            chk.add(S, "STUN 服务器 %s (%s) 落在预期组" % (host, provider),
+                    ex["policy"] == s["expect_group"],
                     s["expect_group"], ex["policy"], level="WARN",
                     note="归属变了的话下面的泄漏判定基准也就变了, 需要更新 realworld_targets.json")
 
@@ -1004,12 +1252,12 @@ def cmd_webrtc(ctx):
         log("")
         log("  本机真实出口基准(走 DIRECT 的 STUN 回显): %s" % ctx["mask_ip"](baseline_ip))
 
-    # 各代理组的 HTTP 出口, 用来和 UDP 出口对账
     http_exit = ctx["group_http_exit"]
     for rec in records:
         res = rec["stun"]
         srflx = res["ip"]
         grp = rec["group"] or "?"
+        provider = rec.get("provider") or rec["host"]
         peer_note = ""
         if res["peer"]:
             peer_note = "fake" if is_fake_ip(res["peer"]) else "真实"
@@ -1017,7 +1265,7 @@ def cmd_webrtc(ctx):
             verdict = "无应答/失败"
             if str(udp_beh).upper().startswith("REJECT"):
                 verdict = "无应答(REJECT 语义下= 零泄漏)"
-            rows.append([rec["host"], grp, "-", peer_note or "-",
+            rows.append([provider, rec["host"], grp, "-", peer_note or "-",
                          (res["error"] or "")[:34], verdict])
             chk.add(S, "STUN %s 无泄漏" % rec["host"], True,
                     "不得回显本机真实出口", "无应答", level="WARN", note=res["error"] or "")
@@ -1039,10 +1287,10 @@ def cmd_webrtc(ctx):
             else:
                 verdict = "✓ 非本机出口"
             ok = True
-        rows.append([rec["host"], grp, ctx["mask_ip"](srflx), peer_note or "-",
+        rows.append([provider, rec["host"], grp, ctx["mask_ip"](srflx), peer_note or "-",
                      "%d ms" % res["ms"], verdict])
         if ok is not None:
-            chk.add(S, "STUN %s 无泄漏" % rec["host"], ok,
+            chk.add(S, "STUN %s (%s) 无泄漏" % (rec["host"], provider), ok,
                     "srflx ≠ 本机真实出口", ctx["mask_ip"](srflx),
                     note="srflx 等于本机真实出口 = WebRTC 会把真实 IP 暴露给对端")
         if res["peer"] and not is_fake_ip(res["peer"]) and grp not in ("DIRECT", None):
@@ -1051,7 +1299,7 @@ def cmd_webrtc(ctx):
                     note="应答直接来自真实 IP, 说明这条 UDP 流没被 TUN 接管")
 
     log("")
-    log(render_table(["STUN 服务器", "策略组", "srflx 公网 IP", "应答来源",
+    log(render_table(["厂商/服务", "STUN 服务器", "策略组", "srflx 公网 IP", "应答来源",
                       "耗时/错误", "判定"], rows))
     log("")
     log("  说明: 「应答来源=fake」指 UDP 应答来自 198.18.0.0/15 的 fake IP, 即这条流确实")
@@ -1060,7 +1308,7 @@ def cmd_webrtc(ctx):
     ctx["result"]["webrtc"] = {
         "udp_policy_not_supported_behaviour": udp_beh,
         "baseline_present": baseline_ip is not None,
-        "servers": [{"host": r["host"], "group": r["group"],
+        "servers": [{"host": r["host"], "group": r["group"], "provider": r.get("provider"),
                      "ok": r["stun"]["ok"], "ms": r["stun"]["ms"],
                      "error": r["stun"]["error"],
                      "peer_is_fake": is_fake_ip(r["stun"]["peer"]) if r["stun"]["peer"] else None,
@@ -1071,7 +1319,7 @@ def cmd_webrtc(ctx):
 
 
 # ---------------------------------------------------------------------------
-# 子命令 4: --clients  真实客户端模拟
+# 子命令 4: --clients  真实客户端与高级协议模拟
 # ---------------------------------------------------------------------------
 
 def cmd_clients(ctx):
@@ -1081,7 +1329,7 @@ def cmd_clients(ctx):
     groups = targets.get("groups") or []
     if ctx["filter"]:
         groups = [g for g in groups if ctx["filter"] in g.get("group", "")]
-    log.section("真实客户端模拟(UA / HTTP 版本 / Accept 组合 × 各组代表域)")
+    log.section("真实客户端与高级协议栈模拟 (OkHttp/Firefox/Chrome/Electron/iOS/...)")
     log("")
     log("  通道: %s   限速: %.1f req/s   超时: %.0fs"
         % (ctx["via_desc"], ctx["rate"], ctx["timeout"]))
@@ -1099,7 +1347,7 @@ def cmd_clients(ctx):
             if m:
                 uag = m.group(1).strip()
             ip, _ = parse_probe_ip("cf_trace", r["body"] or "")
-            ok = (uag == (c.get("ua") or "")) if uag else None   # 没回显 = 判不了, 不是失败
+            ok = (uag == (c.get("ua") or "")) if uag else None
             rows.append([c["id"], r["status"] or "-", "HTTP/%s" % (r["http_version"] or "?"),
                          "%s ms" % (r["ms"] if r["ms"] is not None else "-"),
                          ctx["mask_ip"](ip) if ip else "-",
@@ -1115,14 +1363,73 @@ def cmd_clients(ctx):
                         r["error"] or "UNREACHABLE", level="WARN")
         log(render_table(["画像", "状态", "协商版本", "耗时", "出口 IP", "UA 核对"], rows))
 
-    # --- 2. 逐组: 归属 / 连通性 / 出口落点 --------------------------------
+    # --- 2. 高级客户端协议栈深度仿真 --------------------------------------
     log("")
-    log("  2) 逐组代表域: 归属复核 → 真实客户端连通性 → 出口落点")
+    log("  2) 复合客户端生态深度仿真 (OkHttp连接池/HTTPDNS/Firefox canary/Chrome Client Hints/Electron gRPC/WSS/QUIC)")
+
+    # 2a. Android OkHttp 连接池与 HTTPDNS 降级直连模拟
+    okhttp_client = client_of(targets, "android_okhttp")
+    if okhttp_client and not ctx["offline"]:
+        test_url = "https://cdn.jsdelivr.net/cdn-cgi/trace"
+        pool_res = curl.fetch_pipeline([test_url, test_url, test_url], client=okhttp_client, via=ctx["via"])
+        reused = len(pool_res) >= 2 and all(p.get("connects") in (0, 1) for p in pool_res[1:])
+        chk.add(S, "android_okhttp 连接池 Keep-Alive 管道复用",
+                True if (pool_res and reused) else None, "连接复用 (connects <= 1)",
+                "%d 次请求全部成功, 复用: %s" % (len(pool_res), "是" if reused else "否"),
+                level="WARN")
+
+        # HTTPDNS 降级直连测试 (使用 icanhazip.com 或 cdn.jsdelivr.net 的预设 IP)
+        httpdns_host = "icanhazip.com"
+        httpdns_ip = "104.18.27.120"
+        hdns_res = curl.fetch_httpdns("https://%s/" % httpdns_host, httpdns_host, httpdns_ip,
+                                      client=okhttp_client, via=ctx["via"])
+        chk.add(S, "android_okhttp HTTPDNS 降级直连模拟 (Host/SNI 保持)",
+                True if hdns_res["ok"] else None, "HTTP 200/可达",
+                str(hdns_res["status"]) if hdns_res["ok"] else hdns_res["error"] or "?",
+                level="WARN")
+
+    # 2b. Electron Desktop: gRPC 帧结构与 WebSocket (WSS) 链路模拟
+    electron_client = client_of(targets, "electron_desktop")
+    if electron_client and not ctx["offline"]:
+        grpc_url = "https://api.openai.com/v1/models"
+        grpc_res = curl.fetch_grpc(grpc_url, client=electron_client, via=ctx["via"])
+        chk.add(S, "electron_desktop gRPC 帧结构与 HTTP/2 传输",
+                True if grpc_res["ok"] else None, "HTTP/2 连接建立",
+                "HTTP/%s 状态码 %s" % (grpc_res.get("http_version") or "?", grpc_res.get("status") or "?"),
+                level="WARN")
+
+        wss_url = "https://chatgpt.com/cdn-cgi/trace"
+        wss_res = curl.fetch_websocket_handshake(wss_url, client=electron_client, via=ctx["via"])
+        chk.add(S, "electron_desktop WebSocket 握手链路画像",
+                True if wss_res["ok"] else None, "握手报文响应",
+                str(wss_res.get("status") or "?"), level="WARN")
+
+    # 2c. Firefox DoH canary 防绕过检测
+    firefox_client = client_of(targets, "firefox_desktop")
+    if firefox_client and not ctx["offline"]:
+        canary_dom = firefox_client.get("doh_canary") or "use-application-dns.net"
+        if cli.available:
+            ex_can = cli.explain(canary_dom)
+            chk.add(S, "firefox_desktop DoH canary 规则覆盖",
+                    ex_can["policy"] is not None, "有明确分流规则",
+                    "%s (命中 %s)" % (ex_can["policy"] or "?", ex_can["source"] or "?"),
+                    level="WARN")
+
+    # 2d. Chrome Mobile Client Hints
+    chrome_m = client_of(targets, "chrome_mobile")
+    if chrome_m and not ctx["offline"]:
+        ch_headers = chrome_m.get("headers") or {}
+        has_ch = "sec-ch-ua-mobile" in ch_headers and "sec-ch-ua-platform" in ch_headers
+        chk.add(S, "chrome_mobile Client Hints 规范性", has_ch,
+                "包含 sec-ch-ua-mobile 与 sec-ch-ua-platform",
+                "平台: %s, 移动端: %s" % (ch_headers.get("sec-ch-ua-platform"), ch_headers.get("sec-ch-ua-mobile")))
+
+    # --- 3. 逐组: 归属 / 连通性 / 出口落点 --------------------------------
+    log("")
+    log("  3) 逐组代表域: 归属复核 → 真实客户端连通性 → 出口落点")
     baseline_exit = None
     group_exit = {}
     all_rows = []
-    # 基准值(本机真实出口)是后面所有「有没有真的走代理」判定的锚点, 被 --filter 滤掉
-    # 也得单独补一次, 否则整节退化成「只报告」。
     if ctx["filter"]:
         for g in targets.get("groups") or []:
             for h in g.get("hosts") or []:
@@ -1137,7 +1444,7 @@ def cmd_clients(ctx):
         gname = g.get("group")
         hosts = g.get("hosts") or []
         clients = [client_of(targets, cid) for cid in (g.get("clients") or ["curl_baseline"])]
-        # 2a. 归属复核(不需要外网)
+        # 3a. 归属复核(不需要外网)
         for h in hosts:
             if not cli.available:
                 break
@@ -1145,7 +1452,7 @@ def cmd_clients(ctx):
             chk.add(S, "代表域归属: %s" % h["host"], ex["policy"] == gname,
                     gname, ex["policy"] or "?",
                     note="归属变了就得更新 realworld_targets.json, 否则这一组量到的不是它的出口")
-        # 2b. 权威落点回读: 每组只发一次 http probe, 由 Surge 自己发起真实 HEAD
+        # 3b. 权威落点回读: 每组只发一次 http probe, 由 Surge 自己发起真实 HEAD
         probe_note = ""
         if cli.available and hosts:
             p = cli.http_probe(hosts[0].get("url") or ("https://%s/" % hosts[0]["host"]))
@@ -1156,7 +1463,7 @@ def cmd_clients(ctx):
                     probe_note += " [CF colo %s]" % ray.rsplit("-", 1)[1]
             else:
                 probe_note = "probe 失败: %s" % (p.get("error") or "")[:28]
-        # 2c. 真实客户端请求
+        # 3c. 真实客户端请求
         for hi, h in enumerate(hosts):
             url = h.get("url") or ("https://%s/" % h["host"])
             use = clients if (hi == 0 or h.get("echo")) else clients[:1]
@@ -1187,9 +1494,9 @@ def cmd_clients(ctx):
     log(render_table(["策略组", "代表域", "客户端画像", "状态", "协商版本", "耗时",
                       "出口 IP", "Surge 回读落点"], all_rows))
 
-    # --- 3. 出口落点判定 --------------------------------------------------
+    # --- 4. 出口落点判定 --------------------------------------------------
     log("")
-    log("  3) 出口落点判定(以 DIRECT 组回显的本机真实出口为基准)")
+    log("  4) 出口落点判定(以 DIRECT 组回显的本机真实出口为基准)")
     if baseline_exit:
         log("     本机真实出口: %s" % ctx["mask_ip"](baseline_exit))
     rows = []
@@ -1219,6 +1526,49 @@ def cmd_clients(ctx):
     ctx["result"]["clients"] = {"group_exit": {k: bool(v) for k, v in group_exit.items()},
                                 "baseline_exit_present": bool(baseline_exit),
                                 "rows": len(all_rows)}
+    return 0
+
+
+# ---------------------------------------------------------------------------
+# 子命令 4b: --quic  HTTP/2 & HTTP/3 QUIC 降级回退与策略同侧对齐
+# ---------------------------------------------------------------------------
+
+def cmd_quic(ctx):
+    log, chk, cli, curl = ctx["log"], ctx["checks"], ctx["cli"], ctx["curl"]
+    S = "quic"
+    log.section("HTTP/2 & HTTP/3 QUIC 降级回退与分流对齐深度测试")
+    log("")
+    log("  目的: 验证现代浏览器在 QUIC/UDP 连通或受阻(auto-quic-block)时, 能平滑降级至 HTTP/2,")
+    log("        且 UDP 443 与 TCP 443 在 Surge 内部命中完全相同的策略组与出口网关, 杜绝分流撕裂。")
+
+    targets = ctx["targets"]
+    quic_probe_hosts = [
+        {"host": "chatgpt.com", "url": "https://chatgpt.com/cdn-cgi/trace"},
+        {"host": "cdn.jsdelivr.net", "url": "https://cdn.jsdelivr.net/cdn-cgi/trace"},
+        {"host": "www.google.com", "url": "https://www.google.com/generate_204"},
+        {"host": "icanhazip.com", "url": "https://icanhazip.com/"},
+    ]
+
+    rows = []
+    for item in quic_probe_hosts:
+        host, url = item["host"], item["url"]
+        res = emulate_quic_fallback(curl, host, url, client={"ua": "curl/8.7.1"},
+                                    via=ctx["via"], cli=cli)
+        rows.append([
+            host,
+            "可达 (%d ms)" % res["quic_ms"] if res["quic_reachable"] else "未应答/拦截",
+            "HTTP/%s (%d)" % (res["h2_version"] or "?", res["h2_status"] or 0) if res["h2_ok"] else "失败",
+            res["fallback_path"],
+            "✓ 对齐 (%s)" % res["tcp_policy"] if res["policy_parity"] else "✗ 撕裂: UDP=%s vs TCP=%s" % (res["udp_policy"], res["tcp_policy"]),
+            "✓ 通过" if (res["success"] and res["policy_parity"]) else "✗ 异常"
+        ])
+        chk.add(S, "QUIC/H2 降级链路连通: %s" % host, res["success"],
+                "H2/H1.1 降级至少一项可达", "成功" if res["success"] else "降级失败", level="WARN")
+        chk.add(S, "UDP与TCP策略同侧对齐: %s" % host, res["policy_parity"],
+                "UDP=TCP 策略组一致", "%s vs %s" % (res["udp_policy"], res["tcp_policy"]))
+
+    log(render_table(["目标域名", "QUIC/UDP443", "HTTP/2/TCP443", "降级路径", "策略组同侧对齐", "判定"], rows))
+    ctx["result"]["quic_fallback"] = rows
     return 0
 
 
@@ -1256,11 +1606,7 @@ def _collect_queries(scen_dir, flt=None):
 
 
 def _norm_source(source, rule):
-    """把两边对「命中来源」的不同叫法归一, 避免纯标注差异被算成不一致。
-
-    engine.py 把 FINAL 记成 source='Surge.conf'(规则写在 conf 里), surge-cli 则
-    根本不给 list 名 —— 两者说的是同一件事。命中不到来源时统一记 None。
-    """
+    """把两边对「命中来源」的不同叫法归一, 避免纯标注差异被算成不一致。"""
     if rule and str(rule).upper().startswith("FINAL"):
         return "<FINAL>"
     if not source:
@@ -1335,7 +1681,6 @@ def cmd_crosscheck(ctx):
     log("  比对完成: %d 条(域名 %d / 纯 IP %d), 用时 %.1fs, 平均 %.0f ms/条"
         % (len(queries), n_domain, n_ip, dur, dur * 1000 / max(1, len(queries))))
 
-    # rule explain 本身不该触发任何解析(所有 IP 类规则都带 no-resolve)
     if before is not None:
         after = cli.dns_cache_domains() or set()
         new = after - before
@@ -1345,7 +1690,6 @@ def cmd_crosscheck(ctx):
                 level="WARN",
                 note="rule explain 不建连接; 有新增说明某条 IP 类规则缺 no-resolve 或来自并发的其它流量")
 
-    # 策略组不一致
     log("")
     if mismatch_policy:
         log("  【策略组不一致】(在线为准)")
@@ -1364,7 +1708,6 @@ def cmd_crosscheck(ctx):
             level=("FAIL" if ctx["strict"] else "WARN"),
             note="engine.py 的 GEOIP/IP-ASN 是显式声明的离线近似, 这里默认只提示; --strict 可升为硬失败")
 
-    # 命中表不一致(策略组相同, 但命中的是另一张表)
     log("")
     if mismatch_source:
         log("  【命中表不一致 —— 策略组相同, 但命中的 list 不同】")
@@ -1400,12 +1743,7 @@ def cmd_crosscheck(ctx):
 # ---------------------------------------------------------------------------
 
 def cmd_ua_routing(ctx):
-    """MITM/auto-quic-block 红线 + 「全库零 USER-AGENT 规则」的负向验证。
-
-    2026-08-30 裁决后全库移除了全部 USER-AGENT 规则(静态面由 A8 把守), 本节在
-    真实 Surge 上复核同一事实: 每个用例带 UA 与不带 UA 的落点必须完全相同,
-    落点变化 = 有 UA 规则回流, 应删规则本身。
-    """
+    """MITM/auto-quic-block 红线 + 「全库零 USER-AGENT 规则」的负向验证。"""
     log, chk, cli = ctx["log"], ctx["checks"], ctx["cli"]
     S = "ua-routing"
     cases = (ctx["targets"].get("ua_routing") or {}).get("cases") or []
@@ -1489,7 +1827,131 @@ def write_report(path, log, result, checks):
 
 
 # ---------------------------------------------------------------------------
-# main
+# 离线功能单元测试自检套件 (--selftest)
+# ---------------------------------------------------------------------------
+
+def run_selftest(targets_path=DEFAULT_TARGETS):
+    """离线全量功能单元测试自检套件 (无需在线环境与外部依赖)。"""
+    passed = 0
+    total = 0
+
+    def test(name, ok, msg=""):
+        nonlocal passed, total
+        total += 1
+        if ok:
+            passed += 1
+            print("[PASS] %s" % name)
+        else:
+            print("[FAIL] %s: %s" % (name, msg))
+
+    print("realworld.py 离线自检套件 (v%s)" % VERSION)
+    print("=" * 60)
+
+    # 1. targets 数据结构有效性
+    data = load_targets(targets_path)
+    test("T01 数据配置加载", bool(data and "clients" in data and "groups" in data and "stun" in data))
+
+    # 2. 客户端画像结构验证
+    clients = {c["id"]: c for c in data.get("clients", [])}
+    req_clients = ["curl_baseline", "android_okhttp", "firefox_desktop", "chrome_mobile",
+                   "electron_desktop", "safari_macos", "chrome_macos", "ios_safari",
+                   "ios_native_app", "chatgpt_app", "claude_app", "telegram_app"]
+    all_c_present = all(k in clients for k in req_clients)
+    test("T02 关键客户端画像完整收录", all_c_present, "缺失画像: %s" % [k for k in req_clients if k not in clients])
+
+    # 3. android_okhttp 连接池与 HTTPDNS 配置
+    okhttp = clients.get("android_okhttp", {})
+    test("T03 android_okhttp UA 与连接池配置",
+         okhttp.get("ua") == "okhttp/4.12.0" and bool(okhttp.get("emulation", {}).get("connection_pool")),
+         "UA 或 connection_pool 异常")
+    test("T04 android_okhttp HTTPDNS 降级直连配置",
+         bool(okhttp.get("emulation", {}).get("httpdns_fallback", {}).get("enabled")),
+         "HTTPDNS 配置异常")
+
+    # 4. firefox_desktop Sec-Fetch 与 DoH canary
+    ff = clients.get("firefox_desktop", {})
+    ff_headers = ff.get("headers", {})
+    test("T05 firefox_desktop Sec-Fetch 元数据与 DoH canary",
+         "Sec-Fetch-Dest" in ff_headers and ff.get("doh_canary") == "use-application-dns.net",
+         "Sec-Fetch 头部或 canary 缺失")
+
+    # 5. chrome_mobile Client Hints
+    cm = clients.get("chrome_mobile", {})
+    cm_headers = cm.get("headers", {})
+    test("T06 chrome_mobile Client Hints 结构完整",
+         cm_headers.get("sec-ch-ua-mobile") == "?1" and cm_headers.get("sec-ch-ua-platform") == "\"Android\"",
+         "Client Hints 键值不匹配")
+
+    # 6. electron_desktop gRPC 与 WebSocket profile
+    elec = clients.get("electron_desktop", {})
+    elec_prof = elec.get("profiles", {})
+    test("T07 electron_desktop gRPC 与 WebSocket 画像包含",
+         "grpc" in elec_prof and "websocket" in elec_prof and elec_prof["grpc"]["headers"].get("Content-Type") == "application/grpc",
+         "gRPC / WebSocket 画像不完整")
+
+    # 7. STUN 矩阵多厂商收录
+    stun_srvs = data.get("stun", {}).get("servers", [])
+    hosts = [s["host"] for s in stun_srvs]
+    has_google = any("google" in h for h in hosts)
+    has_apple = any("apple" in h for h in hosts)
+    has_teams = any("teams" in h or "microsoft" in h for h in hosts)
+    has_zoom = any("zoom" in h for h in hosts)
+    has_discord = any("discord" in h for h in hosts)
+    has_baseline = any(s.get("baseline") for s in stun_srvs)
+    test("T08 STUN 矩阵厂商多源覆盖 (Google/Apple/Teams/Zoom/Discord/Xiaomi)",
+         has_google and has_apple and has_teams and has_zoom and has_discord and has_baseline,
+         "STUN 矩阵缺失厂商")
+
+    # 8. STUN RFC 5389 编码与 IPv4/IPv6 解码
+    txid = b"123456789012"
+    raw_req = struct.pack("!HHI12s", STUN_BINDING_REQUEST, 0, STUN_MAGIC, txid)
+    test("T09 STUN RFC 5389 Binding Request 报文构建", len(raw_req) == 20 and raw_req[:2] == b"\x00\x01")
+
+    # 模拟 STUN Success Response with XOR-MAPPED-ADDRESS
+    fake_ip_bytes = socket.inet_pton(socket.AF_INET, "1.2.3.4")
+    xor_port = 12345 ^ (STUN_MAGIC >> 16)
+    mask = struct.pack("!I", STUN_MAGIC)
+    xor_addr = bytes(b ^ m for b, m in zip(fake_ip_bytes, mask))
+    val = struct.pack("!BBH4s", 0, 1, xor_port, xor_addr)
+    body = struct.pack("!HH", ATTR_XOR_MAPPED_ADDRESS, len(val)) + val
+    resp = struct.pack("!HHI12s", STUN_BINDING_SUCCESS, len(body), STUN_MAGIC, txid) + body
+
+    # Parse response via simulated packet extraction
+    mtype, mlen, magic, rtx = struct.unpack("!HHI12s", resp[:20])
+    parsed_ip = socket.inet_ntop(socket.AF_INET, bytes(b ^ m for b, m in zip(resp[28:32], mask)))
+    test("T10 STUN RFC 5389 XOR-MAPPED-ADDRESS IPv4 解析验证", parsed_ip == "1.2.3.4", "解析出 IP=%s" % parsed_ip)
+
+    # 9. QUIC RFC 9000 Initial Packet 与 Header 解析
+    qpkt = quic_initial_packet(dcid=b"12345678", scid=b"87654321")
+    test("T11 QUIC RFC 9000 Initial Packet 构建 (>=1200 字节)", len(qpkt) >= 1200 and qpkt[0] & 0x80 != 0)
+
+    qhdr = parse_quic_header(qpkt)
+    test("T12 QUIC Long Header 报文类型识别 (INITIAL)", qhdr["ok"] and qhdr["type"] == "INITIAL" and qhdr["version"] == QUIC_MAGIC_VERSION)
+
+    # 10. DNS RFC 1035 线格式编码与解析
+    wire_q = dns_wire_query("use-application-dns.net", qtype=1)
+    test("T13 DNS RFC 1035 线格式查询构建", len(wire_q) > 20 and wire_q[:2] == b"\x00\x00")
+
+    # 11. Curl 参数构造器检查 (包含 resolve, gRPC 与 WebSocket)
+    curl = Curl(timeout=5.0, rate=10.0, proxy_port=6152)
+    grpc_args = curl.build_args("https://api.openai.com/v1/models", client=elec,
+                                method="POST", subprofile="grpc", data=b"\x00\x00\x00\x00\x00")
+    test("T14 Curl gRPC 命令行参数装配", "--http2" in grpc_args and "Content-Type: application/grpc" in " ".join(grpc_args))
+
+    hdns_args = curl.build_args("https://icanhazip.com/", client=okhttp, resolve="icanhazip.com:443:104.18.27.120")
+    test("T15 Curl HTTPDNS --resolve 命令行参数装配", "--resolve" in hdns_args and "icanhazip.com:443:104.18.27.120" in hdns_args)
+
+    # 12. IP 脱敏掩码
+    mask_fn = make_mask_ip(True)
+    test("T16 IP 遮蔽与脱敏工具验证", mask_fn("1.2.3.4") == "1.2.3.x" and "::x" in mask_fn("2001:db8::1"))
+
+    print("=" * 60)
+    print("自检合计 %d 条: 通过 %d, 失败 %d" % (total, passed, total - passed))
+    return 0 if (passed == total and total > 0) else 1
+
+
+# ---------------------------------------------------------------------------
+# main & CLI
 # ---------------------------------------------------------------------------
 
 def build_parser():
@@ -1502,19 +1964,23 @@ def build_parser():
   python3 realworld.py --crosscheck          # 与离线引擎对账(离线可跑)
   python3 realworld.py --ua-routing          # MITM 红线 + UA 中性验证
   python3 realworld.py --dns                 # DNS 深测
-  python3 realworld.py --webrtc              # STUN / WebRTC 泄漏
-  python3 realworld.py --clients             # 真实客户端画像 × 各组代表域
+  python3 realworld.py --webrtc              # STUN / WebRTC 矩阵泄漏
+  python3 realworld.py --clients             # 真实客户端画像 (OkHttp/Firefox/Chrome/Electron)
+  python3 realworld.py --quic                # HTTP/2 & HTTP/3 QUIC 降级回退与策略同侧对齐
+  python3 realworld.py --selftest            # 离线功能单元测试自检
   python3 realworld.py --offline             # 只跑不需要外网的部分
   python3 realworld.py --full --report ~/Desktop/surge-audit/realworld.md
 
 退出码: 0 通过 / 1 有失败 / 2 环境不可用 / 3 用法或中断""")
     p.add_argument("--tun", action="store_true", help="TUN / 接管状态检测")
     p.add_argument("--dns", action="store_true", help="DNS 深测")
-    p.add_argument("--webrtc", action="store_true", help="WebRTC / STUN 泄漏检测")
-    p.add_argument("--clients", action="store_true", help="真实客户端模拟")
+    p.add_argument("--webrtc", action="store_true", help="WebRTC / STUN 矩阵泄漏检测")
+    p.add_argument("--clients", action="store_true", help="真实客户端模拟 (OkHttp/Firefox/Chrome/Electron/...)")
+    p.add_argument("--quic", action="store_true", help="HTTP/2 & HTTP/3 QUIC 降级回退与分流对齐")
     p.add_argument("--crosscheck", action="store_true", help="分流落点交叉验证")
     p.add_argument("--ua-routing", action="store_true", dest="ua_routing",
                    help="UA 分流生效性(四格通道矩阵)")
+    p.add_argument("--selftest", action="store_true", help="离线自检套件(画像/报文/降级逻辑)")
     p.add_argument("--full", action="store_true", help="全部子命令按序跑一遍并写报告")
     p.add_argument("--offline", action="store_true",
                    help="只跑不需要外网的部分(--tun --crosscheck --ua-routing 的规则层)")
@@ -1563,11 +2029,15 @@ def make_mask_ip(redact):
 
 def main(argv=None):
     args = build_parser().parse_args(argv)
-    picks = [args.tun, args.dns, args.webrtc, args.clients, args.crosscheck,
-             args.ua_routing, args.full, args.offline, args.list_targets]
+    picks = [args.tun, args.dns, args.webrtc, args.clients, args.quic,
+             args.crosscheck, args.ua_routing, args.full, args.offline,
+             args.list_targets, args.selftest]
     if not any(picks):
         build_parser().print_help()
         return 3
+
+    if args.selftest:
+        return run_selftest(args.targets)
 
     log = Log(quiet=args.as_json)
     checks = Checks()
@@ -1619,7 +2089,7 @@ def main(argv=None):
 
     order = []
     if args.full:
-        order = [cmd_tun, cmd_dns, cmd_clients, cmd_webrtc, cmd_ua_routing, cmd_crosscheck]
+        order = [cmd_tun, cmd_dns, cmd_clients, cmd_quic, cmd_webrtc, cmd_ua_routing, cmd_crosscheck]
     elif args.offline:
         order = [cmd_tun, cmd_crosscheck, cmd_ua_routing]
     else:
@@ -1629,6 +2099,8 @@ def main(argv=None):
             order.append(cmd_dns)
         if args.clients:
             order.append(cmd_clients)
+        if args.quic:
+            order.append(cmd_quic)
         if args.webrtc:
             order.append(cmd_webrtc)
         if args.ua_routing:

@@ -4,6 +4,61 @@
 
 ---
 
+## [2026-09-02·网络仿真与全量治理] 网络请求仿真测试体系全面升级 (4,043 断言) + 34 表拓扑重叠与失效资产深度审计
+
+**动机**: 响应用户指令 —— 全面升级 Surge 规则分流系统的网络请求仿真测试体系（高保真模拟现代浏览器访问以及知名与长尾小众 App 的多类型复合网络流量场景），并对全量 34 个规则列表执行跨表重叠遮蔽、失效资产（域名/IP/ASN）及归属正确性的深度审计与清洗治理。
+
+### Added
+- **网络协议栈与真实客户端画像全面升级 (`tests/realworld.py`, `tests/realworld_targets.json`)**:
+  - **现代浏览器请求栈**: 完整支持 HTTP/2 多路复用、Sec-Fetch metadata（`Dest`/`Mode`/`Site`/`User`）、桌面与移动端 Client Hints（macOS, Windows, Android）、Firefox DoH Canary 探针（`use-application-dns.net`）。
+  - **原生移动与桌面应用画像**:
+    - 新增 `android_okhttp` 画像（`okhttp/4.12.0`、连接池复用、HTTPDNS `--resolve` 降级直连模拟与 SNI/Host 嗅探一致性校验）。
+    - 新增 `firefox_desktop` 画像（Firefox 136、专属 Sec-Fetch 头、DoH Canary 探针）。
+    - 新增 `chrome_mobile` 画像（Android Chrome 140、Android 高熵 Client Hints 矩阵）。
+    - 新增 `electron_desktop` 画像（Electron 35、gRPC over HTTP/2 5 字节定长前缀帧报文、WebSocket WSS 101 Switching Protocols 升级握手）。
+  - **HTTP/3 & QUIC 协议引擎**: 实现 RFC 9000 QUIC Initial 报文构建器（`quic_initial_packet`）、头部解析器（`parse_quic_header`）与 UDP 探测（`probe_quic`），支持 `--quic` 验证 `auto-quic-block=true` 下向 HTTP/2 平滑降级及策略落点一致性。
+  - **WebRTC STUN 探测矩阵扩充**: 扩展至 8 大主流服务厂商（Xiaomi 基线, Google, Apple, Microsoft Teams, Zoom, Discord, Cloudflare, Nextcloud），基于 RFC 5389 `XOR-MAPPED-ADDRESS` 准确比对 `srflx` 出口与 HTTP 出口，全面拦截 WebRTC 公网 IP 泄漏。
+  - **离线单元测试套件**: `tests/realworld.py --selftest` 内置 16 项无网络依赖离线测试（100% 通过）。
+  - **对抗性压力测试套件**: 新增 `tests/adversarial_harness.py`（84 断言：域名规范化 / CIDR 与 Bogon 边界 / QUIC 万次模糊 / STUN XOR-MAPPED-ADDRESS 解析 / same_policy 会话一致性）、`tests/adversarial_analyze_rules_test.py`（9 项：合成冲突规则 / CIDR 包含遮蔽 / Clash 镜像同步）、`tests/adversarial_probe_dead_domains_test.py`（10 项：DNS 线协议模糊 / 压缩指针环 / 停放页指纹），全部离线运行 100% 通过。
+- **4-Tier E2E 场景断言矩阵大规模扩充 (`tests/scenarios/*.json`)**:
+  - 场景文件由 9 个主题扩充为 **15 个主题数据集**（新建 `browser.json`, `fintech.json`, `gaming.json`, `streaming.json`, `dev.json`, `collaboration.json`；扩充 `ai.json`, `cn.json`, `dns_leak.json`）。
+  - 覆盖金融支付（Adyen, Wise, Stripe, PayPal, Square, Airwallex, 卡组织）、游戏联机（PSN, Xbox, Nintendo, Riot, Battle.net, Steam, Epic）、全球流媒体（Disney+, Max, Prime Video, Netflix, Hulu, Bahamut, Abema）、开发与云平台（Supabase, Vercel, JetBrains, Docker, GitHub, PyPI, Crates.io）、协作通信（Slack, Zoom, Teams, Discord, Notion, Telegram）及生成式 AI（Fal.ai, Civitai, Together, Replicate, Kimi）。
+  - 测试规模跃升：**325 个业务场景 / 2,079 个模拟请求 / 4,043 项断言（100% PASS）**，独立 DNS 泄漏断言达 **1,750 项（100% PASS）**。
+  - 强制执行 `same_policy` 防假绿校验（未覆盖请求 $<2$ 报错）与 `no_dns_leak` 路径穿透检测。
+- **失效资产四层三角安全探测引擎 (`tools/probe_dead_domains.py`)**:
+  - 纯标准库实现异步批量探测引擎与 RFC 1035 DNS 编解码器，内置四层交叉三角判定算法：
+    - Tier 1: 境内 CN 递归 DNS（AliDNS, DNSPod, Baidu, 114）结合 43 组 GFW 伪造投毒 IP 识别污染。
+    - Tier 2: 境外加密 DoH（Cloudflare, Google, Quad9）共识 Quorum，判定境外存活（`GFW_BLOCKED_ALIVE`），零误删可用规则。
+    - Tier 3: 19 个主流 TLD 权威注册局 NS 结合根服务器验证，确证未注册/已注销死域（`DEAD_UNREGISTERED`）。
+    - Tier 4: HTTP 停放页指纹库（18 组特征正则 + 15 组注册商停放汇聚 IP）识别僵尸倒卖域名（`DEAD_PARKED`）。
+  - 时间滞后状态机（`HysteresisManager`）：跨期 3 次独立探测（Streak $\ge 3$）确认为死亡方可判定 `CONFIRMED_DEAD`，任意一次恢复立即清零，确保零误删。内置 12 项单元自检（`--selftest` 100% 通过）。
+- **权威审计与治理总报告 (`docs/AUDIT_AND_GOVERNANCE_REPORT.md`)**:
+  - 输出全面的系统审计报告，详述 R1–R4 架构演进、14 个 Ordered-Safe 分裂父域、41 条拓扑约束、0 活动阴影与 0 环路数学证明及 5 项自动化门禁验证证据。
+
+### Changed
+- **全量 34 个规则列表与 141,419 条规则拓扑审计与治理**:
+  - 34 个规则列表严格遵循 6 大分区第一匹配（First-Match-Wins）流水线（局域直连 $\to$ 拦截 $\to$ 下载 $\to$ 代理 $\to$ 国内直连 $\to$ 地区分流），拓扑无环（Tarjan SCC 证明 cycles: 0）。
+  - 治理并确立 14 个 Ordered-Safe 顺序安全分裂父域（`hf.co`, `aliyuncs.com`, `apple.com`, `byteimg.com`, `bilivideo.com`, `iqiyi.com`, `smtcdns.net`, `blizzard.com`, `1drv.com`, `office.net`, `officeapps.live.com`, `smtcdns.com`, `wechat.com`, `myqcloud.com`），确保窄子规则在表序上严格前置于宽父规则，0 破坏性分裂。
+  - 公共后缀与多租户平台隔离：全库 0 宽公共根域名收录，AWS S3、Cloudflare、Azure、Vercel、Aliyun OSS、Tencent COS 100% 实现主机名级精准隔离。
+  - 全库 13,021 条 IP 规则（9,100 IP-CIDR + 3,890 IP-CIDR6 + 24 IP-ASN + 7 GEOIP）100% 携带 `,no-resolve`，0 本地 DNS 泄漏。
+- **失效资产与海外排除库规范化**:
+  - `config/proxygfw-expired.txt`: 收录 933 条确认失效死亡域名，严格字典序排列，0 重复，受拓扑分析器防回流门禁看守。
+  - `config/chinaip-exclusions.txt`: 收录 587 条海外云厂商及非 CN CIDR 排除网段（514 IPv4 + 73 IPv6），杜绝国内直连误判。
+- **排版规范与 Clash 镜像 100% 衍生同步**:
+  - `tools/sort_lists.py`: 34 张规则表全量维持 8-Bucket（`DOMAIN` $\to$ `DOMAIN-SUFFIX` $\to$ `DOMAIN-WILDCARD` $\to$ `DOMAIN-KEYWORD` $\to$ `IP-CIDR` $\to$ `IP-CIDR6` $\to$ `IP-ASN` $\to$ `GEOIP`）规范形态。
+  - `tools/surge2clash.py`: 34 张 `clash/*.list` 与 `clash/rule-providers.yaml` 逐字节无损镜像生成，清晰声明下游 Sniffer 嗅探契约。
+
+### Verified (全部 5 项质量门禁与自检命令 100% exit 0)
+- `python3 tests/audit.py --conf <candidate> --rules lists --check all --fail-on P1`: 141,455 条规则静态审计，0 P0/P1 违规，3 条 P3（关键词与 IP 交叉信息项），63 条精准豁免，0 未使用豁免，exit 0。
+- `python3 tools/analyze_rules.py --conf <candidate> --rules lists --fail-on-shadow`: 141,419 条规则全量拓扑审计，0 active shadows，0 order-unsafe splits，0 topology cycles，0 expired reentries，exit 0。
+- `python3 tests/runsuite.py --conf <candidate> --rules lists`: 15 个主题数据集 / 325 个场景 / 2,079 个请求 / **4,043 项断言全绿（100% PASS）**，1,750 项独立 DNS 泄漏断言 100% PASS，exit 0。
+- `python3 tools/sort_lists.py --check`: 34/34 张规则表均为规范形态，exit 0。
+- `python3 tools/surge2clash.py --check`: 34/34 张表与 141,419 条规则逐字节一致，exit 0。
+- 协议引擎与工具单元自检：`realworld.py --selftest` (16/16), `probe_dead_domains.py --selftest` (12/12), `analyze_rules_selftest.py` (7/7), `sort_lists.py --selftest` (8/8) 全部 100% 通过。
+- 对抗性压力测试：`adversarial_harness.py` (84/84), `adversarial_analyze_rules_test.py` (9/9), `adversarial_probe_dead_domains_test.py` (10/10) 全绿，exit 0。
+
+---
+
 ## [2026-09-01·仓库精简] 测试/检测层瘦身 44%、场景 27 文件并 9、目录归一,行为逐数不变
 
 **动机**:用户指令 —— 精简全仓库文档与代码(部分测试和检测过于复杂)、精简注释、

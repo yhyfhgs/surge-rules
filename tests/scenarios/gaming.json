@@ -1,0 +1,506 @@
+[
+  {
+    "name": "gaming_playstation_network_psn",
+    "desc": "Sony PlayStation Network (PSN)：商店、联机、个人档案与认证",
+    "requests": [
+      {
+        "host": "playstation.com",
+        "note": "PlayStation 官网"
+      },
+      {
+        "host": "playstation.net",
+        "note": "PSN 联机基础设施"
+      },
+      {
+        "host": "playstationnetwork.com",
+        "note": "PSN 核心服务"
+      },
+      {
+        "host": "store.playstation.com",
+        "note": "PlayStation 网页商店"
+      }
+    ],
+    "assert": {
+      "same_policy": true,
+      "policy": "游戏",
+      "no_dns_leak": true
+    }
+  },
+  {
+    "name": "gaming_xbox_live_cloud_gaming",
+    "desc": "Microsoft Xbox Live 与 Cloud Gaming：控制面走游戏策略组，大体积静态 CDN 分流至下载",
+    "requests": [
+      {
+        "host": "xbox.com",
+        "note": "Xbox 官网"
+      },
+      {
+        "host": "xboxlive.com",
+        "note": "Xbox Live 联机网关"
+      },
+      {
+        "host": "xboxgamepass.com",
+        "note": "Game Pass 服务"
+      },
+      {
+        "host": "xboxgamestudios.com",
+        "note": "Xbox 游戏工作室"
+      },
+      {
+        "host": "assets.xboxservices.com",
+        "note": "Xbox 游戏包与静态资源 CDN"
+      },
+      {
+        "host": "cms-assets.xboxservices.com",
+        "note": "Xbox CMS 图片媒体 CDN"
+      }
+    ],
+    "assert": {
+      "same_policy": false,
+      "no_dns_leak": true,
+      "per_request": [
+        {
+          "host": "xbox.com",
+          "policy": "游戏",
+          "reason": "Games.list 专有游戏策略组"
+        },
+        {
+          "host": "xboxlive.com",
+          "policy": "游戏",
+          "reason": "Games.list 专有游戏策略组"
+        },
+        {
+          "host": "xboxgamepass.com",
+          "policy": "游戏",
+          "reason": "Games.list 专有游戏策略组"
+        },
+        {
+          "host": "xboxgamestudios.com",
+          "policy": "游戏",
+          "reason": "Games.list 专有游戏策略组"
+        },
+        {
+          "host": "assets.xboxservices.com",
+          "policy": "下载",
+          "reason": "DownloadCDN.list 下载加速"
+        },
+        {
+          "host": "cms-assets.xboxservices.com",
+          "policy": "下载",
+          "reason": "DownloadCDN.list 下载加速"
+        }
+      ]
+    }
+  },
+  {
+    "name": "gaming_nintendo_switch_online_eshop",
+    "desc": "Nintendo Switch eShop、Nintendo Account 与全球各区网络服务",
+    "requests": [
+      {
+        "host": "nintendo.com",
+        "note": "任天堂美区"
+      },
+      {
+        "host": "nintendo.net",
+        "note": "任天堂网络服务"
+      },
+      {
+        "host": "nintendoswitch.com",
+        "note": "Switch 专属域"
+      },
+      {
+        "host": "nintendonetwork.net",
+        "note": "Nintendo Network 联机"
+      },
+      {
+        "host": "nintendo.co.jp",
+        "note": "任天堂日区官网"
+      },
+      {
+        "host": "nintendo.co.uk",
+        "note": "任天堂英区官网"
+      },
+      {
+        "host": "playnintendo.com",
+        "note": "Play Nintendo 社区"
+      },
+      {
+        "host": "ayudanintendo.com",
+        "note": "任天堂西语支持"
+      }
+    ],
+    "assert": {
+      "same_policy": true,
+      "policy": "游戏",
+      "no_dns_leak": true
+    }
+  },
+  {
+    "name": "gaming_riot_games_valorant_lol",
+    "desc": "Riot Games 拳头游戏：英雄联盟、无畏契约、Riot Client 与游戏静态资源 CDN",
+    "requests": [
+      {
+        "host": "riotgames.com",
+        "note": "Riot Games 官网"
+      },
+      {
+        "host": "riotcdn.net",
+        "note": "Riot 客户端静态资源"
+      },
+      {
+        "host": "riot.net",
+        "note": "Riot 核心网络"
+      },
+      {
+        "host": "riot.com",
+        "note": "Riot 顶级域"
+      },
+      {
+        "host": "riotgames.info",
+        "note": "Riot 资讯"
+      },
+      {
+        "host": "riotgames.jp",
+        "note": "Riot 日区"
+      },
+      {
+        "host": "riot-games.com",
+        "note": "Riot 连字符域"
+      },
+      {
+        "host": "riotforgegames.com",
+        "note": "Riot Forge 独立发行"
+      }
+    ],
+    "assert": {
+      "same_policy": true,
+      "policy": "游戏",
+      "no_dns_leak": true
+    }
+  },
+  {
+    "name": "gaming_blizzard_battlenet_ecosystem",
+    "desc": "Blizzard 暴雪战网：Battle.net 启动器、暗黑破坏神、内容分发与周边商城",
+    "requests": [
+      {
+        "host": "battle.net",
+        "note": "暴雪战网主站"
+      },
+      {
+        "host": "battlenet.com",
+        "note": "战网登录网关"
+      },
+      {
+        "host": "blizzard.com",
+        "note": "暴雪官网"
+      },
+      {
+        "host": "blz-contentstack.com",
+        "note": "暴雪内容堆栈"
+      },
+      {
+        "host": "blizzardgearstore.com",
+        "note": "暴雪周边商城"
+      },
+      {
+        "host": "diablo3.com",
+        "note": "暗黑3官网"
+      },
+      {
+        "host": "diabloimmortal.com",
+        "note": "暗黑不朽官网"
+      },
+      {
+        "host": "bnetcmsus-a.akamaihd.net",
+        "note": "战网 Akamai 内容加速"
+      },
+      {
+        "host": "blznav.akamaized.net",
+        "note": "战网导航组件 CDN"
+      }
+    ],
+    "assert": {
+      "same_policy": true,
+      "policy": "游戏",
+      "no_dns_leak": true
+    }
+  },
+  {
+    "name": "gaming_ea_origin_and_studios",
+    "desc": "Electronic Arts (EA) / Origin / BioWare 工作室与 Apex Legends、战地系列",
+    "requests": [
+      {
+        "host": "ea.com",
+        "note": "EA 官网"
+      },
+      {
+        "host": "apexlegends.com",
+        "note": "Apex 英雄官网"
+      },
+      {
+        "host": "battlefield.com",
+        "note": "战地系列主站"
+      },
+      {
+        "host": "battlefieldv.com",
+        "note": "战地5官网"
+      },
+      {
+        "host": "bioware.com",
+        "note": "BioWare 生化工作室"
+      },
+      {
+        "host": "biowarestore.com",
+        "note": "BioWare 商店"
+      },
+      {
+        "host": "anthemgame.com",
+        "note": "圣歌官网"
+      },
+      {
+        "host": "deadspacegame.com",
+        "note": "死亡空间官网"
+      },
+      {
+        "host": "dragonage.com",
+        "note": "龙腾世纪官网"
+      }
+    ],
+    "assert": {
+      "same_policy": true,
+      "policy": "游戏",
+      "no_dns_leak": true
+    }
+  },
+  {
+    "name": "gaming_steam_client_and_community",
+    "desc": "Steam 客户端、Web 商店、API 与社区",
+    "requests": [
+      {
+        "host": "steampowered.com",
+        "note": "Steam 商店"
+      },
+      {
+        "host": "api.steampowered.com",
+        "note": "Steam Web API"
+      },
+      {
+        "host": "store-images.s-microsoft.com",
+        "note": "Windows 商店相关素材"
+      }
+    ],
+    "assert": {
+      "same_policy": true,
+      "policy": "游戏",
+      "no_dns_leak": true
+    }
+  },
+  {
+    "name": "gaming_epic_games_launcher_unreal",
+    "desc": "Epic Games 客户端、虚幻引擎与游戏商城",
+    "requests": [
+      {
+        "host": "epicgames.com",
+        "note": "Epic 官网与商城"
+      },
+      {
+        "host": "unrealengine.com",
+        "note": "虚幻引擎开发者主站"
+      },
+      {
+        "host": "battlebreakers.com",
+        "note": "Epic 自研游戏"
+      }
+    ],
+    "assert": {
+      "same_policy": true,
+      "policy": "游戏",
+      "no_dns_leak": true
+    }
+  },
+  {
+    "name": "gaming_bethesda_and_bandai_studios",
+    "desc": "Bethesda B社与万代南梦宫 Bandai Namco ID 游戏服务",
+    "requests": [
+      {
+        "host": "beth.games",
+        "note": "Bethesda 游戏短链"
+      },
+      {
+        "host": "bethsoft.com",
+        "note": "Bethesda 官网"
+      },
+      {
+        "host": "bethesdagamestudios.com",
+        "note": "Bethesda 工作室"
+      },
+      {
+        "host": "bandainamcoid.com",
+        "note": "万代南梦宫账号中心"
+      }
+    ],
+    "assert": {
+      "same_policy": true,
+      "policy": "游戏",
+      "no_dns_leak": true
+    }
+  },
+  {
+    "name": "gaming_mobile_supercell_garena",
+    "desc": "移动端游戏网络服务：Supercell 荒野乱斗与任天堂动物森友会口袋营地",
+    "requests": [
+      {
+        "host": "brawlstars.com",
+        "note": "荒野乱斗官网"
+      },
+      {
+        "host": "brawlstarsgame.com",
+        "note": "荒野乱斗游戏服务"
+      },
+      {
+        "host": "ac-pocketcamp.com",
+        "note": "动森口袋露营广场"
+      }
+    ],
+    "assert": {
+      "same_policy": true,
+      "policy": "游戏",
+      "no_dns_leak": true
+    }
+  },
+  {
+    "name": "gaming_nintendo_legacy_and_handhelds",
+    "desc": "任天堂经典掌机与家庭主机网络（3DS, DSi, Wii, NYC旗舰店）",
+    "requests": [
+      {
+        "host": "nintendo3ds.com",
+        "note": "Nintendo 3DS 官网"
+      },
+      {
+        "host": "nintendodsi.com",
+        "note": "Nintendo DSi 服务"
+      },
+      {
+        "host": "nintendowii.com",
+        "note": "Nintendo Wii 官网"
+      },
+      {
+        "host": "nintendonyc.com",
+        "note": "纽约任天堂旗舰店"
+      },
+      {
+        "host": "nintendostore.com",
+        "note": "任天堂周边商店"
+      }
+    ],
+    "assert": {
+      "same_policy": true,
+      "policy": "游戏",
+      "no_dns_leak": true
+    }
+  },
+  {
+    "name": "gaming_battlefield_multi_title_suite",
+    "desc": "战地系列多作品独立主站一致性策略组归属",
+    "requests": [
+      {
+        "host": "battlefield3.com",
+        "note": "战地3官网"
+      },
+      {
+        "host": "battlefield4.com",
+        "note": "战地4官网"
+      },
+      {
+        "host": "battlefield1943.com",
+        "note": "战地1943官网"
+      },
+      {
+        "host": "battlefieldheroes.com",
+        "note": "战地英雄官网"
+      },
+      {
+        "host": "battlelog.com",
+        "note": "Battlelog 战绩系统"
+      }
+    ],
+    "assert": {
+      "same_policy": true,
+      "policy": "游戏",
+      "no_dns_leak": true
+    }
+  },
+  {
+    "name": "gaming_classic_ea_franchises",
+    "desc": "EA 经典即时战略与动作游戏：命令与征服、龙腾世纪、地下城守护者",
+    "requests": [
+      {
+        "host": "commandandconquer.com",
+        "note": "命令与征服官网"
+      },
+      {
+        "host": "cncrivals.com",
+        "note": "C&C 对决手游"
+      },
+      {
+        "host": "dragonagekeep.com",
+        "note": "龙腾世纪档案库"
+      },
+      {
+        "host": "dungeonkeeper.com",
+        "note": "地下城守护者官网"
+      }
+    ],
+    "assert": {
+      "same_policy": true,
+      "policy": "游戏",
+      "no_dns_leak": true
+    }
+  },
+  {
+    "name": "gaming_ubisoft_connect_and_services",
+    "desc": "Ubisoft 育碧游戏发行与 Uplay / Ubisoft Connect 在线服务",
+    "requests": [
+      {
+        "host": "ubisoft.com",
+        "note": "Ubisoft 官网与商城"
+      },
+      {
+        "host": "uplay.com",
+        "note": "Uplay 客户端支持"
+      },
+      {
+        "host": "ubisoftconnect.com",
+        "note": "Ubisoft Connect 平台"
+      }
+    ],
+    "assert": {
+      "same_policy": true,
+      "policy": "游戏",
+      "no_dns_leak": true
+    }
+  },
+  {
+    "name": "gaming_rockstar_and_roblox_platforms",
+    "desc": "Rockstar Games (GTA/RDR) 与 Roblox 全球元宇宙沙盒游戏平台",
+    "requests": [
+      {
+        "host": "rockstargames.com",
+        "note": "Rockstar Games 官网"
+      },
+      {
+        "host": "roblox.com",
+        "note": "Roblox 罗布乐思平台"
+      },
+      {
+        "host": "garena.com",
+        "note": "Garena 东南亚游戏平台"
+      }
+    ],
+    "assert": {
+      "same_policy": true,
+      "policy": "游戏",
+      "no_dns_leak": true
+    }
+  }
+]

@@ -1,0 +1,537 @@
+[
+  {
+    "name": "fintech_adyen_payment_gateway",
+    "desc": "Adyen 国际跨境支付网关：收银台组件、API、实时交易环境与鉴权一致性",
+    "requests": [
+      {
+        "host": "adyen.com",
+        "note": "Adyen 官网"
+      },
+      {
+        "host": "checkout.adyen.com",
+        "note": "Adyen Drop-in / Components 收银台"
+      },
+      {
+        "host": "live.adyen.com",
+        "note": "生产交易网关"
+      },
+      {
+        "host": "test.adyen.com",
+        "note": "沙箱测试网关"
+      },
+      {
+        "host": "ca-live.adyen.com",
+        "note": "Adyen 客户控制台"
+      },
+      {
+        "host": "adyenpayments.com",
+        "note": "Adyen 支付处理域"
+      }
+    ],
+    "assert": {
+      "same_policy": true,
+      "policy": "Payment",
+      "no_dns_leak": true
+    }
+  },
+  {
+    "name": "fintech_wise_multicurrency_transfer",
+    "desc": "Wise (原 TransferWise) 多币种跨境汇款：Web 客户端、API 交易与静态资源同策略出口",
+    "requests": [
+      {
+        "host": "wise.com",
+        "note": "Wise 官网主站"
+      },
+      {
+        "host": "api.wise.com",
+        "note": "Wise 交易与账户 API"
+      },
+      {
+        "host": "transferwise.com",
+        "note": "Wise 历史域名与重定向"
+      },
+      {
+        "host": "api.transferwise.com",
+        "note": "Wise 遗留 API 端点"
+      },
+      {
+        "host": "assets.wise.com",
+        "note": "Wise 前端静态资源"
+      }
+    ],
+    "assert": {
+      "same_policy": true,
+      "policy": "Payment",
+      "no_dns_leak": true
+    }
+  },
+  {
+    "name": "fintech_stripe_checkout_and_elements",
+    "desc": "Stripe 支付网关：Elements 前端嵌入、API、3DS 校验、风控信标与静态资产",
+    "requests": [
+      {
+        "host": "stripe.com",
+        "note": "Stripe 主站"
+      },
+      {
+        "host": "api.stripe.com",
+        "note": "Stripe REST API 网关"
+      },
+      {
+        "host": "js.stripe.com",
+        "note": "Stripe.js 客户端脚本"
+      },
+      {
+        "host": "m.stripe.network",
+        "note": "Stripe 欺诈防范与风控信标"
+      },
+      {
+        "host": "b.stripecdn.com",
+        "note": "Stripe 前端静态资产 CDN"
+      },
+      {
+        "host": "stripeassets.com",
+        "note": "Stripe 品牌与图标资源"
+      },
+      {
+        "host": "q.stripe.com",
+        "note": "Stripe 性能与指标上报"
+      },
+      {
+        "host": "checkout.stripe.com",
+        "note": "Stripe Hosted Checkout 页面"
+      }
+    ],
+    "assert": {
+      "same_policy": true,
+      "policy": "Payment",
+      "no_dns_leak": true
+    }
+  },
+  {
+    "name": "fintech_paypal_checkout_ecosystem",
+    "desc": "PayPal 支付生态：主站、API 网关、静态对象、个人收款与 Xoom 跨境汇款",
+    "requests": [
+      {
+        "host": "www.paypal.com",
+        "note": "PayPal 国际版主站"
+      },
+      {
+        "host": "api.paypal.com",
+        "note": "PayPal 核心 API"
+      },
+      {
+        "host": "c.paypal.com",
+        "note": "PayPal 客户端遥测"
+      },
+      {
+        "host": "t.paypal.com",
+        "note": "PayPal 跟踪信标"
+      },
+      {
+        "host": "www.paypalobjects.com",
+        "note": "PayPal 静态素材 CDN"
+      },
+      {
+        "host": "paypal.me",
+        "note": "PayPal.Me 个人转账短链"
+      },
+      {
+        "host": "paypalcorp.com",
+        "note": "PayPal 企业服务"
+      },
+      {
+        "host": "xoom.com",
+        "note": "Xoom 跨境国际汇款"
+      }
+    ],
+    "assert": {
+      "same_policy": true,
+      "policy": "Payment",
+      "no_dns_leak": true
+    }
+  },
+  {
+    "name": "fintech_square_and_cash_app",
+    "desc": "Block (Square & Cash App) 商业支付与个人转账生态",
+    "requests": [
+      {
+        "host": "squareup.com",
+        "note": "Square 商家平台"
+      },
+      {
+        "host": "api.squareup.com",
+        "note": "Square 交易 API"
+      },
+      {
+        "host": "squarecdn.com",
+        "note": "Square 静态资源"
+      },
+      {
+        "host": "cash.app",
+        "note": "Cash App 移动支付"
+      }
+    ],
+    "assert": {
+      "same_policy": true,
+      "policy": "Payment",
+      "no_dns_leak": true
+    }
+  },
+  {
+    "name": "fintech_airwallex_global_payments",
+    "desc": "Airwallex 空中云汇全球收单与多币种钱包",
+    "requests": [
+      {
+        "host": "airwallex.com",
+        "note": "Airwallex 官网"
+      },
+      {
+        "host": "api.airwallex.com",
+        "note": "Airwallex 全球收单 API"
+      },
+      {
+        "host": "static.airwallex.com",
+        "note": "Airwallex 前端静态资源"
+      },
+      {
+        "host": "pwa.airwallex.com",
+        "note": "Airwallex 网页应用"
+      }
+    ],
+    "assert": {
+      "same_policy": true,
+      "policy": "Payment",
+      "no_dns_leak": true
+    }
+  },
+  {
+    "name": "fintech_klarna_buy_now_pay_later",
+    "desc": "Klarna 先买后付 (BNPL) 支付与收银台 SDK",
+    "requests": [
+      {
+        "host": "klarna.com",
+        "note": "Klarna 官网"
+      },
+      {
+        "host": "api.klarna.com",
+        "note": "Klarna 结账 API"
+      },
+      {
+        "host": "klarnacdn.net",
+        "note": "Klarna 静态脚本 CDN"
+      },
+      {
+        "host": "klarnaevt.com",
+        "note": "Klarna 事件与指标"
+      },
+      {
+        "host": "klarnaservices.com",
+        "note": "Klarna 核心微服务"
+      }
+    ],
+    "assert": {
+      "same_policy": true,
+      "policy": "Payment",
+      "no_dns_leak": true
+    }
+  },
+  {
+    "name": "fintech_checkout_com_merchant_flow",
+    "desc": "Checkout.com 云端收单与商户 API 链路",
+    "requests": [
+      {
+        "host": "checkout.com",
+        "note": "Checkout.com 官网"
+      },
+      {
+        "host": "api.checkout.com",
+        "note": "Checkout.com 交易处理 API"
+      }
+    ],
+    "assert": {
+      "same_policy": true,
+      "policy": "Payment",
+      "no_dns_leak": true
+    }
+  },
+  {
+    "name": "fintech_paddle_and_lemonsqueezy_saas_billing",
+    "desc": "SaaS 软件计费与出海网关：Paddle 与 LemonSqueezy",
+    "requests": [
+      {
+        "host": "paddle.com",
+        "note": "Paddle 官网"
+      },
+      {
+        "host": "paddleapi.com",
+        "note": "Paddle 交易 API"
+      },
+      {
+        "host": "lemonsqueezy.com",
+        "note": "LemonSqueezy SaaS 收银台"
+      }
+    ],
+    "assert": {
+      "same_policy": true,
+      "policy": "Payment",
+      "no_dns_leak": true
+    }
+  },
+  {
+    "name": "fintech_braintree_gateway_tokenization",
+    "desc": "Braintree (PayPal旗下) 信用卡令牌化与金流网关",
+    "requests": [
+      {
+        "host": "braintreepayments.com",
+        "note": "Braintree 支付服务"
+      },
+      {
+        "host": "braintreegateway.com",
+        "note": "Braintree 网关端点"
+      },
+      {
+        "host": "braintree-api.com",
+        "note": "Braintree GraphQL/REST API"
+      }
+    ],
+    "assert": {
+      "same_policy": true,
+      "policy": "Payment",
+      "no_dns_leak": true
+    }
+  },
+  {
+    "name": "fintech_card_networks_3ds_verification",
+    "desc": "国际主流信用卡卡组织安全清算与 3DS 鉴权：Visa, Mastercard, Amex, Discover, JCB",
+    "requests": [
+      {
+        "host": "visa.com",
+        "note": "Visa 国际组织"
+      },
+      {
+        "host": "mastercard.com",
+        "note": "Mastercard 万事达"
+      },
+      {
+        "host": "americanexpress.com",
+        "note": "American Express 美国运通"
+      },
+      {
+        "host": "aexp-static.com",
+        "note": "运通静态资源"
+      },
+      {
+        "host": "discover.com",
+        "note": "Discover 发现卡"
+      },
+      {
+        "host": "discovercard.com",
+        "note": "Discover 信用卡"
+      },
+      {
+        "host": "jcb.co.jp",
+        "note": "JCB 日本卡组织"
+      },
+      {
+        "host": "global.jcb",
+        "note": "JCB 全球清算域"
+      }
+    ],
+    "assert": {
+      "same_policy": true,
+      "policy": "Payment",
+      "no_dns_leak": true
+    }
+  },
+  {
+    "name": "fintech_international_settlement_revolut_worldpay",
+    "desc": "全球跨国结算与网关：Worldpay, Affirm, Plaid, Skrill, Neteller, FastSpring, Recurly",
+    "requests": [
+      {
+        "host": "worldpay.com",
+        "note": "Worldpay 支付处理"
+      },
+      {
+        "host": "affirm.com",
+        "note": "Affirm 分期支付"
+      },
+      {
+        "host": "plaid.com",
+        "note": "Plaid 银行账户直连 API"
+      },
+      {
+        "host": "skrill.com",
+        "note": "Skrill 电子钱包"
+      },
+      {
+        "host": "neteller.com",
+        "note": "Neteller 国际支付"
+      },
+      {
+        "host": "fastspring.com",
+        "note": "FastSpring 软件销售平台"
+      },
+      {
+        "host": "onfastspring.com",
+        "note": "FastSpring 收银子域"
+      },
+      {
+        "host": "recurly.com",
+        "note": "Recurly 订阅计费管理"
+      },
+      {
+        "host": "2checkout.com",
+        "note": "2Checkout 跨境电商收单"
+      },
+      {
+        "host": "2co.com",
+        "note": "2Checkout 简化域"
+      }
+    ],
+    "assert": {
+      "same_policy": true,
+      "policy": "Payment",
+      "no_dns_leak": true
+    }
+  },
+  {
+    "name": "fintech_subscription_billing_chargebee",
+    "desc": "Chargebee 循环计费与订阅管理平台",
+    "requests": [
+      {
+        "host": "chargebee.com",
+        "note": "Chargebee 官网"
+      },
+      {
+        "host": "chargebeestaticv2.com",
+        "note": "Chargebee 静态托管 CDN"
+      }
+    ],
+    "assert": {
+      "same_policy": true,
+      "policy": "Payment",
+      "no_dns_leak": true
+    }
+  },
+  {
+    "name": "fintech_fraud_prevention_threatmetrix",
+    "desc": "支付反欺诈与设备指纹风控服务：ThreatMetrix & CardinalCommerce 3DS",
+    "requests": [
+      {
+        "host": "online-metrix.net",
+        "note": "ThreatMetrix 风险识别信标"
+      },
+      {
+        "host": "cardinalcommerce.com",
+        "note": "CardinalCommerce EMV 3D-Secure 认证"
+      }
+    ],
+    "assert": {
+      "same_policy": true,
+      "policy": "Payment",
+      "no_dns_leak": true
+    }
+  },
+  {
+    "name": "fintech_p2p_and_global_wallets",
+    "desc": "全球数字钱包与跨境收款：Venmo, Payoneer, Trustly, Paysafe, Verifone",
+    "requests": [
+      {
+        "host": "venmo.com",
+        "note": "Venmo 移动社交转账"
+      },
+      {
+        "host": "payoneer.com",
+        "note": "Payoneer 派安盈跨境收付款"
+      },
+      {
+        "host": "trustly.com",
+        "note": "Trustly 开放银行支付"
+      },
+      {
+        "host": "paysafe.com",
+        "note": "Paysafe 支付集团"
+      },
+      {
+        "host": "verifone.com",
+        "note": "Verifone 全球 POS 与线上金流"
+      },
+      {
+        "host": "verifone.cloud",
+        "note": "Verifone 云端收银端点"
+      }
+    ],
+    "assert": {
+      "same_policy": true,
+      "policy": "Payment",
+      "no_dns_leak": true
+    }
+  },
+  {
+    "name": "fintech_australasia_bnpl_and_gateways",
+    "desc": "澳洲与亚太主流先买后付及欧洲支付服务商：Afterpay, Clearpay, Mollie, Nuvei, Link",
+    "requests": [
+      {
+        "host": "afterpay.com",
+        "note": "Afterpay 澳洲先买后付"
+      },
+      {
+        "host": "clearpay.co.uk",
+        "note": "Clearpay 英国分部"
+      },
+      {
+        "host": "mollie.com",
+        "note": "Mollie 欧洲金流网关"
+      },
+      {
+        "host": "nuvei.com",
+        "note": "Nuvei 加拿大全球收单平台"
+      },
+      {
+        "host": "link.com",
+        "note": "Stripe Link 一键快捷支付"
+      }
+    ],
+    "assert": {
+      "same_policy": true,
+      "policy": "Payment",
+      "no_dns_leak": true
+    }
+  },
+  {
+    "name": "fintech_crypto_exchange_gateways",
+    "desc": "合规加密金融与 Web3 链上交易网关（Binance, Coinbase, Kraken, OKX, Bybit）",
+    "requests": [
+      {
+        "host": "binance.com",
+        "note": "Binance 币安"
+      },
+      {
+        "host": "binance.org",
+        "note": "Binance 链上体系"
+      },
+      {
+        "host": "coinbase.com",
+        "note": "Coinbase 美股合规交易所"
+      },
+      {
+        "host": "kraken.com",
+        "note": "Kraken 交易所"
+      },
+      {
+        "host": "okx.com",
+        "note": "OKX 欧易"
+      },
+      {
+        "host": "bybit.com",
+        "note": "Bybit 交易平台"
+      }
+    ],
+    "assert": {
+      "same_policy": true,
+      "policy": "Proxy",
+      "no_dns_leak": true
+    }
+  }
+]
