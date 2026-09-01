@@ -51,12 +51,18 @@ protect earlier exact IP rules. The topology now separates those concerns.
 local/security
 → precise download/media exceptions
 → service owners
-→ verified Apple/Microsoft CN endpoints
+→ domestic direct
+   (verified Apple/Microsoft CN endpoints, then curated domestic lists)
 → regional domains
-→ curated domestic domains
 → residual ProxyGFW
 → generated ChinaDomain
 ```
+
+The nine domestic-direct lists form one contiguous run. The vendor CN endpoints
+and the curated domestic lists share a policy and had no ordering constraint
+against the regional lists that once sat between them, so the split was
+decorative; clustering them keeps the phase boundary where a policy actually
+changes. Order within each run is unchanged.
 
 Regional domains therefore win before generic GFW routing. `ProxyGFW` is
 domain-only and contains no PSL-boundary suffixes and no generic cloud CIDRs. It

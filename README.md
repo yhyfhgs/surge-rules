@@ -30,9 +30,8 @@ phases:
 | Local/security | PrivateLAN, PKU, Reject | Local traffic and global reject overrides |
 | Precise exceptions | GameDownloadCN, ModelDownloadCDN, YouTube | Narrow rules before their broader owners |
 | Service owners | Google, Twitter, Meta, Microsoft, AI, TikTok, SocialOthers, Telegram, Streaming, Games, DownloadCDN, Payment | Stable service/session ownership |
-| Verified direct | AppleCN, MicrosoftCN | Explicit CN-reachable vendor endpoints |
+| Domestic direct | AppleCN, MicrosoftCN, Domestic, ChinaMedia, TencentCN, AlibabaCN, ByteDanceCN, BaiduCN, NetEaseCN | Explicit CN-reachable vendor endpoints and curated domestic ownership, in one contiguous DIRECT run |
 | Regional domains | Japan, UK, Europe, US | Region-bound sites before generic proxy fallback |
-| Domestic domains | Domestic, ChinaMedia, TencentCN, AlibabaCN, ByteDanceCN, BaiduCN, NetEaseCN | Curated domestic ownership |
 | Residual proxy | ProxyGFW | Domain-only rules that are verified to require proxying and fit no owner list |
 | Machine domain fallback | ChinaDomain | Generated domestic long tail after explicit proxy exceptions |
 | Service IP | JapanServiceIP | Verified first-party ranges before generic geography |

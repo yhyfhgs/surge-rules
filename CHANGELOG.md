@@ -4,6 +4,78 @@
 
 ---
 
+## [2026-09-01·聚类重排] 表间聚类:9 张国内直连表连成一段,地区域名整体后移
+
+**动机**:`config/routing.json` 里 DIRECT 表被地区表劈成两半——`AppleCN`/`MicrosoftCN`
+在地区域名之前,`Domestic` 起的 7 张在地区域名之后。这个交错不承重:它不来自任何一条
+拓扑约束,只是历史上分两批加进来的顺序残留。代价是 `[Rule]` 段读起来策略在
+DIRECT→代理→DIRECT 之间来回跳,归属决策树也要在第 5、6、7 步之间折返。本批次按约束
+驱动聚类把 9 张 DIRECT 表连成一段、地区域名整体挪到其后,**只改表间顺序,不增删、
+不改写任何一条规则,不动任何一张表内的行**。
+
+**唯一语义改动**:`rulesets` 数组重排 + `section` 值同步(「厂商 CN 端点」并入
+「国内直连」,分区由 11 段收敛为 10 段,序号重编 0-9)。其余分区与每个分区内部的
+相对顺序一律未动。
+
+### Changed
+- **`config/routing.json`**:`AppleCN, MicrosoftCN, Domestic, ChinaMedia, TencentCN,
+  AlibabaCN, ByteDanceCN, BaiduCN, NetEaseCN` 连续 9 张构成「国内直连」段,
+  `Japan, UK, Europe, US` 四张「地区域名」段整体移到其后。`AppleCN`/`MicrosoftCN`
+  的 `section` 由「厂商 CN 端点」改为「国内直连」;39 个条目的 `name`/`policy`/
+  `extended_matching`/`no_resolve` 字段**逐条比对全等**,section 之外零变化。
+- **`Surge.conf` `[Rule]` 段重渲染**:4 行 `RULE-SET` 位置调整、1 行分区注释消失
+  (55 → 54 行)、分区号 4-9 顺延。分段 sha256 比对断言:`[General]`/`[Proxy]`/
+  `[Proxy Group]`/`[MITM]` 与前言**逐字节相同**,只有 `[Rule]` 段变化。
+- **`clash/rule-providers.yaml` 随 manifest 再生**:4 个 provider 块与参考序列尾注
+  的 4 行随之移位,内容零改动;39 张 `clash/*.list` 一个字节未变,
+  仍为 **141,651 条**。
+- **文档同步**:`docs/ARCHITECTURE.md` 的 Domain phase 图把厂商 CN 端点并入
+  domestic direct 块、地区域名移到其后并说明聚类依据;`docs/MAINTENANCE.md`
+  归属决策树第 6、7 步对调并注明两组互斥;`README.md` 路由模型表的
+  「Verified direct」「Domestic domains」两行合并为一行「Domestic direct」。
+
+### Verified
+行为等价四重证明,均落盘 `verify-20260901/I-reorder/`:
+- **约束满足**:重排前 `topology.json` 的每条 `{before,after}` 断言在新序下逐条复核,
+  plain 24 条 + MMDB 41 条 = **65 条全部满足,违反 0 条**(旧序同样 65/65,故本次
+  重排既未破坏也未依赖任何一条约束)。
+- **翻转对零冲突**:相对序真正翻转的是 `Domestic`/`ChinaMedia`/`TencentCN`/
+  `AlibabaCN`/`ByteDanceCN`/`BaiduCN`/`NetEaseCN` 7 张 × `Japan`/`UK`/`Europe`/`US`
+  4 张 = **28 对**(`AppleCN`/`MicrosoftCN` 本就在地区表之前,序未翻转,一并作旁证)。
+  在重排前 plain 与 MMDB 两份 `relationships.jsonl` 中检索这 28 对的跨策略
+  `covers`/`equivalent`/`overlaps`:**0 条**;`relationship_aggregates.jsonl` 的
+  split-policy 聚合权重:**0**。事实上这些表对之间**没有任何一条关系记录**。
+  另做一次不依赖 analyzer 产物的独立复核:这 11 张表全为域名类规则(无关键词、
+  无 IP),直接穷尽 **1,694,202 个规则对**做语言相交判定,**相交 0 处**——
+  28 对表的匹配语言两两不交,故先后顺序在语义上自由。
+- **重排后全闸门**:`analyze_rules --fail-on-shadow` plain 与 MMDB 均退出 0,
+  规则 **141,651 条不变**,`shadowed_or_conflicting_rules` 0、
+  `order_unsafe_split_apex` / `order_unsafe_split_parents` 均空、拓扑约束仍为
+  24 / 41、无环。产物比对更强:`topology.json`、`relationships.jsonl`、
+  `relationship_aggregates.jsonl`、`split_apex.jsonl`、`split_parent.jsonl`、
+  `fragmented_domains.jsonl` **两侧各 6 份全部逐字节相同**;`summary.json` 的差异
+  只有 `inputs.conf_sha256` 与 `list_order` 两项,全部诊断计数逐项相等。
+  `rules.jsonl` 因表位次平移而下标变化,属定义性后果。
+  `audit.py` 退出 0:141,687 条、A1-A10 原始命中与清理批次完全一致
+  (A3=1、A6=7、**A9=144**、A10=59),未豁免 3 条全 P3、已豁免 63、
+  `allowlist_unused` 0;`findings.jsonl`/`report.md`/`a3_details.tsv`/
+  **`a9_details.tsv`**/`keyword_review.tsv` 五份产物逐字节相同——A9 是 IP 序敏感审计,
+  而 IP 面四段(服务与国内 IP、地区 IP 兜底)相对序一行未动,故不变符合预期,
+  无需逐条解释。`runsuite.py` 退出 0:227 场景 / 1,644 请求 /
+  **3,099 断言全绿**,DNS 泄漏断言 1,326 条 0 失败,输出与重排前逐字节相同。
+  `render_surge_rules --check`、`surge2clash --check`(39 表 141,651 条一致)、
+  `sort_lists --check` 39/39 均退出 0;`surge-cli profile check Surge` 报
+  `Valid` 退出 0。
+- **落点抽测**:从 `D-boundary/landing.csv` 与 `tests/scenarios/fix_final_funnel.json`
+  取 **60 个代表域名**,覆盖全部 13 张涉及表(7 张移动的 DIRECT 表 + 4 张地区表 +
+  `AppleCN`/`MicrosoftCN`),其中 4 张地区表的候选**全量取尽**(21 个)因为翻转的
+  风险面正在于此。`tests/engine.py` match 重排前后逐一对照,
+  落点(表 / 策略 / 命中规则 / 物理出口 / 出口类别 / DNS 泄漏)**60/60 相同**;
+  52 个域名的 `rule_index` 因表位次平移而变化,不计入落点判据。
+
+`tests/scenarios/` 既有断言一条未改未删;`lists/` 一个字节未动;未跑 `update.sh`,
+未触发 CDN purge。
+
 ## [2026-09-01·冗余清理] 同表冗余收尾:删 28 条被同表宽父完全覆盖的窄条目
 
 **来源**:同日「FINAL 漏斗回归纠正」把 13 个注册域顶点升回 `DOMAIN-SUFFIX` 后,

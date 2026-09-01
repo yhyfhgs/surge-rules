@@ -11,10 +11,15 @@ Assign each rule to one owner:
 4. Specific ecosystem/service → its owner list (`Google`, `Microsoft`, `AI`,
    `Streaming`, `Games`, and so on).
 5. Verified Apple/Microsoft CN endpoint → `AppleCN` / `MicrosoftCN`.
-6. Region-bound domain → `Japan`, `UK`, `Europe`, or `US`.
-7. Curated domestic domain → `Domestic` or the corresponding CN vendor list.
+6. Curated domestic domain → `Domestic` or the corresponding CN vendor list.
+   Together with step 5 these nine lists are one contiguous domestic-direct run.
+7. Region-bound domain → `Japan`, `UK`, `Europe`, or `US`.
 8. Confirmed proxy-required domain with no owner → `ProxyGFW`.
 9. Domestic long tail → generated `ChinaDomain`; never hand-add a rule there.
+
+Steps 5–7 are mutually exclusive by construction: no host matched by the nine
+domestic-direct lists is matched by any of the four regional lists, so their
+relative order is free and the tree reads top-down without backtracking.
 
 `config/routing.json` is the canonical order. Do not copy the order into another
 script or document.

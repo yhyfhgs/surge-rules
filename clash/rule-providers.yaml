@@ -171,34 +171,6 @@ rule-providers:
     url: https://cdn.jsdelivr.net/gh/yhyfhgs/surge-rules@main/clash/MicrosoftCN.list
     path: ./rule-sets/surge-rules/MicrosoftCN.list
     interval: 86400
-  Japan:
-    type: http
-    behavior: classical
-    format: text
-    url: https://cdn.jsdelivr.net/gh/yhyfhgs/surge-rules@main/clash/Japan.list
-    path: ./rule-sets/surge-rules/Japan.list
-    interval: 86400
-  UK:
-    type: http
-    behavior: classical
-    format: text
-    url: https://cdn.jsdelivr.net/gh/yhyfhgs/surge-rules@main/clash/UK.list
-    path: ./rule-sets/surge-rules/UK.list
-    interval: 86400
-  Europe:
-    type: http
-    behavior: classical
-    format: text
-    url: https://cdn.jsdelivr.net/gh/yhyfhgs/surge-rules@main/clash/Europe.list
-    path: ./rule-sets/surge-rules/Europe.list
-    interval: 86400
-  US:
-    type: http
-    behavior: classical
-    format: text
-    url: https://cdn.jsdelivr.net/gh/yhyfhgs/surge-rules@main/clash/US.list
-    path: ./rule-sets/surge-rules/US.list
-    interval: 86400
   Domestic:
     type: http
     behavior: classical
@@ -247,6 +219,34 @@ rule-providers:
     format: text
     url: https://cdn.jsdelivr.net/gh/yhyfhgs/surge-rules@main/clash/NetEaseCN.list
     path: ./rule-sets/surge-rules/NetEaseCN.list
+    interval: 86400
+  Japan:
+    type: http
+    behavior: classical
+    format: text
+    url: https://cdn.jsdelivr.net/gh/yhyfhgs/surge-rules@main/clash/Japan.list
+    path: ./rule-sets/surge-rules/Japan.list
+    interval: 86400
+  UK:
+    type: http
+    behavior: classical
+    format: text
+    url: https://cdn.jsdelivr.net/gh/yhyfhgs/surge-rules@main/clash/UK.list
+    path: ./rule-sets/surge-rules/UK.list
+    interval: 86400
+  Europe:
+    type: http
+    behavior: classical
+    format: text
+    url: https://cdn.jsdelivr.net/gh/yhyfhgs/surge-rules@main/clash/Europe.list
+    path: ./rule-sets/surge-rules/Europe.list
+    interval: 86400
+  US:
+    type: http
+    behavior: classical
+    format: text
+    url: https://cdn.jsdelivr.net/gh/yhyfhgs/surge-rules@main/clash/US.list
+    path: ./rule-sets/surge-rules/US.list
     interval: 86400
   ProxyGFW:
     type: http
@@ -330,10 +330,6 @@ rule-providers:
 #  - RULE-SET,Payment,Payment
 #  - RULE-SET,AppleCN,DIRECT
 #  - RULE-SET,MicrosoftCN,DIRECT
-#  - RULE-SET,Japan,🇯🇵日本节点
-#  - RULE-SET,UK,🇬🇧英国节点
-#  - RULE-SET,Europe,🇪🇺欧洲节点
-#  - RULE-SET,US,🇺🇸美国节点
 #  - RULE-SET,Domestic,DIRECT
 #  - RULE-SET,ChinaMedia,DIRECT
 #  - RULE-SET,TencentCN,DIRECT
@@ -341,6 +337,10 @@ rule-providers:
 #  - RULE-SET,ByteDanceCN,DIRECT
 #  - RULE-SET,BaiduCN,DIRECT
 #  - RULE-SET,NetEaseCN,DIRECT
+#  - RULE-SET,Japan,🇯🇵日本节点
+#  - RULE-SET,UK,🇬🇧英国节点
+#  - RULE-SET,Europe,🇪🇺欧洲节点
+#  - RULE-SET,US,🇺🇸美国节点
 #  - RULE-SET,ProxyGFW,Proxy
 #  - RULE-SET,ChinaDomain,DIRECT
 #  - RULE-SET,JapanServiceIP,🇯🇵日本节点,no-resolve
