@@ -2,51 +2,17 @@
 # -*- coding: utf-8 -*-
 """collapse_cidr.py — Surge .list 里 IP-CIDR / IP-CIDR6 的等价折叠器。
 
-用途：机器管理层的 IP 表（ChinaIP 等）由上游整表拷贝而来，普遍含大量
-「被同表更宽前缀完整包含」的子网与「可合并成一条超网」的相邻对。用
-`ipaddress.collapse_addresses` 折叠成规范最小形式，条数可减半，而**地址集合
-与策略语义完全不变**（Surge 的 IP 规则是纯集合归属判定，只要集合不变，落点
-就不变；ChinaIP 还兼作离线引擎 GEOIP,CN 的近似源，同理不变）。
+用 `ipaddress.collapse_addresses` 把机器管理层的 IP 表折叠成规范最小形式：
+地址集合与策略语义完全不变（IP 规则是纯集合归属判定），条数可减半。
+collapse 输出是集合的唯一规范表示，故 collapse(A)==collapse(B) ⟺ 两侧地址
+集合逐位相同；`--verify` 据此逐条比对并输出集合 SHA-256（可 `--against` 基线）。
 
-等价性依据：`collapse_addresses` 的输出是一个地址集合的**规范最小表示**
-（不重叠、不相邻、按网络地址升序，唯一确定）。因此
-    collapse(A) == collapse(B)  ⟺  A 与 B 覆盖的地址集合逐位相同。
-`--verify` 就是把折叠前后两侧都规范化后逐条比对，并输出各自的集合 SHA-256。
+格式约定：头注释原样保留；类型分区沿用首次出现顺序、区间空一行；CIDR 区内按
+网络地址升序；尾参不同的行分组折叠、绝不跨组合并；默认强制 IP 规则带
+no-resolve（`--add-no-resolve` 可自动补齐）。
 
-只依赖 python3 标准库（ipaddress / hashlib / argparse）。
-
-用法
-----
-  # 就地折叠并写回（写回前先做一次内部等价自检，不等价则拒绝写）
-  python3 tools/collapse_cidr.py lists/ChinaIP.list
-
-  # 只看会折叠成什么样，不写文件
-  python3 tools/collapse_cidr.py lists/ChinaIP.list --dry-run
-
-  # 等价校验：把本文件折叠一遍，与自身原始集合逐条比对并打印 SHA-256
-  python3 tools/collapse_cidr.py lists/ChinaIP.list --verify
-
-  # 等价校验（对基线）：证明写回后的文件与折叠前的快照集合相同
-  git show HEAD:lists/ChinaIP.list > /tmp/ChinaIP.pre.list
-  python3 tools/collapse_cidr.py lists/ChinaIP.list --verify --against /tmp/ChinaIP.pre.list
-
-  # 写到别处而不覆盖原文件
-  python3 tools/collapse_cidr.py lists/ChinaIP.list -o /tmp/ChinaIP.new.list
-
-退出码：0 = 成功 / 集合等价；1 = 不等价或输入非法。
-（`--dry-run` 在「文件尚未折叠」时也返回 0；要把「已折叠」当闸门用
-  `--check`，漂移时返回 1。）
-
-格式约定（与仓库 docs/MAINTENANCE 的表格式一致）
-------------------------------------------------
-* 文件头注释（首行起连续的 `#` 行）原样保留，本脚本不改一个字；
-* 规则按类型分区、区间空一行，分区顺序沿用原文件里各类型首次出现的顺序；
-* IP-CIDR / IP-CIDR6 区内按**网络地址**升序（`ipaddress` 的自然序，即
-  网络地址在前、前缀长度在后），非 IP 区的行原样保序不动；
-* `,no-resolve` 等尾参逐条保留；尾参不同的行分组折叠，绝不跨组合并
-  （避免把 no-resolve 与非 no-resolve 语义混在一条超网里）；
-* 默认强制「IP 类规则必须带 no-resolve」，缺失即报错退出；`--add-no-resolve`
-  可在再生管线里自动补齐。
+用法：collapse_cidr.py <list> [--check|--dry-run|--verify [--against F]|-o OUT]
+退出码：0 = 成功 / 集合等价；1 = 不等价、--check 漂移或输入非法。
 """
 import argparse
 import hashlib

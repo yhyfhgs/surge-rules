@@ -1,52 +1,18 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""sort_lists.py — Surge .list 的表内规则重排器（类型分组 + 区内定序）。
+"""sort_lists.py — Surge .list 的表内规则重排器（类型分区 + 区内定序）。
 
-用途：单张 .list 里 DOMAIN / DOMAIN-SUFFIX / IP-CIDR 等类型历史上是交错的
-（例如 ProxyGFW 按注册域族聚合、Reject 按来源批次追加），人读时要在同一屏里
-跳着分辨类型。本脚本把每张表重排成「类型分区 + 区内确定序」的规范形态。
+语义无变化：表内匹配不依赖行序（整表只有一个策略，由 config/routing.json 指定），
+重排前后每张表的规则行多重集完全相同；表与表之间的顺序本脚本一个字节都不碰。
 
-**语义无变化**：Surge 的表内匹配不依赖行序——同一张 rule-set 内不存在
-「先命中者胜」的策略分歧（整表只有一个策略，由 config/routing.json 指定），
-落点只取决于「该表是否包含匹配项」。行序影响的只有 `config/routing.json` 里
-**表与表之间**的顺序，本脚本一个字节都不碰那里。因此重排前后每张表的
-**规则行多重集完全相同**，这也是验收口径（见 docs/MAINTENANCE「排序约定」）。
+规范形态：文件头注释块原样保留；规则按固定类型桶分区（DOMAIN → DOMAIN-SUFFIX →
+DOMAIN-WILDCARD → DOMAIN-KEYWORD → IP-CIDR → IP-CIDR6 → IP-ASN → GEOIP，
+桶外类型报错退出）；桶内域名类按 casefold 字典序、CIDR 按网络地址数值序、
+IP-ASN 按数值序、GEOIP 按国家码；行尾注释与 `,no-resolve` 随行逐字节保留；
+桶间恰好一个空行。排序稳定，--write 后立即 --check 必然通过（幂等）。
 
-规范形态
---------
-* 文件头注释块（首条规则之前的连续 `#` 行）原样保留在顶部，随后空一行；
-* 规则按固定的类型桶顺序分区：
-      DOMAIN → DOMAIN-SUFFIX → DOMAIN-WILDCARD → DOMAIN-KEYWORD
-      → IP-CIDR → IP-CIDR6 → IP-ASN → GEOIP
-  出现此列表之外的类型：**报错退出**，绝不静默放行（新类型必须先在这里
-  和 docs/MAINTENANCE 里定好位置）；
-* 桶内定序：域名类按规则值的字典序（`casefold` 归一大小写），
-  IP-CIDR / IP-CIDR6 按网络地址数值序（`ipaddress`，网络地址在前、
-  前缀长度在后），IP-ASN 按 ASN 数值序，GEOIP 按国家码字典序；
-* 行尾注释（如 Telegram 的 ` # last_verified=…`）与 `,no-resolve` 等尾参
-  随规则行整体移动，**逐字节保留**；
-* 桶与桶之间恰好一个空行，桶内无空行，文件尾恰好一个换行。
-
-排序稳定：完全相同的两行保持原相对次序，因此 `--write` 之后立即 `--check`
-必然通过（幂等）。
-
-用法
-----
-  # 闸门：检查全部 lists/*.list 是否已是规范形态（不写任何文件）
-  python3 tools/sort_lists.py --check
-
-  # 就地重排全部表
-  python3 tools/sort_lists.py --write
-
-  # 只处理指定文件
-  python3 tools/sort_lists.py --check lists/ProxyGFW.list
-  python3 tools/sort_lists.py --write lists/ProxyGFW.list
-
-  # 内置自检（构造小样例验证桶序 / 注释保留 / 幂等 / 未知类型报错）
-  python3 tools/sort_lists.py --selftest
-
-退出码：0 = 已规范 / 已写回；1 = `--check` 发现偏差，或输入非法。
-只依赖 python3 标准库（argparse / ipaddress / os / sys）。
+用法：sort_lists.py --check | --write [paths…] | --selftest
+退出码：0 = 已规范 / 已写回；1 = --check 发现偏差或输入非法。
 """
 import argparse
 import ipaddress

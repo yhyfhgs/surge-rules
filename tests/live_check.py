@@ -1,31 +1,15 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-live_check.py — Surge 分流测试套件 L3「在线实测层」
+live_check.py — 分流测试套件 L3「在线实测层」(需要 Surge HTTP API)。
 
-与其余三层的关系:
-    engine.py      L0 规则语义引擎(纯离线模拟 Surge 匹配)
-    audit.py       L1 静态审计(no-resolve / 重复 / 遮蔽 / 引用一致性)
-    runsuite.py    L2 场景断言(离线批量跑 engine)
-    live_check.py  L3 在线实测  ← 本文件
+做离线层做不到的三件事: 用 HTTP API 读「Surge 认为发生了什么」; 用真实 HTTPS
+请求量各策略组的真实出口 IP 并查 RDAP 判住宅/机房; 用 DNS 缓存实锤泄漏。
 
-本层做离线层做不到的三件事:
-    1. 用 Surge HTTP API 读「真实发生了什么」(实际命中的规则 / 实际使用的策略 / 实际出口);
-    2. 用真实 HTTPS 请求拿到每个策略组的真实出口 IP, 再查 RDAP 判断住宅/机房;
-    3. 用 DNS 缓存实锤 DNS 泄漏(离线只能静态推断)。
+原则: 只读(唯一写操作是 POST /v1/dns/flush, --no-flush 可关), 绝不改配置;
+在线为准, 与离线引擎冲突时输出偏差表; API 未开启时给指引而非崩溃; 标准库 only。
 
-设计原则:
-    * 只读。除 POST /v1/dns/flush(仅清本地 DNS 缓存, 可用 --no-flush 关闭)外无任何写操作,
-      绝不修改 Surge.conf 或 rules/ 下任何文件。
-    * 在线为准。与离线引擎结论冲突时以在线实测为准, 输出偏差表而不是直接判定谁错。
-    * 降级友好。HTTP API 未开启 / engine.py 不存在 / scenarios 缺失, 均给出明确指引而非崩溃。
-    * python3 标准库 only。
-
-退出码:
-    0  全部通过(或仅有 known_broken / 仅报告不断言)
-    1  存在失败项(断言不通过 / 出现 DNS 泄漏 / 在线与离线不一致且判定为错误)
-    2  Surge HTTP API 不可用(未开启、端口不通、Key 错误)
-    3  用法错误或运行环境问题(参数缺失、场景文件损坏等)
+退出码: 0 通过 / 1 有失败 / 2 HTTP API 不可用 / 3 用法或环境错误。
 """
 
 import argparse
@@ -34,7 +18,6 @@ import os
 import re
 import socket
 import ssl
-import subprocess
 import sys
 import time
 import urllib.error
@@ -46,68 +29,38 @@ VERSION = "1.0.0"
 SELF_DIR = os.path.dirname(os.path.abspath(__file__))
 
 # ---------------------------------------------------------------------------
-# 本地私有覆盖档(不入库)
+# 本地私有覆盖档(不入库; 与 engine.py 共用同一 schema 与查找顺序)
 # ---------------------------------------------------------------------------
 #
-# 本仓库公开发布, tests/ 随之发布, 所以代码里**只放中性占位默认值**:
-# 真实的策略组名、物理节点关键字、ASN、RDAP 归属关键字都带线路商与机房品牌标识,
-# 一律外置到本地覆盖档。engine.py 复用同一份 schema 与同一套查找顺序。
-#
-#   {
-#     "exit_class_exact":    {"<策略组或叶子出口组名>": "<exit_class>"},
-#     "exit_class_keywords": [["<物理节点名关键字>", "<exit_class>"], ...],
-#     "asn_map":             {"<ASN>": "<注释>"},
-#     "residential_hints":   ["<RDAP 机构/网段名关键字>", ...],
-#     "datacenter_hints":    ["<RDAP 机构/网段名关键字>", ...]
-#   }
-#
-# 查找顺序(取第一个存在的文件, 不叠加):
-#   1. 环境变量 LIVE_CHECK_LOCAL 指定的路径
-#   2. <repo>/../rules-local/live_check_local.json   ← 推荐: 整个目录都在仓库外
-#   3. <repo>/tests/live_check_local.json            ← 旧路径, 已 gitignore
-#
-# 文件缺失时全部走中性默认值, 不报错(只是启发式归类会退化到国旗兜底)。
+# tests/ 随公开仓库分发, 代码里只放中性占位默认值; 真实策略组名 / 节点关键字 /
+# ASN / RDAP 归属关键字外置到覆盖档: 环境变量 LIVE_CHECK_LOCAL 指定的路径, 或
+# tests/live_check_local.json(已 gitignore)。schema 键: exit_class_exact /
+# exit_class_keywords / asn_map / residential_hints / datacenter_hints。
+# 缺失时全部走中性默认值, 不报错(启发式归类退化到国旗兜底)。
 
-#: 兼容旧键名(rules-local 早期草案), 值语义完全一致。
-_LOCAL_KEY_ALIASES = {
-    "exit_class_exact": ("exit_class_exact", "policy_exit_class"),
-    "exit_class_keywords": ("exit_class_keywords",),
-    "asn_map": ("asn_map", "known_asn_extra"),
-    "residential_hints": ("residential_hints", "residential_hints_extra"),
-    "datacenter_hints": ("datacenter_hints", "datacenter_hints_extra"),
-}
+_LOCAL_KEYS = ("exit_class_exact", "exit_class_keywords", "asn_map",
+               "residential_hints", "datacenter_hints")
 
 
 def local_profile_candidates(self_dir=SELF_DIR):
-    """返回本地覆盖档的候选路径(按优先级)。"""
-    repo = os.path.dirname(self_dir)
     out = []
     env = os.environ.get("LIVE_CHECK_LOCAL")
     if env:
         out.append(env)
-    out.append(os.path.join(os.path.dirname(repo), "rules-local",
-                            "live_check_local.json"))
     out.append(os.path.join(self_dir, "live_check_local.json"))
     return out
 
 
 def load_local_profile(self_dir=SELF_DIR):
-    """读本地私有覆盖档, 返回 (归一化后的 dict, 实际读到的路径 or None)。"""
+    """读第一个存在的覆盖档, 返回 (dict, 路径 or None); 缺失不报错。"""
     for path in local_profile_candidates(self_dir):
         try:
             with open(path, encoding="utf-8") as fh:
                 raw = json.load(fh)
         except (OSError, ValueError):
             continue
-        if not isinstance(raw, dict):
-            continue
-        out = {}
-        for canon, names in _LOCAL_KEY_ALIASES.items():
-            for n in names:
-                if n in raw:
-                    out[canon] = raw[n]
-                    break
-        return out, path
+        if isinstance(raw, dict):
+            return {k: raw[k] for k in _LOCAL_KEYS if k in raw}, path
     return {}, None
 
 
@@ -573,89 +526,34 @@ def detect_proxy_port(api, explicit=None, log=None):
 # ---------------------------------------------------------------------------
 
 class EngineBridge(object):
-    def __init__(self, tests_dir, conf=None):
-        self.path = os.path.join(tests_dir, "engine.py")
-        self.conf = conf
-        self.available = os.path.isfile(self.path)
-        self.reason = "" if self.available else "未找到 %s" % self.path
-        self._cache = {}
-        self._fn = None
-        self.mode = "cli"
-        if self.available:
-            self._try_import(tests_dir)
+    """同目录 engine.py 的进程内桥接; 加载失败时降级为「仅在线结论」。"""
 
-    def _try_import(self, tests_dir):
-        """
-        优先进程内调用(每次 match 省掉 ~0.4s 的解释器+规则加载开销);
-        拿不到就退回 CLI 子进程 —— spec 已锁定 `engine.py match <host> --json` 这个契约。
-        """
+    def __init__(self, tests_dir, conf=None):
+        self.conf = conf
+        self.available = False
+        self.reason = ""
+        self.mode = "in-process"
+        self._cache = {}
+        self._eng = None
         try:
             if tests_dir not in sys.path:
                 sys.path.insert(0, tests_dir)
-            import engine  # noqa: F401  (运行期存在即可)
-        except Exception:
-            return
-        try:
-            if hasattr(engine, "match") and callable(engine.match):
-                self._fn = engine.match
-                self.mode = "in-process(module.match)"
-            elif hasattr(engine, "build_engine"):
-                obj = engine.build_engine(self.conf) if self.conf else engine.build_engine()
-                if hasattr(obj, "match") and callable(obj.match):
-                    self._fn = obj.match
-                    self.mode = "in-process(Engine.match)"
-        except Exception:
-            self._fn = None
+            import engine
+            self._eng = engine.build_engine(conf)
+            self.available = True
+        except BaseException as e:                              # noqa: BLE001
+            self.reason = "engine.py 加载失败: %s" % e
 
-    def match(self, host, process=None, ip=None, ua=None):
+    def match(self, host, ip=None):
         if not self.available:
             return None
-        key = (host, process, ip, ua)
-        if key in self._cache:
-            return self._cache[key]
-        res = self._match_inproc(host, process, ip, ua)
-        if res is None:
-            res = self._match_cli(host, process, ip, ua)
-        self._cache[key] = res
-        return res
-
-    def _match_inproc(self, host, process, ip, ua):
-        if self._fn is None:
-            return None
-        try:
-            import inspect
-            fn = self._fn
-            params = set(inspect.signature(fn).parameters.keys())
-            kwargs = {}
-            for name, val in (("process", process), ("ip", ip), ("ua", ua), ("conf", self.conf)):
-                if val is not None and name in params:
-                    kwargs[name] = val
-            out = fn(host, **kwargs)
-            if isinstance(out, dict):
-                return out
-            if hasattr(out, "__dict__"):
-                return dict(out.__dict__)
-        except Exception:
-            return None
-        return None
-
-    def _match_cli(self, host, process, ip, ua):
-        cmd = [sys.executable, self.path, "match", host, "--json"]
-        for flag, val in (("--process", process), ("--ip", ip), ("--ua", ua), ("--conf", self.conf)):
-            if val:
-                cmd += [flag, val]
-        try:
-            p = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=30)
-        except Exception:
-            return None
-        out = p.stdout.decode("utf-8", "replace")
-        i = out.find("{")
-        if i < 0:
-            return None
-        try:
-            return json.loads(out[i:])
-        except ValueError:
-            return None
+        key = (host, ip)
+        if key not in self._cache:
+            try:
+                self._cache[key] = self._eng.match(host=host, ip=ip)
+            except Exception:                                   # noqa: BLE001
+                self._cache[key] = None
+        return self._cache[key]
 
 
 # ---------------------------------------------------------------------------
@@ -959,9 +857,6 @@ def cmd_scenario(api, proxy, engine, scenarios, log, result, limit_hosts=None):
             host_ctx[host].append({
                 "scenario": name, "file": sc.get("_file", ""),
                 "expect_policy": expect, "policy_in": policy_in,
-                "known_broken": bool(sc.get("known_broken")),
-                "reason": sc.get("reason", ""),
-                "process": (r.get("process") if isinstance(r, dict) else None),
             })
 
     if not order:
@@ -993,7 +888,7 @@ def cmd_scenario(api, proxy, engine, scenarios, log, result, limit_hosts=None):
         return 1
 
     rows, details = [], []
-    stat = {"pass": 0, "fail": 0, "known_broken": 0, "unreachable": 0,
+    stat = {"pass": 0, "fail": 0, "unreachable": 0,
             "not_found": 0, "engine_diff": 0, "no_expect": 0, "skipped": len(skipped)}
 
     for host in order:
@@ -1023,7 +918,7 @@ def cmd_scenario(api, proxy, engine, scenarios, log, result, limit_hosts=None):
         online_cls = exit_class_of(group if group in EXIT_CLASS_EXACT else leaf)[0]
 
         # 离线引擎判定
-        eng = engine.match(host, process=ctx.get("process")) if engine.available else None
+        eng = engine.match(host) if engine.available else None
         eng_policy = (eng or {}).get("policy")
         eng_cls = (eng or {}).get("exit_class")
 
@@ -1038,9 +933,6 @@ def cmd_scenario(api, proxy, engine, scenarios, log, result, limit_hosts=None):
             if ok:
                 state = "PASS"
                 stat["pass"] += 1
-            elif ctx["known_broken"]:
-                state = "KNOWN_BROKEN"
-                stat["known_broken"] += 1
             else:
                 state = "FAIL"
                 stat["fail"] += 1
@@ -1064,15 +956,14 @@ def cmd_scenario(api, proxy, engine, scenarios, log, result, limit_hosts=None):
                         "online_rule": rule, "online_exit_class": online_cls,
                         "remote_address": remote, "engine_policy": eng_policy,
                         "engine_exit_class": eng_cls, "engine_diff": diff,
-                        "scenario": ctx["scenario"], "file": ctx["file"],
-                        "known_broken": ctx["known_broken"]})
+                        "scenario": ctx["scenario"], "file": ctx["file"]})
 
     log("")
     log(render_table(["域名", "期望组", "在线策略", "出口类", "结果", "备注/命中规则"], rows))
     log("")
-    log("  统计: PASS %d | FAIL %d | KNOWN_BROKEN %d | UNREACHABLE %d | NOT_FOUND %d | "
+    log("  统计: PASS %d | FAIL %d | UNREACHABLE %d | NOT_FOUND %d | "
         "仅报告 %d | 跳过 %d"
-        % (stat["pass"], stat["fail"], stat["known_broken"], stat["unreachable"],
+        % (stat["pass"], stat["fail"], stat["unreachable"],
            stat["not_found"], stat["no_expect"], stat["skipped"]))
     if not engine.available:
         log("  注: 离线引擎不可用(%s), 本次只有在线结论, 无偏差对比。" % engine.reason)
@@ -1082,7 +973,7 @@ def cmd_scenario(api, proxy, engine, scenarios, log, result, limit_hosts=None):
     log("  注: UNREACHABLE 表示网络层没打通(被墙/证书/站点拒绝 HEAD), 不算分流错误。")
 
     # 一次什么都没量到的运行不能报「全部通过」—— 那是最坑人的假绿灯
-    decided = stat["pass"] + stat["fail"] + stat["known_broken"] + stat["no_expect"]
+    decided = stat["pass"] + stat["fail"] + stat["no_expect"]
     blind = stat["unreachable"] + stat["not_found"]
     testable = len(order) - len(skipped)
     inconclusive = False
@@ -1117,9 +1008,6 @@ def cmd_scenario(api, proxy, engine, scenarios, log, result, limit_hosts=None):
         if len(classes) <= 1:
             sess_state = "PASS"
             stat["pass"] += 1
-        elif sc.get("known_broken"):
-            sess_state = "KNOWN_BROKEN"
-            stat["known_broken"] += 1
         else:
             sess_state = "FAIL(会话内出口分裂)"
             stat["fail"] += 1

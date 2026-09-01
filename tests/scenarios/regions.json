@@ -1,0 +1,250 @@
+[
+  {
+    "name": "fix_r2_9_bbc_family_uk_exit",
+    "desc": "R2-9 / W4-01 方案 A：BBC 品牌注册域全族由 Streaming 迁入 UK.list。iPlayer 是英国属地锁，而「流媒体」是全局单选组、成员里没有任何英国出口（3 美 + 2 日 + 1 欧），迁 UK 是绕开该限制的方案。四个验收 host 加 bbc.com（既有）必须同出口；DOMAIN-SUFFIX,bbc 是 BBC 独占的品牌 gTLD，随品牌同表",
+    "requests": [
+      {"host": "bbc.co.uk", "note": "iPlayer 全链主域"},
+      {"host": "www.bbc.co.uk", "note": "iPlayer 网页入口"},
+      {"host": "bbci.co.uk", "note": "BBC 静态资产域"},
+      {"host": "open.live.bbc.co.uk", "note": "媒体选择器（属地判定就发生在这一跳）"},
+      {"host": "www.bbc.com", "note": "国际新闻站，迁移前就在 UK.list，迁移后与 co.uk 侧同出口"},
+      {"host": "www.bbc", "note": "品牌 gTLD .bbc 的代表 host；该 TLD 由 BBC 独占，无多租户风险"},
+      {"host": "bbc.example.com", "note": "负例：DOMAIN-SUFFIX,bbc 按标签右锚，不做子串匹配"},
+      {"host": "notbbc.co.uk", "note": "负例：品牌入表以注册域为单位，不外扩到含品牌串的他域"}
+    ],
+    "assert": {
+      "same_policy": true, "policy": "🇬🇧英国节点", "no_dns_leak": true,
+      "per_request": [
+        {"host": "bbc.example.com", "policy": "Final", "reason": "后缀匹配右锚在标签边界，bbc 作为最左标签不命中"},
+        {"host": "notbbc.co.uk", "policy": "Final", "reason": "地区表按域枚举，.co.uk 后缀本身不是入表依据"}
+      ]
+    }
+  },
+  {
+    "name": "fix_r2_9_bbc_thirdparty_cdn_stays_streaming",
+    "desc": "W4-01 执行边界（2026-08-31 advisor 裁决 6 后收窄）：BBC 挂在**多租户**共享 CDN 上的播放面刻意不随品牌域迁 UK —— llnwi.net（Limelight）同注册域还住着 DAZN / HBO Max / Viki，把单个租户前缀拆进地区表会破坏该注册域的一致处置，故 bbcfmt.s.llnwi.net 留 Streaming。而 bbc.mp-pxcdn.com 是 **BBC 专属形态**（Piksel 上的 BBC 独占租户前缀，无其他租户共享该前缀），按裁决 6「Streaming 中 BBC 专属形态随迁 UK.list」已迁入 UK.list —— 两者的分界线就是「该前缀是否被多个租户共享」，本场景把这条分界钉住",
+    "requests": [
+      {"host": "bbcfmt.s.llnwi.net", "note": "Limelight 租户前缀，同注册域另有 DAZN / HBO Max / Viki 四条"},
+      {"host": "bbc.mp-pxcdn.com", "note": "Piksel CDN 上的 BBC 专属租户前缀；2026-08-31 advisor 裁决 6 起随 *-uk-live akamaized 九条一并迁入 UK.list"}
+    ],
+    "assert": {
+      "same_policy": false, "no_dns_leak": true,
+      "per_request": [
+        {"host": "bbcfmt.s.llnwi.net", "policy": "流媒体", "reason": "多租户注册域（同表另有 DAZN / HBO Max / Viki），刻意留 Streaming —— 拆单个租户前缀进地区表会破坏该注册域的一致处置。"},
+        {"host": "bbc.mp-pxcdn.com", "policy": "🇬🇧英国节点", "reason": "advisor 裁决 6：BBC 专属形态随迁 UK.list（DOMAIN,bbc.mp-pxcdn.com @ UK.list），与 bbc.co.uk / bbci.co.uk 同出口，避免 iPlayer 播放面与门面分裂到两个出口触发属地拒绝。"}
+      ]
+    }
+  },
+  {
+    "name": "fix_r1_22_espnplus_redirect_single_exit",
+    "desc": "R1-22 / W4-03：espnplus.com 是纯跳转域（www.espnplus.com 302 → plus.espn.com），跳转目标早已被 Streaming 的 espn.com 后缀认领。删 US.list 侧条目后一次导航不再中途换出口；apex 本身无 HTTP 响应，落 Final 无实际代价",
+    "requests": [
+      {"host": "plus.espn.com", "note": "302 跳转的落地页，ESPN+ 正片面"},
+      {"host": "espn.com", "note": "承接后缀本体，行为不变参照"},
+      {"host": "espnplus.com", "note": "跳转源 apex：curl 实测 000 无响应"},
+      {"host": "www.espnplus.com", "note": "跳转源：curl 实测 302 → plus.espn.com"}
+    ],
+    "assert": {
+      "no_dns_leak": true,
+      "per_request": [
+        {"host": "plus.espn.com", "policy": "流媒体"},
+        {"host": "espn.com", "policy": "流媒体"},
+        {"host": "espnplus.com", "policy": "Final", "reason": "US.list 条目已删；用户实际总是从跳转链第二跳开始使用"},
+        {"host": "www.espnplus.com", "policy": "Final"}
+      ]
+    }
+  },
+  {
+    "name": "fix_r1_22_tubi_single_owner_no_gap",
+    "desc": "R1-22 / W4-07：Tubi 一个品牌原本散在三个策略且留有覆盖空洞 —— tubi.tv 与 www.tubi.tv 用的是 DOMAIN 精确匹配，其余 *.tubi.tv 无人认领。两条 DOMAIN 合并为 DOMAIN-SUFFIX,tubi.tv 后空洞消失；US.list 的 tubi.io 顶域无 A 记录（@8.8.8.8 空、@223.5.5.5 返回 Twitter 段属投毒）且唯一活体子域已归 Streaming，一并删除",
+    "requests": [
+      {"host": "api.tubi.tv", "note": "空洞证明：合并前落 Final，合并后归流媒体"},
+      {"host": "tubi.tv", "note": "原 DOMAIN,tubi.tv"},
+      {"host": "www.tubi.tv", "note": "原 DOMAIN,www.tubi.tv"},
+      {"host": "tubitv.com", "note": "既有条目，行为不变参照"},
+      {"host": "production-public.tubi.io", "note": "tubi.io 下唯一已知活体 host，本就归 Streaming"},
+      {"host": "tubi.io", "note": "顶域近死 + 投毒；US.list 条目已删"},
+      {"host": "mytubi.tv", "note": "负例：后缀合并不得越过标签边界"}
+    ],
+    "assert": {
+      "same_policy": true, "policy": "流媒体", "no_dns_leak": true,
+      "per_request": [
+        {"host": "tubi.io", "policy": "Final", "reason": "顶域无 A 记录，保留只是分裂源；活体子域仍由 Streaming 精确认领"},
+        {"host": "mytubi.tv", "policy": "Final", "reason": "DOMAIN-SUFFIX 右锚在标签边界，不是子串匹配"}
+      ]
+    }
+  },
+  {
+    "name": "fix_r1_22_paravi_retired_successor_unext",
+    "desc": "R1-22 / W4-15：Paravi 2023 年并入 U-NEXT，paravi.jp 现仅是 Vercel 上的跳转壳（/internal-redirect），跳转目标 unext.jp / nxtv.jp 已在 Japan.list 内承接。删除理由按 W4-03 的跳转域口径（目标已被承接）而非「死域」—— 2026-08-31 复测该域仍 301 → www.paravi.jp → 200，审计原文的「curl 000 无响应」已不成立",
+    "requests": [
+      {"host": "paravi.jp", "note": "跳转壳 apex：301 → www.paravi.jp"},
+      {"host": "www.paravi.jp", "note": "跳转壳：200，Vercel 托管，无日本属地锁"},
+      {"host": "unext.jp", "note": "承接域：服务实际所在"},
+      {"host": "video.unext.jp", "note": "承接域播放面，与主站同出口"}
+    ],
+    "assert": {
+      "no_dns_leak": true,
+      "per_request": [
+        {"host": "paravi.jp", "policy": "Final", "reason": "Japan.list 条目已删；跳转目标已被 unext.jp 承接，跳转壳本身无属地锁"},
+        {"host": "www.paravi.jp", "policy": "Final"},
+        {"host": "unext.jp", "policy": "🇯🇵日本节点"},
+        {"host": "video.unext.jp", "policy": "🇯🇵日本节点"}
+      ]
+    }
+  },
+  {
+    "name": "ipv6_literal_cidr6_hits",
+    "desc": "R2-6 IPv6 语料（一）：IPv6 字面量命中 IP-CIDR6 的全部语义分支——/128 精确形、/40 与 /48 前缀形、机器层 ChinaIP v6 兜底、v6 独有的链路本地地址。同时锁住「conf 位次决定归属」这条不变量：2620:120:e000::1 属 AS36040(GGC 缓存)，YouTube.list(区 5) 先于 Google.list(区 6) 命中，落流媒体而非 Google 组。全库 3,947 条 IP-CIDR6 中只有这几张手工表可被字面量稳定复现，ChinaIP/PrivateLAN 两条是机器层与内置层的代表样本。",
+    "requests": [
+      {"ip": "2001:4860:4860::8888", "note": "Google Public DNS v6；Google.list 以 /128 精确形收录（v4 侧 8.8.8.8 同构）"},
+      {"ip": "2620:120:e000::1", "note": "AS36040 YOUTUBE 的 ISP 内嵌 GGC 缓存段 2620:120:e000::/40；R1-16 起该族归 YouTube.list"},
+      {"ip": "2001:67c:4e8::1", "note": "Telegram Messenger 的 RIPE 段 2001:67c:4e8::/48"},
+      {"ip": "2001:250::1", "note": "CERNET 2001:250::/30；ChinaIP.list 机器生成层的 v6 区（3,925 条）代表样本"},
+      {"ip": "fe80::1", "note": "链路本地地址（RFC 4291），v6 独有语义、v4 无对应形态；PrivateLAN.list 收 fe80::/10"}
+    ],
+    "assert": {
+      "no_dns_leak": true,
+      "per_request": [
+        {"ip": "2001:4860:4860::8888", "policy": "Google-X-Meta-MS", "reason": "IP-CIDR6,2001:4860:4860::8888/128 @ Google.list —— /128 精确形必须与 v4 的 8.8.8.8 落同一组。"},
+        {"ip": "2620:120:e000::1", "policy": "流媒体", "reason": "IP-CIDR6,2620:120:e000::/40 @ YouTube.list —— 位次不变量：YouTube.list(conf:93) 先于 Google.list(conf:96)，AS36040 归 YouTube 而非 Google 组（裁决 306 / WB §5-6）。"},
+        {"ip": "2001:67c:4e8::1", "policy": "Telegram", "reason": "IP-CIDR6,2001:67c:4e8::/48 @ Telegram.list —— Telegram 的 v6 面必须与 v4 面同出口（MTProto 会话 IP 一致性）。"},
+        {"ip": "2001:250::1", "policy": "DIRECT", "reason": "IP-CIDR6,2001:250::/30 @ ChinaIP.list —— 机器生成层的 v6 区参与判定；国内 v6 直连不得回退代理。"},
+        {"ip": "fe80::1", "policy": "DIRECT", "reason": "IP-CIDR6,fe80::/10 @ PrivateLAN.list —— 链路本地绝不能走代理；这条覆盖 v4 侧没有的语义分支。"}
+      ]
+    }
+  },
+  {
+    "name": "ipv6_literal_fallback_and_approx_blindspots",
+    "desc": "R2-6 IPv6 语料（二）：不命中任何 IP-CIDR6 时的兜底，以及两处离线引擎近似盲区。按 edge_cases «user_vps_ip_asn» 的既定口径，盲区一律用 policy_in 双态而不是硬断言——policy_in 的第一项是离线引擎现状、第二项是真实 Surge 的期望落点。⚠ 2a03:2880:f003::1 同时暴露一个真实缺口：Meta.list 的 IP 区在 R1-06 后共 15 条 IPv4-CIDR + 3 条 IP-ASN，**IPv6-CIDR 为 0 条**，而 AS32934 现通告 337 条 v6 前缀 —— 离线侧完全靠 IP-ASN 兜，一旦 Surge 侧 ASN 库滞后就落 FINAL。该缺口已记入 WB 交付 §6，待 advisor 决定是否补 IP-CIDR6 段。",
+    "requests": [
+      {"ip": "2001:db8::1", "note": "RFC 3849 文档保留前缀 2001:db8::/32：保证不在任何规则表、也不在任何 GEOIP 库里 —— 真·FINAL 兜底的干净样本"},
+      {"ip": "2600:1f18::1", "note": "AWS us-east-1 的 2600:1f18::/32（ARIN，US）：无精确 IP-CIDR6 收录，落点取决于 GEOIP,US"},
+      {"ip": "2a03:2880:f003::1", "note": "Meta AS32934 的 2a03:2880::/32：Meta.list 无任何 IP-CIDR6，仅 IP-ASN,32934 可能接住"}
+    ],
+    "assert": {
+      "policy": "Final", "no_dns_leak": true,
+      "per_request": [
+        {"ip": "2600:1f18::1", "policy_in": ["Final", "🇺🇸美国节点"], "reason": "GEOIP 近似盲区：engine.py 无 MaxMind 库，7 条非 CN GEOIP 恒不匹配 ⇒ 离线判 Final；真实 Surge 在区 9 由 US.list 的 GEOIP,US,no-resolve 接住 ⇒ 🇺🇸美国节点。两态均为正确落点，硬断言任何一侧都会说谎。"},
+        {"ip": "2a03:2880:f003::1", "policy_in": ["Final", "Google-X-Meta-MS"], "reason": "IP-ASN 近似盲区：engine.py 无 ASN 样本库，IP-ASN 恒不匹配 ⇒ 离线判 Final；真实 Surge 由 Meta.list(conf:98) 的 IP-ASN,32934,no-resolve 接住 ⇒ Google-X-Meta-MS。位次上 Meta.list 远早于区 9 的地区表，故不会被 GEOIP 抢走。"}
+      ]
+    }
+  },
+  {
+    "name": "region_europe_node",
+    "desc": "审计 §3.3：Europe.list 在 L2 无任何胜出规则。补齐域名层覆盖——公共广播/主机商/欧盟官方/数字银行四类代表域走欧洲出口；负例证明本表是精确域清单而非 ccTLD 泛化（域名层不兜底 .de，IP 层才由 GEOIP 收）",
+    "requests": [
+      {"host": "www.zdf.de", "note": "德国公共广播 ZDF"},
+      {"host": "hetzner.com", "note": "德国主机商控制台"},
+      {"host": "europa.eu", "note": "欧盟官方门户"},
+      {"host": "n26.com", "note": "德国数字银行"},
+      {"host": "ing.com", "note": "负例：本表只收 ing.de/ing.nl 两个属地分支，集团总域未收"},
+      {"host": "bmw.de", "note": "负例：同 ccTLD 未收录域"}
+    ],
+    "assert": {
+      "no_dns_leak": true,
+      "per_request": [
+        {"host": "www.zdf.de", "policy": "🇪🇺欧洲节点"},
+        {"host": "hetzner.com", "policy": "🇪🇺欧洲节点"},
+        {"host": "europa.eu", "policy": "🇪🇺欧洲节点"},
+        {"host": "n26.com", "policy": "🇪🇺欧洲节点"},
+        {"host": "ing.com", "policy": "Final", "reason": "属地分支域入表不等于集团总域入表"},
+        {"host": "bmw.de", "policy": "Final", "reason": "地区表按域枚举，.de 后缀本身不是入表依据"}
+      ]
+    }
+  },
+  {
+    "name": "region_japan_node",
+    "desc": "审计 §3.3：Japan.list 在 L2 无任何胜出规则。补齐域名层覆盖——pixiv 主站与其图床 pximg 必须同出口（跨域图片鉴权），电台/二手平台代表域同走日本出口；负例证明 .co.jp 不被泛化",
+    "requests": [
+      {"host": "www.pixiv.net", "note": "pixiv 主站"},
+      {"host": "i.pximg.net", "note": "pixiv 图床，与主站同出口才能取图"},
+      {"host": "radiko.jp", "note": "日本网络电台，地域锁"},
+      {"host": "www.mercari.com", "note": "煤炉二手平台"},
+      {"host": "jal.co.jp", "note": "负例：同 ccTLD 未收录域"},
+      {"host": "line.com", "note": "负例：LINE 官方资产是 line.me / line-apps.com / line-scdn.net，line.com 不属本表"}
+    ],
+    "assert": {
+      "no_dns_leak": true,
+      "per_request": [
+        {"host": "www.pixiv.net", "policy": "🇯🇵日本节点"},
+        {"host": "i.pximg.net", "policy": "🇯🇵日本节点", "reason": "图床与主站同出口，防止跨出口取图 403"},
+        {"host": "radiko.jp", "policy": "🇯🇵日本节点"},
+        {"host": "www.mercari.com", "policy": "🇯🇵日本节点"},
+        {"host": "jal.co.jp", "policy": "Final", "reason": "地区表按域枚举，.co.jp 后缀本身不是入表依据"},
+        {"host": "line.com", "policy": "Final"}
+      ]
+    }
+  },
+  {
+    "name": "region_uk_node",
+    "desc": "审计 §3.3：UK.list 在 L2 无任何胜出规则。补齐域名层覆盖——广播/报刊/银行/公共服务代表域走英国出口；BBC 域族 2026-08-31 由 Streaming 迁入 UK（W4-01 方案 A），bbc.com 与 bbc.co.uk 现为同一出口",
+    "requests": [
+      {"host": "www.bbc.com", "note": "BBC 国际站"},
+      {"host": "www.theguardian.com", "note": "卫报"},
+      {"host": "monzo.com", "note": "英国数字银行"},
+      {"host": "www.nhs.uk", "note": "英国国民保健署"},
+      {"host": "argos.co.uk", "note": "负例：同 ccTLD 未收录域"},
+      {"host": "bbc.co.uk", "note": "iPlayer 全链主域：属地锁需英国出口，2026-08-31 起归 UK.list"}
+    ],
+    "assert": {
+      "no_dns_leak": true,
+      "per_request": [
+        {"host": "www.bbc.com", "policy": "🇬🇧英国节点"},
+        {"host": "www.theguardian.com", "policy": "🇬🇧英国节点"},
+        {"host": "monzo.com", "policy": "🇬🇧英国节点"},
+        {"host": "www.nhs.uk", "policy": "🇬🇧英国节点"},
+        {"host": "argos.co.uk", "policy": "Final", "reason": "地区表按域枚举，.co.uk 后缀本身不是入表依据"},
+        {"host": "bbc.co.uk", "policy": "🇬🇧英国节点", "reason": "全库唯一归属：bbc.co.uk 已迁入 UK.list；「流媒体」是全局单选组且无英国出口成员，属地锁服务的正确 owner 是地区表"}
+      ]
+    }
+  },
+  {
+    "name": "region_us_node",
+    "desc": "审计 §3.3：US.list 在 L2 无任何胜出规则。补齐域名层覆盖——银行/券商/零售/政务代表域走美国出口（银行券商刻意不入 Payment.list，见本表头注释）；负例覆盖同品牌他国站点不随美国站走美国出口",
+    "requests": [
+      {"host": "www.chase.com", "note": "大通银行"},
+      {"host": "schwab.com", "note": "嘉信券商"},
+      {"host": "www.walmart.com", "note": "沃尔玛美国站"},
+      {"host": "irs.gov", "note": "美国国税局"},
+      {"host": "chase.co.uk", "note": "负例：同品牌英国分支未收录"},
+      {"host": "walmart.cn", "note": "负例：沃尔玛中国站应直连，不得随美国站出海"}
+    ],
+    "assert": {
+      "no_dns_leak": true,
+      "per_request": [
+        {"host": "www.chase.com", "policy": "🇺🇸美国节点"},
+        {"host": "schwab.com", "policy": "🇺🇸美国节点"},
+        {"host": "www.walmart.com", "policy": "🇺🇸美国节点"},
+        {"host": "irs.gov", "policy": "🇺🇸美国节点"},
+        {"host": "chase.co.uk", "policy": "Final", "reason": "品牌入表以域为单位，不外扩到其它 ccTLD 分支"},
+        {"host": "walmart.cn", "policy": "DIRECT", "reason": "由 ChinaDomain 的 DOMAIN-SUFFIX,cn 承接直连"}
+      ]
+    }
+  },
+  {
+    "name": "region_neteasecn_direct",
+    "desc": "审计 §3.3：NetEaseCN.list 在 L2 无任何胜出规则。补齐域名层覆盖——邮箱/门户/对象存储/有道/LOFTER 代表域直连；负例锁定本表头注释的裁决：境外托管的网易国际版站点 neteasegames.com/.net 刻意不收，必须走代理出口而非被误直连",
+    "requests": [
+      {"host": "mail.126.com", "note": "网易邮箱"},
+      {"host": "www.163.com", "note": "网易门户"},
+      {"host": "nos.netease.com", "note": "网易对象存储 NOS"},
+      {"host": "www.youdao.com", "note": "有道"},
+      {"host": "lofter.com", "note": "LOFTER"},
+      {"host": "neteasegames.com", "note": "负例：境外托管国际版，头注释明确不收"},
+      {"host": "neteasegames.net", "note": "负例：同上"}
+    ],
+    "assert": {
+      "no_dns_leak": true,
+      "per_request": [
+        {"host": "mail.126.com", "policy": "DIRECT"},
+        {"host": "www.163.com", "policy": "DIRECT"},
+        {"host": "nos.netease.com", "policy": "DIRECT"},
+        {"host": "www.youdao.com", "policy": "DIRECT"},
+        {"host": "lofter.com", "policy": "DIRECT"},
+        {"host": "neteasegames.com", "policy": "Final", "reason": "国际版不得被 netease 系直连规则吸走"},
+        {"host": "neteasegames.net", "policy": "Final"}
+      ]
+    }
+  }
+]

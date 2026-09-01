@@ -1,5 +1,193 @@
 [
   {
+    "name": "sentry_keyword_overcapture",
+    "desc": "DOMAIN-KEYWORD,sentry / sift 的误伤面：官方站、租户 ingest 端点、第三方自建子域、以及同名无关公司。理想值＝按域名真实归属分流，不应被 AI 组吸走",
+    "requests": [
+      {"host": "sentry.io", "note": "Sentry 官方站，非 AI 服务"},
+      {"host": "o447951.ingest.sentry.io", "note": "租户遥测 ingest（跟随宿主应用是可接受的）"},
+      {"host": "sentryone.com", "note": "SolarWinds SentryOne，SQL Server 监控，与 AI 无关"},
+      {"host": "sifted.eu", "note": "Sifted，欧洲创投媒体；被 DOMAIN-KEYWORD,sift 命中"},
+      {"host": "sentry.example.com", "note": "RFC2606 保留域样本，代表任意网站自建的 sentry.<自有域>"}
+    ],
+    "assert": {
+      "same_policy": false, "no_dns_leak": true,
+      "per_request": [
+        {"host": "sentry.io", "policy": "AI", "reason": "刻意保留：FIX-B 裁定 Sentry 官方域仍随 AI 组（AI 应用遥测），只把 DOMAIN-KEYWORD,sentry 收窄为 DOMAIN-SUFFIX,sentry.io + sentry-cdn.com。"},
+        {"host": "o447951.ingest.sentry.io", "policy": "AI", "reason": "保留现状：AI 应用自带的遥测跟随 AI 组，可接受。"},
+        {"host": "sentryone.com", "policy": "Final", "reason": "2026-08-25 F1 已修复：KEYWORD 收窄后不再误伤 SolarWinds SentryOne。"},
+        {"host": "sifted.eu", "policy": "Final", "reason": "2026-08-25 F1 已修复：DOMAIN-KEYWORD,sift 收窄为 DOMAIN-SUFFIX,sift.com。"},
+        {"host": "sentry.example.com", "policy": "Final", "reason": "2026-08-25 F1 已修复：任意站点自建 sentry.* 子域不再被吸入 AI 组。"}
+      ]
+    }
+  },
+  {
+    "name": "domestic_ai_apps_pulled_into_proxy",
+    "desc": "AI.list 直接收录的国内 AI 服务域：小爱同学、星野(MiniMax)、FastGPT。这些是纯国内服务，被 AI.list（远早于国内直连区）强制走美国出口",
+    "note": "2026-08-25 F1：xiaoaiassist.com 与 xingyeai.com 已自 AI.list 移入 Domestic.list。advisor 裁决：fastgpt.in 是 .in 国际站域名，按「国内厂商国际站走代理」原则维持 AI 组（fastgpt.cn/run 国内域不受影响）。",
+    "requests": [
+      {"host": "xiaoaiassist.com", "note": "小米小爱同学"},
+      {"host": "xingyeai.com", "note": "MiniMax 星野"},
+      {"host": "fastgpt.in", "note": "FastGPT（国内）"}
+    ],
+    "assert": {
+      "same_policy": false,
+      "per_request": [
+        {"host": "xiaoaiassist.com", "policy": "DIRECT"},
+        {"host": "xingyeai.com", "policy": "DIRECT"},
+        {"host": "fastgpt.in", "policy": "AI"}
+      ]
+    }
+  },
+  {
+    "name": "ocsp_crl_revocation_check",
+    "desc": "证书吊销检查（OCSP/CRL）：握手关键路径，回归固化当前归属以防漂移",
+    "requests": [
+      {"host": "ocsp.digicert.com"},
+      {"host": "ocsp.apple.com"},
+      {"host": "ocsp2.apple.com"},
+      {"host": "r3.o.lencr.org", "note": "Let's Encrypt OCSP"},
+      {"host": "x1.c.lencr.org", "note": "Let's Encrypt 证书链分发"},
+      {"host": "crl.microsoft.com"}
+    ],
+    "assert": {
+      "same_policy": false, "no_dns_leak": true,
+      "per_request": [
+        {"host": "ocsp.digicert.com", "policy": "DIRECT"},
+        {"host": "ocsp.apple.com", "policy": "DIRECT"},
+        {"host": "ocsp2.apple.com", "policy": "DIRECT"},
+        {"host": "r3.o.lencr.org", "policy": "DIRECT"},
+        {"host": "x1.c.lencr.org", "policy": "DIRECT"},
+        {"host": "crl.microsoft.com", "policy": "DIRECT"}
+      ]
+    }
+  },
+  {
+    "name": "ntp_time_sync",
+    "desc": "NTP 授时：conf 中 udp-policy-not-supported-behaviour=REJECT，NTP 走代理组等于被 REJECT，必须直连",
+    "note": "2026-08-25 F1 已修复：pool.ntp.org / time.windows.com 自 DownloadCDN 移入 Domestic.list。",
+    "requests": [
+      {"host": "time.apple.com"},
+      {"host": "ntp.aliyun.com"},
+      {"host": "cn.pool.ntp.org", "note": "国内 NTP 池"},
+      {"host": "time.windows.com"}
+    ],
+    "assert": {"same_policy": true, "policy": "DIRECT"}
+  },
+  {
+    "name": "captive_portal_detection",
+    "desc": "热点登录探测（captive portal）：必须直连，否则连不上公共 Wi-Fi 就无法弹出登录页",
+    "note": "2026-08-25 F1 已修复：msftconnecttest.com / detectportal.firefox.com 自 DownloadCDN 移入 Domestic.list；同时移除 ProxyGFW.list 的 DOMAIN-SUFFIX,firefox.com（它会抢跑 detectportal，其余 firefox.com 主机改由 FINAL 兜底，策略组不变）。",
+    "requests": [
+      {"host": "captive.apple.com", "note": "内置 SYSTEM 规则集"},
+      {"host": "connect.rom.miui.com", "note": "conf 的 internet-test-url"},
+      {"host": "www.msftconnecttest.com"},
+      {"host": "detectportal.firefox.com"}
+    ],
+    "assert": {"same_policy": true, "policy": "DIRECT"}
+  },
+  {
+    "name": "stripe_payment_session",
+    "desc": "Stripe 支付会话：Elements 脚本 + 支付 API + Checkout 页 + 风控信标。支付强依赖同出口 IP，跨出口易触发 3DS/拒付",
+    "note": "2026-08-25 F1：stripe.com 自 AI.list 移入 ProxyGFW.list，并补 stripe.network。2026-08-29：新建 Payment.list（国际支付渠道专表），stripe.com/stripe.network 自 ProxyGFW.list 移入，stripecdn.com/stripeassets.com 自 DownloadCDN.list 移入；期望落点由兜底组 Final 改为专用策略组 Payment（固定家宽出口，保证 Elements/API/Checkout/风控信标同 IP）。本断言需 Surge.conf 增加 RULE-SET,…/Payment.list,Payment 后方能通过——conf 由主控统一落地。",
+    "requests": [
+      {"host": "js.stripe.com"},
+      {"host": "api.stripe.com"},
+      {"host": "checkout.stripe.com"},
+      {"host": "q.stripe.com", "note": "遥测/风控信标"},
+      {"host": "m.stripe.network", "note": "设备指纹/风控"}
+    ],
+    "assert": {"same_policy": true, "policy": "Payment", "no_dns_leak": true}
+  },
+  {
+    "name": "third_party_saas_captured_by_ai_list",
+    "desc": "AI.list 收录的通用 SaaS 基础设施：Auth0 登录、Intercom 客服、LaunchDarkly 开关、Algolia 搜索、Cloudflare Turnstile。这些出现在成千上万个与 AI 无关的站点里",
+    "requests": [
+      {"host": "auth0.com"},
+      {"host": "api-iam.intercom.io"},
+      {"host": "js.intercomcdn.com"},
+      {"host": "app.launchdarkly.com"},
+      {"host": "events.launchdarkly.com"},
+      {"host": "algolia.net"},
+      {"host": "challenges.cloudflare.com", "note": "Turnstile，ChatGPT 登录会用到"}
+    ],
+    "assert": {
+      "same_policy": false, "no_dns_leak": true,
+      "per_request": [
+        {"host": "auth0.com", "policy": "Proxy", "reason": "2026-08-25 F1 已修复：auth0.com 自 AI.list 移入 ProxyGFW.list。2026-09-01 起 ProxyGFW 独立挂 Proxy 组（与收尾 FINAL 解耦），故落点由 Final 变为 Proxy；断言的真实内容不变——不得再被 AI.list 认领。"},
+        {"host": "api-iam.intercom.io", "policy": "AI", "reason": "刻意保留：FIX-B 裁定 intercom.io / intercomcdn.com 留在 AI 组（AI 产品内嵌客服组件，见 allowlist）。"},
+        {"host": "js.intercomcdn.com", "policy": "AI", "reason": "同上。"},
+        {"host": "app.launchdarkly.com", "policy": "Final", "reason": "2026-08-25 F1 已修复：launchdarkly.com 自 AI.list 删除，落 Final。"},
+        {"host": "events.launchdarkly.com", "policy": "Final", "reason": "同上。"},
+        {"host": "algolia.net", "policy": "Final", "reason": "2026-08-25 F1 已修复：algolia.net 自 AI.list 删除，落 Final。"},
+        {"host": "challenges.cloudflare.com", "policy": "AI", "reason": "刻意保留：Turnstile 是 ChatGPT/Claude 登录链的一环，与 AI 同组反而有利（见 allowlist）。"}
+      ]
+    }
+  },
+  {
+    "name": "pure_ip_requests",
+    "desc": "无域名的纯 IP 请求（直连 IP / DoH bootstrap / 探测），验证 IP 类规则命中且不产生本地解析",
+    "requests": [
+      {"ip": "1.1.1.1", "note": "Cloudflare DNS，未被任何 IP 规则收录"},
+      {"ip": "8.8.8.8", "note": "Google.list IP-CIDR,8.8.8.8/32"},
+      {"ip": "8.8.4.4"},
+      {"ip": "223.5.5.5", "note": "阿里 DNS，落 ChinaIP"},
+      {"ip": "119.29.29.29", "note": "腾讯 DNSPod"},
+      {"ip": "114.114.114.114"},
+      {"ip": "104.244.42.1", "note": "Twitter 段"},
+      {"ip": "149.154.167.51", "note": "Telegram DC 段"},
+      {"ip": "160.79.104.10", "note": "Anthropic 160.79.104.0/21"},
+      {"ip": "192.168.1.1", "note": "内网"},
+      {"ip": "127.0.0.1", "note": "loopback"}
+    ],
+    "assert": {
+      "same_policy": false, "no_dns_leak": true,
+      "per_request": [
+        {"ip": "1.1.1.1", "policy": "Final"},
+        {"ip": "8.8.8.8", "policy": "Google-X-Meta-MS"},
+        {"ip": "8.8.4.4", "policy": "Google-X-Meta-MS"},
+        {"ip": "223.5.5.5", "policy": "DIRECT"},
+        {"ip": "119.29.29.29", "policy": "DIRECT"},
+        {"ip": "114.114.114.114", "policy": "DIRECT"},
+        {"ip": "104.244.42.1", "policy": "Google-X-Meta-MS"},
+        {"ip": "149.154.167.51", "policy": "Telegram"},
+        {"ip": "160.79.104.10", "policy": "AI"},
+        {"ip": "192.168.1.1", "policy": "DIRECT"},
+        {"ip": "127.0.0.1", "policy": "DIRECT"}
+      ]
+    }
+  },
+  {
+    "name": "user_vps_ip_asn",
+    "desc": "用户自有 VPS 直连 IP：DigitalOcean / Vultr 段。realworld.py --crosscheck 实测(2026-08-30)：真实 Surge 会先被区域表的 GEOIP 抓走(159.89.0.1→GEOIP DE@Europe.list→🇪🇺欧洲节点；45.32.0.1→GEOIP US@US.list→🇺🇸美国节点)；离线引擎没有 MaxMind 库、GEOIP 非 CN 一律判不匹配，故落 Final。两种落点都在 policy_in 里，别把它当成断言松懈——这是已登记的离线近似盲区",
+    "requests": [
+      {"ip": "159.89.0.1", "note": "DigitalOcean 段样本；实测落 🇪🇺欧洲节点(GEOIP DE)"},
+      {"ip": "45.32.0.1", "note": "Vultr 段样本；实测落 🇺🇸美国节点(GEOIP US)"}
+    ],
+    "assert": {"policy_in": ["AI", "Final", "🇪🇺欧洲节点", "🇺🇸美国节点"], "no_dns_leak": true}
+  },
+  {
+    "name": "campus_and_gov_direct",
+    "desc": "校园网与政务：北大 CERNET（域名 + IP 段）与 gov.cn，必须直连；bdwm.net 自 R1-05（2026-08-31）起不再由 PKU.list 区 0 认领，单列 per_request",
+    "requests": [
+      {"host": "www.pku.edu.cn"},
+      {"host": "portal.pku.edu.cn"},
+      {"host": "lib.pku.edu.cn"},
+      {"host": "bdwm.net", "note": "未名 BBS；R1-05 起不再由 PKU.list 区 0 认领——旧域已非校方资产（双侧 NOERROR 但解析到 AWS Global Accelerator 76.223.67.189 / 13.248.213.45，非 CERNET）"},
+      {"ip": "162.105.129.16", "note": "PKU 162.105.0.0/16"},
+      {"ip": "115.27.1.1", "note": "PKU 115.27.0.0/16"},
+      {"host": "www.gov.cn"},
+      {"host": "beian.miit.gov.cn"},
+      {"host": "www.customs.gov.cn"},
+      {"host": "12306.cn"}
+    ],
+    "assert": {
+      "same_policy": true, "policy": "DIRECT",
+      "per_request": [
+        {"host": "bdwm.net", "policy": "Final", "reason": "R1-05：PKU 区 0 收窄，落 FINAL 走代理属预期（区 0 是无条件永久信任，前提已不成立）。"}
+      ]
+    }
+  },
+  {
     "name": "funnel_apple_apex_restored",
     "desc": "FINAL 漏斗回归纠正（R1）：09-01 重构把 AppleCN 的 apple.com 从后缀降级为精确顶点，导致 appleid/idmsa/itunes/apps/swcdn 等一整片会话面掉进 FINAL。恢复 DOMAIN-SUFFIX,apple.com 后这些主机回到 DIRECT；同时 Streaming(15) 位次早于 AppleCN(19)，music/tv/news/podcasts 的流媒体归属由前置占位保住，属 ordered-safe split 而非 active shadow。",
     "requests": [
@@ -22,7 +210,7 @@
       {"host": "blobstore.apple.com"}
     ],
     "assert": {
-      "no_dns_leak": true,
+      "same_policy": true, "policy": "DIRECT", "no_dns_leak": true,
       "per_request": [
         {"host": "music.apple.com", "policy": "流媒体", "reason": "前置占位：Streaming.list DOMAIN-SUFFIX,music.apple.com"},
         {"host": "tv.apple.com", "policy": "流媒体", "reason": "前置占位：Streaming.list DOMAIN-SUFFIX,tv.apple.com"},
@@ -30,9 +218,7 @@
         {"host": "news-client.apple.com", "policy": "流媒体", "reason": "前置占位：Streaming.list DOMAIN-SUFFIX,news-client.apple.com"},
         {"host": "ocvideo.apple.com", "policy": "流媒体", "reason": "前置占位：Streaming.list DOMAIN,ocvideo.apple.com"},
         {"host": "blobstore.apple.com", "policy": "流媒体", "reason": "前置占位：Streaming.list DOMAIN-SUFFIX,blobstore.apple.com"}
-      ],
-      "same_policy": true,
-      "policy": "DIRECT"
+      ]
     }
   },
   {
@@ -43,11 +229,7 @@
       {"host": "cdn.edge.apple"},
       {"host": "static.edge.apple"}
     ],
-    "assert": {
-      "no_dns_leak": true,
-      "same_policy": true,
-      "policy": "DIRECT"
-    }
+    "assert": {"same_policy": true, "policy": "DIRECT", "no_dns_leak": true}
   },
   {
     "name": "funnel_alibaba_oss_cn_vs_overseas",
@@ -65,16 +247,14 @@
       {"host": "majsoul-hk-client.cn-hongkong.log.aliyuncs.com", "note": "前置占位负例：Games"}
     ],
     "assert": {
-      "no_dns_leak": true,
+      "same_policy": true, "policy": "DIRECT", "no_dns_leak": true,
       "per_request": [
         {"host": "httpdns.aliyuncs.com", "policy": "REJECT", "reason": "前置占位：Reject.list DOMAIN-SUFFIX,httpdns.aliyuncs.com"},
         {"host": "oss-ap-northeast-1.aliyuncs.com", "policy": "下载", "reason": "前置占位：DownloadCDN 海外 OSS 区"},
         {"host": "oss-cn-hongkong.aliyuncs.com", "policy": "下载", "reason": "前置占位：DownloadCDN 海外 OSS 区"},
         {"host": "oss-ap-southeast-1.aliyuncs.com", "policy": "下载", "reason": "前置占位：DownloadCDN 海外 OSS 区"},
         {"host": "majsoul-hk-client.cn-hongkong.log.aliyuncs.com", "policy": "游戏", "reason": "前置占位：Games.list 雀魂日志端点"}
-      ],
-      "same_policy": true,
-      "policy": "DIRECT"
+      ]
     }
   },
   {
@@ -97,16 +277,14 @@
       {"host": "v.smtcdns.com", "note": "前置占位负例：Streaming"}
     ],
     "assert": {
-      "no_dns_leak": true,
+      "same_policy": true, "policy": "DIRECT", "no_dns_leak": true,
       "per_request": [
         {"host": "cos.ap-hongkong.myqcloud.com", "policy": "下载", "reason": "前置占位：DownloadCDN 海外 COS 区"},
         {"host": "cos.na-ashburn.myqcloud.com", "policy": "下载", "reason": "前置占位：DownloadCDN 海外 COS 区"},
         {"host": "dns.wechat.com", "policy": "REJECT", "reason": "前置占位：Reject.list DOMAIN,dns.wechat.com"},
         {"host": "dl.wechat.com", "policy": "下载", "reason": "前置占位：DownloadCDN.list DOMAIN-SUFFIX,dl.wechat.com"},
         {"host": "v.smtcdns.com", "policy": "流媒体", "reason": "前置占位：Streaming.list DOMAIN-SUFFIX,v.smtcdns.com"}
-      ],
-      "same_policy": true,
-      "policy": "DIRECT"
+      ]
     }
   },
   {
@@ -123,15 +301,13 @@
       {"host": "p3-tt-ipv6.byteimg.com"}
     ],
     "assert": {
-      "no_dns_leak": true,
+      "same_policy": true, "policy": "DIRECT", "no_dns_leak": true,
       "per_request": [
         {"host": "p1-tt.byteimg.com", "policy": "社交媒体", "reason": "前置占位：TikTok.list DOMAIN,p1-tt.byteimg.com"},
         {"host": "p9-tt.byteimg.com", "policy": "社交媒体", "reason": "前置占位：TikTok.list DOMAIN,p9-tt.byteimg.com"},
         {"host": "p26-tt.byteimg.com", "policy": "社交媒体", "reason": "前置占位：TikTok.list DOMAIN,p26-tt.byteimg.com"},
         {"host": "p3-tt-ipv6.byteimg.com", "policy": "社交媒体", "reason": "前置占位：TikTok.list DOMAIN,p3-tt-ipv6.byteimg.com"}
-      ],
-      "same_policy": true,
-      "policy": "DIRECT"
+      ]
     }
   },
   {
@@ -156,7 +332,7 @@
       {"host": "v.smtcdns.net", "note": "前置占位负例：Streaming"}
     ],
     "assert": {
-      "no_dns_leak": true,
+      "same_policy": true, "policy": "DIRECT", "no_dns_leak": true,
       "per_request": [
         {"host": "httpdns.bilivideo.com", "policy": "REJECT", "reason": "前置占位：Reject.list DOMAIN,httpdns.bilivideo.com"},
         {"host": "upos-sz-mirroralibstar1.bilivideo.com", "policy": "流媒体", "reason": "前置占位：Streaming.list 海外回源镜像"},
@@ -166,9 +342,7 @@
         {"host": "intl.iqiyi.com", "policy": "流媒体", "reason": "前置占位：Streaming.list DOMAIN-SUFFIX,intl.iqiyi.com"},
         {"host": "inter.iqiyi.com", "policy": "流媒体", "reason": "前置占位：Streaming.list DOMAIN-SUFFIX,inter.iqiyi.com"},
         {"host": "v.smtcdns.net", "policy": "流媒体", "reason": "前置占位：Streaming.list DOMAIN-SUFFIX,v.smtcdns.net"}
-      ],
-      "same_policy": true,
-      "policy": "DIRECT"
+      ]
     }
   },
   {
@@ -185,16 +359,14 @@
       {"host": "aws.cdn.hf.co"}
     ],
     "assert": {
-      "no_dns_leak": true,
+      "same_policy": true, "policy": "AI", "no_dns_leak": true,
       "per_request": [
         {"host": "cdn-lfs.hf.co", "policy": "下载", "reason": "前置占位：ModelDownloadCDN.list"},
         {"host": "cdn-lfs-us-1.hf.co", "policy": "下载", "reason": "前置占位：ModelDownloadCDN.list"},
         {"host": "cdn-lfs-eu-1.hf.co", "policy": "下载", "reason": "前置占位：ModelDownloadCDN.list"},
         {"host": "xethub.hf.co", "policy": "下载", "reason": "前置占位：ModelDownloadCDN.list"},
         {"host": "aws.cdn.hf.co", "policy": "下载", "reason": "前置占位：ModelDownloadCDN.list"}
-      ],
-      "same_policy": true,
-      "policy": "AI"
+      ]
     }
   },
   {
@@ -208,12 +380,10 @@
       {"host": "download.blizzard.com", "note": "前置占位负例：GameDownloadCN"}
     ],
     "assert": {
-      "no_dns_leak": true,
+      "same_policy": true, "policy": "游戏", "no_dns_leak": true,
       "per_request": [
         {"host": "download.blizzard.com", "policy": "DIRECT", "reason": "前置占位：GameDownloadCN.list DOMAIN-SUFFIX,download.blizzard.com"}
-      ],
-      "same_policy": true,
-      "policy": "游戏"
+      ]
     }
   },
   {
@@ -245,7 +415,7 @@
       {"host": "shell.cdn.office.net"}
     ],
     "assert": {
-      "no_dns_leak": true,
+      "same_policy": true, "policy": "DIRECT", "no_dns_leak": true,
       "per_request": [
         {"host": "odc.officeapps.live.com", "policy": "Google-X-Meta-MS", "reason": "前置占位：Microsoft.list DOMAIN,odc.officeapps.live.com"},
         {"host": "content.office.net", "policy": "Google-X-Meta-MS", "reason": "前置占位：Microsoft.list DOMAIN-SUFFIX,content.office.net"},
@@ -253,9 +423,7 @@
         {"host": "files.1drv.com", "policy": "Google-X-Meta-MS", "reason": "前置占位：Microsoft.list DOMAIN-SUFFIX,files.1drv.com"},
         {"host": "attachments.office.net", "policy": "下载", "reason": "前置占位：DownloadCDN.list DOMAIN-SUFFIX,attachments.office.net"},
         {"host": "shell.cdn.office.net", "policy": "下载", "reason": "前置占位：DownloadCDN.list DOMAIN-SUFFIX,shell.cdn.office.net"}
-      ],
-      "same_policy": true,
-      "policy": "DIRECT"
+      ]
     }
   },
   {
@@ -268,11 +436,7 @@
       {"host": "login.microsoftonline.com"},
       {"host": "account.microsoft.com"}
     ],
-    "assert": {
-      "no_dns_leak": true,
-      "same_policy": true,
-      "policy": "Google-X-Meta-MS"
-    }
+    "assert": {"same_policy": true, "policy": "Google-X-Meta-MS", "no_dns_leak": true}
   },
   {
     "name": "funnel_google_api_endpoints_and_cn_mirror",
@@ -329,11 +493,7 @@
       {"host": "sina.cn"},
       {"host": "sina.com"}
     ],
-    "assert": {
-      "no_dns_leak": true,
-      "same_policy": true,
-      "policy": "DIRECT"
-    }
+    "assert": {"same_policy": true, "policy": "DIRECT", "no_dns_leak": true}
   },
   {
     "name": "gfw_longbridge_openapi_migrated",
@@ -349,14 +509,12 @@
       {"host": "longbridge.sg"}
     ],
     "assert": {
-      "no_dns_leak": true,
+      "same_policy": true, "policy": "DIRECT", "no_dns_leak": true,
       "per_request": [
         {"host": "longbridge.com", "policy": "Proxy", "reason": "国际域归属不变"},
         {"host": "longbridge.hk", "policy": "Proxy", "reason": "国际域归属不变"},
         {"host": "longbridge.sg", "policy": "Proxy", "reason": "国际域归属不变"}
-      ],
-      "same_policy": true,
-      "policy": "DIRECT"
+      ]
     }
   },
   {
@@ -381,13 +539,11 @@
       {"host": "whats.new", "note": "负例：非 Google 资产"}
     ],
     "assert": {
-      "no_dns_leak": true,
+      "same_policy": true, "policy": "Google-X-Meta-MS", "no_dns_leak": true,
       "per_request": [
         {"host": "repo.new", "policy": "Proxy", "reason": "GitHub 快捷域，不属 Google 资产，保留 ProxyGFW"},
         {"host": "whats.new", "policy": "Proxy", "reason": "非 Google 资产，保留 ProxyGFW"}
-      ],
-      "same_policy": true,
-      "policy": "Google-X-Meta-MS"
+      ]
     }
   },
   {
@@ -409,12 +565,10 @@
       {"host": "hardsextube.com", "note": "负例：不在迁移清单"}
     ],
     "assert": {
-      "no_dns_leak": true,
+      "same_policy": true, "policy": "流媒体", "no_dns_leak": true,
       "per_request": [
         {"host": "hardsextube.com", "policy": "Proxy", "reason": "不在 Aylo 集团迁移清单，保留 ProxyGFW"}
-      ],
-      "same_policy": true,
-      "policy": "流媒体"
+      ]
     }
   },
   {
@@ -476,15 +630,13 @@
       {"host": "d2c.aws.amazon.com"}
     ],
     "assert": {
-      "no_dns_leak": true,
+      "same_policy": true, "policy": "🇯🇵日本节点", "no_dns_leak": true,
       "per_request": [
         {"host": "theblaze.com", "policy": "🇺🇸美国节点", "reason": "美国本地媒体"},
         {"host": "amazon.com", "policy": "Proxy", "reason": "锁定裁决：amazon 主站保留 ProxyGFW"},
         {"host": "www.amazon.com", "policy": "Proxy", "reason": "锁定裁决：vendor_family_unification 已锁 Proxy"},
         {"host": "d2c.aws.amazon.com", "policy": "Proxy", "reason": "既有条目，形态不变"}
-      ],
-      "same_policy": true,
-      "policy": "🇯🇵日本节点"
+      ]
     }
   },
   {

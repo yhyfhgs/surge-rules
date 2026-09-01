@@ -4,6 +4,62 @@
 
 ---
 
+## [2026-09-01·仓库精简] 测试/检测层瘦身 44%、场景 27 文件并 9、目录归一,行为逐数不变
+
+**动机**:用户指令 —— 精简全仓库文档与代码(部分测试和检测过于复杂)、精简注释、
+重组目录(除 Backup 外全部内容统一进 rules/,Surge.conf 留在外层)。原则:只删
+「被禁用/零使用/纯报告」的机制面,所有闸门语义与判定结果逐数保持不变。
+
+### Changed
+- **测试层代码 8,742 → 6,956 行(-20%)**:engine.py 1,383→1,039、audit.py
+  1,996→1,310、runsuite.py 800→465、live_check.py 1,827→1,715、realworld.py
+  1,964→1,723;sort_lists/collapse_cidr 压缩 docstring(772→704)。
+- **删除的机制(均为禁用或零使用)**:
+  - engine 的 `PROCESS-NAME`/`USER-AGENT`/`URL-REGEX`/`AND·OR·NOT` 匹配面与
+    `--process`/`--ua` 参数 —— 这些类型被 A8 全库禁用,且 `[Rule]` 由 manifest
+    生成、lists 桶序禁止,不可能出现;解析遇到时告警跳过(A8 静态面照抓)。
+  - runsuite 的 `known_broken` 全套机制(场景/条目级标记、意外通过、
+    `--list-known-broken`/`--allow-known-broken`、`LEGACY_EMPTY_REQUESTS`)——
+    全库 0 使用;module/instance/CLI 三态引擎适配器改为直接 import。
+  - audit 的 report.md/keyword_review.tsv/a2–a9 明细 TSV 输出层(`--out` 只留
+    findings.jsonl)、finding 的 impact/confidence 长文案(压成单行 evidence+fix)、
+    `pending_decision` 机制(0 使用);A2/A4/A9 的四段重复分级逻辑并成
+    `classify_shadow()`。检查项 A1–A10 与豁免语义(check/file/rule/by/by_file/
+    kind/preventive、forbidden 的 file/not_file)全部保留,ID 不变。
+  - realworld 的 UA 四格线路矩阵与 `--clients` 的 UA 副作用自检 ——
+    `--ua-routing` 收敛为两条断言:MITM hostname 非空时 `auto-quic-block=true`
+    (profile 红线)+ 每用例带/不带 UA 落点必须相同(零 UA 规则的负向验证,
+    targets 里本就是负向语义);crosscheck 去掉 process/ua 透传与中性宿主域。
+  - live_check/realworld 各自的降级重复实现(本地覆盖档旧键名别名、engine 的
+    CLI 子进程回退、realworld 的 `_load_sibling` 全套 fallback 工具)——
+    同仓库兄弟模块直接 import,坏了就大声失败。
+- **场景数据 27 文件 7,261 行 → 9 主题文件 4,519 行(-38%)**:ai / cn / download /
+  keywords / regions / reject / services / funnel / dns_leak(live_check 按名引用,
+  保留原名)。合并纯机械:227 个场景逐场景内容等同(canonical dump 多重集比对
+  通过),历史批次残名(fix_*_v2、ownership_fix 等)清除。
+- **文档 896 → 677 行(-24%)**:ARCHITECTURE 236→163(删冻结测量数与 git-show
+  考古段,ordered-safe 注册表改口径为「真值 = analyzer 输出」)、MAINTENANCE
+  288→209、README 139→112(删过期基线数字块,38 表旧数已失真)、tests/README
+  233→193。外层 CLAUDE.md 同步改写。SOURCES.md(供应链/许可登记)不动。
+- **目录归一**:`rules-local/` 撤销 —— 私有映射唯一落点为
+  `tests/live_check_local.json`(gitignore 把守,与 rules-local 副本逐字节相同后
+  删除外层目录);engine/live_check 的查找顺序改为 `LIVE_CHECK_LOCAL` → 该文件。
+  外层从此只有 `Surge.conf` + `rules/` + `Backup/`。
+
+### 验证(全部 exit 0)
+- runsuite:227 场景 / 1,643 请求 / 3,097 断言全过、DNS 泄漏断言 1,325 —— 与改前
+  逐数相同;audit 原始命中逐项相同(A3=1、A6=7、A9=143、A10=59),未豁免仍为
+  3×P3、豁免命中 63、无用豁免 0。
+- engine 自检 55/55、audit 自检 32/32、sort_lists 自检、analyze_rules_selftest、
+  collapse --check、render --check(活动 profile 与 manifest 一致)、
+  surge-cli --check 候选、analyzer 双跑(纯语法 + MMDB 展开)0 shadow /
+  0 order-unsafe / 0 cycles / 0 空选择器、surge2clash --check 一致。
+- realworld --crosscheck 1,453 查询实测对账:域名面 8 条差异全部为「运行中 Surge
+  的外部资源未刷新」(sina.com.cn / googleapis.cn / longbridge.cn 三族,本地与
+  CDN 的 Domestic.list 均含对应条目,新旧 engine 判定逐条一致,HEAD=origin/main)
+  —— 非引擎回归,在 Surge「外部资源」页刷新即消;纯 IP 10 条为声明中的
+  GEOIP 非 CN / IP-ASN 离线近似,维持仅提示。
+
 ## [2026-09-01·ChinaIP 归属审计] 剔除 432 个 RIR 口径下确属外国的上游错误收录条目
 
 **动机**:用户质疑「ChinaIP 为何与地区 IP 选择器重叠」。全量归属审计(724 个交集段

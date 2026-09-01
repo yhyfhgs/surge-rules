@@ -49,8 +49,7 @@
       {"host": "en.wikipedia.org"}
     ],
     "assert": {
-      "same_policy": false,
-      "no_dns_leak": true,
+      "same_policy": false, "no_dns_leak": true,
       "per_request": [
         {"host": "www.youtube.com", "policy": "流媒体"},
         {"host": "www.netflix.com", "policy": "流媒体"},

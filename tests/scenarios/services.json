@@ -1,0 +1,988 @@
+[
+  {
+    "name": "onedrive_personal_carveout_proxy",
+    "desc": "R1-01 止血：OneDrive 个人版会话面全部走 Google-X-Meta-MS。CN 侧 onedrive.live.com 子树解析被投毒导致直连不可用；当前由 Microsoft.list 的显式子树认领，MicrosoftCN 只保留已验证的精确 live.com 主机/子树",
+    "requests": [
+      {"host": "onedrive.live.com", "note": "个人版 Web 入口"},
+      {"host": "skyapi.onedrive.live.com", "note": "SkyDrive 遗留 API 端点，客户端同步用"},
+      {"host": "photos.onedrive.live.com", "note": "相册面"},
+      {"host": "snapshot.onedrive.live.com", "note": "缩略图/预览面"}
+    ],
+    "assert": {"same_policy": true, "policy": "Google-X-Meta-MS", "no_dns_leak": true}
+  },
+  {
+    "name": "onedrive_carveout_no_overreach_direct",
+    "desc": "R1-01 防误伤负例：onedrive.live.com 的窄后缀不得把其他 Office/账户面一起拽走；三条必须仍由 MicrosoftCN.list 的精确主机/子树走 DIRECT",
+    "requests": [
+      {"host": "office.live.com", "note": "Office 网页版入口"},
+      {"host": "view.officeapps.live.com", "note": "Office 文档在线预览"},
+      {"host": "g.live.com", "note": "Microsoft 账户重定向面"}
+    ],
+    "assert": {"same_policy": true, "policy": "DIRECT"}
+  },
+  {
+    "name": "meta_ip_first_party_literal",
+    "desc": "R1-06/R1-15 正例：Meta 第一方 IP 段的字面地址落 Google-X-Meta-MS。157.240/16 与 129.134/16 由两条 /17 合并而来（ARIN NetName THEFA-3 整段归 Facebook），57.144.0.0/14 为新补（RIPE netname FB-BLOCK，AS32934 原样通告）",
+    "requests": [
+      {"ip": "157.240.200.1", "note": "原 157.240.0.0/17 未覆盖的后半段，合并为 /16 后命中"},
+      {"ip": "129.134.200.5", "note": "原 129.134.0.0/17 未覆盖的后半段"},
+      {"ip": "57.144.220.1", "note": "facebook.com 当前实际落点，补录前本表零覆盖"}
+    ],
+    "assert": {"same_policy": true, "policy": "Google-X-Meta-MS", "no_dns_leak": true}
+  },
+  {
+    "name": "meta_ip_foreign_ranges_removed",
+    "desc": "R1-06/R1-07 负例：从 Meta.list 删掉的 27 条非 Meta 段，其字面地址不得再落 Google-X-Meta-MS。184.173.128.0/17=IBM SoftLayer(ThePlanet)、54.235.23.242=AWS 动态 EC2、119.235.224.0/24=LY Corporation(LINE)",
+    "requests": [
+      {"ip": "184.173.128.1", "note": "SoftLayer /17，删除前是本表最大的一条错误覆盖（32768 地址）"},
+      {"ip": "54.235.23.242", "note": "AWS 动态 EC2 /32，实测无任何 Meta 域名解析落点"},
+      {"ip": "119.235.224.1", "note": "LY Corporation/LINE 段；删除 Meta 误收后由 JapanIP.list 的 119.235.224.0/21 接住，同样不是 Meta"}
+    ],
+    "assert": {
+      "same_policy": false, "no_dns_leak": true,
+      "per_request": [
+        {"ip": "184.173.128.1", "policy": "Final"},
+        {"ip": "54.235.23.242", "policy": "Final"},
+        {"ip": "119.235.224.1", "policy": "🇯🇵日本节点", "note": "落 JapanIP.list 的 119.235.224.0/21；LINE 段不属于 Meta 组"}
+      ]
+    }
+  },
+  {
+    "name": "meta_ip_google_range_removed",
+    "desc": "R1-06 负例（弱化形）：108.177.8.0/21 属 ARIN GOOGLE，已从 Meta.list 删除。离线引擎无 AS15169 样本故落 Final；真实 Surge 中 Google.list 的 IP-ASN,15169 会接住并落同一个 Google-X-Meta-MS 组，因此这里刻意用 policy_in 而不是硬断 Final —— 断言的真实内容是「Meta.list 不再声称这段 Google 空间」",
+    "requests": [
+      {"ip": "108.177.8.1", "note": "ARIN 108.177.0.0/17 = GOOGLE；删除前是归属错误 + 被 Google.list 前位遮蔽的死规则"},
+      {"ip": "108.177.15.254", "note": "同段另一端，取两个点避免单点巧合"}
+    ],
+    "assert": {"same_policy": true, "policy_in": ["Final", "Google-X-Meta-MS"], "no_dns_leak": true}
+  },
+  {
+    "name": "meta_runtime_surface_kept",
+    "desc": "R1-09/R3-6 正例：域名区 520→92 大手术后，Meta 运行面（会话关键）六个代表 host 落点不变",
+    "requests": [
+      {"host": "facebook.com"},
+      {"host": "scontent.cdninstagram.com", "note": "Instagram 图片 CDN"},
+      {"host": "web.whatsapp.com"},
+      {"host": "www.threads.com"},
+      {"host": "graph.oculus.com", "note": "Quest 设备 API"},
+      {"host": "www.meta.com"}
+    ],
+    "assert": {"same_policy": true, "policy": "Google-X-Meta-MS", "no_dns_leak": true}
+  },
+  {
+    "name": "meta_defensive_and_foreign_domains_removed",
+    "desc": "R1-09/R3-6 负例：X 档非 Meta 所有 3 条与 D 档防御/停放域 411 条已迁出本表（原文存 reference/meta-defensive-inventory-20260831.txt，不入库不分发），落 Final 而非 Google-X-Meta-MS",
+    "requests": [
+      {"host": "musespark.ai", "note": "X 档：第三方 AI 产品，2025-09 由个人经 GNAME 注册，与 Meta 无关"},
+      {"host": "facebookquotes4u.com", "note": "X 档：Dynadot 注册 / Trellian 停放"},
+      {"host": "acebook.com", "note": "D 档：Meta 自持防御域，NS=*.ns.facebook.com + A=57.144/14 的 .141 停放地址 + 无证书"},
+      {"host": "facebookporn.org", "note": "D 档：同上，品牌防御注册"}
+    ],
+    "assert": {"same_policy": true, "policy": "Final"}
+  },
+  {
+    "name": "meta_dead_domains_removed",
+    "desc": "R1-09 负例：N 档 14 条无委派/死区域已删。crowdtangle.com 与 fbf8.com 是悬空的 Route53 委派（任何人建同名托管区并抽中相同 NS 组即可接管解析），删除另有安全理由",
+    "requests": [
+      {"host": "crowdtangle.com", "note": "CrowdTangle 2024-08 关停，托管区已删"},
+      {"host": "igcdn.com", "note": "两台自建 NS 均不应答，任何 *.igcdn.com 当前不可解析"},
+      {"host": "fbcdn-a.akamaihd.net", "note": "CNAME 到 edgesuite.net 但无 A，Akamai 旧边缘主机名已停用"}
+    ],
+    "assert": {
+      "same_policy": true, "policy": "Final",
+      "per_request": [
+        {"host": "fbcdn-a.akamaihd.net", "policy": "Final", "reason": "Akamai 旧边缘死域已从 Meta.list 删除，也不再由 akamaihd.net 宽后缀兜底，三条死域均落 FINAL。"}
+      ]
+    }
+  },
+  {
+    "name": "youtube_session_assets_reunified",
+    "desc": "R1-16：YouTube 会话资产三分裂归位。频道头像的新形态 googleusercontent 与播放完整性端点 jnn-pa 原先被 Google.list 的宽后缀接走，现由 YouTube.list 的 DOMAIN 精确形认领，与旧形态 ggpht 同组",
+    "requests": [
+      {"host": "yt3.googleusercontent.com", "note": "频道头像/缩略图现网形态"},
+      {"host": "yt4.googleusercontent.com"},
+      {"host": "jnn-pa.googleapis.com", "note": "YouTube 播放完整性/attestation 端点"},
+      {"host": "yt3.ggpht.com", "note": "旧形态，保留；本条证明新旧形态终于同组"},
+      {"host": "yt4.ggpht.com"}
+    ],
+    "assert": {"same_policy": true, "policy": "流媒体", "no_dns_leak": true}
+  },
+  {
+    "name": "google_api_owner_boundaries",
+    "desc": "Explicit Google and YouTube API hosts retain their owner; the shared GCS tenant endpoint remains Final.",
+    "requests": [
+      {"host": "lh3.googleusercontent.com", "note": "Google 相册/头像通用 CDN，必须仍归 Google 组"},
+      {"host": "www.googleapis.com", "note": "Google API 主入口"},
+      {"host": "storage.googleapis.com"},
+      {"host": "tenant-project.googleapis.com"}
+    ],
+    "assert": {
+      "no_dns_leak": true,
+      "per_request": [
+        {"host": "lh3.googleusercontent.com", "policy": "Google-X-Meta-MS"},
+        {"host": "www.googleapis.com", "policy": "Google-X-Meta-MS"},
+        {"host": "storage.googleapis.com", "policy": "Final"},
+        {"host": "tenant-project.googleapis.com", "policy": "Final"}
+      ]
+    }
+  },
+  {
+    "name": "google_shared_cloud_asn_removed",
+    "desc": "R1-15 负例：IP-ASN,19527 与 IP-ASN,43515 已删（98% 以上通告空间是 GCP 客户段，与已删的 AS396982 同一判据）。34.x / 35.x 的 GCP 租户字面 IP 不得再被拉进 Google-X-Meta-MS",
+    "requests": [
+      {"ip": "34.100.1.1", "note": "AS19527 通告的 GCP 客户段首字节分布主体"},
+      {"ip": "35.200.1.1", "note": "AS43515 同类"}
+    ],
+    "assert": {"same_policy": true, "policy": "Final", "no_dns_leak": true}
+  },
+  {
+    "name": "ecosystem_dead_entries_fall_through",
+    "desc": "R1-08/10/11/12/15：各表死条目与第三方停放域删除后一律落 Final。2026-08-31 双侧 dig +tcp 复核：前两条 NXDOMAIN，gvt0.com 等 SERVFAIL，其余为停放商/私网地址",
+    "requests": [
+      {"host": "gateway.bingviz.microsoft.net", "note": "Microsoft.list：NXDOMAIN 双侧一致"},
+      {"host": "app-measurement.net", "note": "Google.list：NXDOMAIN"},
+      {"host": "gvt0.com", "note": "Google.list：SERVFAIL"},
+      {"host": "xn--ggle-55da.com", "note": "Google.list：上游历史残留 IDN，SERVFAIL"},
+      {"host": "twimg.org", "note": "Twitter.list：2025-12 被第三方重注册，NameCheap 停放 162.255.119.245"},
+      {"host": "tellapart.com", "note": "Twitter.list：TellApart 2017 关停后域名释放，Network Solutions 停放"},
+      {"host": "twitteroauth.com", "note": "Twitter.list：abraham/twitteroauth 第三方开源库文档站，GitHub Pages"},
+      {"host": "telegramdownload.com", "note": "Telegram.list：Trellian/DSParking 变现停放页"},
+      {"host": "courses.snapsolve.com", "note": "TikTok.list：SOA=ns1.sedoparking.com，观察期结束"},
+      {"host": "bytedance.net", "note": "TikTok.list：解析出 RFC1918 私网 10.8.6.210，任何策略组都处理不了"}
+    ],
+    "assert": {"same_policy": true, "policy": "Final"}
+  },
+  {
+    "name": "ecosystem_neighbours_unaffected",
+    "desc": "回归：与被删条目字面相近或同表的邻居必须落点不变，防止删除时误伤",
+    "requests": [
+      {"host": "twimg.com", "note": "X 图片资产真身；被删的是 twimg.co / twimg.org"},
+      {"host": "abs.twimg.com"},
+      {"host": "telegram.org", "note": "被删的是 telegramdownload.com"},
+      {"host": "bing.com", "note": "被删的是 gateway.bingviz.microsoft.net"},
+      {"host": "copilotprodattachments.blob.core.windows.net", "note": "Microsoft.list 的多租户平台精确形收录样板"}
+    ],
+    "assert": {
+      "same_policy": false, "no_dns_leak": true,
+      "per_request": [
+        {"host": "twimg.com", "policy": "Google-X-Meta-MS"},
+        {"host": "abs.twimg.com", "policy": "Google-X-Meta-MS"},
+        {"host": "telegram.org", "policy": "Telegram"},
+        {"host": "bing.com", "policy": "Google-X-Meta-MS"},
+        {"host": "copilotprodattachments.blob.core.windows.net", "policy": "Google-X-Meta-MS"}
+      ]
+    }
+  },
+  {
+    "name": "telegram_third_party_ip_observation",
+    "desc": "R1-10：194.221.250.50/32（RIPE netname GLOBALNETWORKMANAGEMENTLTD，与 Telegram 无关）已删；余下两条第三方 /32 加 last_verified=2026-08-31 保留观察，落点仍为 Telegram",
+    "requests": [
+      {"ip": "194.221.250.50", "note": "已删，落 Final"},
+      {"ip": "139.59.210.98", "note": "DigitalOcean 共享云，保留观察 90 天"},
+      {"ip": "196.55.216.167", "note": "AfriNIC 无 RDAP 数据，保留观察 90 天"}
+    ],
+    "assert": {
+      "same_policy": false, "no_dns_leak": true,
+      "per_request": [
+        {"ip": "194.221.250.50", "policy": "Final"},
+        {"ip": "139.59.210.98", "policy": "Telegram"},
+        {"ip": "196.55.216.167", "policy": "Telegram"}
+      ]
+    }
+  },
+  {
+    "name": "telegram_first_party_ip_intact",
+    "desc": "R1-10 回归：Telegram 自有 IP 段（本轮实测全部 netname TELEGRAM-*）不受删除影响，v4/v6 双栈落点一致",
+    "requests": [
+      {"ip": "5.28.200.1", "note": "TELEGRAM-MESSENGER-INFRA-NET"},
+      {"ip": "91.108.4.1"},
+      {"ip": "149.154.167.51"},
+      {"ip": "2a0a:f280::1", "note": "RIPE VG-TELEGRAM-20210616 / org Telegram Messenger Inc"}
+    ],
+    "assert": {"same_policy": true, "policy": "Telegram", "no_dns_leak": true}
+  },
+  {
+    "name": "google_workspace_and_first_party_surfaces",
+    "desc": "Google 官方 Workspace 与主要产品面使用显式子树规则，避免仅保留 google.com apex DOMAIN 导致二级服务落 FINAL。",
+    "requests": [
+      {"host": "calendar.google.com"},
+      {"host": "chat.google.com"},
+      {"host": "contacts.google.com"},
+      {"host": "docs.google.com"},
+      {"host": "drive.google.com"},
+      {"host": "forms.google.com"},
+      {"host": "groups.google.com"},
+      {"host": "mail.google.com"},
+      {"host": "meet.google.com"},
+      {"host": "sheets.google.com"},
+      {"host": "sites.google.com"},
+      {"host": "slides.google.com"},
+      {"host": "vids.google.com"},
+      {"host": "workspace.google.com"},
+      {"host": "maps.google.com"},
+      {"host": "translate.google.com"},
+      {"host": "photos.google.com"},
+      {"host": "play.google.com"},
+      {"host": "news.google.com"},
+      {"host": "support.google.com"},
+      {"host": "myaccount.google.com"}
+    ],
+    "assert": {"same_policy": true, "policy": "Google-X-Meta-MS", "no_dns_leak": true}
+  },
+  {
+    "name": "google_cdn_youtube_and_apex_boundaries",
+    "desc": "保留 Google、googleusercontent、ggpht apex DOMAIN；lh1-lh6 通用图片 CDN 归 Google，yt3/yt4 仍由 YouTube.list 认领，未知子域落 FINAL。",
+    "requests": [
+      {"host": "google.com"},
+      {"host": "googleusercontent.com"},
+      {"host": "ggpht.com"},
+      {"host": "lh1.googleusercontent.com"},
+      {"host": "lh2.googleusercontent.com"},
+      {"host": "lh3.googleusercontent.com"},
+      {"host": "lh4.googleusercontent.com"},
+      {"host": "lh5.googleusercontent.com"},
+      {"host": "lh6.googleusercontent.com"},
+      {"host": "lh1.ggpht.com"},
+      {"host": "lh2.ggpht.com"},
+      {"host": "lh3.ggpht.com"},
+      {"host": "lh4.ggpht.com"},
+      {"host": "lh5.ggpht.com"},
+      {"host": "lh6.ggpht.com"},
+      {"host": "yt3.googleusercontent.com"},
+      {"host": "yt4.googleusercontent.com"},
+      {"host": "yt3.ggpht.com"},
+      {"host": "yt4.ggpht.com"},
+      {"host": "unknown.google.com"},
+      {"host": "unknown.googleusercontent.com"},
+      {"host": "unknown.ggpht.com"}
+    ],
+    "assert": {
+      "no_dns_leak": true,
+      "per_request": [
+        {"host": "google.com", "policy": "Google-X-Meta-MS", "reason": "保留 DOMAIN,google.com apex"},
+        {"host": "googleusercontent.com", "policy": "Google-X-Meta-MS", "reason": "保留 DOMAIN,googleusercontent.com apex"},
+        {"host": "ggpht.com", "policy": "Google-X-Meta-MS", "reason": "保留 DOMAIN,ggpht.com apex"},
+        {"host": "lh1.googleusercontent.com", "policy": "Google-X-Meta-MS", "reason": "DOMAIN-SUFFIX,lh1.googleusercontent.com"},
+        {"host": "lh2.googleusercontent.com", "policy": "Google-X-Meta-MS", "reason": "DOMAIN-SUFFIX,lh2.googleusercontent.com"},
+        {"host": "lh3.googleusercontent.com", "policy": "Google-X-Meta-MS", "reason": "DOMAIN-SUFFIX,lh3.googleusercontent.com"},
+        {"host": "lh4.googleusercontent.com", "policy": "Google-X-Meta-MS", "reason": "DOMAIN-SUFFIX,lh4.googleusercontent.com"},
+        {"host": "lh5.googleusercontent.com", "policy": "Google-X-Meta-MS", "reason": "DOMAIN-SUFFIX,lh5.googleusercontent.com"},
+        {"host": "lh6.googleusercontent.com", "policy": "Google-X-Meta-MS", "reason": "DOMAIN-SUFFIX,lh6.googleusercontent.com"},
+        {"host": "lh1.ggpht.com", "policy": "Google-X-Meta-MS", "reason": "DOMAIN-SUFFIX,lh1.ggpht.com"},
+        {"host": "lh2.ggpht.com", "policy": "Google-X-Meta-MS", "reason": "DOMAIN-SUFFIX,lh2.ggpht.com"},
+        {"host": "lh3.ggpht.com", "policy": "Google-X-Meta-MS", "reason": "DOMAIN-SUFFIX,lh3.ggpht.com"},
+        {"host": "lh4.ggpht.com", "policy": "Google-X-Meta-MS", "reason": "DOMAIN-SUFFIX,lh4.ggpht.com"},
+        {"host": "lh5.ggpht.com", "policy": "Google-X-Meta-MS", "reason": "DOMAIN-SUFFIX,lh5.ggpht.com"},
+        {"host": "lh6.ggpht.com", "policy": "Google-X-Meta-MS", "reason": "DOMAIN-SUFFIX,lh6.ggpht.com"},
+        {"host": "yt3.googleusercontent.com", "policy": "流媒体", "reason": "YouTube.list 的 yt3 精确归属优先于 Google"},
+        {"host": "yt4.googleusercontent.com", "policy": "流媒体", "reason": "YouTube.list 的 yt4 精确归属优先于 Google"},
+        {"host": "yt3.ggpht.com", "policy": "流媒体", "reason": "YouTube.list 的 yt3 精确归属优先于 Google"},
+        {"host": "yt4.ggpht.com", "policy": "流媒体", "reason": "YouTube.list 的 yt4 精确归属优先于 Google"},
+        {"host": "unknown.google.com", "policy": "Final", "reason": "apex DOMAIN 不扩展到未知子域"},
+        {"host": "unknown.googleusercontent.com", "policy": "Final", "reason": "apex DOMAIN 不扩展到未知子域"},
+        {"host": "unknown.ggpht.com", "policy": "Final", "reason": "apex DOMAIN 不扩展到未知子域"}
+      ]
+    }
+  },
+  {
+    "name": "steam_secondary_and_cn_split",
+    "desc": "Steam 国际帮助/主页/商店/API 归 Games；cm.steampowered.com 保持 GameDownloadCN 直连；未知 steampowered 子域不因 apex DOMAIN 被扩大捕获。",
+    "requests": [
+      {"host": "steampowered.com"},
+      {"host": "help.steampowered.com"},
+      {"host": "www.steampowered.com"},
+      {"host": "store.steampowered.com"},
+      {"host": "api.steampowered.com"},
+      {"host": "cm.steampowered.com"},
+      {"host": "unknown.steampowered.com"}
+    ],
+    "assert": {
+      "no_dns_leak": true,
+      "per_request": [
+        {"host": "steampowered.com", "policy": "游戏", "reason": "Games.list DOMAIN,steampowered.com apex"},
+        {"host": "help.steampowered.com", "policy": "游戏", "reason": "Games.list DOMAIN-SUFFIX,help.steampowered.com"},
+        {"host": "www.steampowered.com", "policy": "游戏", "reason": "Games.list DOMAIN-SUFFIX,www.steampowered.com"},
+        {"host": "store.steampowered.com", "policy": "游戏", "reason": "Games.list 既有 DOMAIN-SUFFIX,store.steampowered.com"},
+        {"host": "api.steampowered.com", "policy": "游戏", "reason": "Games.list 既有 DOMAIN-SUFFIX,api.steampowered.com"},
+        {"host": "cm.steampowered.com", "policy": "DIRECT", "reason": "GameDownloadCN.list 既有 DOMAIN-SUFFIX,cm.steampowered.com，位次早于 Games"},
+        {"host": "unknown.steampowered.com", "policy": "Final", "reason": "steampowered.com apex DOMAIN 不扩展到未知子域"}
+      ]
+    }
+  },
+  {
+    "name": "github_browse_and_clone",
+    "desc": "GitHub 全链：浏览仓库 → 读 raw 文件 → 下载 release 资产 → git clone。理想上同组同出口（登录态 + LFS 分片）",
+    "note": "2026-08-29 用户裁决（生态归属优先）：撤销 FIX-B，GitHub 平台域 10 条自 AI.list 迁入 Microsoft.list，整链仍同组同出口（登录态 + LFS 分片依赖此一致性），仅组别由 AI 变为 Google-X-Meta-MS。",
+    "requests": [
+      {"host": "github.com"},
+      {"host": "gist.github.com"},
+      {"host": "github.githubassets.com", "note": "前端静态资源"},
+      {"host": "avatars.githubusercontent.com"},
+      {"host": "raw.githubusercontent.com"},
+      {"host": "objects.githubusercontent.com", "note": "release 资产"},
+      {"host": "codeload.github.com", "note": "zip/tarball 下载"},
+      {"host": "collector.github.com", "note": "前端遥测"}
+    ],
+    "assert": {"same_policy": true, "policy": "Google-X-Meta-MS", "no_dns_leak": true}
+  },
+  {
+    "name": "netflix_watch",
+    "desc": "Netflix 播放：主站 + 前端资源 + OCA 视频节点（流媒体解锁强依赖同出口）",
+    "requests": [
+      {"host": "www.netflix.com"},
+      {"host": "netflix.com"},
+      {"host": "occ-0-1723-1009.1.nflxso.net", "note": "前端/图片"},
+      {"host": "nflxvideo.net"},
+      {"host": "ipv4-c001-lax001-ix.1.oca.nflxvideo.net", "note": "OCA 视频节点"},
+      {"host": "nflxext.com"},
+      {"host": "assets.nflxext.com", "note": "海报/剧照资源"}
+    ],
+    "assert": {"same_policy": true, "policy": "流媒体", "no_dns_leak": true}
+  },
+  {
+    "name": "spotify_playback",
+    "desc": "Spotify 网页播放器：登录 + 元数据 + 封面 + 音频分发",
+    "requests": [
+      {"host": "open.spotify.com"},
+      {"host": "spotify.com"},
+      {"host": "accounts.spotify.com"},
+      {"host": "spclient.wg.spotify.com", "note": "客户端 API"},
+      {"host": "i.scdn.co", "note": "封面图"},
+      {"host": "audio-fa.scdn.co", "note": "音频分发"}
+    ],
+    "assert": {"same_policy": true, "policy": "流媒体", "no_dns_leak": true}
+  },
+  {
+    "name": "discord_chat_voice",
+    "desc": "Discord：登录 → WebSocket 网关 → 附件 CDN → 媒体代理",
+    "requests": [
+      {"host": "discord.com"},
+      {"host": "discordapp.com"},
+      {"host": "gateway.discord.gg"},
+      {"host": "cdn.discordapp.com"},
+      {"host": "media.discordapp.net"},
+      {"host": "discord.gg"}
+    ],
+    "assert": {"same_policy": true, "policy": "社交媒体", "no_dns_leak": true}
+  },
+  {
+    "name": "reddit_browse",
+    "desc": "Reddit：主站 + 图片 + 预览 + 样式资源",
+    "requests": [
+      {"host": "www.reddit.com"},
+      {"host": "reddit.com"},
+      {"host": "i.redd.it"},
+      {"host": "preview.redd.it"},
+      {"host": "styles.redditmedia.com"},
+      {"host": "oauth.reddit.com", "note": "客户端 OAuth API"},
+      {"host": "redd.it"}
+    ],
+    "assert": {"same_policy": true, "policy": "社交媒体", "no_dns_leak": true}
+  },
+  {
+    "name": "wikipedia_article",
+    "desc": "维基百科：条目页 + 图片/媒体（upload.wikimedia.org）+ 静态资源",
+    "note": "2026-08-25 F1 已修复：upload.wikimedia.org 等 3 个 wikimedia 子域已撤出 DownloadCDN。2026-09-01：wikipedia.org / wikimedia.org 命中 ProxyGFW，期望由 Final 改为 Proxy——2026-09-01 起 ProxyGFW 独立挂 Proxy 组（与收尾 FINAL 解耦）。",
+    "requests": [
+      {"host": "en.wikipedia.org"},
+      {"host": "zh.wikipedia.org"},
+      {"host": "wikipedia.org"},
+      {"host": "wikimedia.org"},
+      {"host": "upload.wikimedia.org", "note": "条目内图片/媒体"}
+    ],
+    "assert": {"same_policy": true, "policy": "Proxy", "no_dns_leak": true}
+  },
+  {
+    "name": "steam_store_community",
+    "desc": "Steam 商店/社区（国际）：商店页 + 社区 + 前端 CDN + 账号 API",
+    "requests": [
+      {"host": "store.steampowered.com"},
+      {"host": "steamcommunity.com"},
+      {"host": "api.steampowered.com"},
+      {"host": "steamstatic.com"},
+      {"host": "cdn.akamai.steamstatic.com"},
+      {"host": "steamcdn-a.akamaihd.net"}
+    ],
+    "assert": {"same_policy": true, "policy": "游戏", "no_dns_leak": true}
+  },
+  {
+    "name": "steam_cn_download_split",
+    "desc": "Steam 国服下载 CDN 必须直连（与商店/社区刻意分离，00-context 既有设计）",
+    "requests": [
+      {"host": "cm.steampowered.com", "note": "连接管理器（国服）"},
+      {"host": "steampipe.akamaized.net"},
+      {"host": "st.dl.eccdnx.com"},
+      {"host": "dl.steam.clngaa.com"},
+      {"host": "steamcontent.com"}
+    ],
+    "assert": {"same_policy": true, "policy": "DIRECT"}
+  },
+  {
+    "name": "telegram_domains_and_ips",
+    "desc": "Telegram：Web 客户端 + 官网 + 频道短链 + 典型 DC IP 段直查",
+    "requests": [
+      {"host": "web.telegram.org"},
+      {"host": "telegram.org"},
+      {"host": "core.telegram.org"},
+      {"host": "t.me"},
+      {"host": "telegra.ph"},
+      {"ip": "149.154.167.51", "note": "DC4 段（149.154.160.0/20）"},
+      {"ip": "91.108.56.100", "note": "DC 段（91.108.0.0/16）"}
+    ],
+    "assert": {"same_policy": true, "policy": "Telegram", "no_dns_leak": true}
+  },
+  {
+    "name": "docker_hub_pull",
+    "desc": "docker pull：Hub 网页 → registry 鉴权 → blob 分发。分层拉取中途换出口会导致 blob 校验失败/重试",
+    "note": "2026-08-25 F1 已修复：DOMAIN-SUFFIX,docker.com 自 ProxyGFW 移入 DownloadCDN。",
+    "requests": [
+      {"host": "hub.docker.com"},
+      {"host": "auth.docker.io"},
+      {"host": "registry-1.docker.io"},
+      {"host": "production.cloudflare.docker.com", "note": "blob 分发"}
+    ],
+    "assert": {"same_policy": true, "policy": "下载", "no_dns_leak": true}
+  },
+  {
+    "name": "npm_pypi_install",
+    "desc": "npm install / pip install：包索引 + 制品分发 + 官网",
+    "note": "2026-08-25 F1 已修复：DOMAIN-SUFFIX,npmjs.com 自 ProxyGFW 移入 DownloadCDN。",
+    "requests": [
+      {"host": "registry.npmjs.org"},
+      {"host": "www.npmjs.com"},
+      {"host": "pypi.org"},
+      {"host": "files.pythonhosted.org"}
+    ],
+    "assert": {"same_policy": true, "policy": "下载", "no_dns_leak": true}
+  },
+  {
+    "name": "twitch_stream",
+    "desc": "Twitch 直播：主站 + GraphQL + 静态资源 + HLS 分发",
+    "requests": [
+      {"host": "www.twitch.tv"},
+      {"host": "twitch.tv"},
+      {"host": "gql.twitch.tv"},
+      {"host": "static-cdn.jtvnw.net"},
+      {"host": "usher.ttvnw.net", "note": "HLS 播放列表"},
+      {"host": "video-weaver.lax03.hls.ttvnw.net", "note": "HLS 分片"}
+    ],
+    "assert": {"same_policy": true, "policy": "流媒体", "no_dns_leak": true}
+  },
+  {
+    "name": "ms_gfw_to_microsoft_migration",
+    "desc": "W-MS 迁移正例：5 条微软注册域自 ProxyGFW 迁入 Microsoft.list（区 5，先于 MicrosoftCN 区 7），出口自 GFW 兜底层变 Google-X-Meta-MS。归属证据：gfx.ms/skype.com 为 MarkMonitor + Azure DNS，microsoft-falcon.io/microsofttranslator.com SOA 为 azuredns-hostmaster.microsoft.com（COM LAUDE 品牌注册商），msn.com.tw CNAME → reroute.microsoft.com；五条均经全前位遮蔽扫描确认不遮蔽 MicrosoftCN/AppleCN/Domestic 任何直连条目",
+    "requests": [
+      {"host": "gfx.ms", "note": "Live/登录静态资产注册域"},
+      {"host": "mem.gfx.ms", "note": "实活主机：CNAME → t-msedge 全球 anycast，CN 侧 13.107.246.74 非 CN ASN"},
+      {"host": "microsoft-falcon.io", "note": "Bing Shopping 基建域；本次由窄条 bing-shopping.microsoft-falcon.io 合并为父后缀（Mixpanel 先例）"},
+      {"host": "bing-shopping.microsoft-falcon.io", "note": "原 Microsoft.list 窄条（双侧 NXDOMAIN），删除后仍由父后缀覆盖，落点不变"},
+      {"host": "microsofttranslator.com"},
+      {"host": "www.microsofttranslator.com", "note": "CN 侧 CNAME → china.bing123.com，与 www.bing.com 同一地理引导壳；bing.com 已在本表，同会话须同组"},
+      {"host": "api.cognitive.microsofttranslator.com", "note": "Translator 现网 API 端点"},
+      {"host": "msn.com.tw", "note": "MSN 台湾站，与 MicrosoftCN 的 msn.com 是不同注册域，不构成遮蔽"},
+      {"host": "www.msn.com.tw"},
+      {"host": "skype.com"},
+      {"host": "www.skype.com", "note": "双侧均落 s-msedge 52.123.128-131.14，无投毒无 CN 面"},
+      {"host": "login.skype.com", "note": "登录面随主域同组"}
+    ],
+    "assert": {"same_policy": true, "policy": "Google-X-Meta-MS", "no_dns_leak": true}
+  },
+  {
+    "name": "ms_mscn_direct_face_unshadowed",
+    "desc": "W-MS 防遮蔽回归（负例）：迁入 Microsoft.list 的任何条目都不得把 MicrosoftCN 的国内直连面拽进代理。本组 13 条全部经双侧 dig 实证 CN 面（tdnsdl1.cn / cngslb.com / ksyuncdn.com / ctlcdn.cn / cn.akamaitech.net / Akamai CN POP），必须仍 DIRECT；任何一条翻成 Google-X-Meta-MS 即为「宽后缀回流 Microsoft.list」的信号",
+    "requests": [
+      {"host": "oneclient.sfx.ms", "note": "CN 侧 a124.dscd.akamai.net.0.1.cn.akamaitech.net = Akamai 中国节点；与 ProxyGFW 的精确 p.sfx.ms 规则共同证明父后缀必须禁止"},
+      {"host": "office.live.com", "note": "R1-01 边界：onedrive.live.com 走代理，office.live.com 精确子树仍直连"},
+      {"host": "view.officeapps.live.com"},
+      {"host": "g.live.com"},
+      {"host": "www.msn.com", "note": "与新迁入的 msn.com.tw 的分界：msn.com 仍 DIRECT"},
+      {"host": "www.office.com"},
+      {"host": "officecdn.microsoft.com", "note": "CN 侧 fw85yi09.sched.vodtylego.tdnsvod1.cn"},
+      {"host": "software.download.prss.microsoft.com", "note": "CN 侧 5g7oqi2b.sched.dma.tdnsdl1.cn，23 条 prss 族代表"},
+      {"host": "download.windowsupdate.com", "note": "CN 侧 wu-xlc.…i.cngslb.com"},
+      {"host": "dl.delivery.mp.microsoft.com", "note": "CN 侧 wsdnt-xlc.…z1.cngslb.com"},
+      {"host": "crl.microsoft.com", "note": "微软自家 CA，握手关键路径"},
+      {"host": "oneocsp.microsoft.com"},
+      {"host": "statics.teams.cdn.office.net", "note": "CN 侧 a1813.dscd.akamai.net.0.1.cn.akamaitech.net"}
+    ],
+    "assert": {"same_policy": true, "policy": "DIRECT", "no_dns_leak": true}
+  },
+  {
+    "name": "ms_explicit_owner_boundary",
+    "desc": "Microsoft first-party navigation/API namespaces stay with Microsoft while arbitrary Azure tenants and retired HockeyApp fall through to Final.",
+    "requests": [
+      {"host": "microsoft.com"},
+      {"host": "officeclient.microsoft.com"},
+      {"host": "apis.live.net"},
+      {"host": "www.onenote.com"},
+      {"host": "content.office.net"},
+      {"host": "p.sfx.ms", "note": "Exact Microsoft host; oneclient.sfx.ms remains MicrosoftCN"},
+      {"host": "sometenant.webpubsub.azure.com", "note": "任意 WebPubSub 租户不属于 AI 的 OpenAI 专属实例，azure.com 多租户宽后缀已移除"},
+      {"host": "sometenant.azureedge.net", "note": "任意 Azure Edge 租户，宽兜底已移除"},
+      {"host": "sometenant.azurewebsites.net", "note": "PSL 多租户边界，宽兜底已移除"},
+      {"host": "hockeyapp.net", "note": "微软持有但已停服，NS/SOA 双侧无应答，已移除死域规则"}
+    ],
+    "assert": {
+      "same_policy": false, "no_dns_leak": true,
+      "per_request": [
+        {"host": "microsoft.com", "policy": "Google-X-Meta-MS"},
+        {"host": "officeclient.microsoft.com", "policy": "Google-X-Meta-MS"},
+        {"host": "apis.live.net", "policy": "Google-X-Meta-MS"},
+        {"host": "www.onenote.com", "policy": "Google-X-Meta-MS"},
+        {"host": "content.office.net", "policy": "Google-X-Meta-MS"},
+        {"host": "p.sfx.ms", "policy": "Google-X-Meta-MS"},
+        {"host": "sometenant.webpubsub.azure.com", "policy": "Final"},
+        {"host": "sometenant.azureedge.net", "policy": "Final"},
+        {"host": "sometenant.azurewebsites.net", "policy": "Final"},
+        {"host": "hockeyapp.net", "policy": "Final"}
+      ]
+    }
+  },
+  {
+    "name": "ms_explicit_subtrees_intact",
+    "desc": "微软控制/OneDrive 数据端点归 Microsoft owner；独立下载、Azure 监控包与 OpenAI 专属 WebPubSub 保持各自 owner。",
+    "requests": [
+      {"host": "d.docs.live.net", "note": "OneDrive 数据面与微软控制面同出口"},
+      {"host": "contentsync.onenote.com"},
+      {"host": "hierarchyapi.onenote.com"},
+      {"host": "support.content.office.net"},
+      {"host": "monitor.azure.com"},
+      {"host": "pkgs.dev.azure.com"},
+      {"host": "chatgpt-async-webps-prod-eastus-1.webpubsub.azure.com", "note": "AI.list 的 OpenAI 专属 WebPubSub 实例：位次在 Microsoft.list 之后，azure.com 上移即被吃掉"}
+    ],
+    "assert": {
+      "no_dns_leak": true,
+      "per_request": [
+        {"host": "d.docs.live.net", "policy": "Google-X-Meta-MS"},
+        {"host": "contentsync.onenote.com", "policy": "Google-X-Meta-MS"},
+        {"host": "hierarchyapi.onenote.com", "policy": "Google-X-Meta-MS"},
+        {"host": "support.content.office.net", "policy": "Google-X-Meta-MS"},
+        {"host": "monitor.azure.com", "policy": "下载"},
+        {"host": "pkgs.dev.azure.com", "policy": "下载"},
+        {"host": "chatgpt-async-webps-prod-eastus-1.webpubsub.azure.com", "policy": "AI"}
+      ]
+    }
+  },
+  {
+    "name": "cursor_anysphere_ownership",
+    "desc": "2026-08-31 审计更正：Cursor/Anysphere 是独立公司（Cursor ToS 主体 Anysphere, Inc.），不能由「Grok Bot 后端曾用 cursor 基建」推导出全生态属 X——全家自 Twitter.list 迁 AI.list；x.ai/grok.com 仍属 xAI 留 Twitter.list",
+    "requests": [
+      {"host": "cursor.com"},
+      {"host": "www.cursor.com"},
+      {"host": "api2.cursor.sh", "note": "推理/补全后端"},
+      {"host": "cursor-cdn.com", "note": "更新包 CDN"},
+      {"host": "anysphere.co"},
+      {"host": "x.ai"},
+      {"host": "grok.com"}
+    ],
+    "assert": {
+      "no_dns_leak": true,
+      "per_request": [
+        {"host": "cursor.com", "policy": "AI"},
+        {"host": "www.cursor.com", "policy": "AI"},
+        {"host": "api2.cursor.sh", "policy": "AI"},
+        {"host": "cursor-cdn.com", "policy": "AI"},
+        {"host": "anysphere.co", "policy": "AI"},
+        {"host": "x.ai", "policy": "Google-X-Meta-MS", "reason": "xAI 品牌资产留 X 生态"},
+        {"host": "grok.com", "policy": "Google-X-Meta-MS"}
+      ]
+    }
+  },
+  {
+    "name": "qwen_intl_unified",
+    "desc": "qwenlm.ai 跳转 chat.qwen.ai（同一国际入口）：国内厂商国际站统一走 AI 组，首跳与落地页同出口，不再 Domestic/AI 分裂",
+    "requests": [
+      {"host": "qwenlm.ai", "note": "首跳"},
+      {"host": "qwen.ai"},
+      {"host": "chat.qwen.ai", "note": "跳转落地"}
+    ],
+    "assert": {"same_policy": true, "policy": "AI", "no_dns_leak": true}
+  },
+  {
+    "name": "paypal_official_only",
+    "desc": "PayPal 由 DOMAIN-KEYWORD 改为官方精确后缀：官方域固定 Payment 出口；含 paypal 子串的仿冒域/第三方域不得再被吸入支付组（改前 keyword 会把它们一并送进固定出口）",
+    "requests": [
+      {"host": "www.paypal.com", "note": "checkout/3DS 主链"},
+      {"host": "paypal.me", "note": "收款链接"},
+      {"host": "www.paypalobjects.com", "note": "静态资源"},
+      {"host": "paypal-verify-account.com", "note": "仿冒形态负例"},
+      {"host": "mypaypal-checkout.com", "note": "品牌子串第三方负例"}
+    ],
+    "assert": {
+      "no_dns_leak": true,
+      "per_request": [
+        {"host": "www.paypal.com", "policy": "Payment"},
+        {"host": "paypal.me", "policy": "Payment"},
+        {"host": "www.paypalobjects.com", "policy": "Payment"},
+        {"host": "paypal-verify-account.com", "policy": "Final", "reason": "无规则命中落 FINAL，不再被品牌关键词吸走"},
+        {"host": "mypaypal-checkout.com", "policy": "Final"}
+      ]
+    }
+  },
+  {
+    "name": "tiktok_foreign_assets_removed",
+    "desc": "Snap Kit 域（api.snapkit.com@TikTok、sdk.snapkit.com@DownloadCDN）属 Snap 官方资产，cocacola.co.jp 属日本可口可乐——移除后两条 Snap Kit 域落 FINAL→Final，snapchat.com 由 SocialOthers.list 承接走社交媒体组；可口可乐迁 Japan.list 走日本出口",
+    "requests": [
+      {"host": "api.snapkit.com"},
+      {"host": "sdk.snapkit.com"},
+      {"host": "snapchat.com", "note": "Snap 生态参照"},
+      {"host": "cocacola.co.jp"}
+    ],
+    "assert": {
+      "no_dns_leak": true,
+      "per_request": [
+        {"host": "api.snapkit.com", "policy": "Final", "reason": "与 Snap 生态同出口，不再随 TikTok 走社交媒体组"},
+        {"host": "sdk.snapkit.com", "policy": "Final"},
+        {"host": "snapchat.com", "policy": "社交媒体", "reason": "由 SocialOthers.list 的 DOMAIN-SUFFIX,snapchat.com 承接"},
+        {"host": "cocacola.co.jp", "policy": "🇯🇵日本节点"}
+      ]
+    }
+  },
+  {
+    "name": "chinadomain_keyword_removed",
+    "desc": "ChinaDomain 尾部 9 条品牌关键词删除（已入 allowlist forbidden 段防再生回流）：核心域由厂商表精确后缀承接不变；含品牌子串的未收录域不再被强制 DIRECT（防投毒/仿冒域直连）",
+    "requests": [
+      {"host": "www.taobao.com"},
+      {"host": "www.baidu.com"},
+      {"host": "hnagroup.com", "note": "keyword 删除后由 Domestic 新增精确后缀承接"},
+      {"host": "officecdn.microsoft.com", "note": "由 MicrosoftCN 既有精确后缀承接"},
+      {"host": "taobao-promo2026.com", "note": "品牌子串仿冒形态负例"},
+      {"host": "fakebaidu-login.com", "note": "品牌子串仿冒形态负例"}
+    ],
+    "assert": {
+      "no_dns_leak": true,
+      "per_request": [
+        {"host": "www.taobao.com", "policy": "DIRECT"},
+        {"host": "www.baidu.com", "policy": "DIRECT"},
+        {"host": "hnagroup.com", "policy": "DIRECT"},
+        {"host": "officecdn.microsoft.com", "policy": "DIRECT"},
+        {"host": "taobao-promo2026.com", "policy": "Final", "reason": "不再被 DOMAIN-KEYWORD,taobao 强制直连"},
+        {"host": "fakebaidu-login.com", "policy": "Final"}
+      ]
+    }
+  },
+  {
+    "name": "ca_endpoints_direct",
+    "desc": "CA 所有权归位：digicert.com 整域自 AppleCN（Apple 表登记 CA 属所有权错误）迁 Domestic 的 CA 集中登记段，吊销/AIA 端点直连行为不变",
+    "requests": [
+      {"host": "ocsp.digicert.com"},
+      {"host": "crl3.digicert.com"},
+      {"host": "cacerts.digicert.com"},
+      {"host": "www.digicert.com"}
+    ],
+    "assert": {"same_policy": true, "policy": "DIRECT", "no_dns_leak": true}
+  },
+  {
+    "name": "sony_group_not_games",
+    "desc": "sony.com 是集团总域（相机/影视/半导体/企业站），非游戏会话依赖，自 Games 移除落 FINAL；PlayStation/SIE 业务域保持游戏组",
+    "requests": [
+      {"host": "www.sony.com"},
+      {"host": "www.playstation.com"},
+      {"host": "sonyentertainmentnetwork.com"}
+    ],
+    "assert": {
+      "no_dns_leak": true,
+      "per_request": [
+        {"host": "www.sony.com", "policy": "Final"},
+        {"host": "www.playstation.com", "policy": "游戏"},
+        {"host": "sonyentertainmentnetwork.com", "policy": "游戏"}
+      ]
+    }
+  },
+  {
+    "name": "cf_insights_neutral",
+    "desc": "裁决更正（2026-08-31）：static.cloudflareinsights.com 是 Cloudflare Web Analytics 性能 beacon，与 Turnstile 验证码无关，「降低验证码率」理由不成立——移出 AI 组落 FINAL；challenges.cloudflare.com（真 Turnstile，ChatGPT/Claude 登录链）仍留 AI",
+    "requests": [
+      {"host": "static.cloudflareinsights.com"},
+      {"host": "challenges.cloudflare.com"}
+    ],
+    "assert": {
+      "no_dns_leak": true,
+      "per_request": [
+        {"host": "static.cloudflareinsights.com", "policy": "Final", "reason": "通用遥测组件回中性出口"},
+        {"host": "challenges.cloudflare.com", "policy": "AI"}
+      ]
+    }
+  },
+  {
+    "name": "reject_keyword_boundary",
+    "desc": "Reject 关键词边界化：8 条右锚定片段与 dnserror/hostingcloud 改 DOMAIN-WILDCARD——拦截意图保持（广告 CDN 形态/劫持页/挖矿域族照拦），标签边界外的子串不再有第一优先级误杀面",
+    "requests": [
+      {"host": "js-ad.a.yximgs.com", "note": "快手广告 CDN 形态，*-ad.a.yximgs.com 应拦"},
+      {"host": "tx2-rtb.gravite.net", "note": "*-rtb.gravite.net 应拦"},
+      {"host": "cool-adnow.com", "note": "*-adnow.com 应拦"},
+      {"host": "dnserror.wo.com.cn", "note": "运营商 DNS 劫持页，dnserror.* 应拦"},
+      {"host": "hostingcloud.racing", "note": "挖矿域族，hostingcloud.* 应拦"},
+      {"host": "cdnserror-page.com", "note": "负例：含 dnserror 子串但非劫持页形态"},
+      {"host": "myhostingcloudapp.com", "note": "负例：含 hostingcloud 子串的普通应用域"}
+    ],
+    "assert": {
+      "no_dns_leak": true,
+      "per_request": [
+        {"host": "js-ad.a.yximgs.com", "policy": "REJECT"},
+        {"host": "tx2-rtb.gravite.net", "policy": "REJECT"},
+        {"host": "cool-adnow.com", "policy": "REJECT"},
+        {"host": "dnserror.wo.com.cn", "policy": "REJECT"},
+        {"host": "hostingcloud.racing", "policy": "REJECT"},
+        {"host": "cdnserror-page.com", "policy": "Final", "reason": "改 wildcard 后不再误杀"},
+        {"host": "myhostingcloudapp.com", "policy": "Final"}
+      ]
+    }
+  },
+  {
+    "name": "shared_cloud_ip_removed",
+    "desc": "共享云段不代表业务身份：Games 的 GCP 35.192.0.0/12（约百万地址客户段）、Meta 的 AWS 18.194.0.0/15、Google 的 IP-ASN,396982（Google Cloud 客户前缀 ASN）删除后，云客户 IP 不再被业务表抢走；Meta 自有专网段保持。⚠ 前两条用 policy_in 双态：离线引擎无 MaxMind 库，7 条非 CN GEOIP 恒不匹配 ⇒ 判 Final；真实 Surge 会在区 9 命中 GEOIP,US@US.list / GEOIP,DE@Europe.list。这是已登记的离线近似盲区（engine.py 非 CN GEOIP 恒不匹配），断言强度按 edge_cases «user_vps_ip_asn» 的口径对齐。",
+    "requests": [
+      {"ip": "35.192.0.1", "note": "GCP us-central1 客户段样本（ARIN NET-35-192-0-0-1 GOOGLE-CLOUD，'in use by Google Cloud customers'）"},
+      {"ip": "18.194.0.1", "note": "AWS eu-central-1 客户段样本（RIPE AMAZON-EU 客户段）"},
+      {"ip": "31.13.24.1", "note": "Meta 专网 31.13.24.0/21，AS32934"}
+    ],
+    "assert": {
+      "per_request": [
+        {"ip": "35.192.0.1", "reason": "不再被业务表云段抢走。离线引擎判 Final（无 MaxMind，GEOIP,US 恒不匹配）；真实 Surge 在区 9 由 US.list 的 GEOIP,US,no-resolve 接住 ⇒ 双态均为正确落点。", "policy_in": ["Final", "🇺🇸美国节点"]},
+        {"ip": "18.194.0.1", "policy_in": ["Final", "🇪🇺欧洲节点"], "reason": "同上：离线引擎判 Final；真实 Surge 在区 9 由 Europe.list 的 GEOIP,DE,no-resolve 接住。"},
+        {"ip": "31.13.24.1", "policy": "Google-X-Meta-MS", "reason": "第一方专网保留"}
+      ]
+    }
+  },
+  {
+    "name": "payment_full_chain_same_exit",
+    "desc": "R1-24：一次真实结账的完整链路必须整体走同一出口。收单侧（PayPal / Stripe / Adyen）与风控侧（ThreatMetrix online-metrix.net 的设备指纹）分处两张表时，指纹上报与授权请求会从不同 IP 发出——这正是 3DS 挑战率与拒付率上升的典型成因。ThreatMetrix 归 Payment 后，same_policy 断言把「同出口」这个不变量固化下来",
+    "requests": [
+      {"host": "www.paypal.com", "note": "PayPal 结账页"},
+      {"host": "api.paypal.com", "note": "PayPal 授权 API"},
+      {"host": "www.paypalobjects.com", "note": "PayPal 静态资源/SDK"},
+      {"host": "js.stripe.com", "note": "Stripe Elements 脚本"},
+      {"host": "api.stripe.com", "note": "Stripe 授权 API"},
+      {"host": "m.stripe.network", "note": "Stripe 设备指纹/风控"},
+      {"host": "checkoutshopper-live.adyen.com", "note": "Adyen Drop-in 结账"},
+      {"host": "live.adyen.com", "note": "Adyen 授权端点"},
+      {"host": "h.online-metrix.net", "note": "ThreatMetrix 设备指纹主机名（R1-24 新增），商户结账页常见的 iframe/JS 探针"},
+      {"host": "content.online-metrix.net", "note": "ThreatMetrix 探针资源域，同后缀承接"},
+      {"host": "www.cardinalcommerce.com", "note": "对照：3DS 目录服务器，表内既有条目，同属风控层"}
+    ],
+    "assert": {"same_policy": true, "policy": "Payment", "no_dns_leak": true}
+  },
+  {
+    "name": "payment_threatmetrix_boundary",
+    "desc": "ThreatMetrix 收录边界回归：只收 online-metrix.net 这一个注册域，形态为 DOMAIN-SUFFIX（标签边界）。既不得回退成无边界子串把 myonline-metrix.net 一类同名不同域吃进来，也不得越界到未验证的其他 TLD。反例落 Final 即证明边界正确",
+    "requests": [
+      {"host": "myonline-metrix.net", "note": "反例：串前无标签边界，DOMAIN-SUFFIX 不得命中"},
+      {"host": "online-metrix.com", "note": "反例：同名不同 TLD，刻意未收"},
+      {"host": "online-metrix.net", "note": "正例：apex 本身由 DOMAIN-SUFFIX 覆盖"}
+    ],
+    "assert": {
+      "same_policy": true, "policy": "Final", "no_dns_leak": true,
+      "per_request": [
+        {"host": "online-metrix.net", "policy": "Payment", "reason": "DOMAIN-SUFFIX,online-metrix.net 含 apex"}
+      ]
+    }
+  },
+  {
+    "name": "dynamic_social_families_unified",
+    "desc": "Dynamic workspace, meeting, messaging, and community hosts remain with one service owner.",
+    "requests": [
+      {"host": "app.slack.com"},
+      {"host": "files.slack.com"},
+      {"host": "a.slack-edge.com"},
+      {"host": "us02web.zoom.us"},
+      {"host": "support.zoom.us"},
+      {"host": "file.zoom.us"},
+      {"host": "updates.signal.org"},
+      {"host": "chat.signal.org"},
+      {"host": "api.vrchat.com"},
+      {"host": "assets.vrchat.com"},
+      {"host": "mail.daum.net"},
+      {"host": "accounts.kakao.com"},
+      {"host": "mail.naver.com"},
+      {"host": "nid.naver.com"},
+      {"host": "tv.naver.com", "note": "Naver video remains in Streaming"}
+    ],
+    "assert": {
+      "no_dns_leak": true,
+      "per_request": [
+        {"host": "app.slack.com", "policy": "社交媒体"},
+        {"host": "files.slack.com", "policy": "社交媒体"},
+        {"host": "a.slack-edge.com", "policy": "社交媒体"},
+        {"host": "us02web.zoom.us", "policy": "社交媒体"},
+        {"host": "support.zoom.us", "policy": "社交媒体"},
+        {"host": "file.zoom.us", "policy": "社交媒体"},
+        {"host": "updates.signal.org", "policy": "社交媒体"},
+        {"host": "chat.signal.org", "policy": "社交媒体"},
+        {"host": "api.vrchat.com", "policy": "社交媒体"},
+        {"host": "assets.vrchat.com", "policy": "社交媒体"},
+        {"host": "mail.daum.net", "policy": "社交媒体"},
+        {"host": "accounts.kakao.com", "policy": "社交媒体"},
+        {"host": "mail.naver.com", "policy": "社交媒体"},
+        {"host": "nid.naver.com", "policy": "社交媒体"},
+        {"host": "tv.naver.com", "policy": "流媒体"}
+      ]
+    }
+  },
+  {
+    "name": "regional_vendor_families_unified",
+    "desc": "US institutions and Yandex Russia use regional owners, including their former mirror/download children.",
+    "requests": [
+      {"host": "www.nasa.gov"},
+      {"host": "gibs-c.earthdata.nasa.gov"},
+      {"host": "www.mit.edu"},
+      {"host": "mirrors.mit.edu"},
+      {"host": "www.cmu.edu"},
+      {"host": "www.club.cc.cmu.edu"},
+      {"host": "www.cnet.com"},
+      {"host": "download.cnet.com"},
+      {"host": "mirror.grid.uchicago.edu"},
+      {"host": "mirror.its.umich.edu"},
+      {"host": "mail.yandex.ru"},
+      {"host": "mirror.yandex.ru"},
+      {"host": "www.bet365.com"}
+    ],
+    "assert": {
+      "no_dns_leak": true,
+      "per_request": [
+        {"host": "www.nasa.gov", "policy": "🇺🇸美国节点"},
+        {"host": "gibs-c.earthdata.nasa.gov", "policy": "🇺🇸美国节点"},
+        {"host": "www.mit.edu", "policy": "🇺🇸美国节点"},
+        {"host": "mirrors.mit.edu", "policy": "🇺🇸美国节点"},
+        {"host": "www.cmu.edu", "policy": "🇺🇸美国节点"},
+        {"host": "www.club.cc.cmu.edu", "policy": "🇺🇸美国节点"},
+        {"host": "www.cnet.com", "policy": "🇺🇸美国节点"},
+        {"host": "download.cnet.com", "policy": "🇺🇸美国节点"},
+        {"host": "mirror.grid.uchicago.edu", "policy": "🇺🇸美国节点"},
+        {"host": "mirror.its.umich.edu", "policy": "🇺🇸美国节点"},
+        {"host": "mail.yandex.ru", "policy": "🇪🇺欧洲节点"},
+        {"host": "mirror.yandex.ru", "policy": "🇪🇺欧洲节点"},
+        {"host": "www.bet365.com", "policy": "🇬🇧英国节点"}
+      ]
+    }
+  },
+  {
+    "name": "evidence_backed_subdomain_splits",
+    "desc": "Control surfaces stay with the residual Proxy owner while independently verified downloads and updates retain Download ownership.",
+    "requests": [
+      {"host": "my.1password.com"},
+      {"host": "downloads.1password.com"},
+      {"host": "s3.brave.com"},
+      {"host": "search.brave.com"},
+      {"host": "www.mozilla.org"},
+      {"host": "download.mozilla.org"},
+      {"host": "tile.openstreetmap.org"},
+      {"host": "planet.openstreetmap.org"},
+      {"host": "update.parallels.com"},
+      {"host": "pcdn-my.pcloud.com"},
+      {"host": "ipfs.infura.io"},
+      {"host": "share.riseup.net"},
+      {"host": "update.greasyfork.org"},
+      {"host": "update.sleazyfork.org"},
+      {"host": "debian.csie.ntu.edu.tw"},
+      {"host": "event.ithome.com.tw"}
+    ],
+    "assert": {
+      "no_dns_leak": true,
+      "per_request": [
+        {"host": "my.1password.com", "policy": "Proxy"},
+        {"host": "downloads.1password.com", "policy": "下载"},
+        {"host": "s3.brave.com", "policy": "下载"},
+        {"host": "search.brave.com", "policy": "Proxy"},
+        {"host": "www.mozilla.org", "policy": "Proxy"},
+        {"host": "download.mozilla.org", "policy": "下载"},
+        {"host": "tile.openstreetmap.org", "policy": "Proxy"},
+        {"host": "planet.openstreetmap.org", "policy": "下载"},
+        {"host": "update.parallels.com", "policy": "下载"},
+        {"host": "pcdn-my.pcloud.com", "policy": "下载"},
+        {"host": "ipfs.infura.io", "policy": "下载"},
+        {"host": "share.riseup.net", "policy": "下载"},
+        {"host": "update.greasyfork.org", "policy": "下载"},
+        {"host": "update.sleazyfork.org", "policy": "下载"},
+        {"host": "debian.csie.ntu.edu.tw", "policy": "下载"},
+        {"host": "event.ithome.com.tw", "policy": "Proxy"}
+      ]
+    }
+  },
+  {
+    "name": "download_owners_and_neutral_apexes",
+    "desc": "Download-only namespaces stay unified; general project apexes remain neutral while their verified repositories use Download.",
+    "requests": [
+      {"host": "www.anaconda.com"},
+      {"host": "repo.anaconda.com"},
+      {"host": "www.apache.org"},
+      {"host": "repo.maven.apache.org"},
+      {"host": "www.apkmirror.com"},
+      {"host": "downloadr2.apkmirror.com"},
+      {"host": "registry.npmjs.org"},
+      {"host": "www.npmjs.org"},
+      {"host": "download1.mediafire.com"},
+      {"host": "dl-01.mypikpak.com"},
+      {"host": "downloads.openwrt.org"},
+      {"host": "static.rust-lang.org"},
+      {"host": "data.osmand.net"},
+      {"host": "download.typora.io"},
+      {"host": "mirror.xtom.com"},
+      {"host": "pgl.yoyo.org"}
+    ],
+    "assert": {
+      "no_dns_leak": true,
+      "per_request": [
+        {"host": "www.anaconda.com", "policy": "Final"},
+        {"host": "repo.anaconda.com", "policy": "下载"},
+        {"host": "www.apache.org", "policy": "Final"},
+        {"host": "repo.maven.apache.org", "policy": "下载"},
+        {"host": "www.apkmirror.com", "policy": "下载"},
+        {"host": "downloadr2.apkmirror.com", "policy": "下载"},
+        {"host": "registry.npmjs.org", "policy": "下载"},
+        {"host": "www.npmjs.org", "policy": "下载"},
+        {"host": "download1.mediafire.com", "policy": "下载"},
+        {"host": "dl-01.mypikpak.com", "policy": "下载"},
+        {"host": "downloads.openwrt.org", "policy": "下载"},
+        {"host": "static.rust-lang.org", "policy": "下载"},
+        {"host": "data.osmand.net", "policy": "下载"},
+        {"host": "download.typora.io", "policy": "下载"},
+        {"host": "mirror.xtom.com", "policy": "下载"},
+        {"host": "pgl.yoyo.org", "policy": "下载"}
+      ]
+    }
+  },
+  {
+    "name": "major_vendor_split_boundaries",
+    "desc": "Major vendor cores stay with their owner while explicitly independent AI, media, download, and local endpoints keep their specialized policy.",
+    "requests": [
+      {"host": "account.adobe.com"},
+      {"host": "auth.services.adobe.com"},
+      {"host": "firefly.adobe.com"},
+      {"host": "assets.fonts.adobe.com"},
+      {"host": "account.microsoft.com"},
+      {"host": "api.onenote.com"},
+      {"host": "support.content.office.net"},
+      {"host": "oneclient.sfx.ms"},
+      {"host": "api.adguard.com"},
+      {"host": "local.adguard.org"},
+      {"host": "cdn.adguard.com"},
+      {"host": "tv.naver.com"},
+      {"host": "www.amazon.com"},
+      {"host": "atv-ext.amazon.com"},
+      {"host": "code.buywithprime.amazon.com"},
+      {"host": "d2c.aws.amazon.com"}
+    ],
+    "assert": {
+      "no_dns_leak": true,
+      "per_request": [
+        {"host": "account.adobe.com", "policy": "Proxy"},
+        {"host": "auth.services.adobe.com", "policy": "Proxy"},
+        {"host": "firefly.adobe.com", "policy": "AI"},
+        {"host": "assets.fonts.adobe.com", "policy": "Proxy"},
+        {"host": "account.microsoft.com", "policy": "Google-X-Meta-MS"},
+        {"host": "api.onenote.com", "policy": "Google-X-Meta-MS"},
+        {"host": "support.content.office.net", "policy": "Google-X-Meta-MS"},
+        {"host": "oneclient.sfx.ms", "policy": "DIRECT"},
+        {"host": "api.adguard.com", "policy": "Proxy"},
+        {"host": "local.adguard.org", "policy": "DIRECT"},
+        {"host": "cdn.adguard.com", "policy": "下载"},
+        {"host": "tv.naver.com", "policy": "流媒体"},
+        {"host": "www.amazon.com", "policy": "Proxy"},
+        {"host": "atv-ext.amazon.com", "policy": "流媒体"},
+        {"host": "code.buywithprime.amazon.com", "policy": "Payment"},
+        {"host": "d2c.aws.amazon.com", "policy": "Proxy"}
+      ]
+    }
+  }
+]

@@ -1,42 +1,21 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-realworld.py — Surge 分流测试套件 L4「真实客户端 / 网络栈实测层」
+realworld.py — 分流测试套件 L4「真实客户端 / 网络栈实测层」(surge-cli, 不需要 http-api)。
 
-与其余四层的关系:
-    engine.py      L0 规则语义引擎(纯离线模拟 Surge 匹配)
-    audit.py       L1 静态审计(no-resolve / 重复 / 遮蔽 / 引用一致性)
-    runsuite.py    L2 场景断言(离线批量跑 engine)
-    live_check.py  L3 在线实测(依赖 Surge HTTP API)
-    realworld.py   L4 真实客户端与网络栈实测  ← 本文件
+用真实客户端画像发请求、用系统命令看网络栈、用 surge-cli 问 Surge 本人:
+    --tun         接管状态: utun / 默认路由 / 系统 DNS / hijack 落地
+    --dns         DNS 深测: hijack / fake-IP / canary / SVCB / DoH / 泄漏抽样
+    --webrtc      STUN 取 srflx 公网 IP, 与 HTTP 出口交叉比对
+    --clients     真实客户端画像 × 各组代表域: 归属 / 连通性 / 出口落点
+    --crosscheck  surge-cli 实测语义 vs engine.py 离线推演, 逐条对账
+    --ua-routing  MITM/auto-quic-block 红线 + 零 USER-AGENT 规则的负向验证
 
-L3 靠 Surge HTTP API 回读「Surge 认为发生了什么」; L4 换一个观测面:
-用真实客户端画像发请求、用系统自带命令看网络栈、用 surge-cli 问 Surge 本人,
-回答 L3 回答不了的六类问题 ——
+原则(与 L3 一致): 纯只读, surge-cli 只用 status / rule explain / http probe /
+dump dns / dns lookup; 只访问数据配置登记的端点, 默认限速 3 req/s; 在线为准;
+环境缺失给指引而非崩溃; 标准库 + 系统自带命令(curl/dig/netstat/scutil/ifconfig/lsof)。
 
-    --tun         接管状态: utun 接口 / 默认路由 / 系统 DNS / hijack 落地情况
-    --dns         DNS 深测: hijack-dns 生效性 / fake-IP 池 / canary / SVCB / DoH / 泄漏抽样
-    --webrtc      WebRTC 泄漏: 最小 STUN 客户端取 srflx 公网 IP, 与 HTTP 出口交叉比对
-    --clients     真实客户端模拟: Safari/Chrome/iOS App/ChatGPT/Claude/Telegram 画像
-                  访问各策略组代表域, 验连通性 + 出口落点 + UA 端到端到达
-    --crosscheck  分流落点交叉验证: surge-cli rule match 逐条跑 scenarios/*.json,
-                  与离线 engine.py 对账, 输出不一致清单
-    --ua-routing  UA 分流生效性: 四格通道矩阵(代理/TUN × HTTP/HTTPS), MITM 未开自动跳过
-
-设计原则(与 L3 一致):
-    * 纯只读。不改任何系统状态、不 reload Surge、不 flush DNS、不切策略,
-      surge-cli 只用 status / rule explain / http probe / dump dns / dns lookup 这几个读命令。
-    * 外发最小化。只访问数据配置里登记的公共探测端点与被测域, 普通 GET/HEAD,
-      不携带任何本机标识; 默认限速 3 req/s。
-    * 在线为准。与离线引擎冲突时输出偏差表, 由人决定改引擎还是改规则。
-    * 降级友好。surge-cli/dig/curl 缺失、Surge 未运行、MITM 未启用, 一律给明确说明而不是崩溃。
-    * python3 标准库 only + 系统自带命令(curl/dig/netstat/scutil/ifconfig/lsof)。
-
-退出码:
-    0  全部通过(或仅有 WARN / 仅报告不断言)
-    1  存在硬失败项(FAIL)
-    2  运行环境不可用(Surge 未运行 / surge-cli 缺失 / 出站模式不是 rule)
-    3  用法错误或被 Ctrl-C 打断
+退出码: 0 通过 / 1 有硬失败 / 2 环境不可用 / 3 用法错误或中断。
 """
 
 import argparse
@@ -86,104 +65,21 @@ L4 不需要 http-api —— surge-cli 走的是本机控制通道, 不用改配
 
 
 # ---------------------------------------------------------------------------
-# 与 live_check.py 共享的小工具(导入失败时降级为本地实现)
+# 与 live_check.py 共享的小工具(同仓库兄弟模块, 加载失败就大声失败)
 # ---------------------------------------------------------------------------
 
-def _load_sibling(name):
-    """按文件名加载同目录的兄弟模块; 不存在或有语法错误时返回 None。"""
-    path = os.path.join(SELF_DIR, name + ".py")
-    if not os.path.isfile(path):
-        return None
-    try:
-        import importlib.util
-        spec = importlib.util.spec_from_file_location("surge_" + name, path)
-        mod = importlib.util.module_from_spec(spec)
-        spec.loader.exec_module(mod)
-        return mod
-    except Exception:                                          # noqa: BLE001
-        return None
+sys.path.insert(0, SELF_DIR)
 
+import live_check as _LC  # noqa: E402
 
-_LC = _load_sibling("live_check")
-
-if _LC is not None:
-    dwidth = _LC.dwidth
-    pad = _LC.pad
-    render_table = _LC.render_table
-    Log = _LC.Log
-    RateLimiter = _LC.RateLimiter
-    exit_class_of = _LC.exit_class_of
-    parse_probe_ip = _LC.parse_probe_ip
-    is_private_ip = _LC.is_private_ip
-else:                                                          # 降级实现
-    import unicodedata
-
-    def dwidth(s):
-        return sum(2 if unicodedata.east_asian_width(c) in "WF" else 1 for c in str(s))
-
-    def pad(s, width):
-        s = "" if s is None else str(s)
-        return s + " " * max(0, width - dwidth(s))
-
-    def render_table(headers, rows):
-        if not rows:
-            return "  (无数据)"
-        cols = len(headers)
-        widths = [dwidth(h) for h in headers]
-        norm = []
-        for r in rows:
-            cells = [("" if c is None else str(c)) for c in list(r)[:cols]]
-            cells += [""] * (cols - len(cells))
-            norm.append(cells)
-            for i, c in enumerate(cells):
-                widths[i] = max(widths[i], dwidth(c))
-        out = ["| " + " | ".join(pad(h, widths[i]) for i, h in enumerate(headers)) + " |",
-               "|" + "|".join("-" * (widths[i] + 2) for i in range(cols)) + "|"]
-        for cells in norm:
-            out.append("| " + " | ".join(pad(c, widths[i]) for i, c in enumerate(cells)) + " |")
-        return "\n".join(out)
-
-    class Log(object):
-        def __init__(self, quiet=False):
-            self.quiet = quiet
-            self.lines = []
-
-        def __call__(self, msg=""):
-            self.lines.append(str(msg))
-            if not self.quiet:
-                print(msg)
-
-        def section(self, title):
-            self("")
-            self("=" * 72)
-            self("  " + title)
-            self("=" * 72)
-
-    class RateLimiter(object):
-        def __init__(self, per_second):
-            self.interval = 1.0 / float(per_second) if per_second > 0 else 0.0
-            self._last = 0.0
-
-        def wait(self):
-            if self.interval <= 0:
-                return
-            gap = self.interval - (time.monotonic() - self._last)
-            if gap > 0:
-                time.sleep(gap)
-            self._last = time.monotonic()
-
-    def exit_class_of(name):
-        return ("UNKNOWN", False) if not name else ("UNKNOWN", True)
-
-    def parse_probe_ip(kind, body):
-        m = re.search(r"\b(?:\d{1,3}\.){3}\d{1,3}\b", body or "")
-        return ((m.group(0), "") if m else (None, ""))
-
-    def is_private_ip(text):
-        try:
-            return ipaddress.ip_address(str(text).strip()).is_private
-        except ValueError:
-            return False
+dwidth = _LC.dwidth
+pad = _LC.pad
+render_table = _LC.render_table
+Log = _LC.Log
+RateLimiter = _LC.RateLimiter
+exit_class_of = _LC.exit_class_of
+parse_probe_ip = _LC.parse_probe_ip
+is_private_ip = _LC.is_private_ip
 
 
 # ---------------------------------------------------------------------------
@@ -640,19 +536,6 @@ def conf_mitm_hostname(text):
     if m:
         quic = m.group(1).strip()
     return (bool(host), host, quic)
-
-
-def mitm_covers(hostname_value, host):
-    """粗判某域名是否落在 MITM 的 Host List 里(按序匹配, 先中先停; - 前缀为排除)。"""
-    if not hostname_value:
-        return (False, "hostname 未启用")
-    for item in [x.strip() for x in hostname_value.split(",") if x.strip()]:
-        neg = item.startswith("-")
-        pat = item[1:] if neg else item
-        rx = "^" + re.escape(pat).replace(r"\*", ".*").replace(r"\?", ".") + "$"
-        if re.match(rx, host, re.I):
-            return ((not neg), ("被 %s 排除" % item) if neg else ("命中 %s" % item))
-    return (False, "不在 hostname 列表内")
 
 
 def parse_ifconfig_utun():
@@ -1203,27 +1086,6 @@ def cmd_clients(ctx):
     log("  通道: %s   限速: %.1f req/s   超时: %.0fs"
         % (ctx["via_desc"], ctx["rate"], ctx["timeout"]))
 
-    # --- 0. 画像 UA 副作用自检 -------------------------------------------
-    log("")
-    log("  0) 画像 UA 副作用自检 —— 画像自带的 UA 不能意外命中 USER-AGENT 规则,")
-    log("     否则后面量到的落点全是假的。")
-    rows = []
-    neutral = "example.com"
-    base = cli.explain(neutral) if cli.available else {"policy": None}
-    for c in targets.get("clients") or []:
-        if not cli.available:
-            break
-        got = cli.explain(neutral, user_agent=c.get("ua") or "")
-        same = got["policy"] == base["policy"]
-        rows.append([c["id"], (c.get("ua") or "")[:44], base["policy"] or "?",
-                     got["policy"] or "?", "✓ 无副作用" if same else "✗ UA 改变了落点"])
-        chk.add(S, "画像 UA 无副作用: %s" % c["id"], same,
-                base["policy"] or "?", got["policy"] or "?", level="WARN",
-                note="该画像 UA 命中了 USER-AGENT 规则 %s, 用它测出的落点不代表域名本身的归属"
-                     % (got["source"] or ""))
-    if rows:
-        log(render_table(["画像", "UA(截断)", "基线落点", "带 UA 落点", "判定"], rows))
-
     # --- 1. UA 端到端到达矩阵 --------------------------------------------
     ua_url = targets.get("ua_matrix_url")
     if ua_url:
@@ -1364,25 +1226,18 @@ def cmd_clients(ctx):
 # 子命令 5: --crosscheck  分流落点交叉验证
 # ---------------------------------------------------------------------------
 
-NEUTRAL_HOST = "crosscheck-neutral.invalid"
-
-
 def _engine_bridge():
     """加载 engine.py 实例; 失败返回 (None, 原因)。"""
-    mod = _load_sibling("engine")
-    if mod is None:
-        return (None, "无法加载 engine.py")
     try:
-        return (mod.build_engine(), "")
-    except Exception as e:                                     # noqa: BLE001
+        import engine
+        return (engine.build_engine(), "")
+    except BaseException as e:                                 # noqa: BLE001
         return (None, "engine.build_engine() 失败: %s" % e)
 
 
 def _collect_queries(scen_dir, flt=None):
     """把 scenarios/*.json 里的请求摊平成去重后的查询列表。"""
-    rs = _load_sibling("runsuite")
-    if rs is None:
-        raise SystemExit("无法加载 runsuite.py(交叉验证要用它的场景加载器)")
+    import runsuite as rs
     files = rs.load_scenarios(scen_dir)
     seen, out = set(), []
     for fname, arr in files:
@@ -1391,13 +1246,12 @@ def _collect_queries(scen_dir, flt=None):
             if flt and flt not in name and flt not in fname:
                 continue
             for q in scn.get("requests", []) or []:
-                key = tuple(q.get(k) for k in ("host", "ip", "process", "ua"))
+                key = (q.get("host"), q.get("ip"))
                 if key in seen:
                     continue
                 seen.add(key)
                 out.append({"file": fname, "scenario": name,
-                            "host": q.get("host"), "ip": q.get("ip"),
-                            "process": q.get("process"), "ua": q.get("ua")})
+                            "host": q.get("host"), "ip": q.get("ip")})
     return out
 
 
@@ -1447,22 +1301,12 @@ def cmd_crosscheck(ctx):
     for q in queries:
         host, ip = q["host"], q["ip"]
         target = host or ip
-        note = ""
-        if not target:
-            target, note = NEUTRAL_HOST, "(纯 UA 查询, 双方都用中性宿主域)"
-        overrides = {}
-        if q["process"]:
-            # surge-cli 只吃进程路径, 进程名取路径末段, 语义与 PROCESS-NAME 一致
-            overrides["process_path"] = "/Applications/%s" % q["process"]
-        if q["ua"]:
-            overrides["user_agent"] = q["ua"]
-        ex = cli.explain(target, **overrides)
+        ex = cli.explain(target)
         if ex["error"]:
             errors.append((q, ex["error"]))
             continue
         try:
-            off = eng.match(host=(None if not host and note else host) or (target if note else None),
-                            ip=ip, process=q["process"], ua=q["ua"])
+            off = eng.match(host=host, ip=ip)
         except Exception as e:                                 # noqa: BLE001
             errors.append((q, "engine: %s" % e))
             continue
@@ -1470,10 +1314,7 @@ def cmd_crosscheck(ctx):
             n_ip += 1
         else:
             n_domain += 1
-        label = " ".join(filter(None, [
-            host or "", ("ip=" + ip) if ip else "",
-            ("proc=" + q["process"]) if q["process"] else "",
-            ("ua=" + q["ua"][:24]) if q["ua"] else "", note]))
+        label = " ".join(filter(None, [host or "", ("ip=" + ip) if ip else ""]))
         if (off.get("policy") or "") != (ex["policy"] or ""):
             mismatch_policy.append({
                 "query": label, "kind": "ip" if (ip and not host) else "domain",
@@ -1555,142 +1396,60 @@ def cmd_crosscheck(ctx):
 
 
 # ---------------------------------------------------------------------------
-# 子命令 6: --ua-routing  UA 分流生效性
+# 子命令 6: --ua-routing  MITM 红线 + UA 中性验证
 # ---------------------------------------------------------------------------
 
-UA_CHANNELS = [
-    # (通道 id, via, scheme, Surge 能否看到 UA, 说明)
-    ("proxy_https", "proxy", "https", True,
-     "经 Surge HTTP 代理的 HTTPS: UA 出现在 CONNECT 请求头里, 未解密也可见"),
-    ("proxy_http", "proxy", "http", True,
-     "经 Surge HTTP 代理的明文 HTTP: HTTP 引擎直接读到 UA"),
-    ("tun_http", "tun", "http", True,
-     "绕开代理走 TUN 的明文 HTTP: 仍由 HTTP 引擎处理, UA 可见"),
-    ("tun_https", "tun", "https", False,
-     "绕开代理走 TUN 的 HTTPS: 只有 SNI, UA 不可见 —— 需要 MITM 解密该域才生效"),
-]
-
-
 def cmd_ua_routing(ctx):
-    log, chk, cli, curl = ctx["log"], ctx["checks"], ctx["cli"], ctx["curl"]
+    """MITM/auto-quic-block 红线 + 「全库零 USER-AGENT 规则」的负向验证。
+
+    2026-08-30 裁决后全库移除了全部 USER-AGENT 规则(静态面由 A8 把守), 本节在
+    真实 Surge 上复核同一事实: 每个用例带 UA 与不带 UA 的落点必须完全相同,
+    落点变化 = 有 UA 规则回流, 应删规则本身。
+    """
+    log, chk, cli = ctx["log"], ctx["checks"], ctx["cli"]
     S = "ua-routing"
-    cfg = (ctx["targets"].get("ua_routing") or {})
-    cases = cfg.get("cases") or []
+    cases = (ctx["targets"].get("ua_routing") or {}).get("cases") or []
     conf = ctx["conf_text"]
     mitm_on, mitm_host, quic = conf_mitm_hostname(conf)
-    log.section("UA 分流生效性(四格通道矩阵)")
-    log("")
-    log("  USER-AGENT 规则只在「Surge 的 HTTP 引擎能读到 UA」时生效(surge-docs/rules/http.md)。")
-    log("  能不能读到, 取决于请求走哪条通道 —— 本节把四种通道分别实测一遍:")
-    log(render_table(["通道", "路径", "协议", "Surge 能否读到 UA", "说明"],
-                     [[cid, via, sch, "可以" if vis else "需 MITM", desc]
-                      for cid, via, sch, vis, desc in UA_CHANNELS]))
+    log.section("UA 中性验证 + MITM 红线")
     log("")
     log("  [MITM] hostname = %s" % (mitm_host if mitm_on else "(留空/注释, 未启用)"))
     log("         auto-quic-block = %s" % (quic or "(未设置)"))
-    if mitm_on and str(quic).lower() != "true":
-        chk.add(S, "启用 MITM hostname 时 auto-quic-block 必须为 true", False,
-                "true", quic or "(未设置)",
-                note="否则命中域的 HTTP/3 会绕过 MITM 形成半解密(conf 注释里写明的红线)")
+    if mitm_on:
+        chk.add(S, "启用 MITM hostname 时 auto-quic-block 必须为 true",
+                str(quic).lower() == "true", "true", quic or "(未设置)",
+                note="否则命中域的 HTTP/3 会绕过 MITM 形成半解密(profile 红线)")
 
     if not cli.available:
         chk.add(S, "surge-cli 可用", False, "可用", cli.reason)
         return 2
 
-    rows_rule, rows_wire = [], []
+    rows = []
     for case in cases:
         cid = case.get("id") or case.get("host")
         host = case["host"]
         ua, base_ua = case.get("ua"), case.get("baseline_ua") or "curl/8.7.1"
-
-        # --- 规则层: 随时可跑, 不需要网络 -------------------------------
         got = cli.explain(host, user_agent=ua)
         base = cli.explain(host, user_agent=base_ua)
-        exp_pol = case.get("expect_policy")
-        exp_src = case.get("expect_source")
-        ok_pol = (got["policy"] == exp_pol) if exp_pol else None
-        ok_base = (base["policy"] == case.get("baseline_policy")) if case.get("baseline_policy") else None
-        ok_src = (got["source"] == exp_src) if exp_src else None
-        rows_rule.append([cid, (ua or "")[:26], base["policy"] or "?",
-                          got["policy"] or "?", got["source"] or "-",
-                          case.get("source_rule", "")[:30]])
-        if exp_pol:
-            chk.add(S, "规则层 %s: 带 UA 落点" % cid, ok_pol, exp_pol, got["policy"] or "?",
-                    note=case.get("desc", ""))
+        same = got["policy"] == base["policy"]
+        rows.append([cid, (ua or "")[:32], base["policy"] or "?",
+                     got["policy"] or "?", got["source"] or "-",
+                     "✓ UA 不改变落点" if same else "✗ UA 改变了落点"])
+        chk.add(S, "UA 中性 %s" % cid, same, base["policy"] or "?",
+                got["policy"] or "?",
+                note="落点随 UA 变化 = 有 USER-AGENT 规则回流(命中 %s), 应删规则本身"
+                     % (got["source"] or "?"))
         if case.get("baseline_policy"):
-            chk.add(S, "规则层 %s: 基线落点" % cid, ok_base, case["baseline_policy"],
-                    base["policy"] or "?",
+            chk.add(S, "基线落点 %s" % cid, base["policy"] == case["baseline_policy"],
+                    case["baseline_policy"], base["policy"] or "?", level="WARN",
                     note="基线变了说明宿主域自身归属变了, 用例需要更新")
-        if exp_src:
-            chk.add(S, "规则层 %s: 命中表" % cid, ok_src, exp_src, got["source"] or "-")
-
-        # 两个落点的物理出口是否可区分 —— 决定 wire 层能不能用 IP 断言
-        distinguishable = bool(got["final"] and base["final"] and got["final"] != base["final"])
-
-        # --- 线路层: 四通道实测(--offline 下整层跳过, 它要发真实请求) ------
-        if ctx["offline"]:
-            continue
-        for chan, via, scheme, visible, _desc in UA_CHANNELS:
-            url = case.get("url") or ("%s://%s/" % (scheme, host))
-            url = re.sub(r"^https?://", scheme + "://", url)
-            if via == "proxy" and not ctx["proxy_port"]:
-                rows_wire.append([cid, chan, "SKIP", "-", "-", "没探测到 Surge HTTP 代理端口"])
-                continue
-            if not visible:
-                covered, why = mitm_covers(mitm_host if mitm_on else None, host)
-                if not covered:
-                    rows_wire.append([cid, chan, "SKIP", "-", "-",
-                                      "MITM 未覆盖该域(%s) —— 本通道的 UA 分流本就不该生效" % why])
-                    chk.add(S, "线路层 %s/%s" % (cid, chan), None, "需 MITM 解密",
-                            "跳过: %s" % why, level="WARN",
-                            note="启用 [MITM] hostname 覆盖该域后本用例会自动开始断言")
-                    continue
-            if not case.get("echo"):
-                rows_wire.append([cid, chan, "SKIP", "-", "-", "该用例没有 IP 回显端点, 线路层无法判定"])
-                continue
-            r_ua = curl.fetch(url, client={"ua": ua}, via=via)
-            r_base = curl.fetch(url, client={"ua": base_ua}, via=via)
-            ip_ua, _ = parse_probe_ip(case["echo"], r_ua["body"] or "")
-            ip_base, _ = parse_probe_ip(case["echo"], r_base["body"] or "")
-            if not ip_ua or not ip_base:
-                rows_wire.append([cid, chan, "UNREACHABLE", ctx["mask_ip"](ip_ua) or "-",
-                                  ctx["mask_ip"](ip_base) or "-",
-                                  (r_ua["error"] or r_base["error"] or "回显解析失败")[:36]])
-                chk.add(S, "线路层 %s/%s" % (cid, chan), None, "取到两次出口 IP",
-                        "UNREACHABLE", level="WARN")
-                continue
-            differ = ip_ua != ip_base
-            if not distinguishable:
-                verdict = "· 两个落点物理出口相同, IP 层区分不出(只做规则层断言)"
-                ok = None
-            elif visible:
-                verdict = "✓ UA 改变了实际出口" if differ else "✗ UA 未改变实际出口"
-                ok = differ
-            else:
-                verdict = "✓ UA 未生效(符合该通道预期)" if not differ else "! UA 竟然生效了"
-                ok = not differ
-            rows_wire.append([cid, chan, "OK", ctx["mask_ip"](ip_ua),
-                              ctx["mask_ip"](ip_base), verdict])
-            if ok is not None:
-                chk.add(S, "线路层 %s/%s" % (cid, chan), ok,
-                        "出口随 UA 改变" if visible else "出口不随 UA 改变",
-                        "带 UA=%s / 基线=%s" % (ctx["mask_ip"](ip_ua), ctx["mask_ip"](ip_base)),
-                        note=_desc)
 
     log("")
     log("  规则层(surge-cli rule explain, 不建连接, 随时可跑):")
-    log(render_table(["用例", "UA(截断)", "基线落点", "带 UA 落点", "命中表", "对应规则"],
-                     rows_rule))
-    log("")
-    if ctx["offline"]:
-        log("  线路层: --offline 下整层跳过(它要发真实请求)。去掉 --offline 即可实测四格矩阵。")
-    else:
-        log("  线路层(真实发请求, 比对两次的出口 IP):")
-        log(render_table(["用例", "通道", "结果", "带 UA 出口", "基线出口", "判定"], rows_wire))
+    log(render_table(["用例", "UA(截断)", "基线落点", "带 UA 落点", "命中表", "判定"], rows))
 
     ctx["result"]["ua_routing"] = {
-        "mitm_enabled": mitm_on, "auto_quic_block": quic,
-        "rule_layer": rows_rule, "wire_layer": rows_wire,
+        "mitm_enabled": mitm_on, "auto_quic_block": quic, "cases": rows,
     }
     return 0
 
@@ -1741,7 +1500,7 @@ def build_parser():
         epilog="""示例:
   python3 realworld.py --tun                 # 接管状态(离线可跑)
   python3 realworld.py --crosscheck          # 与离线引擎对账(离线可跑)
-  python3 realworld.py --ua-routing          # UA 分流四格矩阵
+  python3 realworld.py --ua-routing          # MITM 红线 + UA 中性验证
   python3 realworld.py --dns                 # DNS 深测
   python3 realworld.py --webrtc              # STUN / WebRTC 泄漏
   python3 realworld.py --clients             # 真实客户端画像 × 各组代表域

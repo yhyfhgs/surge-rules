@@ -153,14 +153,14 @@
   {
     "name": "httpdns_service_ip_reject",
     "desc": "HTTPDNS 服务器 IP：SDK 通常以 IP 字面量直连（无 DNS 查询），域名规则拦不住，必须保留 IP 层。全部带 no-resolve",
+    "note": "203.107.1.0/24 与 ChinaIP.list:11191 精确重复（A2 P0），本表前位胜出——这是刻意裁决，非缺陷。",
     "requests": [
       {"host": "203.107.1.33", "note": "阿里云 HTTPDNS"},
       {"host": "119.29.29.98", "note": "腾讯 DNSPod HTTPDNS"},
       {"host": "182.254.116.117"},
       {"host": "180.76.76.200", "note": "百度 HTTPDNS"}
     ],
-    "assert": {"same_policy": true, "policy": "REJECT"},
-    "note": "203.107.1.0/24 与 ChinaIP.list:11191 精确重复（A2 P0），本表前位胜出——这是刻意裁决，非缺陷。"
+    "assert": {"same_policy": true, "policy": "REJECT"}
   },
   {
     "name": "product_analytics_never_rejected",

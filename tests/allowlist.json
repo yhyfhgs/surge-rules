@@ -7,7 +7,7 @@
     "preventive=true 表示防回归豁免：当前配置本就不该命中，未命中时不计入「未使用豁免」告警。",
     "file / rule / by / by_file 均支持 fnmatch 通配（* ?）。每条必须写 reason。",
     "允许存在的分层放 exemptions；必须持续不存在的规则放 forbidden，A8 命中即 P0 且不可豁免。",
-    "kind 可缩小检查子类；pending_decision 只登记尚未裁决的项目，不改变退出码。"
+    "kind 可缩小检查子类（如 A10 的 psl-private）。"
   ],
   "exemptions": [
     {

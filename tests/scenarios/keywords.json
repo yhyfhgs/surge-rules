@@ -1,0 +1,721 @@
+[
+  {
+    "name": "keyword_adsyndication_boundary",
+    "desc": "Reject.list 的 DOMAIN-KEYWORD,adsyndication 正例与连字符近似负例。",
+    "requests": [
+      {"host": "adsyndication.com", "note": "正例：命中 DOMAIN-KEYWORD,adsyndication"},
+      {"host": "adsyndicat.com", "note": "负例：拼写近似但不含完整关键词"}
+    ],
+    "assert": {
+      "no_dns_leak": true,
+      "per_request": [
+        {"host": "adsyndication.com", "policy": "REJECT", "reason": "Reject.list:314 DOMAIN-KEYWORD,adsyndication"},
+        {"host": "adsyndicat.com", "policy": "Final", "reason": "不含 adsyndication，落 FINAL"}
+      ]
+    }
+  },
+  {
+    "name": "keyword_adtarget_boundary",
+    "desc": "Reject.list 的 DOMAIN-KEYWORD,adtarget. 正例与连字符近似负例。",
+    "requests": [
+      {"host": "adtarget.net", "note": "正例：命中 DOMAIN-KEYWORD,adtarget."},
+      {"host": "ad-target.net", "note": "负例：连字符分隔，不含完整关键词"}
+    ],
+    "assert": {
+      "no_dns_leak": true,
+      "per_request": [
+        {"host": "adtarget.net", "policy": "REJECT", "reason": "Reject.list:315 DOMAIN-KEYWORD,adtarget."},
+        {"host": "ad-target.net", "policy": "Final", "reason": "不含 adtarget，落 FINAL"}
+      ]
+    }
+  },
+  {
+    "name": "keyword_advertmarket_boundary",
+    "desc": "Reject.list 的 DOMAIN-KEYWORD,advertmarket 正例与连字符近似负例。",
+    "requests": [
+      {"host": "advertmarket.org", "note": "正例：命中 DOMAIN-KEYWORD,advertmarket"},
+      {"host": "advert-market.org", "note": "负例：连字符分隔，不含完整关键词"}
+    ],
+    "assert": {
+      "no_dns_leak": true,
+      "per_request": [
+        {"host": "advertmarket.org", "policy": "REJECT", "reason": "Reject.list:316 DOMAIN-KEYWORD,advertmarket"},
+        {"host": "advert-market.org", "policy": "Final", "reason": "不含 advertmarket，落 FINAL"}
+      ]
+    }
+  },
+  {
+    "name": "keyword_nimiqpool_boundary",
+    "desc": "Reject.list 的 DOMAIN-KEYWORD,nimiqpool 正例与连字符近似负例。",
+    "requests": [
+      {"host": "nimiqpool.com", "note": "正例：命中 DOMAIN-KEYWORD,nimiqpool"},
+      {"host": "nimiq-pool.com", "note": "负例：连字符分隔，不含完整关键词"}
+    ],
+    "assert": {
+      "no_dns_leak": true,
+      "per_request": [
+        {"host": "nimiqpool.com", "policy": "REJECT", "reason": "Reject.list:317 DOMAIN-KEYWORD,nimiqpool"},
+        {"host": "nimiq-pool.com", "policy": "Final", "reason": "不含 nimiqpool，落 FINAL"}
+      ]
+    }
+  },
+  {
+    "name": "keyword_packetsdk_boundary",
+    "desc": "Reject.list 的 DOMAIN-KEYWORD,packetsdk 正例与连字符近似负例。",
+    "requests": [
+      {"host": "packetsdk.net", "note": "正例：命中 DOMAIN-KEYWORD,packetsdk"},
+      {"host": "packet-sdk.net", "note": "负例：连字符分隔，不含完整关键词"}
+    ],
+    "assert": {
+      "no_dns_leak": true,
+      "per_request": [
+        {"host": "packetsdk.net", "policy": "REJECT", "reason": "Reject.list:318 DOMAIN-KEYWORD,packetsdk"},
+        {"host": "packet-sdk.net", "policy": "Final", "reason": "不含 packetsdk，落 FINAL"}
+      ]
+    }
+  },
+  {
+    "name": "keyword_pangolin_sdk_boundary",
+    "desc": "Reject.list 的 DOMAIN-KEYWORD,pangolin-sdk-toutiao 正例与拼写近似负例。",
+    "requests": [
+      {"host": "pangolin-sdk-toutiao.com", "note": "正例：命中 DOMAIN-KEYWORD,pangolin-sdk-toutiao"},
+      {"host": "pangolin-sdk-toutia.com", "note": "负例：拼写近似但不含完整关键词"}
+    ],
+    "assert": {
+      "no_dns_leak": true,
+      "per_request": [
+        {"host": "pangolin-sdk-toutiao.com", "policy": "REJECT", "reason": "Reject.list:319 DOMAIN-KEYWORD,pangolin-sdk-toutiao"},
+        {"host": "pangolin-sdk-toutia.com", "policy": "Final", "reason": "不含 pangolin-sdk-toutiao，落 FINAL"}
+      ]
+    }
+  },
+  {
+    "name": "keyword_sci_hub_boundary",
+    "desc": "ProxyGFW.list 的 DOMAIN-KEYWORD,sci-hub 正例与连字符缺失负例。",
+    "requests": [
+      {"host": "sci-hub.se", "note": "正例：命中 DOMAIN-KEYWORD,sci-hub"},
+      {"host": "schi-hub.org", "note": "负例：拼写近似但不含完整关键词"}
+    ],
+    "assert": {
+      "no_dns_leak": true,
+      "per_request": [
+        {"host": "sci-hub.se", "policy": "Proxy", "reason": "ProxyGFW.list:5580 DOMAIN-KEYWORD,sci-hub"},
+        {"host": "schi-hub.org", "policy": "Final", "reason": "不含 sci-hub，落 FINAL"}
+      ]
+    }
+  },
+  {
+    "name": "kw_direct_applecn_cname_wildcard",
+    "desc": "2026-08-31 审计整改（P1-04）：AppleCN 的 4 条 Akamai CNAME 片段关键词改右锚定 DOMAIN-WILDCARD——只认「以该串结尾」的 CNAME 形态域，不再按任意子串命中",
+    "requests": [
+      {"host": "www.apple.com.edgekey.net", "note": "www.apple.com 的 edgekey CNAME 形态"},
+      {"host": "support.apple.com.akadns.net", "note": "support 面 akadns 调度形态"},
+      {"host": "apple-support.akadns.net", "note": "裸串本身，DOMAIN-SUFFIX 含 apex"},
+      {"host": "www.icloud.com.akadns.net"},
+      {"host": "apple.com.akadns.net.phishing-cdn.com", "note": "负例：品牌串在中段的仿冒域"},
+      {"host": "apple.com.edgekey.net.globalredir.akadns.net", "note": "负例：右锚定后不再命中的 Akamai globalredir 链形态"}
+    ],
+    "assert": {
+      "no_dns_leak": true,
+      "per_request": [
+        {"host": "www.apple.com.edgekey.net", "policy": "DIRECT", "reason": "DOMAIN-SUFFIX,apple.com.edgekey.net"},
+        {"host": "support.apple.com.akadns.net", "policy": "DIRECT", "reason": "DOMAIN-SUFFIX,apple.com.akadns.net"},
+        {"host": "apple-support.akadns.net", "policy": "DIRECT", "reason": "DOMAIN-SUFFIX,apple-support.akadns.net"},
+        {"host": "www.icloud.com.akadns.net", "policy": "DIRECT", "reason": "DOMAIN-SUFFIX,icloud.com.akadns.net"},
+        {"host": "apple.com.akadns.net.phishing-cdn.com", "policy": "Final", "reason": "原 DOMAIN-KEYWORD 会把它误判 DIRECT；右锚定后落 Final"},
+        {"host": "apple.com.edgekey.net.globalredir.akadns.net", "policy": "Final", "reason": "刻意收窄的代价：globalredir 链形态改由代理走，登记为观察项"}
+      ]
+    }
+  },
+  {
+    "name": "kw_direct_applecn_testflight_removed",
+    "desc": "AppleCN 删 DOMAIN-KEYWORD,testflight：官方 TestFlight 域本就由同表 DOMAIN-SUFFIX,apple.com 承接，删除只切掉第三方含 testflight 子串的误捕获",
+    "requests": [
+      {"host": "testflight.apple.com", "note": "上游 TestFlight 表两条精确域之一"},
+      {"host": "beta.apple.com", "note": "上游 TestFlight 表两条精确域之二"},
+      {"host": "mytestflight.io", "note": "负例：第三方含品牌子串"},
+      {"host": "testflight-tracker.sample-analytics.com", "note": "负例：第三方追踪域含品牌子串"}
+    ],
+    "assert": {
+      "no_dns_leak": true,
+      "per_request": [
+        {"host": "testflight.apple.com", "policy": "DIRECT", "reason": "DOMAIN-SUFFIX,apple.com，删 keyword 前后不变"},
+        {"host": "beta.apple.com", "policy": "DIRECT", "reason": "DOMAIN-SUFFIX,apple.com，删 keyword 前后不变"},
+        {"host": "mytestflight.io", "policy": "Final", "reason": "原被 keyword 强制 DIRECT"},
+        {"host": "testflight-tracker.sample-analytics.com", "policy": "Final", "reason": "原被 keyword 强制 DIRECT"}
+      ]
+    }
+  },
+  {
+    "name": "kw_direct_microsoftcn_onedrive_exact",
+    "desc": "OneDrive 国内端点保持 DIRECT；国际控制与数据端点归 Microsoft 组，避免会话跨出口。",
+    "requests": [
+      {"host": "1drv.ms", "note": "OneDrive 短链"},
+      {"host": "1drv.com"},
+      {"host": "by3301-a.1drv.com", "note": "区域数据面主机名"},
+      {"host": "api.onedrive.com"},
+      {"host": "onedrive.live.com", "note": "R1-01 起由 Microsoft.list（前位）窄豁免认领，不再落 MicrosoftCN 的 live.com"},
+      {"host": "skydrive.wns.windows.com", "note": "WNS 推送端点"},
+      {"host": "files.1drv.com", "note": "国际 OneDrive 数据面归 Microsoft owner"},
+      {"host": "firestonedrivestore.com", "note": "负例：上游 Global 表域，串中含 onedrive"},
+      {"host": "51drv.com", "note": "负例：上游 ChinaMax 表域，串中含 1drv"}
+    ],
+    "assert": {
+      "no_dns_leak": true,
+      "per_request": [
+        {"host": "1drv.ms", "policy": "DIRECT", "reason": "DOMAIN-SUFFIX,1drv.ms（新增）"},
+        {"host": "1drv.com", "policy": "DIRECT", "reason": "DOMAIN-SUFFIX,1drv.com（新增）"},
+        {"host": "by3301-a.1drv.com", "policy": "DIRECT", "reason": "DOMAIN-SUFFIX,1drv.com（新增）"},
+        {"host": "api.onedrive.com", "policy": "DIRECT", "reason": "DOMAIN-SUFFIX,onedrive.com（新增）"},
+        {"host": "onedrive.live.com", "policy": "Google-X-Meta-MS", "reason": "R1-01 在 Microsoft.list（前位）加了 DOMAIN-SUFFIX,onedrive.live.com 窄豁免——CN 侧解析被投毒，直连必挂；与本场景删 keyword 无关"},
+        {"host": "skydrive.wns.windows.com", "policy": "DIRECT", "reason": "DOMAIN-SUFFIX,skydrive.wns.windows.com（新增）"},
+        {"host": "files.1drv.com", "policy": "Google-X-Meta-MS", "reason": "OneDrive 数据面与国际控制面统一由 Microsoft.list 认领"},
+        {"host": "firestonedrivestore.com", "policy": "Final", "reason": "原被 onedrive keyword 强制 DIRECT，属跨境误分流"},
+        {"host": "51drv.com", "policy_in": ["Final", "DIRECT"], "reason": "无显式 owner 时落 Final；ChinaDomain 再生后可能按机器层证据回收为 DIRECT。"}
+      ]
+    }
+  },
+  {
+    "name": "kw_direct_chinamedia_bilibili_exact",
+    "desc": "ChinaMedia 删 DOMAIN-KEYWORD,bilibili，恢复上游 BiliBili 表 10 条被级联去重吃掉的精确后缀；国际域 bilibili.tv 仍归 Streaming（前位）",
+    "requests": [
+      {"host": "www.bilibili.com"},
+      {"host": "api.bilibili.com"},
+      {"host": "bilibili.cn"},
+      {"host": "bilibilipay.com"},
+      {"host": "hdslb.com", "note": "对照：非 keyword 覆盖面，本就有精确后缀"},
+      {"host": "bilibili.tv", "note": "国际版，Streaming 前位认领"},
+      {"host": "blbilibili.com", "note": "负例：第三方站，串中含 bilibili"},
+      {"host": "bilibilihelper.com", "note": "负例：第三方工具站"}
+    ],
+    "assert": {
+      "no_dns_leak": true,
+      "per_request": [
+        {"host": "www.bilibili.com", "policy": "DIRECT", "reason": "DOMAIN-SUFFIX,bilibili.com（新增）"},
+        {"host": "api.bilibili.com", "policy": "DIRECT", "reason": "DOMAIN-SUFFIX,bilibili.com（新增）"},
+        {"host": "bilibili.cn", "policy": "DIRECT", "reason": "DOMAIN-SUFFIX,bilibili.cn（新增）"},
+        {"host": "bilibilipay.com", "policy": "DIRECT", "reason": "DOMAIN-SUFFIX,bilibilipay.com（新增）"},
+        {"host": "hdslb.com", "policy": "DIRECT", "reason": "既有 DOMAIN-SUFFIX,hdslb.com"},
+        {"host": "bilibili.tv", "policy": "流媒体", "reason": "Streaming 前位，唯一归属不变"},
+        {"host": "blbilibili.com", "policy": "Final", "reason": "原被 keyword 强制 DIRECT。上游 ChinaDomain（当前版本与 pin 65e8adf）均无此域，再生不会回收，故单态 Final"},
+        {"host": "bilibilihelper.com", "policy": "Final", "reason": "原被 keyword 强制 DIRECT。上游 ChinaDomain（当前版本与 pin 65e8adf）均无此域，再生不会回收，故单态 Final"}
+      ]
+    }
+  },
+  {
+    "name": "kw_direct_chinamedia_qiyi_exact",
+    "desc": "ChinaMedia 删 DOMAIN-KEYWORD,qiyi，恢复上游 iQIYI 表 10 条精确后缀；负例覆盖上游 Advertising / 成人仿冒域——原先被品牌子串一并强制 DIRECT",
+    "requests": [
+      {"host": "www.iqiyi.com"},
+      {"host": "qiyi.com"},
+      {"host": "qiyipic.com"},
+      {"host": "iqiyipic.com"},
+      {"host": "aiqiyicloud.com"},
+      {"host": "intl.iqiyi.com", "note": "国际版，Streaming 前位认领"},
+      {"host": "doh.iqiyi.com", "note": "对照：私有 DoH，Reject 全链最前"},
+      {"host": "qiyikeji.com", "note": "负例：无关国内企业域（企业科技）"},
+      {"host": "iqiyi.space", "note": "负例：上游 Advertising 表域"},
+      {"host": "xxiqiyiavxx.buzz", "note": "负例：上游 Global 表成人仿冒域"}
+    ],
+    "assert": {
+      "no_dns_leak": true,
+      "per_request": [
+        {"host": "www.iqiyi.com", "policy": "DIRECT", "reason": "DOMAIN-SUFFIX,iqiyi.com（新增）"},
+        {"host": "qiyi.com", "policy": "DIRECT", "reason": "DOMAIN-SUFFIX,qiyi.com（新增）"},
+        {"host": "qiyipic.com", "policy": "DIRECT", "reason": "DOMAIN-SUFFIX,qiyipic.com（新增）"},
+        {"host": "iqiyipic.com", "policy": "DIRECT", "reason": "DOMAIN-SUFFIX,iqiyipic.com（新增）"},
+        {"host": "aiqiyicloud.com", "policy": "DIRECT", "reason": "DOMAIN-SUFFIX,aiqiyicloud.com（新增）"},
+        {"host": "intl.iqiyi.com", "policy": "流媒体", "reason": "Streaming 前位，唯一归属不变"},
+        {"host": "doh.iqiyi.com", "policy": "REJECT", "reason": "Reject.list 区 1，删 keyword 前后不变"},
+        {"host": "qiyikeji.com", "policy": "Final", "reason": "原被 keyword 强制 DIRECT。上游 ChinaDomain（当前版本与 pin 65e8adf）均无此域，再生不会回收，故单态 Final"},
+        {"host": "iqiyi.space", "policy": "Final", "reason": "广告域原被品牌子串强制 DIRECT，属误放行"},
+        {"host": "xxiqiyiavxx.buzz", "policy": "Final", "reason": "仿冒域原被品牌子串强制 DIRECT，属误放行"}
+      ]
+    }
+  },
+  {
+    "name": "kw_direct_proxygfw_brand_exact_restore",
+    "desc": "ProxyGFW 的品牌规则收窄为可审计的精确后缀：dropbox/appledaily/dlercloud 资产仍走 Proxy，已移除的 beetalk 退回 Final；abema 资产由 Streaming 承接，仿冒域继续落 Final",
+    "requests": [
+      {"host": "www.dropbox.com"},
+      {"host": "api.dropboxapi.com"},
+      {"host": "getdropbox.com"},
+      {"host": "dropboxusercontent.com", "note": "Dropbox content namespace is unified under DownloadCDN"},
+      {"host": "dl.dropboxusercontent.com"},
+      {"host": "dropboxstatic.com", "note": "DownloadCDN 前位认领，不动"},
+      {"host": "appledaily.com.hk"},
+      {"host": "beetalk.com", "note": "已移除的死域，回落 Final"},
+      {"host": "dlercloud.com"},
+      {"host": "abema.tv", "note": "Abema 资产归 Streaming（前位），删 keyword 不影响"},
+      {"host": "dropbox-download.com", "note": "负例：上游 Advertising 表仿冒域"},
+      {"host": "a8.abemashopping.jp", "note": "负例：与 AbemaTV 无关的日本电商域"}
+    ],
+    "assert": {
+      "no_dns_leak": true,
+      "per_request": [
+        {"host": "www.dropbox.com", "policy": "Proxy", "reason": "DOMAIN-SUFFIX,dropbox.com（新增）；2026-09-01 起 ProxyGFW 独立挂 Proxy 组（与收尾 FINAL 解耦）"},
+        {"host": "api.dropboxapi.com", "policy": "Proxy", "reason": "DOMAIN-SUFFIX,dropboxapi.com（新增）；2026-09-01 起 ProxyGFW 独立挂 Proxy 组（与收尾 FINAL 解耦）"},
+        {"host": "getdropbox.com", "policy": "Proxy", "reason": "DOMAIN-SUFFIX,getdropbox.com（新增）；2026-09-01 起 ProxyGFW 独立挂 Proxy 组（与收尾 FINAL 解耦）"},
+        {"host": "dropboxusercontent.com", "policy": "下载"},
+        {"host": "dl.dropboxusercontent.com", "policy": "下载"},
+        {"host": "dropboxstatic.com", "policy": "下载", "reason": "DownloadCDN 前位，唯一归属不变"},
+        {"host": "appledaily.com.hk", "policy": "Proxy", "reason": "DOMAIN-SUFFIX,appledaily.com.hk（新增）；2026-09-01 起 ProxyGFW 独立挂 Proxy 组（与收尾 FINAL 解耦）"},
+        {"host": "beetalk.com", "policy": "Final", "reason": "beetalk.com 已从 ProxyGFW 移除，落 FINAL 兜底"},
+        {"host": "dlercloud.com", "policy": "Proxy", "reason": "DOMAIN-SUFFIX,dlercloud.com（新增）；2026-09-01 起 ProxyGFW 独立挂 Proxy 组（与收尾 FINAL 解耦）"},
+        {"host": "abema.tv", "policy": "流媒体", "reason": "Streaming 前位，唯一归属不变"},
+        {"host": "dropbox-download.com", "policy": "Final", "reason": "不再由 ProxyGFW keyword 显式认领，落 FINAL 兜底"},
+        {"host": "a8.abemashopping.jp", "policy": "Final", "reason": "不再由 ProxyGFW keyword 显式认领，落 FINAL 兜底"}
+      ]
+    }
+  },
+  {
+    "name": "kw_direct_proxygfw_github_1e100_removed",
+    "desc": "ProxyGFW 删 github/1e100 两条关键词：两条主链早已被前位表（Microsoft / Google）认领，关键词只在制造国内域误判——kkgithub/hellogithub 等不再被钉在代理侧",
+    "requests": [
+      {"host": "github.com", "note": "Microsoft.list 前位认领"},
+      {"host": "githubusercontent.com", "note": "Microsoft.list 前位认领"},
+      {"host": "api.githubcopilot.com", "note": "Microsoft.list 前位认领"},
+      {"host": "1e100.net", "note": "Google.list 前位认领，故不向 ProxyGFW 重复添加"},
+      {"host": "yx-in-f108.1e100.net", "note": "Google.list 前位认领"},
+      {"host": "kkgithub.com", "note": "负例：报告 P1-04 点名的国内镜像站"},
+      {"host": "hellogithub.com", "note": "负例：报告 P1-04 点名的国内社区站"},
+      {"host": "githubim.com", "note": "负例：报告 P1-04 点名"},
+      {"host": "githubshare.com", "note": "负例：报告 P1-04 点名"}
+    ],
+    "assert": {
+      "no_dns_leak": true,
+      "per_request": [
+        {"host": "github.com", "policy": "Google-X-Meta-MS", "reason": "Microsoft.list，删 keyword 前后不变"},
+        {"host": "githubusercontent.com", "policy": "Google-X-Meta-MS", "reason": "Microsoft.list，删 keyword 前后不变"},
+        {"host": "api.githubcopilot.com", "policy": "Google-X-Meta-MS", "reason": "Microsoft.list，删 keyword 前后不变"},
+        {"host": "1e100.net", "policy": "Google-X-Meta-MS", "reason": "Google.list，删 keyword 前后不变"},
+        {"host": "yx-in-f108.1e100.net", "policy": "Google-X-Meta-MS", "reason": "Google.list，删 keyword 前后不变"},
+        {"host": "kkgithub.com", "policy_in": ["Final", "DIRECT"], "reason": "无显式 owner 时落 Final；ChinaDomain 再生可按机器层证据回收为 DIRECT。"},
+        {"host": "hellogithub.com", "policy_in": ["Final", "DIRECT"], "reason": "无显式 owner 时落 Final；ChinaDomain 再生可按机器层证据回收为 DIRECT。"},
+        {"host": "githubim.com", "policy_in": ["Final", "DIRECT"], "reason": "无显式 owner 时落 Final；ChinaDomain 再生可按机器层证据回收为 DIRECT。"},
+        {"host": "githubshare.com", "policy_in": ["Final", "DIRECT"], "reason": "无显式 owner 时落 Final；ChinaDomain 再生可按机器层证据回收为 DIRECT。"}
+      ]
+    }
+  },
+  {
+    "name": "kw_direct_proxygfw_avtb_wildcard",
+    "desc": "ProxyGFW 的 avtb 规则改为显式后缀：avtb.com、avtb.net、avtb123.com 及其子域走 Proxy，不再依赖宽关键词吞入中段含该串的域",
+    "requests": [
+      {"host": "avtb123.com", "note": "正例：显式后缀"},
+      {"host": "avtb.net", "note": "正例：显式后缀"},
+      {"host": "www.avtb.com", "note": "正例：显式 avtb.com 后缀"},
+      {"host": "foo.avtb.net", "note": "正例：显式 avtb.net 后缀"},
+      {"host": "eqoavtbu.com", "note": "负例：上游 KuaiShou/ChinaMax 域，串在中段"},
+      {"host": "dnavtbt.com", "note": "负例：上游 Advertising 域，串在中段"}
+    ],
+    "assert": {
+      "no_dns_leak": true,
+      "per_request": [
+        {"host": "avtb123.com", "policy": "Proxy", "reason": "DOMAIN-SUFFIX,avtb123.com"},
+        {"host": "avtb.net", "policy": "Proxy", "reason": "DOMAIN-SUFFIX,avtb.net"},
+        {"host": "www.avtb.com", "policy": "Proxy", "reason": "DOMAIN-SUFFIX,avtb.com"},
+        {"host": "foo.avtb.net", "policy": "Proxy", "reason": "DOMAIN-SUFFIX,avtb.net"},
+        {"host": "eqoavtbu.com", "policy_in": ["Final", "DIRECT"], "reason": "无显式 owner 时落 Final；ChinaDomain 再生可按机器层证据回收为 DIRECT。"},
+        {"host": "dnavtbt.com", "policy": "Final", "reason": "不再被 ProxyGFW 钉住；广告域应由 Reject 层裁决"}
+      ]
+    }
+  },
+  {
+    "name": "kw_youtube_precise_suffixes",
+    "desc": "YouTube 宽 DOMAIN-KEYWORD,youtube 删除：先自上游 blackmatrix7 YouTube 表恢复 165 条缺失精确后缀（youtube.com 及各 ccTLD、youtubekids/withyoutube/youtubego 等）与 2 条 YouTube 专属 l.google.com 负载均衡名，核心播放会话仍落流媒体组；含 youtube 子串的第三方站不再被吸入",
+    "requests": [
+      {"host": "www.youtube.com", "note": "网页主链"},
+      {"host": "m.youtube.com", "note": "移动端"},
+      {"host": "music.youtube.com", "note": "YouTube Music"},
+      {"host": "youtube.co.uk", "note": "ccTLD 跳转域"},
+      {"host": "youtubekids.com", "note": "YouTube Kids"},
+      {"host": "withyoutube.com", "note": "创作者门面"},
+      {"host": "youtubeeducation.com", "note": "上游确认的官方教育域"},
+      {"host": "rr1---sn-abc.googlevideo.com", "note": "视频数据面（既有后缀）"},
+      {"host": "i.ytimg.com", "note": "缩略图（既有后缀）"},
+      {"host": "wide-youtube.l.google.com", "note": "YouTube 专属 LB 名，恢复后不再退化到 Google 组"},
+      {"host": "youtube-dubbing.com", "note": "负例：上游归国内表的第三方配音站"},
+      {"host": "ssyoutube.com", "note": "负例：第三方下载站"},
+      {"host": "youtubeconverter.io", "note": "负例：第三方转码站"},
+      {"host": "youtubei.googleapis.com", "note": "App 主 API 端点，YouTube 专属 googleapis 子域"}
+    ],
+    "assert": {
+      "no_dns_leak": true,
+      "per_request": [
+        {"host": "www.youtube.com", "policy": "流媒体"},
+        {"host": "m.youtube.com", "policy": "流媒体"},
+        {"host": "music.youtube.com", "policy": "流媒体"},
+        {"host": "youtube.co.uk", "policy": "流媒体"},
+        {"host": "youtubekids.com", "policy": "流媒体"},
+        {"host": "withyoutube.com", "policy": "流媒体"},
+        {"host": "youtubeeducation.com", "policy": "流媒体"},
+        {"host": "rr1---sn-abc.googlevideo.com", "policy": "流媒体"},
+        {"host": "i.ytimg.com", "policy": "流媒体"},
+        {"host": "wide-youtube.l.google.com", "policy": "流媒体", "reason": "YouTube 专属 LB 名精确恢复，位次先于 Google.list 的 google.com"},
+        {"host": "youtube-dubbing.com", "policy": "Final", "reason": "删 keyword 后不再被品牌子串吸入流媒体组"},
+        {"host": "ssyoutube.com", "policy": "Final"},
+        {"host": "youtubeconverter.io", "policy": "Final"},
+        {"host": "youtubei.googleapis.com", "policy": "流媒体", "reason": "2026-08-31 裁决：YouTube 专属 googleapis 子域随 YouTube 会话，不落 Google 组"}
+      ]
+    }
+  },
+  {
+    "name": "kw_google_blogspot_gmail_recaptcha",
+    "desc": "Google 三条宽关键词（blogspot/gmail/recaptcha）删除：自上游 Google 表恢复 73 条 blogspot ccTLD 后缀 + gmail.com + recaptcha.net；报告实证的 qingmail.com / suningmail.com 误捕获消除。recaptcha-cn.net 自 2026-08-31（advisor 裁决 7，`-cn` 族 18 条可迁）起改由 Domestic.list 直连承接，单列 per_request",
+    "requests": [
+      {"host": "gmail.com"},
+      {"host": "mail.google.com", "note": "由既有 google.com 后缀承接"},
+      {"host": "googlemail.com"},
+      {"host": "blogspot.com"},
+      {"host": "someblog.blogspot.com", "note": "用户博客子域"},
+      {"host": "blogspot.co.uk", "note": "ccTLD 后缀"},
+      {"host": "www.recaptcha.net", "note": "reCAPTCHA 全球可达端点"},
+      {"host": "recaptcha-cn.net", "note": "reCAPTCHA 中国可达端点；2026-08-31 起归 Domestic.list 直连（CMNET 120.253/16 落点，与 .cn 族同一张 GTS 证书）"},
+      {"host": "qingmail.com", "note": "负例：报告实证的 gmail 关键词误捕获"},
+      {"host": "suningmail.com", "note": "负例：报告实证的 gmail 关键词误捕获"},
+      {"host": "blogspotter.net", "note": "负例：含 blogspot 子串的第三方域"},
+      {"host": "recaptcha-solver.io", "note": "负例：含 recaptcha 子串的第三方域"}
+    ],
+    "assert": {
+      "no_dns_leak": true,
+      "per_request": [
+        {"host": "gmail.com", "policy": "Google-X-Meta-MS"},
+        {"host": "mail.google.com", "policy": "Google-X-Meta-MS"},
+        {"host": "googlemail.com", "policy": "Google-X-Meta-MS"},
+        {"host": "blogspot.com", "policy": "Google-X-Meta-MS"},
+        {"host": "someblog.blogspot.com", "policy": "Google-X-Meta-MS"},
+        {"host": "blogspot.co.uk", "policy": "Google-X-Meta-MS"},
+        {"host": "www.recaptcha.net", "policy": "Google-X-Meta-MS"},
+        {"host": "recaptcha-cn.net", "policy": "DIRECT", "reason": "advisor 裁决 7（`-cn` 族矩阵）：该端点在 CN 侧解析到中国移动 120.253.255.x 且证书 SAN 与 `.cn` 族同源，属境内可直连的 Google 中国面 —— 已从 Google.list 迁入 Domestic.list，落 DIRECT 属预期。"},
+        {"host": "qingmail.com", "policy": "Final", "reason": "不再被 DOMAIN-KEYWORD,gmail 误捕获"},
+        {"host": "suningmail.com", "policy": "Final", "reason": "不再被 DOMAIN-KEYWORD,gmail 误捕获"},
+        {"host": "blogspotter.net", "policy": "Final"},
+        {"host": "recaptcha-solver.io", "policy": "Final"}
+      ]
+    }
+  },
+  {
+    "name": "kw_twitter_official_suffixes",
+    "desc": "Twitter 宽 DOMAIN-KEYWORD,twitter 删除：自上游 Twitter 表恢复 9 条含品牌词的官方后缀（twitter.com/.biz/.jp、ads-twitter.com、twitterstat.us 等）；第三方客户端与工具站不再默认归 X 生态",
+    "requests": [
+      {"host": "twitter.com"},
+      {"host": "api.twitter.com", "note": "API 面"},
+      {"host": "ads-twitter.com", "note": "广告转化像素"},
+      {"host": "twitterstat.us", "note": "状态页"},
+      {"host": "x.com", "note": "既有后缀"},
+      {"host": "pbs.twimg.com", "note": "媒体 CDN（既有后缀）"},
+      {"host": "twitterrific.com", "note": "负例：第三方客户端厂商站"},
+      {"host": "twitterdownloader.cc", "note": "负例：第三方下载站"}
+    ],
+    "assert": {
+      "no_dns_leak": true,
+      "per_request": [
+        {"host": "twitter.com", "policy": "Google-X-Meta-MS"},
+        {"host": "api.twitter.com", "policy": "Google-X-Meta-MS"},
+        {"host": "ads-twitter.com", "policy": "Google-X-Meta-MS"},
+        {"host": "twitterstat.us", "policy": "Google-X-Meta-MS"},
+        {"host": "x.com", "policy": "Google-X-Meta-MS"},
+        {"host": "pbs.twimg.com", "policy": "Google-X-Meta-MS"},
+        {"host": "twitterrific.com", "policy": "Final", "reason": "第三方含品牌子串域不再自动归 X"},
+        {"host": "twitterdownloader.cc", "policy": "Final"}
+      ]
+    }
+  },
+  {
+    "name": "kw_meta_fbcdn_instagram_whatsapp",
+    "desc": "Meta 三条宽关键词（fbcdn/instagram/whatsapp）删除：只恢复 Meta 自营运行域与官方门面（fbcdn.net/.com、cdninstagram.com、instagram.com、whatsapp.com/.net 等 17 条）；上游 Facebook 表夹带的品牌抢注/刷粉/破解站与第三方魔改客户端 whatsapp-plus.* 刻意不恢复，落 Final；fbcdn-a.akamaihd.net 于 2026-08-31 审计判 N 档（双侧 NXDOMAIN）随 R1-06 删除，同样落 Final",
+    "requests": [
+      {"host": "www.instagram.com"},
+      {"host": "scontent-lax3-1.cdninstagram.com", "note": "IG 图片/视频数据面"},
+      {"host": "web.whatsapp.com"},
+      {"host": "g.whatsapp.net", "note": "WhatsApp 消息数据面"},
+      {"host": "static.xx.fbcdn.net", "note": "FB/IG 静态资源 CDN"},
+      {"host": "fbcdn-a.akamaihd.net", "note": "Akamai 前置的旧 fbcdn，2026-08-31 已从 Meta.list 删除（N 档死域）"},
+      {"host": "whatsapp-plus.net", "note": "负例：第三方魔改客户端"},
+      {"host": "theinstagramhack.com", "note": "负例：上游夹带的破解站"},
+      {"host": "onlineinstagram.com", "note": "负例：第三方 IG 浏览器"},
+      {"host": "instagramdownloader.tools", "note": "负例：第三方下载站"}
+    ],
+    "assert": {
+      "no_dns_leak": true,
+      "per_request": [
+        {"host": "www.instagram.com", "policy": "Google-X-Meta-MS"},
+        {"host": "scontent-lax3-1.cdninstagram.com", "policy": "Google-X-Meta-MS"},
+        {"host": "web.whatsapp.com", "policy": "Google-X-Meta-MS"},
+        {"host": "g.whatsapp.net", "policy": "Google-X-Meta-MS"},
+        {"host": "static.xx.fbcdn.net", "policy": "Google-X-Meta-MS"},
+        {"host": "fbcdn-a.akamaihd.net", "policy": "Final", "reason": "Akamai 旧边缘死域已从 Meta.list 删除，也不再由 akamaihd.net 宽后缀兜底，落 FINAL。"},
+        {"host": "whatsapp-plus.net", "policy": "Final", "reason": "第三方魔改客户端不属 Meta 会话"},
+        {"host": "theinstagramhack.com", "policy": "Final"},
+        {"host": "onlineinstagram.com", "policy": "Final"},
+        {"host": "instagramdownloader.tools", "policy": "Final"}
+      ]
+    }
+  },
+  {
+    "name": "kw_telegram_official_and_clients",
+    "desc": "Telegram 两条宽关键词（telegram/nicegram）删除：自上游 Telegram 表恢复 telegram.org/.me/.dog/.space、cdn-telegram.org、telegram-cdn.org、telegramdownload.com，自上游 Global 表恢复 nicegram.app/.cloud；含品牌子串的第三方群组站/镜像站不再强制归 Telegram 独立组",
+    "requests": [
+      {"host": "web.telegram.org"},
+      {"host": "api.telegram.org", "note": "Bot API"},
+      {"host": "telegram.me", "note": "旧短链域"},
+      {"host": "t.me", "note": "既有后缀"},
+      {"host": "telegra.ph", "note": "既有后缀"},
+      {"host": "nicegram.app", "note": "第三方客户端（本表既有 swiftgram.app 等同类先例）"},
+      {"host": "telegramgroups.io", "note": "负例：第三方群组目录站"},
+      {"host": "telegram-cn.net", "note": "负例：含品牌子串的第三方域"},
+      {"host": "mytelegram-mirror.top", "note": "负例：第三方镜像形态"}
+    ],
+    "assert": {
+      "no_dns_leak": true,
+      "per_request": [
+        {"host": "web.telegram.org", "policy": "Telegram"},
+        {"host": "api.telegram.org", "policy": "Telegram"},
+        {"host": "telegram.me", "policy": "Telegram"},
+        {"host": "t.me", "policy": "Telegram"},
+        {"host": "telegra.ph", "policy": "Telegram"},
+        {"host": "nicegram.app", "policy": "Telegram"},
+        {"host": "telegramgroups.io", "policy": "Final", "reason": "删 keyword 后第三方站落 Final"},
+        {"host": "telegram-cn.net", "policy": "Final"},
+        {"host": "mytelegram-mirror.top", "policy": "Final"}
+      ]
+    }
+  },
+  {
+    "name": "kw_ai_azure_host_wildcards",
+    "desc": "AI 两条 Azure 主机命名关键词改双向锚定 DOMAIN-WILDCARD：结构由 reference/wool_scripts/Loon/rule/AI.list 的 AND 规则与上游 OpenAI 表样本 openaicom-api-bdcpf8c6d2e9atf6.z01.azurefd.net 共同确认；旋转哈希/区域名仍命中，品牌子串脱离 Azure 域后不再命中",
+    "requests": [
+      {"host": "chatgpt-async-webps-prod-eastus-1.webpubsub.azure.com", "note": "ChatGPT 异步 WebPubSub"},
+      {"host": "chatgpt-async-webps-prod-southcentralus-2.webpubsub.azure.com", "note": "换区域仍命中"},
+      {"host": "openaicom-api-bdcpf8c6d2e9atf6.z01.azurefd.net", "note": "上游实证样本，Azure Front Door"},
+      {"host": "chatgpt-async-webps-prod.notazure.net", "note": "负例：前缀相同但不在 webpubsub.azure.com 下"},
+      {"host": "openaicom-api.mirror.top", "note": "负例：缺尾缀锚点且无 azurefd.net"},
+      {"host": "foo.webpubsub.azure.com", "note": "负例：同一 Azure 服务的他人实例，不属 OpenAI"}
+    ],
+    "assert": {
+      "no_dns_leak": true,
+      "per_request": [
+        {"host": "chatgpt-async-webps-prod-eastus-1.webpubsub.azure.com", "policy": "AI"},
+        {"host": "chatgpt-async-webps-prod-southcentralus-2.webpubsub.azure.com", "policy": "AI"},
+        {"host": "openaicom-api-bdcpf8c6d2e9atf6.z01.azurefd.net", "policy": "AI"},
+        {"host": "chatgpt-async-webps-prod.notazure.net", "policy": "Final", "reason": "右锚定生效，品牌前缀脱离 Azure 域不再命中"},
+        {"host": "openaicom-api.mirror.top", "policy": "Final"},
+        {"host": "foo.webpubsub.azure.com", "policy": "Final", "reason": "他人 WebPubSub 实例不命中 AI 的 OpenAI 专属规则，azure.com 多租户宽后缀已移除，落 FINAL 兜底"}
+      ]
+    }
+  },
+  {
+    "name": "streaming_spotify_exact_assets",
+    "desc": "Spotify 由 DOMAIN-KEYWORD,spotify 改为上游对撞恢复的精确后缀集（本库此前只剩 scdn.co/pscdn.co/spoti.fi/spotilocal.com，其余 20 条精确资产被宽关键词级联去重吃掉）：官方域与专属 CDN 仍走流媒体；含 spotify 子串的第三方/破解站不再被吸入流媒体出口",
+    "requests": [
+      {"host": "open.spotify.com", "note": "Web Player 主链"},
+      {"host": "api.spotify.com", "note": "目录/播放授权 API"},
+      {"host": "audio-ak-spotify-com.akamaized.net", "note": "音频内容面"},
+      {"host": "spotify.map.fastly.net", "note": "Fastly CNAME 形态精确 host"},
+      {"host": "scdn.co", "note": "既有专属 CDN，行为不变参照"},
+      {"host": "tospotify.com"},
+      {"host": "myspotify-downloader.com", "note": "负例：品牌子串第三方"},
+      {"host": "spotify-mod-apk.net", "note": "负例：破解分发站"}
+    ],
+    "assert": {
+      "no_dns_leak": true,
+      "per_request": [
+        {"host": "open.spotify.com", "policy": "流媒体"},
+        {"host": "api.spotify.com", "policy": "流媒体"},
+        {"host": "audio-ak-spotify-com.akamaized.net", "policy": "流媒体"},
+        {"host": "spotify.map.fastly.net", "policy": "流媒体"},
+        {"host": "scdn.co", "policy": "流媒体"},
+        {"host": "tospotify.com", "policy": "流媒体"},
+        {"host": "myspotify-downloader.com", "policy": "Final", "reason": "删 keyword 后无规则命中，不再被品牌子串吸走"},
+        {"host": "spotify-mod-apk.net", "policy": "Final"}
+      ]
+    }
+  },
+  {
+    "name": "streaming_bbc_uk_live_exact",
+    "desc": "BBC 播放面的两条边界一起钉住。①（原断言）uk-live/bbcfmt 两条关键词已改精确资产，uk-live 这种通用词不再对任意含串域生效；②（2026-08-31 审计裁决 6）BBC 专属形态随品牌迁 UK.list —— 9 条 *-uk-live.akamaized.net 与 bbc.mp-pxcdn.com 期望 🇬🇧英国节点（iPlayer 属地锁，「流媒体」组无任何英国出口），而 *-ww-live（worldwide，非属地锁）与多租户 bbcfmt.s.llnwi.net（同注册域另住 DAZN/HBO Max/Viki）留在流媒体。**迁移线画在「主机名是否 BBC 专属」而不是「注册域是否多租户」上**，改这条线必须同时改 tests/scenarios/fix_regions_v2.json 的 fix_r2_9_bbc_thirdparty_cdn_stays_streaming",
+    "requests": [
+      {"host": "vod-hls-uk-live.akamaized.net", "note": "点播 HLS —— 已迁 UK"},
+      {"host": "aod-dash-uk-live.akamaized.net", "note": "音频点播 DASH —— 已迁 UK"},
+      {"host": "vs-cmaf-push-uk-live.akamaized.net", "note": "直播 CMAF —— 已迁 UK"},
+      {"host": "bbc.mp-pxcdn.com", "note": "Piksel 多租户 CDN 上的 BBC 专属租户前缀 —— 已迁 UK"},
+      {"host": "vod-dash-ww-live.akamaized.net", "note": "留守参照：ww = worldwide，非属地锁面，仍走流媒体"},
+      {"host": "bbcfmt.s.llnwi.net", "note": "留守参照：Limelight 租户前缀，同注册域另住 DAZN/HBO Max/Viki，整段处置须一致"},
+      {"host": "my-uk-live-tv.example.com", "note": "负例：含 uk-live 通用串的无关域"},
+      {"host": "sports-uk-live.example.net", "note": "负例：同上"}
+    ],
+    "assert": {
+      "no_dns_leak": true,
+      "per_request": [
+        {"host": "vod-hls-uk-live.akamaized.net", "policy": "🇬🇧英国节点", "reason": "裁决 6：BBC 专属播放面随品牌迁 UK.list，取回英国出口"},
+        {"host": "aod-dash-uk-live.akamaized.net", "policy": "🇬🇧英国节点"},
+        {"host": "vs-cmaf-push-uk-live.akamaized.net", "policy": "🇬🇧英国节点"},
+        {"host": "bbc.mp-pxcdn.com", "policy": "🇬🇧英国节点", "reason": "主机名是 BBC 专属；多租户的是注册域 mp-pxcdn.com，不是这个 host"},
+        {"host": "vod-dash-ww-live.akamaized.net", "policy": "流媒体", "reason": "ww-live 是 worldwide 面，不受属地锁约束，留 Streaming"},
+        {"host": "bbcfmt.s.llnwi.net", "policy": "流媒体", "reason": "llnwi.net 同注册域另住 DAZN/HBO Max/Viki，拆走单个租户会破坏该注册域的一致处置"},
+        {"host": "my-uk-live-tv.example.com", "policy": "Final", "reason": "通用词 uk-live 删除后不再误捕获"},
+        {"host": "sports-uk-live.example.net", "policy": "Final"}
+      ]
+    }
+  },
+  {
+    "name": "streaming_brand_keyword_to_suffix",
+    "desc": "HBO GO Asia / TVB Anywhere / Twitch(ttvnw) / Netflix DNS 测试域 / RTHK / DAZN VOD 六组品牌关键词改精确 suffix 或精确 host：核心资产落点不变，含品牌子串的第三方域回落原归属",
+    "requests": [
+      {"host": "www.hbogoasia.sg", "note": "HBO GO Asia 新加坡站"},
+      {"host": "api.hbogoasia.tw", "note": "台湾站 API"},
+      {"host": "www.tvbanywhere.com"},
+      {"host": "tvbanywhere.com.sg"},
+      {"host": "video-edge-1a2b3c.lhr03.abs.hls.ttvnw.net", "note": "Twitch 视频边缘节点"},
+      {"host": "netflixdnstest3.com", "note": "Netflix DNS 测试域"},
+      {"host": "rthklive2-lh.akamaihd.net", "note": "RTHK 直播"},
+      {"host": "dca-ll-voddazn-dznvodjp.s.llnwi.net", "note": "DAZN 日本点播"},
+      {"host": "hbogoasia-fanclub.example.com", "note": "负例：品牌子串第三方"},
+      {"host": "myttvnw-mirror.com", "note": "负例：品牌子串第三方"}
+    ],
+    "assert": {
+      "no_dns_leak": true,
+      "per_request": [
+        {"host": "www.hbogoasia.sg", "policy": "流媒体"},
+        {"host": "api.hbogoasia.tw", "policy": "流媒体"},
+        {"host": "www.tvbanywhere.com", "policy": "流媒体"},
+        {"host": "tvbanywhere.com.sg", "policy": "流媒体"},
+        {"host": "video-edge-1a2b3c.lhr03.abs.hls.ttvnw.net", "policy": "流媒体"},
+        {"host": "netflixdnstest3.com", "policy": "流媒体"},
+        {"host": "rthklive2-lh.akamaihd.net", "policy": "流媒体", "reason": "由 Streaming.list 的精确 host 规则承接"},
+        {"host": "dca-ll-voddazn-dznvodjp.s.llnwi.net", "policy": "流媒体"},
+        {"host": "hbogoasia-fanclub.example.com", "policy": "Final"},
+        {"host": "myttvnw-mirror.com", "policy": "Final"}
+      ]
+    }
+  },
+  {
+    "name": "streaming_grey_media_exact_and_tencent_release",
+    "desc": "japonx/japronx/nivod 三条灰站关键词改精确后缀（上游 Japonx/GlobalMedia 对撞）；nivod 此前把腾讯持有的 univod.cn 一起抓进流媒体代理（子串 u-nivod-.cn），删关键词后该域回落国内直连",
+    "requests": [
+      {"host": "japonx.tv"},
+      {"host": "www.japonx.vip"},
+      {"host": "japronx.vip"},
+      {"host": "nivod.tv"},
+      {"host": "nivodz.com"},
+      {"host": "univod.cn", "note": "负例：腾讯持有域，被 nivod 子串误捕获"},
+      {"host": "univod.example.com", "note": "负例：同一子串形态的无关域"}
+    ],
+    "assert": {
+      "no_dns_leak": true,
+      "per_request": [
+        {"host": "japonx.tv", "policy": "流媒体"},
+        {"host": "www.japonx.vip", "policy": "流媒体"},
+        {"host": "japronx.vip", "policy": "流媒体"},
+        {"host": "nivod.tv", "policy": "流媒体"},
+        {"host": "nivodz.com", "policy": "流媒体"},
+        {"host": "univod.cn", "policy": "DIRECT", "reason": "不再被 nivod 关键词抢走，回落国内直连"},
+        {"host": "univod.example.com", "policy": "Final"}
+      ]
+    }
+  },
+  {
+    "name": "streaming_elb_cname_wildcard",
+    "desc": "Netflix 设备 API 的 ELB/NLB 与 PrimeVideo AVOD DASH、NowTV 三类结构化命名由 DOMAIN-KEYWORD 改左锚定/右标签边界 DOMAIN-WILDCARD：结构内 host 落点不变，结构外的同子串域不再命中",
+    "requests": [
+      {"host": "apiproxy-device-prod-nlb-abc.elb.ap-northeast-1.amazonaws.com", "note": "Netflix 设备 API NLB"},
+      {"host": "dualstack.apiproxy-device-prod-nlb-x.elb.eu-west-1.amazonaws.com", "note": "双栈形态"},
+      {"host": "dualstack.ichnaea-web-1.elb.sa-east-1.amazonaws.com", "note": "Netflix ichnaea 遥测 ELB"},
+      {"host": "avoddashs3ww-a.akamaihd.net", "note": "AVOD DASH 内容面（与既有 avodmp4s3ww-a 同族）"},
+      {"host": "nowtv100.akamaized.net"},
+      {"host": "xnowtv1001.example.com", "note": "负例：无标签边界的子串扩展"},
+      {"host": "mynowtv100x.net", "note": "负例：同上"}
+    ],
+    "assert": {
+      "no_dns_leak": true,
+      "per_request": [
+        {"host": "apiproxy-device-prod-nlb-abc.elb.ap-northeast-1.amazonaws.com", "policy": "流媒体"},
+        {"host": "dualstack.apiproxy-device-prod-nlb-x.elb.eu-west-1.amazonaws.com", "policy": "流媒体"},
+        {"host": "dualstack.ichnaea-web-1.elb.sa-east-1.amazonaws.com", "policy": "流媒体"},
+        {"host": "avoddashs3ww-a.akamaihd.net", "policy": "流媒体"},
+        {"host": "nowtv100.akamaized.net", "policy": "流媒体"},
+        {"host": "xnowtv1001.example.com", "policy": "Final", "reason": "改 wildcard 后要求右侧标签边界"},
+        {"host": "mynowtv100x.net", "policy": "Final"}
+      ]
+    }
+  },
+  {
+    "name": "streaming_shared_components_unbound",
+    "desc": "P1-03 确定级：Adobe DTM / Braze / Kochava / OneTrust·CookieLaw / Optimizely 是多租户共享组件，AWS 区域 execute-api 是云厂商通用网关后缀——都不代表流媒体身份，自 Streaming 移除；HBO GO Asia 的精确 API host 保留在流媒体",
+    "requests": [
+      {"host": "assets.adobedtm.com", "note": "Adobe 标签管理器"},
+      {"host": "sdk.iad-01.braze.com", "note": "Braze 消息 SDK"},
+      {"host": "control.kochava.com", "note": "Kochava 归因"},
+      {"host": "cdn.cookielaw.org", "note": "OneTrust 同意横幅"},
+      {"host": "www.onetrust.com"},
+      {"host": "cdn.optimizely.com", "note": "Optimizely A/B"},
+      {"host": "abcd1234.execute-api.us-east-1.amazonaws.com", "note": "任意租户的 AWS API Gateway"},
+      {"host": "44wilhpljf.execute-api.ap-southeast-1.amazonaws.com", "note": "正例：HBO GO Asia 精确网关 host 保留"}
+    ],
+    "assert": {
+      "no_dns_leak": true,
+      "per_request": [
+        {"host": "assets.adobedtm.com", "policy": "Final", "reason": "共享组件回中性出口"},
+        {"host": "sdk.iad-01.braze.com", "policy": "Final"},
+        {"host": "control.kochava.com", "policy": "Final"},
+        {"host": "cdn.cookielaw.org", "policy": "Final"},
+        {"host": "www.onetrust.com", "policy": "Final"},
+        {"host": "cdn.optimizely.com", "reason": "共享 A/B SaaS 与流媒体/下载均无归属，DownloadCDN 的 optimizely.com 已同批移除", "policy": "Final"},
+        {"host": "abcd1234.execute-api.us-east-1.amazonaws.com", "policy": "Final", "reason": "任意租户的 AWS API Gateway 不代表流媒体身份；amazonaws.com 宽兜底已移除，落 FINAL"},
+        {"host": "44wilhpljf.execute-api.ap-southeast-1.amazonaws.com", "policy": "流媒体"}
+      ]
+    }
+  },
+  {
+    "name": "tiktok_cdn_keyword_to_exact",
+    "desc": "TikTok 的 tiktokcdn-/ttcdn-tos. 两条关键词：前者改精确 suffix（tiktokcdn-us.com / tiktokcdn-eu.com 是可注册域，实际 host 为 v16m.tiktokcdn-us.com 形态，左锚定 wildcard 会漏）；后者删除——其唯一第一方资产由 ipstatp.com 后缀承接，剩下命中全是字节国内广告 CDN 与第三方碰撞域",
+    "requests": [
+      {"host": "v16m.tiktokcdn-us.com", "note": "美区视频面"},
+      {"host": "p19-sign.tiktokcdn-us.com", "note": "美区签名图片面"},
+      {"host": "lf16-gecko.tiktokcdn-eu.com", "note": "欧区资源面"},
+      {"host": "p16-tiktokcdn-com.akamaized.net", "note": "上游精确 host"},
+      {"host": "sf16-ttcdn-tos.ipstatp.com", "note": "正例：由 ipstatp.com 后缀继续承接"},
+      {"host": "ttcdn-tos.kkimg.cc", "note": "负例：上游 Direct 明确直连的第三方图床"},
+      {"host": "sf1-ttcdn-tos.pstatp.com", "note": "负例：字节国内广告 CDN，应归 ByteDanceCN 直连"}
+    ],
+    "assert": {
+      "no_dns_leak": true,
+      "per_request": [
+        {"host": "v16m.tiktokcdn-us.com", "policy": "社交媒体"},
+        {"host": "p19-sign.tiktokcdn-us.com", "policy": "社交媒体"},
+        {"host": "lf16-gecko.tiktokcdn-eu.com", "policy": "社交媒体"},
+        {"host": "p16-tiktokcdn-com.akamaized.net", "policy": "社交媒体"},
+        {"host": "sf16-ttcdn-tos.ipstatp.com", "policy": "社交媒体"},
+        {"host": "ttcdn-tos.kkimg.cc", "policy": "Final", "reason": "不再被 TikTok 抢走；本库未收 kkimg.cc 故落 FINAL"},
+        {"host": "sf1-ttcdn-tos.pstatp.com", "policy": "DIRECT", "reason": "归还 ByteDanceCN 的 pstatp.com 直连"}
+      ]
+    }
+  },
+  {
+    "name": "tiktok_cname_wildcard_boundary",
+    "desc": "bytedance.map. / musical.ly. / tiktokcdn.com. / tiktokv.com. / ttlivecdn.com. 五条尾点关键词是 CNAME 展平形态，改「左锚定 + 带左标签边界」两条 DOMAIN-WILDCARD：展平 host 落点不变，缺标签边界的同子串域不再命中",
+    "requests": [
+      {"host": "bytedance.map.fastly.net", "note": "Fastly service map"},
+      {"host": "musical.ly.edgekey.net", "note": "Akamai 展平（裸形态）"},
+      {"host": "www.musical.ly.edgekey.net", "note": "Akamai 展平（带子域）"},
+      {"host": "p16-sign-va.tiktokcdn.com.edgekey.net"},
+      {"host": "mon-va.tiktokv.com.akamaized.net"},
+      {"host": "pull-flv.ttlivecdn.com.edgesuite.net"},
+      {"host": "notmusical.lyrics.com", "note": "负例：无左标签边界的子串"},
+      {"host": "mytiktokcdn.com.cn", "note": "负例：含 tiktokcdn.com. 子串的国内域"}
+    ],
+    "assert": {
+      "no_dns_leak": true,
+      "per_request": [
+        {"host": "bytedance.map.fastly.net", "policy": "社交媒体"},
+        {"host": "musical.ly.edgekey.net", "policy": "社交媒体"},
+        {"host": "www.musical.ly.edgekey.net", "policy": "社交媒体"},
+        {"host": "p16-sign-va.tiktokcdn.com.edgekey.net", "policy": "社交媒体"},
+        {"host": "mon-va.tiktokv.com.akamaized.net", "policy": "社交媒体"},
+        {"host": "pull-flv.ttlivecdn.com.edgesuite.net", "policy": "社交媒体"},
+        {"host": "notmusical.lyrics.com", "policy": "Final", "reason": "改 wildcard 后要求左侧标签边界"},
+        {"host": "mytiktokcdn.com.cn", "policy": "Final", "reason": "The synthetic third-party registrant remains neutral after the broad com.cn rule was removed."}
+      ]
+    }
+  }
+]

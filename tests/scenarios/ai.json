@@ -1,0 +1,499 @@
+[
+  {
+    "name": "deepseek_chat",
+    "desc": "DeepSeek 网页对话 + 开放平台 API（国内服务必须全程直连，走代理反而更慢且可能被风控）",
+    "requests": [
+      {"host": "chat.deepseek.com"},
+      {"host": "www.deepseek.com"},
+      {"host": "api.deepseek.com"},
+      {"host": "platform.deepseek.com"},
+      {"host": "cdn.deepseek.com"}
+    ],
+    "assert": {"same_policy": true, "policy": "DIRECT"}
+  },
+  {
+    "name": "kimi_moonshot",
+    "desc": "Kimi（月之暗面）：网页对话 + 静态资源 + 开放平台",
+    "requests": [
+      {"host": "www.kimi.com"},
+      {"host": "kimi.com"},
+      {"host": "kimi.moonshot.cn"},
+      {"host": "statics.moonshot.cn"},
+      {"host": "api.moonshot.cn"},
+      {"host": "platform.moonshot.cn"}
+    ],
+    "assert": {"same_policy": true, "policy": "DIRECT"}
+  },
+  {
+    "name": "tongyi_qianwen_cn",
+    "desc": "通义千问国内站 + 灵积/DashScope API（阿里生态直连）",
+    "requests": [
+      {"host": "tongyi.aliyun.com"},
+      {"host": "qianwen.aliyun.com"},
+      {"host": "www.tongyi.com"},
+      {"host": "dashscope.aliyuncs.com"},
+      {"host": "g.alicdn.com", "note": "阿里前端 CDN"}
+    ],
+    "assert": {"same_policy": true, "policy": "DIRECT"}
+  },
+  {
+    "name": "doubao_bytedance",
+    "desc": "豆包（字节）：网页版 + 前端 CDN + 火山方舟",
+    "requests": [
+      {"host": "www.doubao.com"},
+      {"host": "doubao.com"},
+      {"host": "lf-flow-web-cdn.doubao.com"},
+      {"host": "console.volcengine.com", "note": "火山引擎控制台"},
+      {"host": "ark.cn-beijing.volces.com", "note": "方舟推理端点"}
+    ],
+    "assert": {"same_policy": true, "policy": "DIRECT"}
+  },
+  {
+    "name": "zhipu_chatglm",
+    "desc": "智谱清言 / BigModel 开放平台",
+    "requests": [
+      {"host": "chatglm.cn"},
+      {"host": "www.chatglm.cn"},
+      {"host": "open.bigmodel.cn"},
+      {"host": "bigmodel.cn"},
+      {"host": "zhipuai.cn"}
+    ],
+    "assert": {"same_policy": true, "policy": "DIRECT"}
+  },
+  {
+    "name": "minimax_hailuo",
+    "desc": "MiniMax 海螺 AI 与开放平台",
+    "requests": [
+      {"host": "hailuoai.com"},
+      {"host": "www.hailuoai.com"},
+      {"host": "minimaxi.com"},
+      {"host": "www.minimaxi.com"}
+    ],
+    "assert": {"same_policy": true, "policy": "DIRECT"}
+  },
+  {
+    "name": "baidu_wenxin_yiyan",
+    "desc": "百度文心一言 / 千帆平台",
+    "requests": [
+      {"host": "yiyan.baidu.com"},
+      {"host": "wenxin.baidu.com"},
+      {"host": "qianfan.cloud.baidu.com"},
+      {"host": "ss1.bdstatic.com", "note": "百度静态资源"}
+    ],
+    "assert": {"same_policy": true, "policy": "DIRECT"}
+  },
+  {
+    "name": "xfyun_spark",
+    "desc": "讯飞星火：对话站 + 开放平台（经 ChinaDomain 的 .cn 长尾兜底命中）",
+    "requests": [
+      {"host": "xinghuo.xfyun.cn"},
+      {"host": "www.xfyun.cn"},
+      {"host": "spark-api.xf-yun.com"},
+      {"host": "www.iflytek.com"}
+    ],
+    "assert": {"same_policy": true, "policy": "DIRECT"}
+  },
+  {
+    "name": "tencent_yuanbao_hunyuan",
+    "desc": "腾讯元宝 / 混元大模型",
+    "requests": [
+      {"host": "yuanbao.tencent.com"},
+      {"host": "hunyuan.tencent.com"},
+      {"host": "cloud.tencent.com"},
+      {"host": "hunyuan.cloud.tencent.com"}
+    ],
+    "assert": {"same_policy": true, "policy": "DIRECT"}
+  },
+  {
+    "name": "metaso_search",
+    "desc": "秘塔 AI 搜索",
+    "requests": [
+      {"host": "metaso.cn"},
+      {"host": "www.metaso.cn"},
+      {"host": "static.metaso.cn"}
+    ],
+    "assert": {"same_policy": true, "policy": "DIRECT"}
+  },
+  {
+    "name": "baichuan_stepfun_sensetime",
+    "desc": "其余国内模型厂：百川 / 阶跃星辰 / 商汤商量",
+    "requests": [
+      {"host": "www.baichuan-ai.com"},
+      {"host": "baichuan-ai.com"},
+      {"host": "stepfun.com"},
+      {"host": "www.stepfun.com"},
+      {"host": "sensetime.com"},
+      {"host": "chat.sensetime.com"}
+    ],
+    "assert": {"same_policy": true, "policy": "DIRECT"}
+  },
+  {
+    "name": "google_gemini_full_chain",
+    "desc": "Gemini 网页版全链：登录 Google 账号 → 对话 → 加载头像/静态资源。依据 00-context「大厂自有 AI 归各自生态」，全链应在 Google-X-Meta-MS 组",
+    "requests": [
+      {"host": "gemini.google.com"},
+      {"host": "accounts.google.com", "note": "账号登录"},
+      {"host": "apis.google.com"},
+      {"host": "clients6.google.com", "note": "内部 RPC"},
+      {"host": "ssl.gstatic.com"},
+      {"host": "www.gstatic.com"},
+      {"host": "lh3.googleusercontent.com", "note": "头像/图片"}
+    ],
+    "assert": {"same_policy": true, "policy": "Google-X-Meta-MS", "no_dns_leak": true}
+  },
+  {
+    "name": "google_ai_studio",
+    "desc": "Google AI Studio：控制台 + Gemini API 后端 + 文档",
+    "requests": [
+      {"host": "aistudio.google.com"},
+      {"host": "generativelanguage.googleapis.com", "note": "Gemini API 后端"},
+      {"host": "ai.google.dev", "note": "开发者文档"},
+      {"host": "accounts.google.com"},
+      {"host": "www.gstatic.com"}
+    ],
+    "assert": {"same_policy": true, "policy": "Google-X-Meta-MS", "no_dns_leak": true}
+  },
+  {
+    "name": "google_notebooklm",
+    "desc": "NotebookLM：上传源文件（走 Drive）→ 生成摘要 → 音频概览",
+    "requests": [
+      {"host": "notebooklm.google.com"},
+      {"host": "drive.google.com", "note": "源文件选择"},
+      {"host": "accounts.google.com"},
+      {"host": "lh3.googleusercontent.com"},
+      {"host": "ssl.gstatic.com"}
+    ],
+    "assert": {"same_policy": true, "policy": "Google-X-Meta-MS", "no_dns_leak": true}
+  },
+  {
+    "name": "google_colab_notebook",
+    "desc": "Colab control surfaces stay with Google; the path-multiplexed GCS tenant endpoint remains neutral Final.",
+    "requests": [
+      {"host": "colab.research.google.com"},
+      {"host": "storage.googleapis.com", "note": "数据集读取"},
+      {"host": "accounts.google.com"},
+      {"host": "drive.google.com"}
+    ],
+    "assert": {
+      "no_dns_leak": true,
+      "per_request": [
+        {"host": "colab.research.google.com", "policy": "Google-X-Meta-MS"},
+        {"host": "storage.googleapis.com", "policy": "Final"},
+        {"host": "accounts.google.com", "policy": "Google-X-Meta-MS"},
+        {"host": "drive.google.com", "policy": "Google-X-Meta-MS"}
+      ]
+    }
+  },
+  {
+    "name": "meta_ai_chat",
+    "desc": "Meta AI：meta.ai 独立站 + Facebook 账号态 + FB CDN（Meta 生态同组）",
+    "requests": [
+      {"host": "meta.ai"},
+      {"host": "www.meta.ai"},
+      {"host": "www.facebook.com"},
+      {"host": "static.xx.fbcdn.net"},
+      {"host": "scontent.xx.fbcdn.net"},
+      {"host": "www.whatsapp.com", "note": "WhatsApp 内的 Meta AI 入口"}
+    ],
+    "assert": {"same_policy": true, "policy": "Google-X-Meta-MS", "no_dns_leak": true}
+  },
+  {
+    "name": "xai_grok_x_embedded_and_standalone",
+    "desc": "Grok：x.com 内嵌入口 + grok.com 独立站 + 媒体 CDN。依据 00-context，xAI 归 Twitter.list → Google-X-Meta-MS 组",
+    "requests": [
+      {"host": "grok.com"},
+      {"host": "x.ai"},
+      {"host": "grokipedia.com"},
+      {"host": "x.com", "note": "X 内嵌 Grok 入口"},
+      {"host": "api.x.com"},
+      {"host": "abs.twimg.com"},
+      {"host": "pbs.twimg.com", "note": "图片 CDN"}
+    ],
+    "assert": {"same_policy": true, "policy": "Google-X-Meta-MS", "no_dns_leak": true}
+  },
+  {
+    "name": "microsoft_copilot_full_chain",
+    "desc": "Microsoft Copilot：copilot.microsoft.com 登录（MSA/AAD）→ Bing 后端检索 → Office substrate 取上下文。理想上一次会话应同组同出口",
+    "note": "2026-08-25 架构调整：微软海外面自 AI.list 拆出为 Microsoft.list，随 Google/Twitter/Meta 走 Google-X-Meta-MS 组（大厂自有 AI 归各自生态）；GitHub 生态仍在 AI 组。",
+    "requests": [
+      {"host": "copilot.microsoft.com"},
+      {"host": "www.bing.com", "note": "检索后端"},
+      {"host": "sydney.bing.com", "note": "Copilot 对话后端"},
+      {"host": "edgeservices.bing.com"},
+      {"host": "r.bing.com"},
+      {"host": "login.microsoftonline.com", "note": "AAD 登录"},
+      {"host": "login.live.com", "note": "MSA 登录"},
+      {"host": "substrate.office.com", "note": "Office 上下文"},
+      {"host": "copilot.com", "note": "消费者主域（2026-08-30 四大厂核查补入）"},
+      {"host": "m365copilot.com", "note": "企业版入口，301→m365.cloud.microsoft"},
+      {"host": "m365.cloud.microsoft", "note": "M365 Copilot 聊天主面"}
+    ],
+    "assert": {"same_policy": true, "policy": "Google-X-Meta-MS", "no_dns_leak": true}
+  },
+  {
+    "name": "apple_intelligence_pcc",
+    "desc": "Apple Intelligence / Private Cloud Compute：Siri 请求 + PCC 网关 + iCloud 私密中继",
+    "requests": [
+      {"host": "guzzoni.apple.com", "note": "Siri 后端"},
+      {"host": "smoot.apple.com", "note": "Siri 建议/搜索"},
+      {"host": "gateway.icloud.com", "note": "PCC/中继网关；2026-08-29 起归 AppleCN(DIRECT)"},
+      {"host": "mask.icloud.com", "note": "iCloud Private Relay"},
+      {"host": "mask-api.icloud.com"},
+      {"host": "mask-h2.icloud.com"}
+    ],
+    "assert": {
+      "same_policy": false, "no_dns_leak": true,
+      "per_request": [
+        {"host": "guzzoni.apple.com", "policy": "DIRECT", "reason": "刻意：国内 Siri 后端直连更快，随 AppleCN 走 DIRECT（见 allowlist）。"},
+        {"host": "smoot.apple.com", "policy": "DIRECT", "reason": "同上。"},
+        {"host": "gateway.icloud.com", "policy": "DIRECT", "reason": "2026-08-29 用户裁决（生态归属优先）：自 AI.list 摘除，由 AppleCN.list 的 DOMAIN-SUFFIX,icloud.com 接管直连。代价：Apple Intelligence(PCC) 大陆 IP 不受支持，功能将不可用；如需恢复，在 AI.list 重新加入 DOMAIN-SUFFIX,gateway.icloud.com 即可（AI 在 conf 96 先于 AppleCN 105）。"},
+        {"host": "mask.icloud.com", "policy_in": ["DIRECT", "REJECT"], "reason": "2026-08-25 F1 已从 AI.list 摘除；FIX-A2 在 conf 层显式 REJECT 后为 REJECT，conf 未落地时落 AppleCN 直连。"},
+        {"host": "mask-api.icloud.com", "policy_in": ["DIRECT", "REJECT"], "reason": "同上。"},
+        {"host": "mask-h2.icloud.com", "policy_in": ["DIRECT", "REJECT"], "reason": "同上。"}
+      ]
+    }
+  },
+  {
+    "name": "openai_chatgpt_web",
+    "desc": "网页版 ChatGPT：登录 → 对话 → 上传图片（主站+鉴权+API+静态 CDN+用户文件+风控）",
+    "requests": [
+      {"host": "chatgpt.com"},
+      {"host": "ab.chatgpt.com", "note": "A/B 实验分流端点"},
+      {"host": "openai.com", "note": "官网跳转入口"},
+      {"host": "auth.openai.com", "note": "登录鉴权"},
+      {"host": "api.openai.com"},
+      {"host": "cdn.oaistatic.com", "note": "前端静态资源"},
+      {"host": "files.oaiusercontent.com", "note": "上传/下载的用户文件"},
+      {"host": "tcr9i.chat.openai.com", "note": "Arkose 风控"},
+      {"host": "client-api.arkoselabs.com", "note": "Arkose 验证码后端"}
+    ],
+    "assert": {"same_policy": true, "policy": "AI", "no_dns_leak": true}
+  },
+  {
+    "name": "openai_desktop_app",
+    "desc": "macOS/Windows ChatGPT 桌面应用域名链（2026-08-31 重建：原 PROCESS-NAME 请求随 D7 移除后场景被掏空）",
+    "requests": [
+      {"host": "chatgpt.com"},
+      {"host": "auth.openai.com"},
+      {"host": "cdn.oaistatic.com"},
+      {"host": "oaiusercontent.com"}
+    ],
+    "assert": {"same_policy": true, "policy": "AI", "no_dns_leak": true}
+  },
+  {
+    "name": "openai_sora_video",
+    "desc": "Sora 视频生成：站点 + 生成任务 + 视频分发",
+    "requests": [
+      {"host": "sora.com"},
+      {"host": "sora.chatgpt.com"},
+      {"host": "videos.openai.com", "note": "生成结果视频分发"},
+      {"host": "api.openai.com"},
+      {"host": "files.oaiusercontent.com"}
+    ],
+    "assert": {"same_policy": true, "policy": "AI", "no_dns_leak": true}
+  },
+  {
+    "name": "anthropic_claude_web",
+    "desc": "网页版 Claude：登录 → 对话 → 上传附件 → Artifact 预览",
+    "requests": [
+      {"host": "claude.ai"},
+      {"host": "claude.com"},
+      {"host": "api.anthropic.com"},
+      {"host": "console.anthropic.com"},
+      {"host": "statsig.anthropic.com", "note": "特性开关/实验"},
+      {"host": "claudeusercontent.com", "note": "Artifact 沙箱内容域"},
+      {"host": "claude.site", "note": "已发布 Artifact 的公开访问域"},
+      {"host": "cdn.usefathom.com", "note": "官网分析脚本"}
+    ],
+    "assert": {"same_policy": true, "policy": "AI", "no_dns_leak": true}
+  },
+  {
+    "name": "anthropic_claude_code_cli",
+    "desc": "Claude Code CLI：模型调用 + 特性开关 + 崩溃上报（2026-08-31 重建：原 PROCESS-NAME 请求随 D7 移除后场景被掏空）",
+    "requests": [
+      {"host": "api.anthropic.com", "note": "模型调用"},
+      {"host": "statsig.anthropic.com", "note": "特性开关"},
+      {"host": "o1158394.ingest.sentry.io", "note": "崩溃上报（sentry 随 AI 组，B2 裁决）"}
+    ],
+    "assert": {"same_policy": true, "policy": "AI", "no_dns_leak": true}
+  },
+  {
+    "name": "anthropic_api_developer",
+    "desc": "开发者直连 Anthropic API：文档 → 控制台 → 计费 → 状态页",
+    "requests": [
+      {"host": "docs.anthropic.com"},
+      {"host": "console.anthropic.com"},
+      {"host": "api.anthropic.com"},
+      {"host": "status.anthropic.com"},
+      {"host": "anthropic.com"}
+    ],
+    "assert": {"same_policy": true, "policy": "AI", "no_dns_leak": true}
+  },
+  {
+    "name": "perplexity_search",
+    "desc": "Perplexity 搜索：主站 + 检索 API + 图片 CDN + 文件上传",
+    "requests": [
+      {"host": "www.perplexity.ai"},
+      {"host": "perplexity.ai"},
+      {"host": "api.perplexity.ai"},
+      {"host": "pplx-res.cloudinary.com", "note": "结果图片 CDN"},
+      {"host": "ppl-ai-file-upload.s3.amazonaws.com", "note": "文件上传桶"}
+    ],
+    "assert": {"same_policy": true, "policy": "AI", "no_dns_leak": true}
+  },
+  {
+    "name": "mistral_le_chat",
+    "desc": "Mistral Le Chat + 平台控制台",
+    "requests": [
+      {"host": "chat.mistral.ai"},
+      {"host": "mistral.ai"},
+      {"host": "api.mistral.ai"},
+      {"host": "console.mistral.ai"},
+      {"host": "docs.mistral.ai"}
+    ],
+    "assert": {"same_policy": true, "policy": "AI", "no_dns_leak": true}
+  },
+  {
+    "name": "poe_multimodel_chat",
+    "desc": "Poe 多模型聊天：主站 + 媒体 CDN",
+    "requests": [
+      {"host": "poe.com"},
+      {"host": "www.poe.com"},
+      {"host": "poecdn.net"},
+      {"host": "qph.cf2.poecdn.net", "note": "图片/附件 CDN"}
+    ],
+    "assert": {"same_policy": true, "policy": "AI", "no_dns_leak": true}
+  },
+  {
+    "name": "cursor_ide_session",
+    "desc": "Cursor 编辑器：登录 → 补全/Composer → 自动更新。2026-08-31 审计更正：Cursor/Anysphere 是独立公司（非 X 资产），全家自 Twitter.list 迁 AI.list，整链走 AI 组",
+    "requests": [
+      {"host": "cursor.com"},
+      {"host": "www.cursor.com"},
+      {"host": "api2.cursor.sh", "note": "推理/补全后端"},
+      {"host": "cursorapi.com"},
+      {"host": "cursor-cdn.com", "note": "更新包 CDN"},
+      {"host": "downloads.cursor.com"}
+    ],
+    "assert": {"same_policy": true, "policy": "AI", "no_dns_leak": true}
+  },
+  {
+    "name": "windsurf_ide_session",
+    "desc": "Windsurf / Codeium：主站 + 推理服务 + 遥测（含 PROCESS-NAME）",
+    "requests": [
+      {"host": "windsurf.com"},
+      {"host": "codeium.com"},
+      {"host": "server.codeium.com", "note": "补全推理服务"},
+      {"host": "codeiumdata.com"}
+    ],
+    "assert": {"same_policy": true, "policy": "AI", "no_dns_leak": true}
+  },
+  {
+    "name": "github_copilot_oauth_chain",
+    "desc": "GitHub Copilot：从 github.com 发起 OAuth → api.github.com 换 token → Copilot 补全 → 遥测上报。2026-08-30 用户裁决起整链同组：GitHub 平台面与 Copilot 推理面均归 Microsoft.list（四大厂 AI 归各自生态表）",
+    "note": "裁决沿革：2026-08-25 FIX-B（GitHub 全生态归 AI）→ 2026-08-29 生态归属优先（平台域归微软、推理面留 AI，刻意跨两组）→ 2026-08-30 用户裁决 Copilot 整链同组（githubcopilot.com/githubnext.com 亦入 Microsoft.list）。",
+    "requests": [
+      {"host": "github.com", "note": "OAuth 授权页"},
+      {"host": "api.github.com", "note": "token 交换"},
+      {"host": "api.githubcopilot.com", "note": "Copilot 推理端点"},
+      {"host": "copilot-proxy.githubusercontent.com"},
+      {"host": "copilot-telemetry.githubusercontent.com"}
+    ],
+    "assert": {
+      "same_policy": false, "no_dns_leak": true,
+      "per_request": [
+        {"host": "github.com", "policy": "Google-X-Meta-MS", "reason": "2026-08-29 用户裁决：GitHub 平台域归 Microsoft.list（微软生态）。"},
+        {"host": "api.github.com", "policy": "Google-X-Meta-MS", "reason": "同上，由 DOMAIN-SUFFIX,github.com 覆盖。"},
+        {"host": "api.githubcopilot.com", "policy": "Google-X-Meta-MS", "reason": "2026-08-30 用户裁决：githubcopilot.com 迁入 Microsoft.list，Copilot 整链同组。"},
+        {"host": "copilot-proxy.githubusercontent.com", "policy": "Google-X-Meta-MS", "reason": "githubusercontent.com 属平台静态面，随 Microsoft.list。"},
+        {"host": "copilot-telemetry.githubusercontent.com", "policy": "Google-X-Meta-MS", "reason": "同上。"}
+      ]
+    }
+  },
+  {
+    "name": "midjourney_web_and_discord",
+    "desc": "Midjourney：官网/Web 编辑器出图 + Discord 内 /imagine 交互。跨组是既有设计（Discord 属社交媒体组），此处显式固化两组归属以防漂移",
+    "requests": [
+      {"host": "www.midjourney.com"},
+      {"host": "midjourney.com"},
+      {"host": "cdn.midjourney.com"},
+      {"host": "midjourney.cdn.b-cdn.net", "note": "Bunny CDN 出图分发"},
+      {"host": "discord.com", "note": "Discord 侧交互"},
+      {"host": "gateway.discord.gg", "note": "Discord WebSocket 网关"},
+      {"host": "cdn.discordapp.com"},
+      {"host": "media.discordapp.net"}
+    ],
+    "assert": {
+      "same_policy": false, "policy": "AI", "no_dns_leak": true,
+      "per_request": [
+        {"host": "discord.com", "policy": "社交媒体"},
+        {"host": "gateway.discord.gg", "policy": "社交媒体"},
+        {"host": "cdn.discordapp.com", "policy": "社交媒体"},
+        {"host": "media.discordapp.net", "policy": "社交媒体"}
+      ]
+    }
+  },
+  {
+    "name": "huggingface_hub",
+    "desc": "HuggingFace：模型页浏览 → 大文件 LFS 下载 → Spaces 运行（2026-08-31 R1-02/R1-13：HF 已整体切 Xet 后端，ModelDownloadCDN 改锚 aws.cdn.hf.co 族；cdn-lfs.huggingface.co 已死、hf.space 属 PSL PRIVATE 多租户边界已删）",
+    "requests": [
+      {"host": "huggingface.co"},
+      {"host": "cdn-lfs.huggingface.co", "note": "旧 LFS 权重下载端点；2026-08-31 实测死域（国际侧 EMPTY、CN 侧 SoftLayer 陈旧记录）"},
+      {"host": "cdn-lfs-us-1.hf.co"},
+      {"host": "hf.co"},
+      {"host": "hf.space", "note": "Spaces 运行域（PSL PRIVATE 多租户边界，已从 AI.list 删除）"}
+    ],
+    "assert": {
+      "same_policy": false, "no_dns_leak": true,
+      "per_request": [
+        {"host": "huggingface.co", "policy": "AI"},
+        {"host": "cdn-lfs.huggingface.co", "policy": "AI", "reason": "R1-02（2026-08-31）：该 host 已死（双侧无有效 A），随 ModelDownloadCDN 重写删除；现由 AI.list 的 DOMAIN-SUFFIX,huggingface.co 兜底，落 AI 属预期。现网大文件端点是 aws.cdn.hf.co 族（见 cdn-lfs-us-1.hf.co 一条）。"},
+        {"host": "cdn-lfs-us-1.hf.co", "policy": "下载", "reason": "同上"},
+        {"host": "hf.co", "policy": "AI"},
+        {"host": "hf.space", "policy": "Final", "reason": "R1-13（2026-08-31）：hf.space 是 PSL PRIVATE 多租户边界（任意用户的 Space 共用该后缀），已从 AI.list 删除；落 FINAL 属预期。"}
+      ]
+    }
+  },
+  {
+    "name": "ai_audio_elevenlabs_suno",
+    "desc": "AI 音频：ElevenLabs 语音合成 + Suno 音乐生成（生成任务与音频 CDN 应同出口，否则分片下载易被打断）",
+    "requests": [
+      {"host": "elevenlabs.io"},
+      {"host": "api.elevenlabs.io"},
+      {"host": "elevenlabs.com"},
+      {"host": "suno.com"},
+      {"host": "suno.ai"},
+      {"host": "studio-api.suno.ai"},
+      {"host": "cdn1.suno.ai", "note": "生成音频 CDN"}
+    ],
+    "assert": {"same_policy": true, "policy": "AI", "no_dns_leak": true}
+  },
+  {
+    "name": "llm_inference_platforms",
+    "desc": "推理聚合/托管平台：Groq 控制台 + OpenRouter / Together / Replicate / Fireworks / DeepInfra / Cohere",
+    "requests": [
+      {"host": "groq.com"},
+      {"host": "console.groq.com"},
+      {"host": "api.groq.com"},
+      {"host": "openrouter.ai"},
+      {"host": "api.together.xyz"},
+      {"host": "together.ai"},
+      {"host": "replicate.com"},
+      {"host": "replicate.delivery", "note": "模型输出文件分发"},
+      {"host": "api.fireworks.ai"},
+      {"host": "deepinfra.com"},
+      {"host": "api.cohere.com"}
+    ],
+    "assert": {"same_policy": true, "policy": "AI", "no_dns_leak": true}
+  },
+  {
+    "name": "ollama_model_pull",
+    "desc": "Ollama 本地模型拉取：官网 + registry 拉层。理想上 registry 与官网同组同出口（分层下载中途换出口会 416/断流）",
+    "note": "2026-08-25 F1 已修复：AI.list 补入 DOMAIN-SUFFIX,ollama.ai。",
+    "requests": [
+      {"host": "ollama.com"},
+      {"host": "registry.ollama.ai", "note": "模型 blob registry"}
+    ],
+    "assert": {"same_policy": true, "policy": "AI", "no_dns_leak": true}
+  }
+]

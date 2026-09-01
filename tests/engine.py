@@ -1,24 +1,23 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""
-engine.py — Surge 规则语义引擎（分流测试套件 L0 层）
+"""engine.py — 分流测试套件 L0：离线复刻 Surge 匹配语义。
 
-职责：
-  1. 只读解析 Surge.conf（[Proxy] / [Proxy Group] / [Rule]）与 rules/lists/*.list；
-  2. 把 RULE-SET 内联展开成一张「按 conf 顺序」的全局规则表（rule_index 即优先级）；
-  3. 离线模拟一次请求的分流判定，返回 spec/testkit.md 约定的 JSON 结构；
-  4. 供 audit.py / runsuite.py 以模块方式复用（`import engine`）。
+只读解析 Surge.conf（[Proxy] / [Proxy Group] / [Rule]）与 lists/*.list，把
+RULE-SET 内联展开成一张按 conf 顺序的全局规则表，再按首次命中模拟一次请求的
+分流判定；供 audit.py / runsuite.py 以模块方式复用。
 
-设计约束：
-  * python3 标准库 only（macOS 自带 3.9+ 可跑）；
-  * 全程只读，绝不写入 Surge Profiles 目录；
-  * 无法离线精确判定的语义（GEOIP 非 CN、IP-ASN、URL-REGEX、内置 SYSTEM/LAN 规则集）
-    一律采用**显式标注的近似实现**，并在 Engine.warnings 中留痕；
-  * 本文件公开发布，**不含任何真实策略组名 / 线路商 / 机房标识**，这类映射一律外置到
-    本地私有覆盖档（见下方「本地私有覆盖档」，与 live_check.py 共用同一 schema）。
+只支持本仓库允许的规则面：DOMAIN / DOMAIN-SUFFIX / DOMAIN-KEYWORD /
+DOMAIN-WILDCARD / IP-CIDR / IP-CIDR6 / IP-ASN / GEOIP，加上 conf 里的
+RULE-SET / FINAL 与内置 SYSTEM / LAN 的近似展开。其余类型（含 A8 禁用的
+USER-AGENT / PROCESS-NAME / URL-REGEX）解析时告警并跳过，不参与匹配。
+离线近似：GEOIP,CN 用 ChinaIP.list，IP-ASN 用内置样本段；纯 IP 结论以在线为准。
+
+真实策略组名 / 线路商映射不入库：由本地覆盖档提供（环境变量 LIVE_CHECK_LOCAL
+指定路径，或 tests/live_check_local.json，已 gitignore；与 live_check.py 共用
+同一 schema），缺失时走中性占位默认值。
 
 CLI：
-  engine.py match <host> [--process P] [--ip I] [--ua U] [--conf PATH] [--json]
+  engine.py match <host|ip> [--ip I] [--conf PATH] [--rules DIR] [--json]
   engine.py dump-index [--file NAME] [--json]
   engine.py --selftest [--json]
 """
@@ -33,69 +32,34 @@ import re
 import sys
 
 # ---------------------------------------------------------------------------
-# 本地私有覆盖档（不入库）
+# 本地私有覆盖档（不入库；schema 与 live_check.py 共用）
 # ---------------------------------------------------------------------------
-#
-# 本仓库公开发布，代码里**只放中性占位默认值**；真实的策略组名 / 节点关键字 /
-# ASN / RDAP 归属关键字都带线路商与机房品牌标识，一律外置到本地覆盖档，
-# 由 live_check.py 与 engine.py 共用同一份 schema：
-#
-#   {
-#     "exit_class_exact":    {"<策略组或叶子出口组名>": "<exit_class>"},
-#     "exit_class_keywords": [["<物理节点名关键字>", "<exit_class>"], ...],
-#     "asn_map":             {"<ASN>": "<注释>"},
-#     "residential_hints":   ["<RDAP 机构/网段名关键字>", ...],
-#     "datacenter_hints":    ["<RDAP 机构/网段名关键字>", ...]
-#   }
-#
-# 查找顺序（取第一个存在的文件，不叠加）:
-#   1. 环境变量 LIVE_CHECK_LOCAL 指定的路径
-#   2. <repo>/../rules-local/live_check_local.json   ← 推荐：整个目录都在仓库外
-#   3. <repo>/tests/live_check_local.json            ← 旧路径，已 gitignore
-#
-# 文件缺失时全部走中性默认值，不报错（离线自检、干净 clone 都能跑）。
 
-#: 兼容旧键名（rules-local 早期草案），值语义完全一致。
-_LOCAL_KEY_ALIASES = {
-    "exit_class_exact": ("exit_class_exact", "policy_exit_class"),
-    "exit_class_keywords": ("exit_class_keywords",),
-    "asn_map": ("asn_map", "known_asn_extra"),
-    "residential_hints": ("residential_hints", "residential_hints_extra"),
-    "datacenter_hints": ("datacenter_hints", "datacenter_hints_extra"),
-}
+_LOCAL_KEYS = ("exit_class_exact", "exit_class_keywords", "asn_map",
+               "residential_hints", "datacenter_hints")
 
 
 def local_profile_candidates(self_dir=None):
-    """返回本地覆盖档的候选路径（按优先级）。"""
+    """覆盖档候选路径：环境变量 LIVE_CHECK_LOCAL → tests/live_check_local.json。"""
     self_dir = self_dir or os.path.dirname(os.path.abspath(__file__))
-    repo = os.path.dirname(self_dir)
     out = []
     env = os.environ.get("LIVE_CHECK_LOCAL")
     if env:
         out.append(env)
-    out.append(os.path.join(os.path.dirname(repo), "rules-local",
-                            "live_check_local.json"))
     out.append(os.path.join(self_dir, "live_check_local.json"))
     return out
 
 
 def load_local_profile(self_dir=None):
-    """读本地私有覆盖档，返回 (归一化后的 dict, 实际读到的路径 or None)。"""
+    """读第一个存在的覆盖档，返回 (dict, 路径 or None)；缺失不报错。"""
     for path in local_profile_candidates(self_dir):
         try:
             with open(path, encoding="utf-8") as fh:
                 raw = json.load(fh)
         except (OSError, ValueError):
             continue
-        if not isinstance(raw, dict):
-            continue
-        out = {}
-        for canon, names in _LOCAL_KEY_ALIASES.items():
-            for n in names:
-                if n in raw:
-                    out[canon] = raw[n]
-                    break
-        return out, path
+        if isinstance(raw, dict):
+            return {k: raw[k] for k in _LOCAL_KEYS if k in raw}, path
     return {}, None
 
 
@@ -105,42 +69,27 @@ LOCAL_PROFILE, LOCAL_PROFILE_PATH = load_local_profile()
 # 常量与近似实现表
 # ---------------------------------------------------------------------------
 
-#: 域名类规则
 DOMAIN_TYPES = frozenset((
     "DOMAIN", "DOMAIN-SUFFIX", "DOMAIN-KEYWORD", "DOMAIN-WILDCARD",
 ))
+IP_TYPES = frozenset(("IP-CIDR", "IP-CIDR6", "IP-ASN", "GEOIP"))
 
-#: IP 类规则（这些规则对「域名请求」若缺 no-resolve 会触发本地 DNS 解析）
-IP_TYPES = frozenset((
-    "IP-CIDR", "IP-CIDR6", "IP-ASN", "GEOIP", "IP-CIDR-SET", "IP-ASN6",
+#: 认识但不支持匹配的类型：告警 + 跳过（A8 禁用类型与逻辑规则都在此列）。
+SKIPPED_TYPES = frozenset((
+    "AND", "OR", "NOT", "PROCESS-NAME", "USER-AGENT", "URL-REGEX",
+    "IP-CIDR-SET", "IP-ASN6", "DOMAIN-SET", "SRC-IP", "SRC-PORT",
+    "DEST-PORT", "PROTOCOL", "IN-PORT", "SCRIPT", "SUBNET",
+    "CELLULAR-RADIO", "DEVICE-NAME", "RULE-SET-REMOTE",
 ))
 
-#: 逻辑组合规则
-LOGICAL_TYPES = frozenset(("AND", "OR", "NOT"))
-
-#: 其它已知可解析类型
-OTHER_TYPES = frozenset((
-    "PROCESS-NAME", "USER-AGENT", "URL-REGEX", "FINAL", "RULE-SET",
-    "DOMAIN-SET", "SRC-IP", "SRC-PORT", "DEST-PORT", "PROTOCOL",
-    "IN-PORT", "SCRIPT", "SUBNET", "CELLULAR-RADIO", "DEVICE-NAME",
-    "RULE-SET-REMOTE",
-))
-
-KNOWN_TYPES = DOMAIN_TYPES | IP_TYPES | LOGICAL_TYPES | OTHER_TYPES
-
-#: 已知修饰符（出现在规则行尾）
 KNOWN_MODIFIERS = frozenset((
     "no-resolve", "extended-matching", "dns-failed", "force-remote-dns",
     "pre-matching", "update-interval", "hidden",
 ))
 
-#: 出口画像映射（exit_class 共享 Schema，与 spec/testkit.md 一致）。
-#:
-#: exit_class 的**取值集合**是共享契约，改名要同步 spec 与 live_check.py；
-#: 但**键**（策略组名）是每个人自己的 conf 里的名字，真实名字带线路商 / ISP
-#: 标识，不入库 —— 这里只登记中性占位组名，真实组名由本地私有覆盖档的
-#: exit_class_exact 覆盖合并进来（见文件顶部「本地私有覆盖档」）。
-#: 覆盖档缺失时，未登记的组名走 _infer_exit_class 的国旗前缀兜底。
+#: 出口画像映射（exit_class 取值集合是共享契约，改名要同步 live_check.py）。
+#: 键是策略组名 —— 真实组名带线路商标识不入库，这里只登记中性占位，
+#: 真实映射由覆盖档 exit_class_exact 合并进来；表外组名走国旗前缀兜底。
 EXIT_CLASS_MAP_DEFAULT = {
     "🇺🇸美国家宽A": "US-HOME-A",
     "🇺🇸美国家宽B": "US-HOME-B",
@@ -160,15 +109,10 @@ _local_exact = LOCAL_PROFILE.get("exit_class_exact") or {}
 if isinstance(_local_exact, dict):
     EXIT_CLASS_MAP.update({str(k): str(v) for k, v in _local_exact.items()})
 
-#: 本地覆盖档是否真的提供了 exit_class_exact。
-#: 自检里针对**真实 conf**的落点断言只有在它为真时才有意义（否则真实组名不在表内）。
+#: 覆盖档是否提供了 exit_class_exact；自检的真实落点断言以此为门。
 LOCAL_EXIT_CLASS_LOADED = bool(_local_exact)
 
-#: 内置 SYSTEM 规则集的**近似**实现。
-#: Surge 内置 SYSTEM 集合不公开，这里只收录 spec 点名的三个域 + 少量同类
-#: 「设备激活/描述文件/门户探测」域，刻意取小集合以免掩盖真实分流路径。
-#: 名单里带「实测」标注的，是 realworld.py --crosscheck 拿 surge-cli 逐条对账时
-#: 发现「Surge 实际命中 RULE-SET SYSTEM 而本表没有」的域，按在线为准补录。
+#: 内置 SYSTEM 规则集近似（Surge 不公开；--crosscheck 发现漏项按在线为准补录）。
 BUILTIN_SYSTEM_DOMAINS = (
     "captive.apple.com",
     "mesu.apple.com",
@@ -179,10 +123,10 @@ BUILTIN_SYSTEM_DOMAINS = (
     "static.ips.apple.com",
     "iprofiles.apple.com",
     "deviceenrollment.apple.com",
-    "guzzoni.apple.com",        # 实测 2026-08-30: Surge 命中 DOMAIN guzzoni.apple.com(in SYSTEM)
+    "guzzoni.apple.com",
 )
 
-#: 内置 LAN 规则集的**近似**实现：RFC1918 / loopback / link-local / 保留段。
+#: 内置 LAN 规则集近似：RFC1918 / loopback / link-local / 保留段。
 BUILTIN_LAN_CIDRS = (
     "0.0.0.0/8", "10.0.0.0/8", "100.64.0.0/10", "127.0.0.0/8",
     "169.254.0.0/16", "172.16.0.0/12", "192.0.0.0/24", "192.0.2.0/24",
@@ -192,10 +136,9 @@ BUILTIN_LAN_CIDRS = (
 BUILTIN_LAN_CIDRS6 = ("::1/128", "fc00::/7", "fe80::/10", "ff00::/8")
 BUILTIN_LAN_DOMAINS = ("local", "localhost", "home.arpa", "lan")
 
-#: IP-ASN **近似**映射：仅收录该 ASN 的少量代表性网段样本，用于离线冒烟。
-#: 绝非完整 ASN 段表 —— 命中即视为「该 ASN 的典型段」，未命中不代表不属于该 ASN。
+#: IP-ASN 近似：仅收录代表性网段样本，命中即视为该 ASN，未命中不代表不属于。
 BUILTIN_ASN_SAMPLES = {
-    # DigitalOcean（AI.list 收了整个 ASN，用户自有 DO VPS 会被拉进 AI 组）
+    # DigitalOcean
     "14061": ["159.89.0.0/16", "165.227.0.0/16", "167.71.0.0/16", "167.99.0.0/16",
               "104.131.0.0/16", "134.209.0.0/16", "138.68.0.0/16", "142.93.0.0/16",
               "143.198.0.0/16", "146.190.0.0/16", "157.245.0.0/16", "161.35.0.0/16",
@@ -205,7 +148,7 @@ BUILTIN_ASN_SAMPLES = {
     "20473": ["45.32.0.0/16", "45.63.0.0/16", "45.76.0.0/16", "45.77.0.0/16",
               "66.42.0.0/18", "104.156.224.0/19", "108.61.0.0/16", "149.28.0.0/16",
               "155.138.128.0/17", "207.246.64.0/18", "216.128.128.0/17"],
-    # Anthropic（自有 /21）
+    # Anthropic
     "399358": ["160.79.104.0/21"],
     "401518": ["160.79.104.0/21"],
     # Twitter / X
@@ -227,18 +170,14 @@ BUILTIN_ASN_SAMPLES = {
 # ---------------------------------------------------------------------------
 
 def host_suffixes(host):
-    """生成 host 的全部后缀候选（含自身）：a.b.c → a.b.c / b.c / c"""
+    """host 的全部后缀候选（含自身）：a.b.c → a.b.c / b.c / c"""
     parts = host.split(".")
     for i in range(len(parts)):
         yield ".".join(parts[i:])
 
 
 def wildcard_to_regex(pattern):
-    """把 Surge 通配（* 任意长度、? 单字符）转成正则。
-
-    近似说明：Surge 的 DOMAIN-WILDCARD 未公开是否跨 `.` 匹配，这里 `*` 取
-    「任意字符（含 .）」的宽松解释；`fnmatch` 的 [] 字符类语义被禁用。
-    """
+    """Surge 通配转正则：* 任意长度（含 .，宽松解释）、? 单字符。"""
     out = ["^"]
     for ch in pattern:
         if ch == "*":
@@ -259,35 +198,12 @@ def is_ip_literal(text):
         return False
 
 
-def split_top_level(text, sep=","):
-    """按顶层分隔符切分，忽略括号内的分隔符（用于 AND/OR/NOT）。"""
-    out, depth, buf = [], 0, []
-    for ch in text:
-        if ch == "(":
-            depth += 1
-            buf.append(ch)
-        elif ch == ")":
-            depth -= 1
-            buf.append(ch)
-        elif ch == sep and depth == 0:
-            out.append("".join(buf).strip())
-            buf = []
-        else:
-            buf.append(ch)
-    if buf:
-        out.append("".join(buf).strip())
-    return out
-
-
 def strip_comment(line):
-    """去掉 # 注释（行首或前置空白的 #）。URL-REGEX 行不处理以免破坏正则。"""
-    s = line.rstrip("\n").rstrip("\r")
-    if s.lstrip().startswith("#") or s.lstrip().startswith(";"):
+    """去掉整行注释与 " #" 起的行尾注释。"""
+    s = line.rstrip("\r\n")
+    t = s.lstrip()
+    if t.startswith("#") or t.startswith(";") or t.startswith("//"):
         return ""
-    if s.lstrip().startswith("//"):
-        return ""
-    if s.startswith("URL-REGEX"):
-        return s.strip()
     idx = s.find(" #")
     if idx >= 0:
         s = s[:idx]
@@ -302,51 +218,37 @@ class Rule(object):
     """展开后的一条规则。idx 即全局优先级（越小越先匹配）。"""
 
     __slots__ = ("idx", "type", "value", "policy", "modifiers", "source",
-                 "line", "raw", "set_modifiers", "sub")
+                 "line", "raw", "set_modifiers")
 
     def __init__(self, idx, rtype, value, policy, modifiers, source, line,
-                 raw, set_modifiers=(), sub=None):
+                 raw, set_modifiers=()):
         self.idx = idx
         self.type = rtype
         self.value = value
         self.policy = policy
         self.modifiers = frozenset(modifiers)
         self.source = source          # 来源文件名 / "Surge.conf" / "SYSTEM" / "LAN"
-        self.line = line              # 来源文件内行号（1 起）
+        self.line = line
         self.raw = raw
         self.set_modifiers = frozenset(set_modifiers)  # conf RULE-SET 行级修饰
-        self.sub = sub                # AND/OR/NOT 的子条件列表
 
-    # -- 修饰符 ------------------------------------------------------------
     @property
     def no_resolve(self):
         """有效 no-resolve = 规则自带 or conf RULE-SET 行级修饰。"""
-        if "no-resolve" in self.modifiers or "no-resolve" in self.set_modifiers:
-            return True
-        if self.type in LOGICAL_TYPES and self.sub:
-            ip_subs = [c for c in self.sub if c[0] in IP_TYPES]
-            if ip_subs and all("no-resolve" in c[2] for c in ip_subs):
-                return True
-        return False
+        return "no-resolve" in self.modifiers or "no-resolve" in self.set_modifiers
 
     @property
     def is_ip_class(self):
-        if self.type in IP_TYPES:
-            return True
-        if self.type in LOGICAL_TYPES and self.sub:
-            return any(c[0] in IP_TYPES for c in self.sub)
-        return False
+        return self.type in IP_TYPES
 
     def signature(self):
-        """(type,value) 规范化签名，用于查重。PROCESS-NAME 大小写敏感。"""
-        if self.type == "PROCESS-NAME":
-            return (self.type, self.value)
+        """(type, value) 规范化签名，用于查重。"""
         if self.type in DOMAIN_TYPES:
             return (self.type, (self.value or "").lower())
         return (self.type, self.value)
 
     def rule_str(self):
-        """schema 中 matched_rule 的形式：TYPE,VALUE（不含 policy / 修饰符）。"""
+        """结果 schema 中 matched_rule 的形式：TYPE,VALUE（不含 policy / 修饰符）。"""
         if self.type == "FINAL":
             return "FINAL"
         return "%s,%s" % (self.type, self.value)
@@ -365,8 +267,7 @@ class Engine(object):
     def __init__(self, conf_path, rules_dir=None):
         self.conf_path = os.path.abspath(conf_path)
         base = os.path.dirname(self.conf_path)
-        # 默认布局：<conf 同级>/rules/ 是规则仓库根，全部 .list 收纳在其 lists/ 下。
-        # 显式传入 rules_dir 时原样使用（自检的 tempdir fixture 走这一支）。
+        # 默认布局：<conf 同级>/rules/lists/；显式传入 rules_dir 时原样使用。
         self.rules_dir = os.path.abspath(
             rules_dir or os.path.join(base, "rules", "lists"))
         self.warnings = []
@@ -401,45 +302,35 @@ class Engine(object):
                 if "=" in s and not s.startswith("#"):
                     k, v = s.split("=", 1)
                     self.general[k.strip()] = v.strip()
-                continue
-            if section == "Proxy":
-                if s.startswith("#") or "=" not in s:
-                    continue
-                name, body = s.split("=", 1)
-                self.proxies[name.strip()] = body.strip()
-                continue
-            if section == "Proxy Group":
+            elif section == "Proxy":
+                if not s.startswith("#") and "=" in s:
+                    name, body = s.split("=", 1)
+                    self.proxies[name.strip()] = body.strip()
+            elif section == "Proxy Group":
                 if s.startswith("#") or "=" not in s:
                     continue
                 name, body = s.split("=", 1)
                 toks = [t.strip() for t in body.split(",") if t.strip()]
                 if not toks:
                     continue
-                gtype, members = toks[0], []
-                for t in toks[1:]:
-                    if "=" in t:      # include-all-proxies=0 / policy-priority=… 等选项
-                        continue
-                    members.append(t)
-                self.groups[name.strip()] = {"type": gtype, "members": members}
-                continue
-            if section == "Rule":
+                # "k=v" 形态是组选项（policy-priority=… 等），不是成员
+                members = [t for t in toks[1:] if "=" not in t]
+                self.groups[name.strip()] = {"type": toks[0], "members": members}
+            elif section == "Rule":
                 text = strip_comment(raw)
-                if not text:
-                    continue
-                self._add_conf_rule(text, lineno)
-                continue
+                if text:
+                    self._add_conf_rule(text, lineno)
 
     def _add_conf_rule(self, text, conf_lineno):
-        """把 conf [Rule] 里的一行加入规则表（RULE-SET 会内联展开）。"""
-        head = text.split(",", 1)[0].strip().upper()
-        if head in ("RULE-SET", "DOMAIN-SET"):
-            toks = split_top_level(text)
+        """把 conf [Rule] 的一行加入规则表（RULE-SET 内联展开）。"""
+        toks = [t.strip() for t in text.split(",")]
+        head = toks[0].upper()
+        if head == "RULE-SET":
             if len(toks) < 3:
                 self._warn("conf:%d RULE-SET 行字段不足，跳过：%s" % (conf_lineno, text))
                 return
-            ref, policy = toks[1].strip(), toks[2].strip()
-            mods = [m.strip().lower() for m in toks[3:] if m.strip()]
-            self._expand_ruleset(ref, policy, mods, conf_lineno)
+            mods = [m.lower() for m in toks[3:] if m]
+            self._expand_ruleset(toks[1], toks[2], mods, conf_lineno)
             return
         rule = self._parse_rule_line(text, with_policy=True,
                                      source=os.path.basename(self.conf_path),
@@ -452,7 +343,7 @@ class Engine(object):
         upper = ref.strip().upper()
         if upper in ("SYSTEM", "LAN"):
             self.ruleset_refs.append((ref, upper, policy, mods, conf_lineno))
-            self._append_builtin(upper, policy, mods, conf_lineno)
+            self._append_builtin(upper, policy, mods)
             return
         basename = ref.rstrip("/").split("/")[-1].split("?")[0]
         self.ruleset_refs.append((ref, basename, policy, mods, conf_lineno))
@@ -473,113 +364,62 @@ class Engine(object):
                     rule.idx = len(self.rules)
                     self.rules.append(rule)
 
-    def _append_builtin(self, which, policy, mods, conf_lineno):
+    def _append_builtin(self, which, policy, mods):
         """内置 SYSTEM / LAN 规则集的近似展开。"""
         if which == "SYSTEM":
             self._warn("RULE-SET,SYSTEM 使用近似实现（%d 条系统域）"
                        % len(BUILTIN_SYSTEM_DOMAINS))
             for i, d in enumerate(BUILTIN_SYSTEM_DOMAINS, 1):
-                r = Rule(len(self.rules), "DOMAIN", d, policy, (), "SYSTEM", i,
-                         "DOMAIN,%s" % d, mods)
-                self.rules.append(r)
-        else:
-            self._warn("RULE-SET,LAN 使用近似实现（RFC1918/loopback/link-local）")
-            n = 0
-            for d in BUILTIN_LAN_DOMAINS:
+                self.rules.append(Rule(len(self.rules), "DOMAIN", d, policy, (),
+                                       "SYSTEM", i, "DOMAIN,%s" % d, mods))
+            return
+        self._warn("RULE-SET,LAN 使用近似实现（RFC1918/loopback/link-local）")
+        n = 0
+        for d in BUILTIN_LAN_DOMAINS:
+            n += 1
+            self.rules.append(Rule(len(self.rules), "DOMAIN-SUFFIX", d, policy,
+                                   (), "LAN", n, "DOMAIN-SUFFIX,%s" % d, mods))
+        for t, cidrs in (("IP-CIDR", BUILTIN_LAN_CIDRS),
+                         ("IP-CIDR6", BUILTIN_LAN_CIDRS6)):
+            for c in cidrs:
                 n += 1
-                self.rules.append(Rule(len(self.rules), "DOMAIN-SUFFIX", d, policy,
-                                       (), "LAN", n, "DOMAIN-SUFFIX,%s" % d, mods))
-            for c in BUILTIN_LAN_CIDRS:
-                n += 1
-                self.rules.append(Rule(len(self.rules), "IP-CIDR", c, policy,
+                self.rules.append(Rule(len(self.rules), t, c, policy,
                                        ("no-resolve",), "LAN", n,
-                                       "IP-CIDR,%s,no-resolve" % c, mods))
-            for c in BUILTIN_LAN_CIDRS6:
-                n += 1
-                self.rules.append(Rule(len(self.rules), "IP-CIDR6", c, policy,
-                                       ("no-resolve",), "LAN", n,
-                                       "IP-CIDR6,%s,no-resolve" % c, mods))
+                                       "%s,%s,no-resolve" % (t, c), mods))
 
     def _parse_rule_line(self, text, with_policy, source, line,
                          policy=None, set_modifiers=()):
         """解析一行规则。with_policy=True 时第三段是策略（conf 内联规则）。"""
-        toks = split_top_level(text)
-        if not toks:
-            return None
-        rtype = toks[0].strip().upper()
+        toks = [t.strip() for t in text.split(",")]
+        rtype = toks[0].upper()
 
         if rtype == "FINAL":
-            pol = toks[1].strip() if len(toks) > 1 else policy
-            mods = [m.strip().lower() for m in toks[2:]]
+            pol = toks[1] if len(toks) > 1 else policy
+            mods = [m.lower() for m in toks[2:]]
             return Rule(0, "FINAL", None, pol, mods, source, line, text, set_modifiers)
 
-        if rtype not in KNOWN_TYPES:
+        if rtype in SKIPPED_TYPES:
+            self._warn("%s:%d 不支持的规则类型 %s，已跳过（本仓库规则面之外）"
+                       % (source, line, rtype))
+            return None
+        if rtype not in DOMAIN_TYPES and rtype not in IP_TYPES:
             self._warn("%s:%d 未知规则类型 %s，已跳过：%s" % (source, line, rtype, text))
             return None
-
-        if rtype in LOGICAL_TYPES:
-            expr = toks[1] if len(toks) > 1 else ""
-            pol, mods = None, []
-            if with_policy and len(toks) > 2:
-                pol = toks[2].strip()
-                mods = [m.strip().lower() for m in toks[3:]]
-            else:
-                pol = policy
-                mods = [m.strip().lower() for m in toks[2:]
-                        if m.strip().lower() in KNOWN_MODIFIERS]
-            sub = self._parse_logical(expr, source, line)
-            return Rule(0, rtype, expr, pol, mods, source, line, text,
-                        set_modifiers, sub)
-
-        if rtype == "URL-REGEX":
-            # value 可能含逗号；离线无 URL 上下文，恒不匹配（仅登记）
-            rest = text.split(",", 1)[1] if "," in text else ""
-            pol = policy
-            if with_policy:
-                sub_toks = split_top_level(rest)
-                if len(sub_toks) >= 2:
-                    pol = sub_toks[-1].strip()
-                    rest = ",".join(sub_toks[:-1])
-            self._warn("%s:%d URL-REGEX 离线无法判定（缺 URL 上下文），恒不匹配"
-                       % (source, line))
-            return Rule(0, rtype, rest.strip(), pol, (), source, line, text,
-                        set_modifiers)
-
-        if len(toks) < 2:
+        if len(toks) < 2 or not toks[1]:
             self._warn("%s:%d 规则字段不足，跳过：%s" % (source, line, text))
             return None
 
-        value = toks[1].strip()
+        value = toks[1]
         if with_policy:
-            pol = toks[2].strip() if len(toks) > 2 else policy
-            mods = [m.strip().lower() for m in toks[3:] if m.strip()]
+            pol = toks[2] if len(toks) > 2 else policy
+            mods = [m.lower() for m in toks[3:] if m]
         else:
             pol = policy
-            mods = [m.strip().lower() for m in toks[2:] if m.strip()]
+            mods = [m.lower() for m in toks[2:] if m]
         for m in mods:
             if m not in KNOWN_MODIFIERS and "=" not in m:
                 self._warn("%s:%d 未知修饰符 %s" % (source, line, m))
         return Rule(0, rtype, value, pol, mods, source, line, text, set_modifiers)
-
-    def _parse_logical(self, expr, source, line):
-        """解析 ((TYPE,VAL,mods),(TYPE,VAL)) → [(type, value, mods_frozenset)]"""
-        expr = expr.strip()
-        if expr.startswith("(") and expr.endswith(")"):
-            expr = expr[1:-1]
-        out = []
-        for part in split_top_level(expr):
-            p = part.strip()
-            if p.startswith("(") and p.endswith(")"):
-                p = p[1:-1]
-            fields = [f.strip() for f in p.split(",")]
-            if len(fields) < 2:
-                self._warn("%s:%d 逻辑规则子条件解析失败：%s" % (source, line, part))
-                continue
-            t = fields[0].upper()
-            v = fields[1]
-            mods = frozenset(f.lower() for f in fields[2:])
-            out.append((t, v, mods))
-        return out
 
     # -- 索引 --------------------------------------------------------------
 
@@ -588,13 +428,9 @@ class Engine(object):
         self.by_suffix = {}
         self.by_keyword = []       # [(kw, idx)]
         self.by_wildcard = []      # [(regex, idx)]
-        self.by_process = {}
-        self.by_process_pattern = []
-        self.by_ua = []            # [(regex, idx, raw)]
         self.ip_nets = []          # [(version, net_int, mask_int, idx)]
         self.asn_rules = []        # [(asn, idx)]
         self.geoip_rules = []      # [(cc, idx)]
-        self.logical_rules = []    # [Rule]
         self.final_rule = None
         self.rules_by_file = {}
         self._china_ip_cache = None
@@ -610,14 +446,6 @@ class Engine(object):
                 self.by_keyword.append((r.value.lower(), r.idx))
             elif t == "DOMAIN-WILDCARD":
                 self.by_wildcard.append((wildcard_to_regex(r.value.lower()), r.idx))
-            elif t == "PROCESS-NAME":
-                if ("*" in r.value) or ("?" in r.value) or r.value.startswith("/"):
-                    # 通配 / 全路径 / App Bundle 形态：无法哈希精确查找，走逐条匹配
-                    self.by_process_pattern.append((r.value, r.idx))
-                else:
-                    self.by_process.setdefault(r.value, []).append(r.idx)
-            elif t == "USER-AGENT":
-                self.by_ua.append((wildcard_to_regex(r.value), r.idx, r.value))
             elif t in ("IP-CIDR", "IP-CIDR6"):
                 parsed = self._parse_cidr(r.value)
                 if parsed:
@@ -627,11 +455,8 @@ class Engine(object):
                 self.asn_rules.append((r.value.strip(), r.idx))
             elif t == "GEOIP":
                 self.geoip_rules.append((r.value.strip().upper(), r.idx))
-            elif t in LOGICAL_TYPES:
-                self.logical_rules.append(r)
-            elif t == "FINAL":
-                if self.final_rule is None:
-                    self.final_rule = r
+            elif t == "FINAL" and self.final_rule is None:
+                self.final_rule = r
 
         # 会触发本地 DNS 解析的 IP 类规则（缺 no-resolve），按 idx 升序
         self.leaky_ip_rules = sorted(
@@ -643,8 +468,7 @@ class Engine(object):
             net = ipaddress.ip_network(text.strip(), strict=False)
         except ValueError:
             return None
-        ver = net.version
-        return (ver, int(net.network_address), int(net.netmask))
+        return (net.version, int(net.network_address), int(net.netmask))
 
     def _china_ip_nets(self):
         """GEOIP,CN 的近似实现：用 ChinaIP.list 的 CIDR 集合代替 MaxMind 库。"""
@@ -673,12 +497,7 @@ class Engine(object):
     # -- 策略组 → 物理出口 -------------------------------------------------
 
     def resolve_exit(self, policy):
-        """递归取策略组首项，直到落到已知物理出口名或 [Proxy] 条目。
-
-        exit_class 表以「🇺🇸美国家宽A」这类**叶子出口组**为键（真实组名由本地
-        私有覆盖档提供），故递归遇到表内名字即停（此时它就是 physical_exit）；
-        表外的组继续下钻到 [Proxy] 物理名。
-        """
+        """递归取策略组首项，直到落到 exit_class 表内名字或 [Proxy] 条目。"""
         seen, cur = set(), policy
         while True:
             if cur in EXIT_CLASS_MAP:
@@ -706,15 +525,20 @@ class Engine(object):
 
     # -- 匹配 --------------------------------------------------------------
 
-    def match(self, host=None, ip=None, process=None, ua=None):
-        """离线模拟一次请求的分流判定，返回 spec/testkit.md 的结果 JSON。"""
+    def match(self, host=None, ip=None):
+        """离线模拟一次请求的分流判定，返回结果 JSON（schema 见 _result）。
+
+        no-resolve 语义：域名请求时带 no-resolve 的 IP 规则一律跳过；
+        缺 no-resolve 的 IP 规则记 dns_leak（离线不真解析）；显式给了 --ip
+        则视为已解析，允许非 no-resolve 的 IP 规则命中（泄漏照记）。
+        """
         q_host, q_ip = host, ip
         if host and is_ip_literal(host):
             q_ip, q_host = host, None
         if q_host:
             q_host = q_host.strip().rstrip(".").lower()
 
-        best = None                      # (idx, Rule)
+        best = None
         is_domain_query = bool(q_host)
 
         def consider(idx):
@@ -722,7 +546,6 @@ class Engine(object):
             if best is None or idx < best:
                 best = idx
 
-        # --- 域名类 -------------------------------------------------------
         if q_host:
             hits = self.by_domain.get(q_host)
             if hits:
@@ -732,42 +555,12 @@ class Engine(object):
                 if hits:
                     consider(hits[0])
             for kw, idx in self.by_keyword:
-                if best is not None and idx > best:
-                    continue
-                if kw in q_host:
+                if (best is None or idx < best) and kw in q_host:
                     consider(idx)
             for rx, idx in self.by_wildcard:
-                if best is not None and idx > best:
-                    continue
-                if rx.match(q_host):
+                if (best is None or idx < best) and rx.match(q_host):
                     consider(idx)
 
-        # --- 进程名 / UA --------------------------------------------------
-        if process:
-            # 精确名快查（查询为全路径时同时按 basename 查，对齐 Surge Filename Mode）
-            hits = self.by_process.get(process)
-            if hits:
-                consider(hits[0])
-            if "/" in process:
-                base_hits = self.by_process.get(process.rsplit("/", 1)[-1])
-                if base_hits:
-                    consider(base_hits[0])
-            for pv, idx in self.by_process_pattern:
-                if best is not None and idx > best:
-                    continue
-                if self._proc_match(pv, process):
-                    consider(idx)
-        if ua:
-            for rx, idx, _raw in self.by_ua:
-                if best is not None and idx > best:
-                    continue
-                if rx.match(ua):
-                    consider(idx)
-
-        # --- IP 类 --------------------------------------------------------
-        # 语义：域名请求 + 规则带 no-resolve → 跳过；域名请求 + 无 no-resolve →
-        # 记 dns_leak 并跳过（离线不真解析）；显式给了 --ip 则视为「已解析」，
-        # 允许非 no-resolve 的 IP 规则命中（同时仍记泄漏）。
         ip_obj = None
         if q_ip:
             try:
@@ -777,9 +570,7 @@ class Engine(object):
         if ip_obj is not None:
             ip_int, ver = int(ip_obj), ip_obj.version
             for r_ver, net_int, mask, idx in self.ip_nets:
-                if r_ver != ver:
-                    continue
-                if best is not None and idx > best:
+                if r_ver != ver or (best is not None and idx > best):
                     continue
                 if not self._ip_rule_usable(idx, is_domain_query):
                     continue
@@ -800,35 +591,24 @@ class Engine(object):
                 if self._geoip_match(cc, ip_obj, ip_int, ver):
                     consider(idx)
 
-        # --- 逻辑规则 ------------------------------------------------------
-        for r in self.logical_rules:
-            if best is not None and r.idx > best:
-                continue
-            if self._eval_logical(r, q_host, ip_obj, process, ua, is_domain_query):
-                consider(r.idx)
-
-        # --- 兜底 ----------------------------------------------------------
         matched = self.rules[best] if best is not None else self.final_rule
         if matched is None:
-            return self._result(q_host, q_ip, process, ua, None, [], None)
+            return self._result(q_host, q_ip, None, [], None)
 
         trace, leak_at = [], None
         if is_domain_query:
             for idx, r in self.leaky_ip_rules:
                 if idx >= matched.idx:
                     break
-                desc = "%s (%s:%s → %s) 缺 no-resolve，域名请求到此会触发本地 DNS 解析" % (
-                    r.rule_str(), r.source, r.line, r.policy)
-                trace.append(desc)
+                trace.append("%s (%s:%s → %s) 缺 no-resolve，域名请求到此会触发本地 DNS 解析"
+                             % (r.rule_str(), r.source, r.line, r.policy))
                 if leak_at is None:
                     leak_at = r.rule_str()
-        return self._result(q_host, q_ip, process, ua, matched, trace, leak_at)
+        return self._result(q_host, q_ip, matched, trace, leak_at)
 
     def _ip_rule_usable(self, idx, is_domain_query):
         """域名请求时：带 no-resolve 的 IP 规则一律跳过。"""
-        if not is_domain_query:
-            return True
-        return not self.rules[idx].no_resolve
+        return not is_domain_query or not self.rules[idx].no_resolve
 
     def _asn_match(self, asn, ip_obj):
         sample = BUILTIN_ASN_SAMPLES.get(str(asn))
@@ -837,10 +617,7 @@ class Engine(object):
             return False
         for cidr in sample:
             p = self._parse_cidr(cidr)
-            if not p:
-                continue
-            ver, net_int, mask = p
-            if ver == ip_obj.version and (int(ip_obj) & mask) == net_int:
+            if p and p[0] == ip_obj.version and (int(ip_obj) & p[2]) == p[1]:
                 return True
         return False
 
@@ -853,89 +630,17 @@ class Engine(object):
         self._warn("GEOIP,%s 离线无 MaxMind 库，判定为不匹配（近似）" % cc)
         return False
 
-    def _eval_logical(self, rule, host, ip_obj, process, ua, is_domain_query):
-        if not rule.sub:
-            return False
-        results = []
-        for (t, v, mods) in rule.sub:
-            results.append(self._eval_cond(t, v, mods, host, ip_obj, process,
-                                           ua, is_domain_query))
-        if rule.type == "AND":
-            return all(r is True for r in results)
-        if rule.type == "OR":
-            return any(r is True for r in results)
-        if rule.type == "NOT":
-            return results and results[0] is False
-        return False
-
-    @staticmethod
-    def _proc_match(v, process):
-        """Surge PROCESS-NAME 三种形态（全部大小写敏感，surge-cli 6.9.0 实测语义）：
-        Filename：可执行名，支持 */? 通配（Claude Helper* 命中全部括号变体）。
-        Full Path（/ 开头）无通配：以 / 结尾为路径前缀匹配（App Bundle Mode），否则全路径精确。
-        Full Path 含通配：整串 glob——* 一旦出现即失去前缀语义，须以 * 收尾才能匹配更深路径段。
-        查询侧：process 含 / 视为全路径（Filename 规则对其 basename 匹配）；仅进程名时全路径规则不可判定。
-        """
-        if not process:
-            return False
-        has_glob = ("*" in v) or ("?" in v)
-        if v.startswith("/"):
-            if "/" not in process:
-                return False
-            if has_glob:
-                return bool(wildcard_to_regex(v).match(process))
-            if v.endswith("/"):
-                return process.startswith(v)
-            return process == v
-        name = process.rsplit("/", 1)[-1] if "/" in process else process
-        if has_glob:
-            return bool(wildcard_to_regex(v).match(name))
-        return name == v
-
-    def _eval_cond(self, t, v, mods, host, ip_obj, process, ua, is_domain_query):
-        if t in DOMAIN_TYPES:
-            if not host:
-                return False
-            lv = v.lower()
-            if t == "DOMAIN":
-                return host == lv
-            if t == "DOMAIN-SUFFIX":
-                return host == lv or host.endswith("." + lv)
-            if t == "DOMAIN-KEYWORD":
-                return lv in host
-            return bool(wildcard_to_regex(lv).match(host))
-        if t == "PROCESS-NAME":
-            return self._proc_match(v, process)
-        if t == "USER-AGENT":
-            return bool(ua and wildcard_to_regex(v).match(ua))
-        if t in IP_TYPES:
-            if is_domain_query and "no-resolve" in mods:
-                return False
-            if ip_obj is None:
-                return False
-            if t in ("IP-CIDR", "IP-CIDR6"):
-                p = self._parse_cidr(v)
-                if not p:
-                    return False
-                ver, net_int, mask = p
-                return ver == ip_obj.version and (int(ip_obj) & mask) == net_int
-            if t == "IP-ASN":
-                return self._asn_match(v, ip_obj)
-            if t == "GEOIP":
-                return self._geoip_match(v.upper(), ip_obj, int(ip_obj), ip_obj.version)
-        return False
-
-    def _result(self, host, ip, process, ua, matched, trace, leak_at):
+    def _result(self, host, ip, matched, trace, leak_at):
         if matched is None:
             return {
-                "query": {"host": host, "ip": ip, "process": process, "ua": ua},
+                "query": {"host": host, "ip": ip},
                 "matched_rule": None, "rule_index": None, "source": None,
                 "policy": None, "physical_exit": None, "exit_class": None,
                 "dns_leak": False, "dns_leak_at": None, "trace": trace,
             }
         exit_name, exit_class = self.resolve_exit(matched.policy)
         return {
-            "query": {"host": host, "ip": ip, "process": process, "ua": ua},
+            "query": {"host": host, "ip": ip},
             "matched_rule": matched.rule_str(),
             "rule_index": matched.idx,
             "source": matched.source,
@@ -956,7 +661,7 @@ _FALLBACK_CONF = "/Users/fhgs/Library/Application Support/Surge/Profiles/Surge.c
 
 
 def default_conf_path():
-    """安装到 rules/tests/ 后：<tests>/../../Surge.conf；开发期回落到已知绝对路径。"""
+    """<tests>/../../Surge.conf；开发期回落到已知绝对路径。"""
     env = os.environ.get("SURGE_CONF")
     if env and os.path.isfile(env):
         return env
@@ -977,7 +682,7 @@ def build_engine(conf=None, rules=None):
 
 
 # ---------------------------------------------------------------------------
-# 自检（≥20 条手工断言）
+# 自检
 # ---------------------------------------------------------------------------
 
 SELFTEST_CONF = u"""\
@@ -993,7 +698,6 @@ PhysC = snell, 9.10.11.12, 63003
 \U0001F1FA\U0001F1F8美国家宽A = smart, PhysA, PhysB
 \U0001F1FA\U0001F1F8美国家宽B = smart, PhysB, PhysA
 \U0001F1FA\U0001F1F8美国落地 = smart, PhysC
-\U0001F1EF\U0001F1F5日本家宽 = smart, PhysA
 \U0001F1EC\U0001F1E7英国 = select, PhysB
 AI = select, \U0001F1FA\U0001F1F8美国家宽A, \U0001F1FA\U0001F1F8美国家宽B
 Social = select, \U0001F1FA\U0001F1F8美国落地, AI
@@ -1015,28 +719,22 @@ FINAL,Final,dns-failed
 
 SELFTEST_LISTS = {
     "First.list": u"""\
-# 手工构造：覆盖各域名类规则 + 进程 + UA
+# 覆盖各域名类规则 + IP 类
 DOMAIN,exact.example.com
 DOMAIN-SUFFIX,suffix.example.com
 DOMAIN-KEYWORD,kwtoken
 DOMAIN-WILDCARD,wild-*.example.net
 DOMAIN-WILDCARD,two-??.example.net
-PROCESS-NAME,ClaudeApp
-PROCESS-NAME,WildProc*
-PROCESS-NAME,/Applications/BundleApp.app/
-PROCESS-NAME,/Users/*/.hidden/*
-USER-AGENT,MyApp*
 IP-CIDR,203.0.113.0/24,no-resolve
 IP-CIDR6,2001:db8:aa::/48,no-resolve
 IP-ASN,399358,no-resolve
-AND,((DOMAIN-KEYWORD,cdn),(DOMAIN-KEYWORD,-epic-))
+USER-AGENT,MustBeSkipped*
 """,
     "Second.list": u"""\
-# 后位 list：这些条目会被 First.list 遮蔽（用于遮蔽断言）
+# 后位 list：与 First.list 的遮蔽关系
 DOMAIN,exact.example.com
 DOMAIN-SUFFIX,deep.suffix.example.com
 DOMAIN-SUFFIX,second-only.example.org
-PROCESS-NAME,claudeapp
 """,
     "Leaky.list": u"""\
 # 缺 no-resolve 的 IP 规则：域名请求经过此处会触发本地 DNS 解析
@@ -1053,38 +751,32 @@ IP-CIDR,192.0.2.0/24
 }
 
 
-def _make_selftest_env(tmpdir):
-    rules_dir = os.path.join(tmpdir, "rules")
-    os.makedirs(rules_dir, exist_ok=True)
-    conf = os.path.join(tmpdir, "Surge.conf")
-    with open(conf, "w", encoding="utf-8") as fh:
-        fh.write(SELFTEST_CONF)
-    for name, body in SELFTEST_LISTS.items():
-        with open(os.path.join(rules_dir, name), "w", encoding="utf-8") as fh:
-            fh.write(body)
-    return conf, rules_dir
-
-
 def run_selftest(verbose=True):
-    """内置自检：合成配置上跑手工断言 + 真实配置冒烟断言。"""
+    """合成配置手工断言 + 真实配置冒烟断言。"""
+    import shutil
     import tempfile
 
     results = []
 
     def check(name, got, want):
-        ok = (got == want)
-        results.append({"name": name, "ok": ok, "got": got, "want": want})
-        return ok
+        results.append({"name": name, "ok": got == want, "got": got, "want": want})
 
     tmpdir = tempfile.mkdtemp(prefix="surge-engine-selftest-")
     try:
-        conf, rules_dir = _make_selftest_env(tmpdir)
+        rules_dir = os.path.join(tmpdir, "rules")
+        os.makedirs(rules_dir)
+        conf = os.path.join(tmpdir, "Surge.conf")
+        with open(conf, "w", encoding="utf-8") as fh:
+            fh.write(SELFTEST_CONF)
+        for name, body in SELFTEST_LISTS.items():
+            with open(os.path.join(rules_dir, name), "w", encoding="utf-8") as fh:
+                fh.write(body)
         e = Engine(conf, rules_dir)
 
         def m(**kw):
             return e.match(**kw)
 
-        # --- 1) 各规则类型 ---------------------------------------------
+        # --- 域名类 ------------------------------------------------------
         check("T01 DOMAIN 精确匹配", m(host="exact.example.com")["policy"], "AI")
         check("T02 DOMAIN 不匹配子域",
               m(host="a.exact.example.com")["policy"], "Final")
@@ -1102,104 +794,82 @@ def run_selftest(verbose=True):
               m(host="two-12.example.net")["policy"], "AI")
         check("T09 DOMAIN-WILDCARD ? 长度不符不匹配",
               m(host="two-123.example.net")["policy"], "Final")
-        check("T10 PROCESS-NAME 精确+大小写敏感",
-              m(host="nomatch.invalid", process="ClaudeApp")["policy"], "AI")
-        check("T11 PROCESS-NAME 大小写变体走后位 list",
-              m(host="nomatch.invalid", process="claudeapp")["policy"], "Social")
-        check("T12 USER-AGENT 通配",
-              m(host="nomatch.invalid", ua="MyApp/1.0")["policy"], "AI")
-        check("T13 AND 逻辑规则命中",
-              m(host="cdn-epic-1.example.io")["policy"], "AI")
-        check("T14 AND 逻辑规则半命中不算",
-              m(host="cdn-only.example.io")["policy"], "Final")
 
-        # --- 2) IP 类 ---------------------------------------------------
-        check("T15 IP-CIDR 纯 IP 查询命中",
+        # --- IP 类 -------------------------------------------------------
+        check("T10 IP-CIDR 纯 IP 查询命中",
               m(host="203.0.113.9")["policy"], "AI")
-        check("T16 IP-CIDR 边界外不命中",
+        check("T11 IP-CIDR 边界外不命中",
               m(host="203.0.114.1")["policy"], "Final")
-        check("T17 IP-CIDR6 命中",
+        check("T12 IP-CIDR6 命中",
               m(host="2001:db8:aa::1")["policy"], "AI")
-        check("T18 IP-ASN 近似样本命中(Anthropic 160.79.104.0/21)",
+        check("T13 IP-ASN 近似样本命中(160.79.104.0/21)",
               m(host="160.79.104.5")["policy"], "AI")
-        check("T19 LAN 内置近似：私网 IP 直连",
+        check("T14 LAN 内置近似：私网 IP 直连",
               m(host="192.168.1.1")["policy"], "DIRECT")
-        check("T20 LAN 内置近似：loopback 直连",
+        check("T15 LAN 内置近似：loopback 直连",
               m(host="127.0.0.1")["policy"], "DIRECT")
-        check("T21 纯 IP 查询把 host 归一到 ip 字段",
+        check("T16 纯 IP 查询把 host 归一到 ip 字段",
               m(host="203.0.113.9")["query"]["ip"], "203.0.113.9")
 
-        # --- 3) 遮蔽 -----------------------------------------------------
-        r = m(host="exact.example.com")
-        check("T22 遮蔽：前位 list 胜出（source）", r["source"], "First.list")
-        check("T23 遮蔽：后位 list 更细后缀被吞",
+        # --- 遮蔽 --------------------------------------------------------
+        check("T17 遮蔽：前位 list 胜出（source）",
+              m(host="exact.example.com")["source"], "First.list")
+        check("T18 遮蔽：后位 list 更细后缀被吞",
               m(host="deep.suffix.example.com")["policy"], "AI")
-        check("T24 后位 list 独有条目仍可命中",
+        check("T19 后位 list 独有条目仍可命中",
               m(host="second-only.example.org")["policy"], "Social")
-        check("T25 直连区条目被前位代理区遮蔽（P0 型）",
+        check("T20 直连区条目被前位代理区遮蔽",
               m(host="x.suffix.example.com")["source"], "First.list")
-        check("T26 直连区独有条目正常直连",
+        check("T21 直连区独有条目正常直连",
               m(host="www.cn-direct.example.cn")["policy"], "DIRECT")
 
-        # --- 4) no-resolve / DNS 泄漏路径 --------------------------------
+        # --- no-resolve / DNS 泄漏路径 ------------------------------------
         leak = m(host="www.cn-direct.example.cn")
-        check("T27 泄漏标记：路径经过缺 no-resolve 的 IP 规则",
+        check("T22 泄漏标记：路径经过缺 no-resolve 的 IP 规则",
               leak["dns_leak"], True)
-        check("T28 泄漏定位到具体规则",
+        check("T23 泄漏定位到具体规则",
               leak["dns_leak_at"], "IP-CIDR,198.51.100.0/24")
-        check("T29 泄漏 trace 非空", len(leak["trace"]) > 0, True)
-        check("T30 命中点早于泄漏规则则不算泄漏",
+        check("T24 泄漏 trace 非空", len(leak["trace"]) > 0, True)
+        check("T25 命中点早于泄漏规则则不算泄漏",
               m(host="exact.example.com")["dns_leak"], False)
-        check("T31 conf 行级 no-resolve 修饰生效（Safe.list 零泄漏条目）",
+        check("T26 conf 行级 no-resolve 修饰生效（Safe.list 零泄漏条目）",
               [r.source for _i, r in e.leaky_ip_rules], ["Leaky.list"])
-        check("T32 带 no-resolve 的 IP 规则对域名请求不参与匹配",
+        check("T27 带 no-resolve 的 IP 规则对域名请求不参与匹配",
               m(host="some.unknown.invalid")["policy"], "Final")
 
-        # --- 5) 策略组递归 / 出口画像 ------------------------------------
-        check("T33 组递归：AI → 首项叶子出口组",
+        # --- 策略组递归 / 出口画像 ----------------------------------------
+        check("T28 组递归：AI → 首项叶子出口组",
               m(host="exact.example.com")["physical_exit"], "🇺🇸美国家宽A")
-        check("T34 exit_class 映射 US-HOME-A",
+        check("T29 exit_class 映射 US-HOME-A",
               m(host="exact.example.com")["exit_class"], "US-HOME-A")
-        check("T35 组递归：Social 首项 → 美国落地/US-DC",
+        check("T30 组递归：Social 首项 → 美国落地/US-DC",
               m(host="second-only.example.org")["exit_class"], "US-DC")
-        check("T36 多层组递归：Deep→UKNode→英国→EU",
+        check("T31 多层组递归：Deep→UKNode→英国→EU",
               e.resolve_exit("Deep"), ("🇬🇧英国", "EU"))
-        check("T37 DIRECT 原样透传", e.resolve_exit("DIRECT"), ("DIRECT", "DIRECT"))
-        check("T38 REJECT 原样透传", e.resolve_exit("REJECT"), ("REJECT", "REJECT"))
+        check("T32 DIRECT 原样透传", e.resolve_exit("DIRECT"), ("DIRECT", "DIRECT"))
+        check("T33 REJECT 原样透传", e.resolve_exit("REJECT"), ("REJECT", "REJECT"))
 
-        # --- 6) 内置 SYSTEM / FINAL --------------------------------------
-        check("T39 内置 SYSTEM 近似：captive.apple.com 直连",
+        # --- 内置 SYSTEM / FINAL / schema / 不支持类型 --------------------
+        check("T34 内置 SYSTEM 近似：captive.apple.com 直连",
               m(host="captive.apple.com")["policy"], "DIRECT")
-        check("T40 FINAL 兜底策略组",
+        check("T35 FINAL 兜底策略组",
               m(host="nothing-matches-here.invalid")["matched_rule"], "FINAL")
-        check("T41 matched_rule 形如 TYPE,VALUE",
+        check("T36 matched_rule 形如 TYPE,VALUE",
               m(host="suffix.example.com")["matched_rule"],
               "DOMAIN-SUFFIX,suffix.example.com")
-        check("T42 结果 schema 键集合完整",
+        check("T37 结果 schema 键集合完整",
               sorted(m(host="exact.example.com").keys()),
               sorted(["query", "matched_rule", "rule_index", "source", "policy",
                       "physical_exit", "exit_class", "dns_leak", "dns_leak_at",
                       "trace"]))
-
-        # --- 6.5) PROCESS-NAME 通配与全路径形态（2026-08-30 补，对齐 surge-cli 实测语义） --
-        check("T43 PROCESS-NAME 通配命中括号变体",
-              m(host="nomatch.invalid", process="WildProc (Renderer)")["policy"], "AI")
-        check("T44 PROCESS-NAME 通配大小写敏感",
-              m(host="nomatch.invalid", process="wildproc (Renderer)")["policy"], "Final")
-        check("T45 App Bundle 路径前缀命中",
-              m(host="nomatch.invalid",
-                process="/Applications/BundleApp.app/Contents/MacOS/Sub Helper")["policy"], "AI")
-        check("T46 Filename 规则对全路径查询取 basename",
-              m(host="nomatch.invalid", process="/usr/local/bin/ClaudeApp")["policy"], "AI")
-        check("T47 全路径含 * 为整串 glob（* 收尾达深层）",
-              m(host="nomatch.invalid", process="/Users/alice/.hidden/tool")["policy"], "AI")
-        check("T48 仅进程名查询不命中全路径规则",
-              m(host="nomatch.invalid", process="BundleApp")["policy"], "Final")
+        check("T38 不支持的类型被跳过并告警（USER-AGENT）",
+              (any("USER-AGENT" in w for w in e.warnings),
+               any(r.type == "USER-AGENT" for r in e.rules)),
+              (True, False))
     finally:
-        import shutil
         shutil.rmtree(tmpdir, ignore_errors=True)
 
-    # --- 7) 真实配置冒烟（只断言与架构文档一致的稳定事实） ----------------
+    # --- 真实配置冒烟（只断言与架构文档一致的稳定事实）--------------------
     real_ok = True
     real_conf = default_conf_path()
     if os.path.isfile(real_conf):
@@ -1209,9 +879,8 @@ def run_selftest(verbose=True):
                   len(re_engine.rules) > 100000, True)
             check("R02 FINAL 存在且指向 Final 组",
                   re_engine.final_rule.policy, "Final")
-            # R03–R06 断言真实 conf 的叶子出口**画像**而不是组名 —— 组名带线路商
-            # 标识，不入库；组名→exit_class 的对照放本地私有覆盖档。覆盖档缺失时
-            # 真实组名不在 EXIT_CLASS_MAP 内，这四条只能退化为国旗兜底，故跳过。
+            # R03–R06 断言真实 conf 的叶子出口画像而不是组名（组名带线路商
+            # 标识不入库）；覆盖档缺失时退化为国旗兜底，只能跳过。
             if LOCAL_EXIT_CLASS_LOADED:
                 check("R03 Final 组递归到美国家宽 A 出口",
                       re_engine.resolve_exit("Final")[1], "US-HOME-A")
@@ -1222,11 +891,6 @@ def run_selftest(verbose=True):
                 check("R05b Final 与 AI 落到同一个叶子出口组",
                       re_engine.resolve_exit("Final")[0] ==
                       re_engine.resolve_exit("AI")[0], True)
-                # R06：2026-09-01 用户删除全部「落地」(DC) 组与其节点链后，社交媒体
-                # 组首项改为美国家宽 A。旧断言 ("🇺🇸美国落地","US-DC") 引用的组已不
-                # 存在，故按当前 conf 实际递归结果重写；同时改断**画像**不断组名，
-                # 与 R03–R05 对齐（真实组名不入库），并移进覆盖档门禁——无覆盖档时
-                # 首项是表外组名，会退化成国旗兜底 US-DC 而假绿。
                 check("R06 社交媒体组递归到美国家宽 A 出口",
                       re_engine.resolve_exit("社交媒体")[1], "US-HOME-A")
             else:
@@ -1271,8 +935,7 @@ def run_selftest(verbose=True):
     failed = len(results) - passed
     if verbose:
         for r in results:
-            flag = "PASS" if r["ok"] else "FAIL"
-            line = "[%s] %s" % (flag, r["name"])
+            line = "[%s] %s" % ("PASS" if r["ok"] else "FAIL", r["name"])
             if not r["ok"]:
                 line += "\n       got : %r\n       want: %r" % (r["got"], r["want"])
             print(line)
@@ -1288,8 +951,7 @@ def run_selftest(verbose=True):
 
 def _print_match_human(res, engine_obj):
     q = res["query"]
-    print("查询       : host=%s ip=%s process=%s ua=%s" % (
-        q["host"], q["ip"], q["process"], q["ua"]))
+    print("查询       : host=%s ip=%s" % (q["host"], q["ip"]))
     print("命中规则   : %s" % res["matched_rule"])
     print("规则序号   : %s" % res["rule_index"])
     print("来源文件   : %s" % res["source"])
@@ -1298,16 +960,13 @@ def _print_match_human(res, engine_obj):
     print("出口画像   : %s" % res["exit_class"])
     print("DNS 泄漏   : %s%s" % (res["dns_leak"],
                                  ("  @ " + res["dns_leak_at"]) if res["dns_leak_at"] else ""))
-    if res["trace"]:
-        print("路径提示   :")
-        for t in res["trace"]:
-            print("  - %s" % t)
+    for t in res["trace"]:
+        print("  - %s" % t)
     if engine_obj.warnings:
         print("引擎告警   : %d 条（--json 可见）" % len(engine_obj.warnings))
 
 
 def main(argv=None):
-    # 公共选项：子命令前后都可写（engine.py --json match X / engine.py match X --json）
     common = argparse.ArgumentParser(add_help=False)
     common.add_argument("--conf", help="Surge.conf 路径（默认自动定位）")
     common.add_argument("--rules", help=".list 所在目录（默认 conf 同级 rules/lists/）")
@@ -1321,9 +980,7 @@ def main(argv=None):
 
     p_match = sub.add_parser("match", parents=[common], help="模拟一次请求判定")
     p_match.add_argument("host", help="域名或 IP")
-    p_match.add_argument("--process", help="进程名")
     p_match.add_argument("--ip", help="已解析 IP（域名请求时视为已知解析结果）")
-    p_match.add_argument("--ua", help="User-Agent")
 
     p_dump = sub.add_parser("dump-index", parents=[common],
                             help="导出展开后的全规则表")
@@ -1344,8 +1001,7 @@ def main(argv=None):
     eng = build_engine(args.conf, args.rules)
 
     if args.cmd == "match":
-        res = eng.match(host=args.host, ip=args.ip,
-                        process=args.process, ua=args.ua)
+        res = eng.match(host=args.host, ip=args.ip)
         if args.json:
             out = dict(res)
             out["warnings"] = eng.warnings
