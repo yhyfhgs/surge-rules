@@ -4,6 +4,77 @@
 
 ---
 
+## [2026-09-01·仓库精简] 删历史诊断文档与 module/script 脚手架,tests/README 减 70%
+
+**动机**:仓库里堆着三类没有消费者的东西 —— 结论已经进 `ARCHITECTURE`/`CHANGELOG` 的
+历史诊断报告、一个从未产出过生产件的 module/script 脚手架、以及一份把叙事和操作混在
+一起的 770 行测试文档。留着它们的代价不是磁盘,是**每次改动都要判断一遍「这份还算不算
+数」**;`RULE_ANALYSIS` 那份甚至还在被 `README`/`ARCHITECTURE` 当作现行依据引用,而它的
+基线早已被后两个批次改掉。本批次**只删文档与脚手架,不动任何规则、测试代码、场景、
+allowlist、快照**。
+
+### Removed(入库面,git 可完整恢复)
+| 文件 | 行数 | 处置依据 |
+|---|---|---|
+| `docs/RULE_ANALYSIS_2026-09-01.md` | 293 | 诊断证据,结论已在 `ARCHITECTURE` + `CHANGELOG`;其 141,829 条基线已被后续批次改掉,继续被引用只会误导。`git show 311f7cd:` 可取全文 |
+| `docs/RULES_AUDIT_V2_2026-08-31.md` | 12 | 2026-08-31 起就只是指向 `RULE_ANALYSIS` 的桩;全文见 `git show 5dcd5ec:` |
+| `docs/RULES_AUDIT_AND_OPTIMIZATION_2026-08-31.md` | 12 | 同上;全文见 `git show e03c530:` |
+| `docs/DEVELOPMENT.md` | 273 | module/script 开发指南。它描述的三件交付物(`modules/`、`scripts/`、`reference/`)本批次全部删除,全文随之失去对象 —— 见下方「并入 MAINTENANCE 的部分」 |
+| `modules/README.md` + `modules/_template.sgmodule` | 38 + 217 | 脚手架。全库零 `PROCESS-NAME`/`USER-AGENT`、零模块分发,`update.sh` 的 `DIST_RE` 也不包含这两个目录 —— 模板不该占 CDN purge 额度,更不该占「这仓库是干什么的」的认知带宽 |
+| `scripts/README.md` + `scripts/_template.js` | 38 + 456 | 同上 |
+
+合计删除 **1,339 行 / 8 个文件**。`tests/README.md` **770 → 233 行(−70%)**:保留各工具
+用途、全部调用式、断言与 allowlist schema、退出码、已知观察项与限制;删除历史叙事、
+过时基线数字(208 场景 / 1418 请求 / 2639 断言 / 39 表等,真值改为指向 `CHANGELOG` 与
+命令自身输出)与重复段落。**测试代码、`scenarios/`、`allowlist.json`、`tests/data/`
+一个字节未动。**
+
+**并入 `MAINTENANCE` 的部分**:`DEVELOPMENT.md` 里只有三条仍然作用于**现存对象**(活动
+profile)的约束,已移入 `MAINTENANCE` 新增的「Profile red lines」:CA 证书材料与口令永不
+入库(公开仓库,git 历史不可逆);`[MITM]` 不写 `enable` 键(Surge 规范化会移除,开关在
+GUI 运行态,conf 只留 `h2 = true`);`hostname` 非空时 `auto-quic-block` 必须为 `true`
+(否则被解密域的 HTTP/3 绕过 MITM 形成半解密)。另把 `update.sh` 的 `DIST_RE` 分发面
+(`lists/*.list` + `clash/*.list` + `rule-providers.yaml`)写进「Derive and publish」,
+并新增一条「manifest 改了就重渲染 profile」——本批次 5a 刚踩到活动 profile 落后一个批次
+的坑。其余(sgmodule 段语义、脚本 API 全表、MitM 原理、调试流程、参考项目导读)随对象
+一并删除。
+
+### Removed(本地未入库面,不可从 git 恢复)
+- `reference/` 整个目录:**434 MB / 9,716 个文件**。含 14 个上游浅克隆(`ios_rule_script`
+  136MB、`wool_scripts` 117MB、`chavyleung-scripts` 78MB、`iRingo` 36MB、`xream-scripts`
+  16MB 等)——全部是公开仓库,`SOURCES.md` 逐条记着 URL + revision,随时可重新克隆;
+  以及 `audit-v2-20260831/`(19MB 工作归档)与 `meta-defensive-inventory-20260831.txt`,
+  两者结论均已提炼入库,且含出口判定类信息,本地不留。
+- `tests/__pycache__`(464KB)、`tools/__pycache__`(208KB),运行时自动再生。
+
+删除前 `rg --no-ignore --hidden 'reference/'` 全库排查,唯一的**程序性**引用是
+`sources.lock.json` 的 `"local_mirror": "reference/ios_rule_script"`,已删除该键 ——
+它只是 `fetch_locked.py` 的可选离线后端(取不到就静默回落网络后端),sha256 校验对两个
+后端一视同仁,**证据链强度不变**;`fetch_locked.py` 的取源顺序注释同步说明。其余引用
+全是散文:`SOURCES.md` 的快照 revision 列(已加一句说明它是溯源坐标而非现存文件)、
+`CHANGELOG` 历史条目、以及 `tests/` 数据面里三处 `reason`/`desc`/`note` 说明文本
+(**按不动测试面的约束原样保留**,它们不是会被打开的路径)。`.gitignore` 的
+`reference/` 条目**保留并补注释**:目录没了,但条目仍是防线,防止将来重新克隆时被
+`git add -A` 整仓提交进来。
+
+### Changed
+- `docs/ARCHITECTURE.md` / `README.md` / `SOURCES.md` 中指向被删文档的引用,改为
+  `git show <commit>:<path>` + 对应 `CHANGELOG` 条目。
+- `docs/ARCHITECTURE.md` 的最终验证数字同步校正到实测(与 5a 校正 `README` 同源的既有
+  漂移):141,679 → **141,651** 条、1,739(476 covers)→ **1,711(448)**、
+  3,575,469 → **3,575,213** 对、3,554,063 → **3,553,807** split-policy、
+  redundant coverage 317 → **289**。
+
+### Verified
+全套闸门在删除后重跑,**8 项全部退出 0**:`analyze_rules --fail-on-shadow` plain 与
+MMDB(141,651 条 / 38 表,与 5a 后逐项相同)、`audit.py`(A9=144、未豁免 3 条全 P3、
+`allowlist_unused` 0)、`runsuite.py`(227 场景 / 1,644 请求 / 3,099 断言全绿,
+DNS 泄漏断言 1,326 条 0 失败)、`render_surge_rules --check`、`sort_lists --check`、
+`surge2clash --check`、`surge-cli --check`。删除面全在文档与本地归档,闸门数字与 5a 后
+完全一致本身就是「没碰到承重面」的证据。
+
+未跑 `update.sh`,未推送,未触发 CDN purge。
+
 ## [2026-09-01·日本 IP 合并] `JapanServiceIP` 并入 `JapanIP`:表数 39 → 38
 
 **动机**:`JapanServiceIP` 与 `JapanIP` 是同一个策略(`🇯🇵日本节点`)、同一个修饰符

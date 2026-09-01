@@ -15,8 +15,10 @@
 
 取源顺序（两个后端产出的字节必须完全相同，校验对二者一视同仁）：
   1. 本地镜像 local_mirror（git repo）：`git cat-file -p <revision>:<path>`
-     —— 离线可用，且能证明「reference/ 里那份就是 pin」。
+     —— 可选加速/离线路径。2026-09-01 起 lock 里没有任何条目声明它（本地上游克隆
+     已随仓库精简删除），要用就自己 clone 一份再把 local_mirror 指过去。
   2. 网络 url 模板（{revision} / {path} 占位）—— 镜像缺失或 --network 时走这条。
+     没有镜像时这是唯一取源路径；sha256 校验对它一视同仁，所以证据链不受影响。
 
 用法
 ----

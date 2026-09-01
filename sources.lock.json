@@ -34,7 +34,6 @@
       "revision_date": "2026-08-28",
       "path": "rule/Surge/ChinaIPs/ChinaIPs.list",
       "url": "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/{revision}/{path}",
-      "local_mirror": "reference/ios_rule_script",
       "sha256": "75004937d3683535892fb0c7a0cc17d4965f1b47e6d08733d80d04d500860046",
       "size": 799748,
       "license": "GPL-2.0",

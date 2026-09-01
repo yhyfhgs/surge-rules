@@ -156,12 +156,18 @@ GFW re-entry, GFW IP rules, GFW PSL-boundary suffixes, and order-unsafe splits.
 - MMDB path, SHA-256, and build epoch are written to `summary.json`; the result is
   reproducible against the same database bytes.
 
-The pre-refactor and post-refactor measurements are recorded in
-[RULE_ANALYSIS_2026-09-01.md](RULE_ANALYSIS_2026-09-01.md).
+The 2026-09-01 refactor's before/after measurements were kept in a standalone
+diagnostic report, `docs/RULE_ANALYSIS_2026-09-01.md`, removed on 2026-09-01 once
+its conclusions had landed here and in `CHANGELOG.md`. Its full text remains
+recoverable with `git show 311f7cd:docs/RULE_ANALYSIS_2026-09-01.md`; the two
+older audit reports it superseded are at
+`git show e03c530:docs/RULES_AUDIT_AND_OPTIMIZATION_2026-08-31.md` and
+`git show 5dcd5ec:docs/RULES_AUDIT_V2_2026-08-31.md`. Per-batch numbers live in
+the matching `CHANGELOG.md` entries.
 
-Final syntax verification accounts for 141,679 rules and 1,739 materialized
-relations (476 covers / 1,263 overlaps). The compact aggregate represents
-3,575,469 exact possible pairs in 960 records: 21,406 same-policy and 3,554,063
+Final syntax verification accounts for 141,651 rules and 1,711 materialized
+relations (448 covers / 1,263 overlaps). The compact aggregate represents
+3,575,213 exact possible pairs in 960 records: 21,406 same-policy and 3,553,807
 split-policy. These are syntactically possible matches, not observed traffic.
 
 Syntax topology has 159 order-dependent exceptions, 118 fragmented domains, and
@@ -170,7 +176,7 @@ exceptions and 13 are registered ordered-safe splits; `split_parent.jsonl` adds
 one non-apex ordered-safe parent, for 14. Order-unsafe splits, active shadows,
 and conflicting equivalents are zero. `split_parent.jsonl` is the general
 broad-parent gate for suffix, wildcard, and keyword rules; `split_apex.jsonl` is
-its registrable-domain view. The final relation classes include 317 redundant
+its registrable-domain view. The final relation classes include 289 redundant
 coverage relations, 256 same-policy overlaps, and 1,007 split-policy overlaps.
 
 The 13 registered ordered-safe split apexes restore the FINAL funnel for

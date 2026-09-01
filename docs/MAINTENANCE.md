@@ -193,6 +193,24 @@ Replace the active profile only after reviewing the `[Rule]` diff. The renderer
 changes only that section; proxy groups, nodes, MITM, and other private settings
 are preserved.
 
+Re-render whenever `config/routing.json` changes, not only when a list changes.
+The active profile has silently fallen a batch behind before; `render_surge_rules
+--check` is the gate that catches it, so run it as part of every batch.
+
+### Profile red lines
+
+These constrain the active profile, which lives outside this repository and is
+never regenerated wholesale — only its `[Rule]` block is:
+
+- Certificate material — the CA `.p12` and its passphrase — must never enter this
+  repository. It is public and git history is permanent. `[MITM] ca-p12` and
+  `ca-passphrase` exist only in the active profile.
+- Do not write an `enable` key into `[MITM]`. Surge strips it on normalization;
+  the profile keeps `h2 = true` and the switch itself lives in the GUI runtime.
+- While `[MITM] hostname` is non-empty, `auto-quic-block` must be `true`.
+  Otherwise HTTP/3 to a decrypted host bypasses MITM and the surface is only half
+  decrypted. `tests/realworld.py --ua-routing` asserts this pair.
+
 ## Derive and publish
 
 ```bash
@@ -200,6 +218,10 @@ python3 tools/surge2clash.py
 python3 tools/surge2clash.py --check
 ./update.sh "describe the routing change"
 ```
+
+`update.sh` purges exactly the published distribution surface — `lists/*.list`,
+`clash/*.list`, and `clash/rule-providers.yaml`, matched by its `DIST_RE`. A new
+distribution directory is not purged until it is added there deliberately.
 
 `update.sh` requires `requirements-analysis.txt` to be installed and readable
 Country/ASN databases. `SURGE_COUNTRY_DB_PATH` / `SURGE_ASN_DB_PATH` override

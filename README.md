@@ -57,8 +57,11 @@ tests/audit.py                  structural checks
 tests/runsuite.py               behavioral regression suite
 docs/ARCHITECTURE.md            invariants and algorithms
 docs/MAINTENANCE.md             edit/verify/publish workflow
-docs/RULE_ANALYSIS_2026-09-01.md evidence and refactor record
+tests/README.md                 test suite operation
 ```
+
+Per-batch evidence and decisions live in `CHANGELOG.md`; superseded diagnostic
+reports are recoverable from git history, cited from the entry that replaced them.
 
 ## Verify
 

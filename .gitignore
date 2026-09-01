@@ -1,6 +1,11 @@
 __pycache__/
 *.pyc
+
+# 本地上游克隆的落点。2026-09-01 起本机没有这个目录了（约 430MB 已删，各上游按
+# SOURCES.md 的 revision 随时可重新浅克隆）；条目保留是防线——将来谁再 clone 一份
+# 进来，`git add -A` 也不会把上游整仓提交进本库。
 reference/
+
 tests/live_check_local.json
 tests/expected_asn.json
 live_report.md
