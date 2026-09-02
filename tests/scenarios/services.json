@@ -984,5 +984,69 @@
         {"host": "d2c.aws.amazon.com", "policy": "Proxy"}
       ]
     }
+  },
+  {
+    "name": "google_product_faces_backfill_20260902",
+    "desc": "2026-09-02 覆盖补录：Google 产品面继续走显式子树（不引入 google.com apex，unknown.google.com 仍落 FINAL 的裁决不变）。补录此前落 FINAL 的 Cloud / Firebase / Scholar / Developers / Fonts / One / Pay / Takeout / Admin / Chrome Web Store 等子树，以及 Firebase Auth / Firestore / Chrome 更新的 googleapis 显式端点；dl.google.com 作为批量下载面归 DownloadCDN。",
+    "requests": [
+      {"host": "cloud.google.com"},
+      {"host": "console.cloud.google.com"},
+      {"host": "firebase.google.com"},
+      {"host": "scholar.google.com"},
+      {"host": "developers.google.com"},
+      {"host": "fonts.google.com"},
+      {"host": "one.google.com"},
+      {"host": "pay.google.com"},
+      {"host": "takeout.google.com"},
+      {"host": "admin.google.com"},
+      {"host": "chromewebstore.google.com"},
+      {"host": "firestore.googleapis.com", "note": "Firestore 显式端点"},
+      {"host": "identitytoolkit.googleapis.com", "note": "Firebase Auth"},
+      {"host": "securetoken.googleapis.com", "note": "Firebase Auth token"},
+      {"host": "update.googleapis.com", "note": "Chrome 组件更新"},
+      {"host": "clients2.googleusercontent.com", "note": "Chrome 扩展 CRX 下载"},
+      {"host": "unknown.google.com", "note": "负例：apex 不扩展到未知子域的裁决不变"},
+      {"host": "storage.googleapis.com", "note": "负例：GCS 租户端点仍不认领"},
+      {"host": "dl.google.com", "note": "负例：批量下载面归 DownloadCDN"}
+    ],
+    "assert": {
+      "same_policy": true, "policy": "Google-X-Meta-MS", "no_dns_leak": true,
+      "per_request": [
+        {"host": "unknown.google.com", "policy": "Final", "reason": "显式子树设计：未知 google.com 子域仍落 FINAL"},
+        {"host": "storage.googleapis.com", "policy": "Final", "reason": "googleapis.com 共享租户命名空间，只认领显式端点"},
+        {"host": "dl.google.com", "policy": "下载", "reason": "Chrome / Android SDK 安装包批量下载面，DownloadCDN 先于 Google"}
+      ]
+    }
+  },
+  {
+    "name": "microsoft_dev_control_planes_backfill_20260902",
+    "desc": "2026-09-02 覆盖补录：Visual Studio / VS Code / Azure DevOps / Azure Portal / Azure AI Foundry / Edge 服务与 Entra 登录面归 Microsoft。azure.com 不做 apex（AI 表的 webpubsub 通配与 Streaming 之后的子域会被遮蔽），只收显式子树；DownloadCDN 前位的下载面保持不变。",
+    "requests": [
+      {"host": "visualstudio.com"},
+      {"host": "marketplace.visualstudio.com"},
+      {"host": "code.visualstudio.com"},
+      {"host": "vscode.dev"},
+      {"host": "dev.azure.com"},
+      {"host": "portal.azure.com"},
+      {"host": "management.azure.com"},
+      {"host": "ai.azure.com", "note": "自 Streaming 迁入（误归属）"},
+      {"host": "edge.microsoft.com"},
+      {"host": "login.windows.net"},
+      {"host": "login.microsoftonline.com", "note": "精确条目并入 microsoftonline.com 后缀"},
+      {"host": "microsoftonline.com"},
+      {"host": "update.code.visualstudio.com", "note": "负例：VS Code 更新包，DownloadCDN 先于 Microsoft"},
+      {"host": "sts.online.visualstudio.com", "note": "负例：既有 DownloadCDN 条目"},
+      {"host": "chatgpt-async-webps-prod-eus.webpubsub.azure.com", "note": "负例：AI 表通配不受影响"},
+      {"host": "applicationinsights.azure.com", "note": "负例：既有 DownloadCDN 条目"}
+    ],
+    "assert": {
+      "same_policy": true, "policy": "Google-X-Meta-MS", "no_dns_leak": true,
+      "per_request": [
+        {"host": "update.code.visualstudio.com", "policy": "下载", "reason": "ordered-safe：DownloadCDN 子域先于 Microsoft 的 visualstudio.com 后缀"},
+        {"host": "sts.online.visualstudio.com", "policy": "下载", "reason": "同上"},
+        {"host": "chatgpt-async-webps-prod-eus.webpubsub.azure.com", "policy": "AI", "reason": "不引入 azure.com apex，AI 表通配保持"},
+        {"host": "applicationinsights.azure.com", "policy": "下载", "reason": "既有 DownloadCDN 条目不受影响"}
+      ]
+    }
   }
 ]

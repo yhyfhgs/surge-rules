@@ -10,7 +10,7 @@ entry, not any hardcoded number.
 
 ## Routing model
 
-Surge is first-match-wins. The manifest groups the lists into six sections:
+Surge is first-match-wins. The manifest groups the lists into seven sections:
 
 | Section | Lists | Purpose |
 |---|---|---|
@@ -20,6 +20,7 @@ Surge is first-match-wins. The manifest groups the lists into six sections:
 | 代理 | YouTube, Google, Twitter, Meta, Microsoft, AI, TikTok, SocialOthers, Telegram, Streaming, Games, Payment, ProxyGFW | Service/session ownership, closed by the domain-only proxy residual |
 | 国内直连 | AppleCN, MicrosoftCN, Domestic, ChinaMedia, TencentCN, AlibabaCN, ByteDanceCN, BaiduCN, NetEaseCN, ChinaDomain, ChinaIP | One contiguous DIRECT run: vendor CN endpoints, curated domestic, generated long tail, authoritative CN ranges |
 | 地区分流 | Japan, US, UK, Europe | Region-bound domains plus each region's IP fallback in one hybrid list; sits after ChinaIP so GeoLite selectors cannot pull CN ranges abroad, with Japan first so `GEOIP,US` cannot capture the LINE/LY CIDRs |
+| 国内兜底 | ChinaTLD | Terminal DIRECT catch-all for `.cn` and the CNNIC IDN ccTLDs; sits after every regional list so each proxy-owned, rejected, or region-owned `.cn` host is already matched. It only recovers hosts that would otherwise fall through FINAL to a remote exit, because `GEOIP,CN` is `no-resolve` and never sees a hostname request |
 | Terminal | LAN, GEOIP CN, FINAL | Built-in safety and unmatched traffic |
 
 `ProxyGFW` uses `Proxy`; terminal `FINAL` uses `Final`. They are deliberately

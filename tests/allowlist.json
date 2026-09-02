@@ -277,6 +277,13 @@
     },
     {
       "check": "A10",
+      "file": "ChinaTLD.list",
+      "kind": "single-label-tld",
+      "reason": "2026-09-02 裁决：.cn 与 CNNIC 中文顶级域（xn--fiqs8s / xn--fiqz9s / xn--55qx5d / xn--io0a7i）在表序最末做 DIRECT 兜底。零本地 DNS 不变量下 GEOIP,CN 带 no-resolve 看不到域名请求，此前未列名的 .cn 域名（icbc.com.cn / lenovo.com.cn / autohome.com.cn …）全部落 FINAL 走远端出口（surge-cli rule explain 实证）。位于全部地区表之后，任何不同策略的 .cn 子域（Reject / ProxyGFW / US 的 schwab.com.cn）都先于它命中，ordered-safe 由构造保证；com.cn 在服务表内仍属禁收。",
+      "rule": "*"
+    },
+    {
+      "check": "A10",
       "file": "YouTube.list",
       "kind": "single-label-tld",
       "rule": "DOMAIN-SUFFIX,youtube",
@@ -397,10 +404,6 @@
     }
   ],
   "forbidden": [
-    {
-      "pattern": "DOMAIN-SUFFIX,cn",
-      "reason": "A single-label public suffix cannot encode service ownership; explicit CN domains and ChinaIP provide the fallback."
-    },
     {
       "pattern": "DOMAIN-SUFFIX,wang",
       "reason": "A public gTLD cannot be assigned wholesale to one policy."

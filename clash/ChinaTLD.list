@@ -1,0 +1,12 @@
+# AUTO-GENERATED — Clash(Mihomo) classical 规则，由 ../lists/ChinaTLD.list 派生
+# 勿手工编辑；修改 Surge 源后运行 python3 tools/surge2clash.py 重新生成
+
+# ChinaTLD — .cn 与 CNNIC 中文顶级域（.中国 / .中國 / .公司 / .网络）的直连兜底；表序最末，只接住前面没有任何归属的主机
+# 零本地 DNS 不变量下 GEOIP,CN 带 no-resolve、看不到域名请求，未列名的 .cn 域名原本直接落 FINAL 走远端出口；本表把它们收回 DIRECT
+# 位于所有地区表之后，因此 Reject / ProxyGFW / US(schwab.com.cn) 里的 .cn 子域都先于本表命中（ordered-safe 由构造保证）
+
+DOMAIN-SUFFIX,cn
+DOMAIN-SUFFIX,xn--55qx5d
+DOMAIN-SUFFIX,xn--fiqs8s
+DOMAIN-SUFFIX,xn--fiqz9s
+DOMAIN-SUFFIX,xn--io0a7i

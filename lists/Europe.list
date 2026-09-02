@@ -2,6 +2,8 @@
 
 DOMAIN-SUFFIX,1und1.de
 DOMAIN-SUFFIX,abnamro.nl
+DOMAIN-SUFFIX,airfrance.com
+DOMAIN-SUFFIX,amazon.de
 DOMAIN-SUFFIX,ard.de
 DOMAIN-SUFFIX,ardmediathek.de
 DOMAIN-SUFFIX,arte.tv
@@ -14,9 +16,11 @@ DOMAIN-SUFFIX,cern.ch
 DOMAIN-SUFFIX,commerzbank.de
 DOMAIN-SUFFIX,congstar.de
 DOMAIN-SUFFIX,contabo.com
+DOMAIN-SUFFIX,corriere.it
 DOMAIN-SUFFIX,daserste.de
 DOMAIN-SUFFIX,deutsche-bank.de
 DOMAIN-SUFFIX,dkb.de
+DOMAIN-SUFFIX,elpais.com
 DOMAIN-SUFFIX,esa.int
 DOMAIN-SUFFIX,europa.eu
 DOMAIN-SUFFIX,faz.net
@@ -31,16 +35,25 @@ DOMAIN-SUFFIX,ing.de
 DOMAIN-SUFFIX,ing.nl
 DOMAIN-SUFFIX,ionos.de
 DOMAIN-SUFFIX,joyn.de
+DOMAIN-SUFFIX,klm.com
 DOMAIN-SUFFIX,kpn.com
+DOMAIN-SUFFIX,lefigaro.fr
+DOMAIN-SUFFIX,lematin.ch
+DOMAIN-SUFFIX,lemonde.fr
+DOMAIN-SUFFIX,lesoir.be
+DOMAIN-SUFFIX,lufthansa.com
 DOMAIN-SUFFIX,m6.fr
 DOMAIN-SUFFIX,mail.ru
 DOMAIN-SUFFIX,n26.com
 DOMAIN-SUFFIX,ndr.de
 DOMAIN-SUFFIX,netcup.de
 DOMAIN-SUFFIX,netcup.eu
+DOMAIN-SUFFIX,nobel.se
 DOMAIN-SUFFIX,nos.nl
 DOMAIN-SUFFIX,npo.nl
 DOMAIN-SUFFIX,npostart.nl
+DOMAIN-SUFFIX,nrk.no
+DOMAIN-SUFFIX,nu.nl
 DOMAIN-SUFFIX,o2online.de
 DOMAIN-SUFFIX,odido.nl
 DOMAIN-SUFFIX,ok.ru
@@ -66,6 +79,7 @@ DOMAIN-SUFFIX,swisscom.ch
 DOMAIN-SUFFIX,telekom.de
 DOMAIN-SUFFIX,tf1.fr
 DOMAIN-SUFFIX,trade-republic.com
+DOMAIN-SUFFIX,trouw.nl
 DOMAIN-SUFFIX,tudelft.nl
 DOMAIN-SUFFIX,tvnow.de
 DOMAIN-SUFFIX,uva.nl

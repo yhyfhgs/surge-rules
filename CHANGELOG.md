@@ -4,6 +4,58 @@
 
 ---
 
+## [2026-09-02·全表复核与覆盖补录] .cn 直连兜底表 + 上游同步（ChinaIP / ChinaDomain 增量）+ 14 张手工表覆盖补录与属地归位
+
+**动机**:用户指令 —— 检查并更新全部 lists 内容,提高分流质量。方法:先跑全套离线门禁确认基线全绿,再用离线引擎对约 1,300 个主流域名做「落点普查」,把落到 FINAL 的主机按归属决策树逐个裁决;同时核对两张机器层相对上游 pin 的漂移,并用 `surge-cli rule explain` 在运行中的 Surge 上实证关键结论。
+
+### 一、修复:未列名的 `.cn` 域名整体走远端出口(新增 `ChinaTLD` 表)
+
+- **缺陷**:`DOMAIN-SUFFIX,cn` 此前被登记为 A8 禁收(理由「单标签公共后缀不能表达归属,显式 CN 域与 ChinaIP 提供兜底」),但在零本地 DNS 不变量下终结段的 `GEOIP,CN,DIRECT,no-resolve` 看不到域名请求,而上游 ChinaMaxNoIP 本身只靠 `cn` 顶点承载 .cn 名字空间(本地 ChinaDomain 中以 `.cn` 结尾的条目数为 0)。结果是**除 Domestic / 厂商表显式列出的约 150 个 .cn 域外,整个 .cn 顶级域都落 FINAL** —— 运行中的 Surge 实证:`surge-cli rule explain icbc.com.cn` → `FINAL,Final,dns-failed` → Final(用户当前选择日本家宽)。同类主机还有 lenovo.com.cn / autohome.com.cn / zol.com.cn / mafengwo.cn / ucloud.cn / tesla.cn / airchina.com.cn / pconline.com.cn 等。
+- **修法**:新增 `lists/ChinaTLD.list`(DIRECT,manifest 最末、独立分区「国内兜底」),收 `cn` 与 CNNIC 四个中文顶级域(`xn--fiqs8s` .中国 / `xn--fiqz9s` .中國 / `xn--55qx5d` .公司 / `xn--io0a7i` .网络,全部在 IANA 根区快照内)。表序最末使 ordered-safe 由构造成立:Reject 的 74 条 .cn、ProxyGFW 的承载集、US 的 `schwab.com.cn` 全部先于它命中,analyzer 把 `cn` 登记为 ordered-safe split parent、0 active shadow。
+- **门禁随动**:`tests/allowlist.json` 删除 `DOMAIN-SUFFIX,cn` 的 forbidden 项(`com.cn` 在服务表内仍禁收,登记边界不得进归属表),新增 ChinaTLD 的 A10 `single-label-tld` 豁免;`keywords.json` 中合成域 `mytiktokcdn.com.cn` 的落点由 Final 改 DIRECT(该断言的本意是「TikTok 通配不捕获它」,不变);新增 `cn.json/china_tld_terminal_direct_catchall`(8 正例 + schwab.com.cn→US / bloomberg.cn→Proxy / 4336wang.cn→REJECT 三负例)。README / ARCHITECTURE / MAINTENANCE 同步为七分区,决策树增第 10 步「无归属的 .cn 不必再手加 Domestic」。
+
+### 二、机器层上游同步
+
+- **ChinaIP**:pin `65e8adf`(2026-08-28)→ `e1ae9f9`(2026-09-02),地址级 diff **只增不减**(v4 +59 段 / v6 +540 段,0 删除;`collapse_cidr.py --verify --against` 旧快照证明)。新增段逐段 RDAP 复核(rdap.org / rdap.apnic.net),RIR 国家非 CN 者追加进 `config/chinaip-exclusions.txt`(HK 段按 2026-09-01 C 档口径保留直连):共 144 段（5 v4 + 139 v6），其中 113 段为中国运营商海外 PoP（宁波大华茂 ZX-NET/NBDHM 的 HKG 以外各 PoP、tenonet、LeanCloud US-West、廊坊沃派 WOP、LoCyan 等,B-cn-operator-overseas 口径,与 2026-09-01 用户对阿里云/腾讯云海外区域的裁决一致）,31 段为外国分配（Solon/Onepiece JP、LARUS US、PLUSLAYER TR、RingNet JP、Sakura RU、Educational Solutions LLC 等）;HK 41 段 + TW 5 段按 C 档「大中华区」口径保留直连。`sources.lock.json` 的 revision / sha256 / size / upstream_counts / expect 同步更新,`rebuild.py --network` diff = 0。ChinaIP 10,858 → **11,061（7,041 v4 + 4,020 v6）** 条。
+- **ChinaDomain**:相对同一 revision 的上游 ChinaMaxNoIP 做**只增不删**的增量补录 —— 复用 `tools/regen_chinadomain.py` 自身的 F0/F1/F2 过滤与 P1–P10 判定函数(未绕过任何护栏):上游 111,158 条 → F0/F1/F2 后 106,222 条 survivors,其中本地缺失 811 条;逐条多解析器解析 + Team Cymru ASN 后 KEEP_CN 565 / KEEP_PROTECTED 21 / QUARANTINE 64 / DROP_OFFSHORE 77 / NO_A 84,**只写入 KEEP_* 的 586 条中通过 PSL 边界复核的 585 条**(剔除公共后缀 `in.th`)。QUARANTINE / DROP / NO_A 一条未加;本地独有的 966 条(上游已删)按 P7 迟滞口径**本批次不删**,留给正式的两轮影子运行。逐条裁决报告存 scratchpad(不入库)。`suningmail.com` 因此由 Final 改为 DIRECT(keywords.json 断言随动,其本意「不被 gmail 关键词误捕获」不变)。
+
+### 三、手工表覆盖补录与属地归位(共 +113 / 迁移 44 / 改形 3)
+
+落点普查中落 FINAL 且有明确归属者,按决策树入表;地区迁移沿用 §4 G4 裁决口径(本地媒体/门户/航司/电商迁地区表,国际广播 rfi.fr / swissinfo.ch / dw.* 保留 ProxyGFW)。每组均有 runsuite 场景钉住正负例:
+
+| 表 | 变更 |
+|---|---|
+| Google | +36 显式子树(cloud / firebase / scholar / developers / fonts / books / earth / one / pay / keep / classroom / takeout / ads / analytics / search / business / admin / store / messages / voice / jules / script / podcasts / lens / lookerstudio / trends / alerts / adsense / admob / policies / myactivity / passwords / families / ogs / chromewebstore / chrome.google.com)+ 6 个 googleapis / googleusercontent 显式端点(firestore / identitytoolkit / securetoken / update / clientservices / clients2)。**不引入 google.com apex**,`unknown.google.com → Final` 与 `storage.googleapis.com → Final` 的裁决不变 |
+| Microsoft | +visualstudio.com / vscode.dev / dev.azure.com / portal.azure.com / management.azure.com / edge.microsoft.com / login.windows.net / microsoftonline.com(吸收原精确 login.microsoftonline.com);`ai.azure.com` 自 Streaming 迁入(Azure AI Foundry 误归流媒体)。azure.com 不做 apex(AI 表 webpubsub 通配与 DownloadCDN 后置子项会被遮蔽) |
+| Games | +gog.com / ubi.com / square-enix.com / square-enix-games.com / capcom.com / sega.com / konami.com / bandainamcoent.com / atlus.com / minecraft.net / mojang.com / minecraftservices.com / minecraft-services.net;DownloadCDN 前位的 gog / ubi / minecraft / mojang 批量面保持「下载」(analyzer 登记为 ordered-safe split) |
+| Japan | +nhk.or.jp / nhk.jp / asahi.com / mainichi.jp / ana.co.jp / jal.co.jp / cygames.co.jp / sega.jp / fromsoftware.jp;自 ProxyGFW 迁入 goo.ne.jp / hatena.ne.jp / livedoor.jp / excite.co.jp / exblog.jp / blog.jp / blogimg.jp / wikiwiki.jp |
+| US | +united.com / delta.com / aa.com;自 ProxyGFW 迁入美国联邦 .gov 19 条(america / americorps / archives / cecc / census / cia / cms / dotgov / freedom / msha / nic / nih / nps / osha / supremecourt / usembassy / usgs / uspto / pems.dot.ca)与美国大学 .edu 9 条(american / brookings / sans / smith / stanford / usma / virginia / westpoint / airuniversity.af),与在册 irs.gov / mit.edu 同表;cgst.edu / hkcmi.edu(香港)不迁 |
+| UK | +amazon.co.uk / britishairways.com |
+| Europe | +amazon.de / lefigaro.fr / corriere.it / lufthansa.com / airfrance.com / klm.com;自 ProxyGFW 迁入 lemonde.fr / elpais.com / lematin.ch / nu.nl / trouw.nl / lesoir.be / nrk.no / nobel.se |
+| Streaming | +audible.com / catchplay.com / mlb.com / mlb.tv / formula1.com;−ai.azure.com |
+| SocialOthers | +zoom.com(Zoom 新主域,与 zoom.us 同组)/ webex.com |
+| AI | +hailuoai.video(MiniMax 海外 Hailuo,与 minimax.io 同组)/ agentskills.io / `DOMAIN,anthropic.skilljar.com`(Anthropic Academy,Skilljar 多租户只收精确形) |
+| ProxyGFW | +crypto.com / ibkr.com / notion.com / stackexchange.com / superuser.com / serverfault.com / askubuntu.com / stackauth.com / stackoverflow.blog(均为在册条目的同会话族);−44(上述迁移)。核验否决:`initium.com` 实测为 Initium Corporate Finance 而非端传媒,不入表,并以负例场景钉住 |
+| DownloadCDN | +dl.google.com / dl-ssl.google.com / nuget.org / services.gradle.org / conda.anaconda.org;npm.jsr.io 并入 jsr.io |
+| Domestic | +staticfile.org / staticfile.net(七牛 Staticfile CDN) |
+
+明确**不做**的:`revolut.com` 命中 allowlist §8 禁收裁决(Payment 只收本人在用通道),补录后被 A8 P0 拦下,已回退并写成负例;未被封锁、也无归属的第三方 SaaS(figma / linear / atlassian / tailscale / jetbrains 门面等)按设计留 FINAL 漏斗,不塞 ProxyGFW。
+
+### 四、核查但未动的项
+
+- **ProxyGFW 死域探测**:`probe_dead_domains.py --check-only` 全表 5,348 域(884 s):BLOCKED_BY_GFW 4,465 / UNKNOWN 454 / DEAD_* 429。但 DEAD_LAME_DELEGATION(271)与 DEAD_PARKED(145)里含 etsy.com / patreon.com / kraken.com / behance.net / lemonde.fr / af.mil 等明显存活站点 —— 本机经 Surge 网络跑 Tier 3/4 探测结果不可信;按工具自身的 3 轮迟滞设计,**一条未删**,不写 state。
+- **Streaming IP 面、OneDrive 数据面、Microsoft 会话面**三项 open decision 未触碰(需实测证据)。
+- 活动 profile 的 `[MITM]` 无 `hostname`,`auto-quic-block = false` 不触红线。
+
+### Verified(候选 profile,全部 exit 0)
+- `sort_lists.py --check` 35/35;`surge-cli --check` OK;`render_surge_rules.py --check` 待发布后重渲染(manifest 新增表,活动 profile 须在 CDN 可取到 ChinaTLD.list 后替换 `[Rule]`)。
+- `analyze_rules.py --fail-on-shadow`(纯语法 + MMDB 展开双跑):142,320 条全 accounted,0 active shadow / 0 order-unsafe / 0 cycle / 0 expired reentry / ProxyGFW 0 IP 0 PSL 边界;ordered-safe split parents 新增 gog.com / ubi.com / minecraft.net / minecraft-services.net / mojang.com / visualstudio.com / dev.azure.com / nhk.jp / formula1.com / crypto.com / amazon.co.uk / cn。
+- `audit.py --check all --fail-on P1`:未豁免仍为 3 条 P3(与基线相同),A10 新增 5 条已豁免,豁免表未命中 0。
+- `runsuite.py`:**336 场景 / 2,241 请求 / 4,375 断言全绿**(基线 325 / 2,079 / 4,043),DNS 泄漏断言 1,912 条 0 失败。
+- `collapse_cidr.py lists/ChinaIP.list --check` 与 `--verify --against` 旧快照(只增不减);`rebuild.py --id blackmatrix7_china_ip --network` diff = 0;`surge2clash.py` 再生 35 表 + `--check` 一致。
+
+---
+
 ## [2026-09-02·网络仿真与全量治理] 网络请求仿真测试体系全面升级 (4,043 断言) + 34 表拓扑重叠与失效资产深度审计
 
 **动机**: 响应用户指令 —— 全面升级 Surge 规则分流系统的网络请求仿真测试体系（高保真模拟现代浏览器访问以及知名与长尾小众 App 的多类型复合网络流量场景），并对全量 34 个规则列表执行跨表重叠遮蔽、失效资产（域名/IP/ASN）及归属正确性的深度审计与清洗治理。

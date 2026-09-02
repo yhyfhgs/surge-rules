@@ -2,6 +2,7 @@
 # Shared components are admitted only when same-exit session behavior is documented in tests/allowlist.json.
 
 DOMAIN,anthropic-com.ghost.io
+DOMAIN,anthropic.skilljar.com
 DOMAIN,aws-language-servers.us-east-1.amazonaws.com
 DOMAIN,aws-toolkit-language-servers.amazonaws.com
 DOMAIN,cdn.usefathom.com
@@ -24,6 +25,7 @@ DOMAIN,q-developer-integration.us-east-1.api.aws
 DOMAIN-SUFFIX,01.ai
 DOMAIN-SUFFIX,abacus.ai
 DOMAIN-SUFFIX,agent-plugins.org
+DOMAIN-SUFFIX,agentskills.io
 DOMAIN-SUFFIX,ai.cloudflare.com
 DOMAIN-SUFFIX,ai.com
 DOMAIN-SUFFIX,ai21.com
@@ -166,6 +168,7 @@ DOMAIN-SUFFIX,grazie.aws.intellij.net
 DOMAIN-SUFFIX,greptile.com
 DOMAIN-SUFFIX,groq.com
 DOMAIN-SUFFIX,h2o.ai
+DOMAIN-SUFFIX,hailuoai.video
 DOMAIN-SUFFIX,haiper.ai
 DOMAIN-SUFFIX,harpa.ai
 DOMAIN-SUFFIX,hedra.com

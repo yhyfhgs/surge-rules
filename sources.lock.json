@@ -29,21 +29,21 @@
       "id": "blackmatrix7_china_ip",
       "provenance": "pinned",
       "repository": "https://github.com/blackmatrix7/ios_rule_script",
-      "revision": "65e8adff06ea66c81bc61ed64329dae4fbfa7438",
-      "revision_short": "65e8adf",
-      "revision_date": "2026-08-28",
+      "revision": "e1ae9f9ca4de99065ee80174094f238fb47267bc",
+      "revision_short": "e1ae9f9",
+      "revision_date": "2026-09-02",
       "path": "rule/Surge/ChinaIPs/ChinaIPs.list",
       "url": "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/{revision}/{path}",
-      "sha256": "75004937d3683535892fb0c7a0cc17d4965f1b47e6d08733d80d04d500860046",
-      "size": 799748,
+      "sha256": "881067dc6c7f652f2e1df44d01750f6a37e3bc5ba88c824205b93c58bae4db41",
+      "size": 827739,
       "license": "GPL-2.0",
       "targets": [
         "ChinaIP.list"
       ],
       "upstream_counts": {
-        "IP-CIDR": 17265,
-        "IP-CIDR6": 5153,
-        "total": 22418
+        "IP-CIDR": 17541,
+        "IP-CIDR6": 5619,
+        "total": 23160
       },
       "transform": [
         {
@@ -71,20 +71,20 @@
         }
       ],
       "expect": {
-        "rules": 10858,
+        "rules": 11061,
         "per_type": {
-          "IP-CIDR": 6990,
-          "IP-CIDR6": 3868
+          "IP-CIDR": 7041,
+          "IP-CIDR6": 4020
         },
         "set_sha256": {
-          "IP-CIDR": "61fca00efbf2b78ec198978dbd618feae9f62794b86250ba0e9d1449579ebb42",
-          "IP-CIDR6": "fb315ce0a35f261e642e4f72f39af6d90c37f9d9998d2a343e60d085cc8ad216"
+          "IP-CIDR": "0d69a2ce3265327b7407c374d0192d2277fd8f8629ce13279ec9f41131acad52",
+          "IP-CIDR6": "3c5199704a1223313fc72f1afafbcec555ee310537a8db46a7b0fff69fbf1b16"
         }
       },
       "verified": {
-        "at": "2026-09-01",
+        "at": "2026-09-02",
         "by": "tools/rebuild.py",
-        "result": "diff = 0（折叠并排除前位 Google/PKU 所有权网段后逐位相同）",
+        "result": "diff = 0（上游 e1ae9f9 折叠 + 排除层后与 lists/ChinaIP.list 逐位相同）",
         "note": [
           "set_sha256 的定义 = tools/collapse_cidr.py:set_digest()：对 collapse_addresses()",
           "规范化后的网段逐行文本（末尾带换行）取 SHA-256。审计 §3.7 正文里另一组摘要",
@@ -93,10 +93,10 @@
         ]
       },
       "notes": [
-        "上游同步待办（审计 R2-2）：当前上游相对本 pin 多 v4 59 段 / v6 540 段。",
-        "同步流程：fetch_locked.py 换 revision 取新版 → rebuild.py --write →",
-        "collapse_cidr.py --verify --against <旧快照> 证明只增不减 → 更新本文件的",
-        "revision / sha256 / expect 三处 → 重跑 runsuite。"
+        "2026-09-02 完成一次上游同步（65e8adf → e1ae9f9）：地址级只增不减（v4 +59 段 / v6 +540 段，0 删除）；",
+        "新增段逐段 RDAP 复核，RIR 国家非 CN 的段追加进 config/chinaip-exclusions.txt（HK 段按 C 档保留）。",
+        "下次同步流程不变：改本条目 revision/sha256/size → fetch_locked.py --check → rebuild.py --write →",
+        "collapse_cidr.py --verify --against <旧快照> 证明只增不减 → 更新 expect → 重跑全部门禁。"
       ]
     }
   ],
@@ -114,7 +114,7 @@
       "unblocked_by": "tools/regen_chinadomain.py --shadow 连续两轮，删除项报告齐全且 P1–P10 零触发",
       "observed_state": {
         "at": "2026-08-31",
-        "note": "本轮未对 ChinaDomain 落任何哈希：它正处于 R3-2/R3-4 的改动窗口内，此刻记的状态哈希在收尾批次就会失效。"
+        "note": "本轮未对 ChinaDomain 落任何哈希：它正处于 R3-2/R3-4 的改动窗口内，此刻记的状态哈希在收尾批次就会失效。2026-09-02 按上游 e1ae9f9 做过一次只增不删的增量补录（复用 regen_chinadomain.py 的 F0/F1/F2 + P1–P10 判定，585 条 KEEP_* 写入，见 CHANGELOG），仍未 pin。"
       }
     },
     {

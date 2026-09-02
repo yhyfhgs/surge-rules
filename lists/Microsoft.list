@@ -17,7 +17,6 @@ DOMAIN,graph.microsoft.com
 DOMAIN,location.microsoft.com
 DOMAIN,login.live.com
 DOMAIN,login.microsoft.com
-DOMAIN,login.microsoftonline.com
 DOMAIN,m365.cloud.microsoft
 DOMAIN,microsoft.com
 DOMAIN,mobilecenter.azureedge.net
@@ -30,6 +29,7 @@ DOMAIN,www.microsoft.com
 DOMAIN,xpaywalletcdn.azureedge.net
 
 DOMAIN-SUFFIX,account.microsoft.com
+DOMAIN-SUFFIX,ai.azure.com
 DOMAIN-SUFFIX,answers.microsoft.com
 DOMAIN-SUFFIX,assets.msn.com
 DOMAIN-SUFFIX,bing.com
@@ -40,7 +40,9 @@ DOMAIN-SUFFIX,content.office.net
 DOMAIN-SUFFIX,copilot.com
 DOMAIN-SUFFIX,copilot.microsoft.com
 DOMAIN-SUFFIX,designer.microsoft.com
+DOMAIN-SUFFIX,dev.azure.com
 DOMAIN-SUFFIX,developer.microsoft.com
+DOMAIN-SUFFIX,edge.microsoft.com
 DOMAIN-SUFFIX,events.microsoft.com
 DOMAIN-SUFFIX,files.1drv.com
 DOMAIN-SUFFIX,gfx.ms
@@ -60,9 +62,12 @@ DOMAIN-SUFFIX,img-s-msn-com.akamaized.net
 DOMAIN-SUFFIX,in.appcenter.ms
 DOMAIN-SUFFIX,learn.microsoft.com
 DOMAIN-SUFFIX,live.net
+DOMAIN-SUFFIX,login.windows.net
 DOMAIN-SUFFIX,m365copilot.com
+DOMAIN-SUFFIX,management.azure.com
 DOMAIN-SUFFIX,microsoft-falcon.io
 DOMAIN-SUFFIX,microsoftapp.net
+DOMAIN-SUFFIX,microsoftonline.com
 DOMAIN-SUFFIX,microsofttranslator.com
 DOMAIN-SUFFIX,msauth.net
 DOMAIN-SUFFIX,msftauth.net
@@ -70,7 +75,10 @@ DOMAIN-SUFFIX,msn.com.tw
 DOMAIN-SUFFIX,officeclient.microsoft.com
 DOMAIN-SUFFIX,onedrive.live.com
 DOMAIN-SUFFIX,onenote.com
+DOMAIN-SUFFIX,portal.azure.com
 DOMAIN-SUFFIX,prod-streaming-video-msn-com.akamaized.net
 DOMAIN-SUFFIX,skydrive.live.com
 DOMAIN-SUFFIX,skype.com
 DOMAIN-SUFFIX,support.microsoft.com
+DOMAIN-SUFFIX,visualstudio.com
+DOMAIN-SUFFIX,vscode.dev

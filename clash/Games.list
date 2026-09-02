@@ -21,9 +21,11 @@ DOMAIN-SUFFIX,anthemthegame.com
 DOMAIN-SUFFIX,apexlegends.com
 DOMAIN-SUFFIX,api.steampowered.com
 DOMAIN-SUFFIX,armorgames.com
+DOMAIN-SUFFIX,atlus.com
 DOMAIN-SUFFIX,avatargarenanow-a.akamaihd.net
 DOMAIN-SUFFIX,awayoutgame.com
 DOMAIN-SUFFIX,ayudanintendo.com
+DOMAIN-SUFFIX,bandainamcoent.com
 DOMAIN-SUFFIX,bandainamcoid.com
 DOMAIN-SUFFIX,battle.net
 DOMAIN-SUFFIX,battlebreakers.com
@@ -65,6 +67,7 @@ DOMAIN-SUFFIX,callersbane.com
 DOMAIN-SUFFIX,camelot-europe.com
 DOMAIN-SUFFIX,camelotherald.com
 DOMAIN-SUFFIX,camelotherald.net
+DOMAIN-SUFFIX,capcom.com
 DOMAIN-SUFFIX,capitalgames.com
 DOMAIN-SUFFIX,cdngarenanow-a.akamaihd.net
 DOMAIN-SUFFIX,cfx.re
@@ -168,6 +171,7 @@ DOMAIN-SUFFIX,genshinimpact.com
 DOMAIN-SUFFIX,ghostgames.com
 DOMAIN-SUFFIX,giratina.com
 DOMAIN-SUFFIX,gloryofheracles.com
+DOMAIN-SUFFIX,gog.com
 DOMAIN-SUFFIX,gog.qtlglb.com
 DOMAIN-SUFFIX,hackyourconsole.com
 DOMAIN-SUFFIX,help.steampowered.com
@@ -185,6 +189,7 @@ DOMAIN-SUFFIX,industrialtoys.com
 DOMAIN-SUFFIX,instituteofwar.org
 DOMAIN-SUFFIX,kirbysepicyarn.com
 DOMAIN-SUFFIX,kirbysuperstarultra.com
+DOMAIN-SUFFIX,konami.com
 DOMAIN-SUFFIX,kyurem.com
 DOMAIN-SUFFIX,lb-cdn.maj-soul.com
 DOMAIN-SUFFIX,lb-hw.maj-soul.com
@@ -230,12 +235,16 @@ DOMAIN-SUFFIX,maxis.com
 DOMAIN-SUFFIX,media-rockstargames-com.akamaized.net
 DOMAIN-SUFFIX,miitomo.com
 DOMAIN-SUFFIX,miiverse.com
+DOMAIN-SUFFIX,minecraft-services.net
+DOMAIN-SUFFIX,minecraft.net
+DOMAIN-SUFFIX,minecraftservices.com
 DOMAIN-SUFFIX,minecraftshop.com
 DOMAIN-SUFFIX,mirrorsedge.com
 DOMAIN-SUFFIX,mirrorsedge.jp
 DOMAIN-SUFFIX,mirrorsedge.net
 DOMAIN-SUFFIX,mirrorsedge2.com
 DOMAIN-SUFFIX,mirrorsedge2d.com
+DOMAIN-SUFFIX,mojang.com
 DOMAIN-SUFFIX,molesports.com
 DOMAIN-SUFFIX,msgamestudios.com
 DOMAIN-SUFFIX,mysims.com
@@ -376,6 +385,7 @@ DOMAIN-SUFFIX,ruinedking.com
 DOMAIN-SUFFIX,s.team
 DOMAIN-SUFFIX,seagroup.com
 DOMAIN-SUFFIX,seaofsolitude.com
+DOMAIN-SUFFIX,sega.com
 DOMAIN-SUFFIX,shadowcomplex.com
 DOMAIN-SUFFIX,simcity-buildit.com
 DOMAIN-SUFFIX,simcity.com
@@ -386,6 +396,8 @@ DOMAIN-SUFFIX,speedhunters.com
 DOMAIN-SUFFIX,splatoon2tournament.com
 DOMAIN-SUFFIX,spore.com
 DOMAIN-SUFFIX,spyjinx.com
+DOMAIN-SUFFIX,square-enix-games.com
+DOMAIN-SUFFIX,square-enix.com
 DOMAIN-SUFFIX,ssx3.com
 DOMAIN-SUFFIX,starcraft.com
 DOMAIN-SUFFIX,starcraft2.com
@@ -446,6 +458,7 @@ DOMAIN-SUFFIX,tiberiumalliances.com
 DOMAIN-SUFFIX,tiburon.com
 DOMAIN-SUFFIX,titanfall.com
 DOMAIN-SUFFIX,tnt-ea.com
+DOMAIN-SUFFIX,ubi.com
 DOMAIN-SUFFIX,ubisoft-orbit-savegames.s3.amazonaws.com
 DOMAIN-SUFFIX,ubisoft-uplay-savegames.s3.amazonaws.com
 DOMAIN-SUFFIX,ubisoft.com

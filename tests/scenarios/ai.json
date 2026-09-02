@@ -1197,5 +1197,26 @@
       "policy": "AI",
       "no_dns_leak": true
     }
+  },
+  {
+    "name": "ai_backfill_20260902",
+    "desc": "2026-09-02 覆盖补录：MiniMax 海外 Hailuo 视频面 hailuoai.video 与在册 minimax.io 同组；Anthropic 的 Agent Skills 规范站 agentskills.io 与 Anthropic Academy（Skilljar 租户 anthropic.skilljar.com，精确形）归 AI。国内 hailuoai.com 仍直连；Vercel 的 skills.sh 无归属落 FINAL。",
+    "requests": [
+      {"host": "hailuoai.video"},
+      {"host": "agentskills.io"},
+      {"host": "anthropic.skilljar.com"},
+      {"host": "minimax.io", "note": "既有条目"},
+      {"host": "hailuoai.com", "note": "负例：国内 Hailuo 直连"},
+      {"host": "other.skilljar.com", "note": "负例：Skilljar 其他租户不随 Anthropic 精确形"},
+      {"host": "skills.sh", "note": "负例：无归属"}
+    ],
+    "assert": {
+      "same_policy": true, "policy": "AI", "no_dns_leak": true,
+      "per_request": [
+        {"host": "hailuoai.com", "policy": "DIRECT", "reason": "Domestic.list 既有条目"},
+        {"host": "other.skilljar.com", "policy": "Final", "reason": "多租户平台只认领 Anthropic 精确主机"},
+        {"host": "skills.sh", "policy": "Final", "reason": "第三方注册表，无归属"}
+      ]
+    }
   }
 ]

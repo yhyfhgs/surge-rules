@@ -76,7 +76,6 @@ DOMAIN-SUFFIX,adx.promo
 DOMAIN-SUFFIX,afewmomentswith.com
 DOMAIN-SUFFIX,afp.com
 DOMAIN-SUFFIX,afpforum.com
-DOMAIN-SUFFIX,ai.azure.com
 DOMAIN-SUFFIX,aiv-cdn.net
 DOMAIN-SUFFIX,aiv-delivery.net
 DOMAIN-SUFFIX,amazon.jobs
@@ -133,6 +132,7 @@ DOMAIN-SUFFIX,atv-ps-eu.amazon.co.uk
 DOMAIN-SUFFIX,atv-ps-eu.amazon.com
 DOMAIN-SUFFIX,atv-ps-fe.amazon.com
 DOMAIN-SUFFIX,atv-ps.amazon.com
+DOMAIN-SUFFIX,audible.com
 DOMAIN-SUFFIX,audio-ak-spotify-com.akamaized.net
 DOMAIN-SUFFIX,avod-dash-ww-live.akamaized.net
 DOMAIN-SUFFIX,avodmp4s3ww-a.akamaihd.net
@@ -164,6 +164,7 @@ DOMAIN-SUFFIX,c4assets.com
 DOMAIN-SUFFIX,cabletv.com.hk
 DOMAIN-SUFFIX,callhulu.com
 DOMAIN-SUFFIX,casoneexchange.com
+DOMAIN-SUFFIX,catchplay.com
 DOMAIN-SUFFIX,cbsaavideo.com
 DOMAIN-SUFFIX,cbscorporation.com
 DOMAIN-SUFFIX,cbsi.com
@@ -371,6 +372,7 @@ DOMAIN-SUFFIX,fetnet.net
 DOMAIN-SUFFIX,findyourlimits.com
 DOMAIN-SUFFIX,fls-na.amazon.com
 DOMAIN-SUFFIX,flxvpn.net
+DOMAIN-SUFFIX,formula1.com
 DOMAIN-SUFFIX,forthethrone.com
 DOMAIN-SUFFIX,fox-corporation.com
 DOMAIN-SUFFIX,fox-news.com
@@ -740,6 +742,8 @@ DOMAIN-SUFFIX,media-amazon.com
 DOMAIN-SUFFIX,meridian.net
 DOMAIN-SUFFIX,mewatch.sg
 DOMAIN-SUFFIX,mickey.tv
+DOMAIN-SUFFIX,mlb.com
+DOMAIN-SUFFIX,mlb.tv
 DOMAIN-SUFFIX,mobile-collector.newrelic.com
 DOMAIN-SUFFIX,moov.hk
 DOMAIN-SUFFIX,moviesanywhere.com

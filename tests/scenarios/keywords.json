@@ -388,7 +388,7 @@
         {"host": "www.recaptcha.net", "policy": "Google-X-Meta-MS"},
         {"host": "recaptcha-cn.net", "policy": "DIRECT", "reason": "advisor 裁决 7（`-cn` 族矩阵）：该端点在 CN 侧解析到中国移动 120.253.255.x 且证书 SAN 与 `.cn` 族同源，属境内可直连的 Google 中国面 —— 已从 Google.list 迁入 Domestic.list，落 DIRECT 属预期。"},
         {"host": "qingmail.com", "policy": "Final", "reason": "不再被 DOMAIN-KEYWORD,gmail 误捕获"},
-        {"host": "suningmail.com", "policy": "Final", "reason": "不再被 DOMAIN-KEYWORD,gmail 误捕获"},
+        {"host": "suningmail.com", "policy": "DIRECT", "reason": "含 gmail 子串的苏宁邮箱域不被任何 Google 规则捕获（关键词已删）；2026-09-02 起由 ChinaDomain 增量补录直连，落点 DIRECT 而非 FINAL"},
         {"host": "blogspotter.net", "policy": "Final"},
         {"host": "recaptcha-solver.io", "policy": "Final"}
       ]
@@ -714,7 +714,7 @@
         {"host": "mon-va.tiktokv.com.akamaized.net", "policy": "社交媒体"},
         {"host": "pull-flv.ttlivecdn.com.edgesuite.net", "policy": "社交媒体"},
         {"host": "notmusical.lyrics.com", "policy": "Final", "reason": "改 wildcard 后要求左侧标签边界"},
-        {"host": "mytiktokcdn.com.cn", "policy": "Final", "reason": "The synthetic third-party registrant remains neutral after the broad com.cn rule was removed."}
+        {"host": "mytiktokcdn.com.cn", "policy": "DIRECT", "reason": "合成的第三方 .com.cn 注册域不被 TikTok 的 wildcard 捕获；2026-09-02 起由表序最末的 ChinaTLD（DOMAIN-SUFFIX,cn）直连兜底，而非落 FINAL。"}
       ]
     }
   }

@@ -441,5 +441,30 @@
       "policy": "Proxy",
       "no_dns_leak": true
     }
+  },
+  {
+    "name": "download_registry_backfill_20260902",
+    "desc": "2026-09-02 覆盖补录：NuGet / Gradle 发行版 / conda 频道 / JSR 注册表（npm.jsr.io 并入 jsr.io）/ dl.google.com 批量下载面归 DownloadCDN；gradle.org / anaconda.com 门面无归属落 FINAL。",
+    "requests": [
+      {"host": "nuget.org"},
+      {"host": "api.nuget.org"},
+      {"host": "globalcdn.nuget.org"},
+      {"host": "services.gradle.org"},
+      {"host": "conda.anaconda.org"},
+      {"host": "jsr.io"},
+      {"host": "npm.jsr.io"},
+      {"host": "dl.google.com"},
+      {"host": "dl-ssl.google.com"},
+      {"host": "repo.anaconda.com", "note": "既有条目"},
+      {"host": "gradle.org", "note": "负例：门面无归属"},
+      {"host": "anaconda.com", "note": "负例：门面无归属"}
+    ],
+    "assert": {
+      "same_policy": true, "policy": "下载", "no_dns_leak": true,
+      "per_request": [
+        {"host": "gradle.org", "policy": "Final", "reason": "只认领批量端点，门面不归属"},
+        {"host": "anaconda.com", "policy": "Final", "reason": "同上"}
+      ]
+    }
   }
 ]

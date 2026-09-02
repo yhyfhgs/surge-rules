@@ -14,6 +14,9 @@ Assign each rule to one owner:
 7. Region-bound domain → `Japan`, `UK`, `Europe`, or `US`.
 8. Confirmed proxy-required domain with no owner → `ProxyGFW`.
 9. Domestic long tail → generated `ChinaDomain`; never hand-add a rule there.
+10. `.cn` / CNNIC IDN host with no owner above → nothing to add: the terminal
+    `ChinaTLD` catch-all already routes it DIRECT. Add an explicit `.cn` entry
+    to `Domestic` only when it must precede a broader different-policy rule.
 
 Steps 5–7 are mutually exclusive by construction: no host matched by the
 domestic-direct lists is matched by any regional list, so the tree reads

@@ -269,6 +269,13 @@ rule-providers:
     url: https://cdn.jsdelivr.net/gh/yhyfhgs/surge-rules@main/clash/Europe.list
     path: ./rule-sets/surge-rules/Europe.list
     interval: 86400
+  ChinaTLD:
+    type: http
+    behavior: classical
+    format: text
+    url: https://cdn.jsdelivr.net/gh/yhyfhgs/surge-rules@main/clash/ChinaTLD.list
+    path: ./rule-sets/surge-rules/ChinaTLD.list
+    interval: 86400
 
 # ─── rules 参考序列（与 Surge.conf [Rule] 区逐行同序；取消注释并替换为你的策略组名）───
 # Surge 内置 SYSTEM 集无 Clash 等价物（近似：本机常见系统域自行按需补充）；
@@ -309,5 +316,6 @@ rule-providers:
 #  - RULE-SET,US,🇺🇸美国节点
 #  - RULE-SET,UK,🇬🇧英国节点
 #  - RULE-SET,Europe,🇪🇺欧洲节点
+#  - RULE-SET,ChinaTLD,DIRECT
 #  - GEOIP,CN,DIRECT,no-resolve
 #  - MATCH,Final

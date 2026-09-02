@@ -426,5 +426,29 @@
       "policy": "流媒体",
       "no_dns_leak": true
     }
+  },
+  {
+    "name": "streaming_backfill_20260902",
+    "desc": "2026-09-02 覆盖补录：Audible / CatchPlay / MLB.tv / F1 TV 归 Streaming（DownloadCDN 前位的 formula1 静态与媒体面保持「下载」）；误归属的 ai.azure.com 迁出到 Microsoft。",
+    "requests": [
+      {"host": "audible.com"},
+      {"host": "www.audible.com"},
+      {"host": "catchplay.com"},
+      {"host": "mlb.com"},
+      {"host": "mlb.tv"},
+      {"host": "formula1.com"},
+      {"host": "f1tv.formula1.com"},
+      {"host": "static.formula1.com", "note": "负例：DownloadCDN 既有"},
+      {"host": "media.formula1.com", "note": "负例：DownloadCDN 既有"},
+      {"host": "ai.azure.com", "note": "负例：Azure AI Foundry 迁出 Streaming"}
+    ],
+    "assert": {
+      "same_policy": true, "policy": "流媒体", "no_dns_leak": true,
+      "per_request": [
+        {"host": "static.formula1.com", "policy": "下载", "reason": "ordered-safe：DownloadCDN 子域先于 Streaming 的 formula1.com 后缀"},
+        {"host": "media.formula1.com", "policy": "下载", "reason": "同上"},
+        {"host": "ai.azure.com", "policy": "Google-X-Meta-MS", "reason": "Azure AI Foundry 是微软控制面，与流媒体无关"}
+      ]
+    }
   }
 ]

@@ -40,9 +40,9 @@ and `Reject` precede ordinary routing owners.
 
 ## Section topology
 
-The manifest groups the lists into six sections (see README for the table):
-局域直连 → 广告/恶意拦截 → 下载 → 代理 → 国内直连 → 地区分流 → built-in
-LAN / GEOIP,CN / FINAL.
+The manifest groups the lists into seven sections (see README for the table):
+局域直连 → 广告/恶意拦截 → 下载 → 代理 → 国内直连 → 地区分流 → 国内兜底 →
+built-in LAN / GEOIP,CN / FINAL.
 
 - Download-plane lists precede the service owners because their narrow rules
   must beat broader service suffixes (`GameDownloadCN` < `Games`,
@@ -58,6 +58,16 @@ LAN / GEOIP,CN / FINAL.
   because MaxMind marks part of the verified LINE/LY CIDRs as US; those ranges
   stay as explicit CIDRs inside `Japan`, disjoint from ChinaIP — a property the
   A9 gate keeps guarded.
+
+- `ChinaTLD` closes the list order with the `.cn` / CNNIC IDN ccTLD catch-all
+  (`cn`, `xn--fiqs8s`, `xn--fiqz9s`, `xn--55qx5d`, `xn--io0a7i`). Under the
+  zero-local-DNS invariant `GEOIP,CN,no-resolve` never sees a hostname request,
+  so without this list every unlisted `.cn` host fell through `FINAL` to the
+  remote exit (verified with `surge-cli rule explain icbc.com.cn`). Placing the
+  catch-all last makes it ordered-safe by construction: every different-policy
+  `.cn` child (Reject, ProxyGFW carriers, `schwab.com.cn` in US) precedes it.
+  `com.cn` remains forbidden inside service lists — a registration boundary
+  must never sit in an owner list, only in this terminal funnel.
 
 All IP-class rules use `no-resolve`; a domain request skips every IP rule
 without local DNS resolution.
@@ -118,7 +128,11 @@ authoritative registry is the analyzer's `ordered_safe_split_apex` /
 for `apple.com` (AppleCN), `aliyuncs.com` (AlibabaCN), `myqcloud.com`,
 `smtcdns.com`, `wechat.com` (TencentCN), `byteimg.com` (ByteDanceCN),
 `bilivideo.com`, `iqiyi.com`, `smtcdns.net` (ChinaMedia), `hf.co` (AI),
-`blizzard.com` (Games), `1drv.com`, `office.net` (MicrosoftCN), plus the
+`blizzard.com`, `gog.com`, `ubi.com`, `minecraft.net`, `minecraft-services.net`,
+`mojang.com` (Games, download planes in DownloadCDN), `visualstudio.com`,
+`dev.azure.com` (Microsoft), `nhk.jp` (Japan, behind Streaming), `formula1.com`
+(Streaming), `crypto.com` (ProxyGFW), `amazon.co.uk` (UK), `1drv.com`,
+`office.net` (MicrosoftCN), the terminal `cn` catch-all (ChinaTLD), plus the
 non-apex parent `officeapps.live.com` (MicrosoftCN). Because every child sits in
 an earlier list, the `topology.json` constraints are load-bearing: reordering a
 constrained pair silently kills the child.

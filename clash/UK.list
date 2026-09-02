@@ -15,6 +15,7 @@ DOMAIN,vod-thumb-uk-live.akamaized.net
 DOMAIN,vs-cmaf-push-uk-live.akamaized.net
 
 DOMAIN-SUFFIX,ac.uk
+DOMAIN-SUFFIX,amazon.co.uk
 DOMAIN-SUFFIX,barclays.co.uk
 DOMAIN-SUFFIX,bbc
 DOMAIN-SUFFIX,bbc.co
@@ -30,6 +31,7 @@ DOMAIN-SUFFIX,bbcpersian.com
 DOMAIN-SUFFIX,bbcverticals.com
 DOMAIN-SUFFIX,bet365.com
 DOMAIN-SUFFIX,bfi.org.uk
+DOMAIN-SUFFIX,britishairways.com
 DOMAIN-SUFFIX,dailymail.co.uk
 DOMAIN-SUFFIX,ee.co.uk
 DOMAIN-SUFFIX,giffgaff.com

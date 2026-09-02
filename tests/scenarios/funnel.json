@@ -703,7 +703,7 @@
         {"host": "tv.naver.com", "policy": "流媒体", "reason": "Streaming 后置异策略子项，正是不升级的原因"},
         {"host": "azure.com", "policy": "Final", "reason": "未收编：azure.cn 直连边界与 5 条后置异策略子项"},
         {"host": "monitor.azure.com", "policy": "下载", "reason": "DownloadCDN 后置条目，正是不收编整段的原因"},
-        {"host": "ai.azure.com", "policy": "流媒体", "reason": "Streaming 后置条目"},
+        {"host": "ai.azure.com", "policy": "Google-X-Meta-MS", "reason": "2026-09-02 自 Streaming 迁入 Microsoft（Azure AI Foundry 是微软控制面）；作为 azure.com 的后置异策略子项它仍然存在，apex 继续不升级"},
         {"host": "pkgs.dev.azure.com", "policy": "下载", "reason": "DownloadCDN 后置条目"},
         {"host": "microsoft.com", "policy": "Google-X-Meta-MS", "reason": "会话面归一留用户决策，顶点形态不变"},
         {"host": "unknown.microsoft.com", "policy": "Final", "reason": "未升级"},
@@ -713,6 +713,21 @@
         {"host": "unknown.msn.com", "policy": "Final", "reason": "未升级"},
         {"host": "office.com", "policy": "DIRECT", "reason": "MicrosoftCN 既有混合形态不变"},
         {"host": "unknown.office.com", "policy": "Final", "reason": "未升级"}
+      ]
+    }
+  },
+  {
+    "name": "gfw_lookalike_domain_not_claimed_20260902",
+    "desc": "2026-09-02 归属核验负例：initium.com 实测为 Initium Corporate Finance（与端传媒 theinitium.com 无关），不得因品牌名相似进 ProxyGFW；ProxyGFW 迁出的属地条目见 regions.json regional_backfill_20260902。",
+    "requests": [
+      {"host": "theinitium.com", "note": "既有条目：端传媒"},
+      {"host": "www.theinitium.com"},
+      {"host": "initium.com", "note": "负例：同名他司，页面标题 Initium Corporate Finance"}
+    ],
+    "assert": {
+      "same_policy": true, "policy": "Proxy", "no_dns_leak": true,
+      "per_request": [
+        {"host": "initium.com", "policy": "Final", "reason": "无归属；品牌相似不是入表依据"}
       ]
     }
   }

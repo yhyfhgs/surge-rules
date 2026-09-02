@@ -502,5 +502,41 @@
       "policy": "游戏",
       "no_dns_leak": true
     }
+  },
+  {
+    "name": "publisher_faces_and_minecraft_session_backfill_20260902",
+    "desc": "2026-09-02 覆盖补录：GOG / Ubisoft 短域 / Square Enix / Capcom / Sega / Konami / Bandai Namco / Atlus 门面归 Games；Minecraft 会话面（minecraft.net / mojang.com 会话与鉴权 / minecraftservices.com）归 Games，而 DownloadCDN 前位的 piston / libraries / launcher 批量面保持「下载」。",
+    "requests": [
+      {"host": "gog.com"},
+      {"host": "www.gog.com"},
+      {"host": "ubi.com"},
+      {"host": "square-enix.com"},
+      {"host": "capcom.com"},
+      {"host": "sega.com"},
+      {"host": "konami.com"},
+      {"host": "bandainamcoent.com"},
+      {"host": "atlus.com"},
+      {"host": "minecraft.net"},
+      {"host": "sessionserver.mojang.com", "note": "多人联机会话校验"},
+      {"host": "authserver.mojang.com"},
+      {"host": "api.minecraftservices.com", "note": "Microsoft 账户时代的 Minecraft 服务 API"},
+      {"host": "images.gog.com", "note": "负例：DownloadCDN 既有"},
+      {"host": "gog-cdn-fastly.gog.com", "note": "负例：DownloadCDN 既有"},
+      {"host": "cdn.ubi.com", "note": "负例：DownloadCDN 既有"},
+      {"host": "libraries.minecraft.net", "note": "负例：DownloadCDN 既有"},
+      {"host": "piston-data.mojang.com", "note": "负例：DownloadCDN 既有"},
+      {"host": "cdn.gatherings.franchise.minecraft-services.net", "note": "负例：DownloadCDN 既有"}
+    ],
+    "assert": {
+      "same_policy": true, "policy": "游戏", "no_dns_leak": true,
+      "per_request": [
+        {"host": "images.gog.com", "policy": "下载", "reason": "ordered-safe：DownloadCDN 子域先于 Games 的 gog.com 后缀"},
+        {"host": "gog-cdn-fastly.gog.com", "policy": "下载", "reason": "同上"},
+        {"host": "cdn.ubi.com", "policy": "下载", "reason": "同上（ubi.com）"},
+        {"host": "libraries.minecraft.net", "policy": "下载", "reason": "同上（minecraft.net）"},
+        {"host": "piston-data.mojang.com", "policy": "下载", "reason": "同上（mojang.com）"},
+        {"host": "cdn.gatherings.franchise.minecraft-services.net", "policy": "下载", "reason": "同上（minecraft-services.net）"}
+      ]
+    }
   }
 ]

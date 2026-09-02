@@ -1257,6 +1257,7 @@ DOMAIN-SUFFIX,components.cyclingfactory.be
 DOMAIN-SUFFIX,components.justanswer.com
 DOMAIN-SUFFIX,components.trynow.net
 DOMAIN-SUFFIX,componentupdater.brave.com
+DOMAIN-SUFFIX,conda.anaconda.org
 DOMAIN-SUFFIX,conf.config-security.com
 DOMAIN-SUFFIX,connect.getflowbox.com
 DOMAIN-SUFFIX,connect.nosto.com
@@ -1511,6 +1512,7 @@ DOMAIN-SUFFIX,divhunt.b-cdn.net
 DOMAIN-SUFFIX,divio-media.net
 DOMAIN-SUFFIX,dl-cdn.alpinelinux.org
 DOMAIN-SUFFIX,dl-portal.iina.io
+DOMAIN-SUFFIX,dl-ssl.google.com
 DOMAIN-SUFFIX,dl.airdroid.com
 DOMAIN-SUFFIX,dl.circleci.com
 DOMAIN-SUFFIX,dl.cleverfiles.com
@@ -1519,6 +1521,7 @@ DOMAIN-SUFFIX,dl.devmate.com
 DOMAIN-SUFFIX,dl.elementary.io
 DOMAIN-SUFFIX,dl.flathub.org
 DOMAIN-SUFFIX,dl.getaurora.dev
+DOMAIN-SUFFIX,dl.google.com
 DOMAIN-SUFFIX,dl.iina.io
 DOMAIN-SUFFIX,dl.imobie.com
 DOMAIN-SUFFIX,dl.min.io
@@ -2674,6 +2677,7 @@ DOMAIN-SUFFIX,jsonplaceholder.typicode.com
 DOMAIN-SUFFIX,jspm.dev
 DOMAIN-SUFFIX,jspm.io
 DOMAIN-SUFFIX,jspm.org
+DOMAIN-SUFFIX,jsr.io
 DOMAIN-SUFFIX,jssdk.opin.media
 DOMAIN-SUFFIX,jssdkcdns.mparticle.com
 DOMAIN-SUFFIX,jstatic.xyz
@@ -3576,7 +3580,6 @@ DOMAIN-SUFFIX,notionusercontent.com
 DOMAIN-SUFFIX,npm.antfu.dev
 DOMAIN-SUFFIX,npm.im
 DOMAIN-SUFFIX,npm.io
-DOMAIN-SUFFIX,npm.jsr.io
 DOMAIN-SUFFIX,npmcdn.com
 DOMAIN-SUFFIX,npmfs.com
 DOMAIN-SUFFIX,npmjs.com
@@ -3584,6 +3587,7 @@ DOMAIN-SUFFIX,npmjs.org
 DOMAIN-SUFFIX,npms.io
 DOMAIN-SUFFIX,ns-cdn.neustar.biz
 DOMAIN-SUFFIX,nsimg.net
+DOMAIN-SUFFIX,nuget.org
 DOMAIN-SUFFIX,null.jsbin.com
 DOMAIN-SUFFIX,nv7s.com
 DOMAIN-SUFFIX,nxcli.io
@@ -4099,6 +4103,7 @@ DOMAIN-SUFFIX,senja.io
 DOMAIN-SUFFIX,seo-wp.airdroid.com
 DOMAIN-SUFFIX,server.arcgisonline.com
 DOMAIN-SUFFIX,service-icons.zeabur.com
+DOMAIN-SUFFIX,services.gradle.org
 DOMAIN-SUFFIX,services.linkfire.com
 DOMAIN-SUFFIX,sessions.bugsnag.com
 DOMAIN-SUFFIX,sfbassets.com

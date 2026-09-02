@@ -322,5 +322,44 @@
       "policy": "社交媒体",
       "no_dns_leak": true
     }
+  },
+  {
+    "name": "collab_backfill_20260902",
+    "desc": "2026-09-02 覆盖补录：Zoom 新主域 zoom.com 与 Webex 归 SocialOthers（与 zoom.us 同组）；Notion 新主域 notion.com 随 notion.so、Stack Exchange 网络（stackexchange / superuser / serverfault / askubuntu / stackauth / stackoverflow.blog）随 stackoverflow.com 进 ProxyGFW，DownloadCDN 前位的 sstatic / notion-static 静态面不变。",
+    "requests": [
+      {"host": "zoom.com"},
+      {"host": "webex.com"},
+      {"host": "zoom.us", "note": "既有条目"},
+      {"host": "notion.com"},
+      {"host": "notion.so"},
+      {"host": "stackexchange.com"},
+      {"host": "superuser.com"},
+      {"host": "serverfault.com"},
+      {"host": "askubuntu.com"},
+      {"host": "stackauth.com", "note": "Stack Exchange 统一登录"},
+      {"host": "stackoverflow.blog"},
+      {"host": "stackoverflow.com", "note": "既有条目"},
+      {"host": "cdn.sstatic.net", "note": "负例：DownloadCDN 既有"},
+      {"host": "notion-static.com", "note": "负例：DownloadCDN 既有"}
+    ],
+    "assert": {
+      "no_dns_leak": true,
+      "per_request": [
+        {"host": "zoom.com", "policy": "社交媒体"},
+        {"host": "webex.com", "policy": "社交媒体"},
+        {"host": "zoom.us", "policy": "社交媒体"},
+        {"host": "notion.com", "policy": "Proxy"},
+        {"host": "notion.so", "policy": "Proxy"},
+        {"host": "stackexchange.com", "policy": "Proxy"},
+        {"host": "superuser.com", "policy": "Proxy"},
+        {"host": "serverfault.com", "policy": "Proxy"},
+        {"host": "askubuntu.com", "policy": "Proxy"},
+        {"host": "stackauth.com", "policy": "Proxy"},
+        {"host": "stackoverflow.blog", "policy": "Proxy"},
+        {"host": "stackoverflow.com", "policy": "Proxy"},
+        {"host": "cdn.sstatic.net", "policy": "下载", "reason": "既有 DownloadCDN 条目不变"},
+        {"host": "notion-static.com", "policy": "下载", "reason": "既有 DownloadCDN 条目不变"}
+      ]
+    }
   }
 ]

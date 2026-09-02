@@ -533,5 +533,26 @@
       "policy": "Proxy",
       "no_dns_leak": true
     }
+  },
+  {
+    "name": "fintech_backfill_20260902",
+    "desc": "2026-09-02 覆盖补录：crypto.com 随加密交易所家族、ibkr.com 随 interactivebrokers.com 进 ProxyGFW（DownloadCDN 前位的 crypto.com 静态面保持「下载」）。Revolut 按 §8 禁收裁决（allowlist forbidden）不入 Payment，仍落 FINAL。",
+    "requests": [
+      {"host": "revolut.com", "note": "负例：§8 禁收裁决，Payment 只收本人在用通道"},
+      {"host": "crypto.com"},
+      {"host": "ibkr.com"},
+      {"host": "interactivebrokers.com", "note": "既有条目"},
+      {"host": "static.crypto.com", "note": "负例：DownloadCDN 既有"}
+    ],
+    "assert": {
+      "no_dns_leak": true,
+      "per_request": [
+        {"host": "revolut.com", "policy": "Final", "reason": "allowlist forbidden DOMAIN-SUFFIX,revolut.com（§8 裁决）保持"},
+        {"host": "crypto.com", "policy": "Proxy", "reason": "与 binance / okx / coinbase 同口径"},
+        {"host": "ibkr.com", "policy": "Proxy", "reason": "IBKR 短域与 interactivebrokers.com 同会话族"},
+        {"host": "interactivebrokers.com", "policy": "Proxy", "reason": "既有条目不变"},
+        {"host": "static.crypto.com", "policy": "下载", "reason": "ordered-safe：DownloadCDN 子域先于 ProxyGFW 的 crypto.com 后缀"}
+      ]
+    }
   }
 ]

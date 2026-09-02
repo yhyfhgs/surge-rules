@@ -34,6 +34,7 @@
     {"name": "Japan", "policy": "🇯🇵日本节点", "section": "地区分流"},
     {"name": "US", "policy": "🇺🇸美国节点", "section": "地区分流"},
     {"name": "UK", "policy": "🇬🇧英国节点", "section": "地区分流"},
-    {"name": "Europe", "policy": "🇪🇺欧洲节点", "section": "地区分流"}
+    {"name": "Europe", "policy": "🇪🇺欧洲节点", "section": "地区分流"},
+    {"name": "ChinaTLD", "policy": "DIRECT", "section": "国内兜底"}
   ]
 }

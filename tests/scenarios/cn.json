@@ -818,5 +818,33 @@
       "same_policy": true,
       "policy": "DIRECT"
     }
+  },
+  {
+    "name": "china_tld_terminal_direct_catchall",
+    "desc": "2026-09-02：ChinaTLD 表（表序最末，DOMAIN-SUFFIX,cn + CNNIC 中文顶级域）把此前落 FINAL 走远端出口的未列名 .cn 主机收回 DIRECT。零本地 DNS 不变量下 GEOIP,CN,no-resolve 看不到域名请求，icbc.com.cn 等在运行中 Surge 实证命中 FINAL → 日本出口。负例锁住 ordered-safe 前提：Reject / ProxyGFW / US 里的 .cn 子域仍先于兜底命中。",
+    "requests": [
+      {"host": "icbc.com.cn", "note": "工行主站，此前 FINAL"},
+      {"host": "www.icbc.com.cn"},
+      {"host": "lenovo.com.cn", "note": "联想中国，此前 FINAL"},
+      {"host": "autohome.com.cn", "note": "汽车之家"},
+      {"host": "zol.com.cn"},
+      {"host": "mafengwo.cn"},
+      {"host": "ucloud.cn", "note": "UCloud 控制台"},
+      {"host": "tesla.cn"},
+      {"host": "www.example.xn--fiqs8s", "note": ".中国 IDN 顶级域（punycode）"},
+      {"host": "staticfile.org", "note": "七牛 Staticfile CDN，2026-09-02 补录 Domestic"},
+      {"host": "staticfile.net"},
+      {"host": "schwab.com.cn", "note": "负例：US.list 的美国券商中国面，先于兜底"},
+      {"host": "bloomberg.cn", "note": "负例：ProxyGFW 承载集"},
+      {"host": "4336wang.cn", "note": "负例：Reject 恶意域"}
+    ],
+    "assert": {
+      "same_policy": true, "policy": "DIRECT", "no_dns_leak": true,
+      "per_request": [
+        {"host": "schwab.com.cn", "policy": "🇺🇸美国节点", "reason": "US.list 先于 ChinaTLD；兜底只接住无归属的 .cn"},
+        {"host": "bloomberg.cn", "policy": "Proxy", "reason": "ProxyGFW 先于 ChinaTLD，投毒域保护不变"},
+        {"host": "4336wang.cn", "policy": "REJECT", "reason": "Reject 先于全部路由表"}
+      ]
+    }
   }
 ]
