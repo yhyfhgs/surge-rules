@@ -4,18 +4,18 @@ This directory is the public `surge-rules` repository. Commands below run here. 
 
 ## Source and privacy boundaries
 
-- Routing is first-match-wins. `config/routing.json` alone defines list order, policies, modifiers and sections. Edit it and/or `lists/*.list`, render a candidate, verify it, then review the diff before replacing only the profile's `[Rule]` section. Never hand-edit that generated section.
-- Cross-list order is semantic; ordered-safe broad parents must remain behind every different-policy child (Reject exceptions follow the documented contract). Use `tools/sort_lists.py --write` for canonical within-list shape, not manual sorting.
-- Never hand-edit generated `clash/`, `lists/ChinaDomain.list`, or `lists/ChinaIP.list`. Their workflows are `tools/surge2clash.py`, `tools/regen_chinadomain.py`, and locked `tools/rebuild.py --id blackmatrix7_china_ip`. Preserve ChinaIP exclusions and collapse checks; re-admission needs fresh documented RDAP evidence.
+- Routing is first-match-wins. `config/routing.json` alone defines list order, policies, modifiers and sections. Edit it and/or `lists/*.list`, render a candidate, verify it, then review the diff before replacing only the profile's generated `[Rule]` section.
+- Cross-list order is semantic; ordered-safe broad parents must remain behind every different-policy child (Reject exceptions follow the documented contract). Canonicalize within-list shape with `tools/sort_lists.py --write`.
+- Regenerate `clash/`, `lists/ChinaDomain.list`, and `lists/ChinaIP.list` through their respective workflows: `tools/surge2clash.py`, `tools/regen_chinadomain.py`, and locked `tools/rebuild.py --id blackmatrix7_china_ip`. Preserve ChinaIP exclusions and collapse checks; re-admission needs fresh documented RDAP evidence.
 - Keep node names, exit IP/ASN/ISP mappings, policy internals, certificates and credentials out of public files. Use neutral test placeholders. `tests/live_check_local.json` is private/ignored: verify `git check-ignore` before committing. Put diagnostic artifacts outside the repository. Do not dump private profile contents into logs or reports.
-- Upstream provenance belongs in `SOURCES.md` and `sources.lock.json`; use locked fetch/rebuild tools, not upstream overwrite. Preserve existing uncommitted work and unrelated files.
+- Upstream provenance belongs in `SOURCES.md` and `sources.lock.json`; apply upstream changes through locked fetch/rebuild tools. Preserve existing uncommitted work and unrelated files.
 
 ## Routing invariants
 
-- Move rules between owners instead of duplicating them. All IP-class rules carry `no-resolve`.
+- Maintain one owner per rule when moving it between lists. All IP-class rules carry `no-resolve`.
 - `ProxyGFW` is a domain-only residual: no IP, PSL-boundary suffix, specifically owned domain or denylisted expired domain. Preserve registered multitenant namespaces; removing an expired-domain denial needs fresh DNS evidence.
 - `USER-AGENT`, `PROCESS-NAME`, and `URL-REGEX` are forbidden repository-wide without exemptions. Every allowlist exemption needs a reason.
-- Treat redirect/login/API/CDN endpoints as one session family; split only evidenced download or regional surfaces. Live-traffic decisions in `docs/MAINTENANCE.md` cannot be resolved by syntax-only edits.
+- Treat redirect/login/API/CDN endpoints as one session family; split only evidenced download or regional surfaces. Resolve live-traffic decisions in `docs/MAINTENANCE.md` with the required traffic evidence.
 - Never write an `[MITM] enable` key. Nonempty MITM hostname requires `auto-quic-block = true`; certificate material stays private. Live tests must not change configuration or policy selections.
 
 ## Verification and release
@@ -32,8 +32,8 @@ python3 tests/runsuite.py --conf /tmp/Surge.candidate.conf --rules lists
 python3 tools/surge2clash.py --check
 ```
 
-IP/GEOIP/ASN changes also need the documented MMDB analysis. Diagnose domains with `python3 tests/engine.py match example.com --json` and the runtime `surge-cli rule explain example.com`; offline success is not proof of all live semantics. L3/L4 require running Surge and explicit relevant task scope. Instructions-only edits need link/path/diff checks, not live routing tests.
+IP/GEOIP/ASN changes also need the documented MMDB analysis. Diagnose domains with `python3 tests/engine.py match example.com --json` and the runtime `surge-cli rule explain example.com`; verify live semantics against runtime evidence. L3/L4 require running Surge and explicit relevant task scope. Use link/path/diff checks for instructions-only edits.
 
-`./update.sh "description"` validates, runs `git add -A`, pushes main and verifies CDN state. Inspect/stage scope before any commit; never use this broad staging release script for unrelated documentation cleanup or a dirty tree. Distinguish Git push from CDN publication and `VALIDATED_NOT_PUBLISHED`, `PUBLISHED_AND_VERIFIED`, `PUBLISHED_BUT_UNVERIFIED`; never report the last as complete.
+`./update.sh "description"` validates, runs `git add -A`, pushes main and verifies CDN state. Use this release script only for an inspected routing release with a clean, appropriately scoped tree; stage and commit documentation-only changes by their exact paths. Distinguish Git push from CDN publication and `VALIDATED_NOT_PUBLISHED`, `PUBLISHED_AND_VERIFIED`, `PUBLISHED_BUT_UNVERIFIED`; report the last as awaiting CDN verification.
 
-Use focused edits and explicit errors, never fabricated successful checks or speculative routing fixes. Run affected existing checks without new scaffolding. Match English README/docs and Chinese test docs/commit messages/CHANGELOG; routing batches record motivation and actual validation in CHANGELOG. Counts and unresolved decisions come from current command output and evidence, not copied snapshots.
+Use focused edits and explicit errors, and support routing changes and successful checks with observed evidence. Run affected existing checks. Match English README/docs and Chinese test docs/commit messages/CHANGELOG; routing batches record motivation and actual validation in CHANGELOG. Report counts and unresolved decisions from current command output and evidence.
