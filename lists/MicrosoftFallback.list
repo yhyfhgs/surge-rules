@@ -1,7 +1,0 @@
-# Microsoft first-party suffix fallback, AFTER MicrosoftCN and all specific owners.
-# Keep Microsoft.list ahead of MicrosoftCN for OneDrive/Office narrow proxy exceptions.
-
-DOMAIN-SUFFIX,live.com
-DOMAIN-SUFFIX,microsoft.com
-DOMAIN-SUFFIX,msn.com
-DOMAIN-SUFFIX,office.com

@@ -460,7 +460,7 @@
   {
     "name": "microsoft_copilot_full_chain",
     "desc": "Microsoft Copilot：copilot.microsoft.com 登录（MSA/AAD）→ Bing 后端检索 → Office substrate 取上下文。理想上一次会话应同组同出口",
-    "note": "2026-08-25 架构调整：微软海外面自 AI.list 拆出为 Microsoft.list，随 Google/Twitter/Meta 走 Google-X-Meta-MS 组（大厂自有 AI 归各自生态）；GitHub 生态仍在 AI 组。",
+    "note": "2026-08-25 架构调整：微软海外面自 AI.list 拆出为 Microsoft.list，随 Google/Twitter/Meta 走 Google-X-Meta-MS 组（大厂自有 AI 归各自生态）；GitHub 生态按 2026-08-29 裁决归 Microsoft，同走 Google-X-Meta-MS。",
     "requests": [
       {
         "host": "copilot.microsoft.com"
@@ -1214,6 +1214,361 @@
         {"host": "other.skilljar.com", "policy": "Final", "reason": "多租户平台只认领 Anthropic 精确主机"},
         {"host": "skills.sh", "policy": "Final", "reason": "第三方注册表，无归属"}
       ]
+    }
+  },
+  {
+    "name": "ai_refresh_20260907_independent",
+    "desc": "上游固定 revision 新增 Claude 专属域与 OpenAI Blob/CDN 精确资产；独立 AI 同策略。",
+    "requests": [
+      {
+        "host": "claudemcpclient.com"
+      },
+      {
+        "host": "api.claudemcpclient.com"
+      },
+      {
+        "host": "lcicat.org"
+      },
+      {
+        "host": "lcicollections.org"
+      },
+      {
+        "host": "muthos.com"
+      },
+      {
+        "host": "openaiassets.blob.core.windows.net"
+      },
+      {
+        "host": "openai.com.cdn.cloudflare.net"
+      },
+      {
+        "host": "chatgpt.com"
+      },
+      {
+        "host": "claude.ai"
+      },
+      {
+        "host": "cursor.com"
+      },
+      {
+        "host": "windsurf.com"
+      }
+    ],
+    "assert": {
+      "same_policy": true,
+      "policy": "AI",
+      "no_dns_leak": true
+    }
+  },
+  {
+    "name": "ai_refresh_20260907_alibaba_international",
+    "desc": "阿里官方国际地域 API 和控制台必须先于 AlibabaCN 父域匹配；workspace/trial 只覆盖已登记境外区域。",
+    "requests": [
+      {
+        "host": "qwen.ai"
+      },
+      {
+        "host": "qwenlm.ai"
+      },
+      {
+        "host": "qoder.com"
+      },
+      {
+        "host": "dashscope-intl.aliyuncs.com"
+      },
+      {
+        "host": "dashscope-us.aliyuncs.com"
+      },
+      {
+        "host": "coding-intl.dashscope.aliyuncs.com"
+      },
+      {
+        "host": "cn-hongkong.dashscope.aliyuncs.com"
+      },
+      {
+        "host": "bailian.console.alibabacloud.com"
+      },
+      {
+        "host": "modelstudio.console.alibabacloud.com"
+      },
+      {
+        "host": "workspace.ap-southeast-1.maas.aliyuncs.com"
+      },
+      {
+        "host": "trial.ap-southeast-1.maas.aliyuncs.com"
+      },
+      {
+        "host": "workspace.us-east-1.maas.aliyuncs.com"
+      },
+      {
+        "host": "workspace.eu-central-1.maas.aliyuncs.com"
+      },
+      {
+        "host": "workspace.ap-northeast-1.maas.aliyuncs.com"
+      },
+      {
+        "host": "workspace.cn-hongkong.maas.aliyuncs.com"
+      }
+    ],
+    "assert": {
+      "same_policy": true,
+      "policy": "AI",
+      "no_dns_leak": true
+    }
+  },
+  {
+    "name": "ai_refresh_20260907_domestic",
+    "desc": "国内 AI 主站与国内 API 保持 DIRECT；零一万物中文官网改正归属，不能按 .com 判断国际站。",
+    "requests": [
+      {
+        "host": "lingyiwanwu.com"
+      },
+      {
+        "host": "www.lingyiwanwu.com"
+      },
+      {
+        "host": "qianwen.com"
+      },
+      {
+        "host": "tongyi.com"
+      },
+      {
+        "host": "qoder.cn"
+      },
+      {
+        "host": "modelscope.cn"
+      },
+      {
+        "host": "bailian.console.aliyun.com"
+      },
+      {
+        "host": "dashscope.aliyuncs.com"
+      },
+      {
+        "host": "coding.dashscope.aliyuncs.com"
+      },
+      {
+        "host": "workspace.cn-beijing.maas.aliyuncs.com"
+      },
+      {
+        "host": "trial.cn-beijing.maas.aliyuncs.com"
+      },
+      {
+        "host": "deepseeksvc.com"
+      },
+      {
+        "host": "api.deepseek.com"
+      },
+      {
+        "host": "kimi.com"
+      },
+      {
+        "host": "api.moonshot.cn"
+      },
+      {
+        "host": "api.minimaxi.com"
+      },
+      {
+        "host": "bigmodel.cn"
+      },
+      {
+        "host": "coze.cn"
+      },
+      {
+        "host": "cozeapp.net"
+      },
+      {
+        "host": "cozecdn.com"
+      },
+      {
+        "host": "trae.cn"
+      },
+      {
+        "host": "api.trae.com.cn"
+      },
+      {
+        "host": "trae-api-cn.mchost.guru"
+      }
+    ],
+    "assert": {
+      "same_policy": true,
+      "policy": "DIRECT",
+      "no_dns_leak": true
+    }
+  },
+  {
+    "name": "ai_refresh_20260907_trae_international",
+    "desc": "TRAE 国际产品及已实测新加坡 API 同 AI 策略。",
+    "requests": [
+      {
+        "host": "trae.ai"
+      },
+      {
+        "host": "traeapi.us"
+      },
+      {
+        "host": "trae-api-sg.mchost.guru"
+      }
+    ],
+    "assert": {
+      "same_policy": true,
+      "policy": "AI",
+      "no_dns_leak": true
+    }
+  },
+  {
+    "name": "ai_refresh_20260907_regional_pairs",
+    "desc": "保留国内厂商已裁决国际入口，不能按上游 scope=cn 整表直连。",
+    "requests": [
+      {
+        "host": "kimi.ai"
+      },
+      {
+        "host": "moonshot.ai"
+      },
+      {
+        "host": "minimax.io"
+      },
+      {
+        "host": "hailuoai.video"
+      },
+      {
+        "host": "z.ai"
+      },
+      {
+        "host": "siliconflow.com"
+      },
+      {
+        "host": "stepfun.ai"
+      },
+      {
+        "host": "01.ai"
+      },
+      {
+        "host": "coze.com"
+      },
+      {
+        "host": "modelscope.com"
+      }
+    ],
+    "assert": {
+      "same_policy": true,
+      "policy": "AI",
+      "no_dns_leak": true
+    }
+  },
+  {
+    "name": "ai_refresh_20260907_ecosystems",
+    "desc": "上游大厂 AI 核心及登录 API 保持厂商策略。",
+    "requests": [
+      {
+        "host": "gemini.google.com"
+      },
+      {
+        "host": "aistudio.google.com"
+      },
+      {
+        "host": "notebooklm.google"
+      },
+      {
+        "host": "antigravity.google"
+      },
+      {
+        "host": "generativelanguage.googleapis.com"
+      },
+      {
+        "host": "copilot.microsoft.com"
+      },
+      {
+        "host": "githubcopilot.com"
+      },
+      {
+        "host": "copilotprodattachments.blob.core.windows.net"
+      },
+      {
+        "host": "meta.ai"
+      },
+      {
+        "host": "llama.com"
+      },
+      {
+        "host": "grok.com"
+      },
+      {
+        "host": "x.ai"
+      }
+    ],
+    "assert": {
+      "same_policy": true,
+      "policy": "Google-X-Meta-MS",
+      "no_dns_leak": true
+    }
+  },
+  {
+    "name": "ai_refresh_20260907_model_download",
+    "desc": "HF 数据平面优先于 AI 主站父域。",
+    "requests": [
+      {
+        "host": "us.aws.cdn.hf.co"
+      },
+      {
+        "host": "cdn-lfs.hf.co"
+      },
+      {
+        "host": "cas-bridge.xethub.hf.co"
+      },
+      {
+        "host": "transfer.xethub.hf.co"
+      }
+    ],
+    "assert": {
+      "same_policy": true,
+      "policy": "下载",
+      "no_dns_leak": true
+    }
+  },
+  {
+    "name": "ai_refresh_20260907_shared_and_lookalikes",
+    "desc": "不导入多租户托管父域、共享云控制面或无证据的 mchost 主机；精确资产不扩展到其他租户。",
+    "requests": [
+      {
+        "host": "tenant.hf.space"
+      },
+      {
+        "host": "tenant.windsurf.build"
+      },
+      {
+        "host": "tenant.replit.app"
+      },
+      {
+        "host": "tenant.replit.dev"
+      },
+      {
+        "host": "tenant.repl.co"
+      },
+      {
+        "host": "api.cloudflare.com"
+      },
+      {
+        "host": "other.blob.core.windows.net"
+      },
+      {
+        "host": "unknown.mchost.guru"
+      },
+      {
+        "host": "trae-api-cn.mchost.guru.example.org"
+      },
+      {
+        "host": "dashscope-intl.aliyuncs.com.example.org"
+      },
+      {
+        "host": "other.com.cdn.cloudflare.net"
+      }
+    ],
+    "assert": {
+      "same_policy": true,
+      "policy": "Final",
+      "no_dns_leak": true
     }
   }
 ]

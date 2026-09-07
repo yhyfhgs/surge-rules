@@ -388,7 +388,7 @@
   },
   {
     "name": "funnel_microsoft_cn_office_faces",
-    "desc": "§3 MicrosoftCN FINAL 漏斗补录：officeapps.live.com / office.net / outlook.com / outlook.office.com / windowsupdate.com / delivery.mp.microsoft.com / 1drv.com 七条归入 MicrosoftCN(20)。全部前置占位在 Microsoft(10) 或 DownloadCDN(17)，既有混合形态不变。",
+    "desc": "2026-09-07 列表简化：MicrosoftCN 优先，Office/OneDrive 的四处旧代理例外随所属父域直连；其余请求维持各自既有策略。",
     "requests": [
       {"host": "officeapps.live.com"},
       {"host": "view.officeapps.live.com"},
@@ -407,7 +407,7 @@
       {"host": "dl.delivery.mp.microsoft.com"},
       {"host": "1drv.com"},
       {"host": "by3301-a.1drv.com"},
-      {"host": "odc.officeapps.live.com", "note": "前置占位负例：Microsoft 全球面"},
+      {"host": "odc.officeapps.live.com", "note": "2026-09-07 用户确认 MicrosoftCN 优先，归属直连"},
       {"host": "content.office.net"},
       {"host": "cdn.designerapp.osi.office.net"},
       {"host": "files.1drv.com"},
@@ -417,10 +417,10 @@
     "assert": {
       "same_policy": true, "policy": "DIRECT", "no_dns_leak": true,
       "per_request": [
-        {"host": "odc.officeapps.live.com", "policy": "Google-X-Meta-MS", "reason": "前置占位：Microsoft.list DOMAIN,odc.officeapps.live.com"},
-        {"host": "content.office.net", "policy": "Google-X-Meta-MS", "reason": "前置占位：Microsoft.list DOMAIN-SUFFIX,content.office.net"},
-        {"host": "cdn.designerapp.osi.office.net", "policy": "Google-X-Meta-MS", "reason": "前置占位：Microsoft.list"},
-        {"host": "files.1drv.com", "policy": "Google-X-Meta-MS", "reason": "前置占位：Microsoft.list DOMAIN-SUFFIX,files.1drv.com"},
+        {"host": "odc.officeapps.live.com", "policy": "DIRECT", "reason": "2026-09-07 用户确认 MicrosoftCN 优先，归属直连"},
+        {"host": "content.office.net", "policy": "DIRECT", "reason": "2026-09-07 用户确认 MicrosoftCN 优先，归属直连"},
+        {"host": "cdn.designerapp.osi.office.net", "policy": "DIRECT", "reason": "2026-09-07 用户确认 MicrosoftCN 优先，归属直连"},
+        {"host": "files.1drv.com", "policy": "DIRECT", "reason": "2026-09-07 用户确认 MicrosoftCN 优先，归属直连"},
         {"host": "attachments.office.net", "policy": "下载", "reason": "前置占位：DownloadCDN.list DOMAIN-SUFFIX,attachments.office.net"},
         {"host": "shell.cdn.office.net", "policy": "下载", "reason": "前置占位：DownloadCDN.list DOMAIN-SUFFIX,shell.cdn.office.net"}
       ]

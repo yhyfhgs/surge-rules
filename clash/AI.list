@@ -1,29 +1,38 @@
 # AUTO-GENERATED — Clash(Mihomo) classical 规则，由 ../lists/AI.list 派生
 # 勿手工编辑；修改 Surge 源后运行 python3 tools/surge2clash.py 重新生成
 
-# Independent AI services and session-bound infrastructure; vendor-owned AI remains with its ecosystem.
+# Independent AI and CN vendors' international AI surfaces; Google/X/Meta/Microsoft AI stays with its ecosystem.
 # Shared components are admitted only when same-exit session behavior is documented in tests/allowlist.json.
 
 DOMAIN,anthropic-com.ghost.io
 DOMAIN,anthropic.skilljar.com
 DOMAIN,aws-language-servers.us-east-1.amazonaws.com
 DOMAIN,aws-toolkit-language-servers.amazonaws.com
+DOMAIN,bailian.console.alibabacloud.com
 DOMAIN,cdn.usefathom.com
 DOMAIN,chat.openai.com.cdn.cloudflare.net
 DOMAIN,client-telemetry.us-east-1.amazonaws.com
+DOMAIN,cn-hongkong.dashscope.aliyuncs.com
 DOMAIN,codewhisperer.us-east-1.amazonaws.com
+DOMAIN,coding-intl.dashscope.aliyuncs.com
 DOMAIN,cognito-identity.us-east-1.amazonaws.com
 DOMAIN,cp4.cloudflare.com
+DOMAIN,dashscope-intl.aliyuncs.com
+DOMAIN,dashscope-us.aliyuncs.com
 DOMAIN,idetoolkits-hostedfiles.amazonaws.com
 DOMAIN,idetoolkits.amazonwebservices.com
+DOMAIN,modelstudio.console.alibabacloud.com
 DOMAIN,oaisidekickupdates.blob.core.windows.net
 DOMAIN,openai-api.arkoselabs.com
+DOMAIN,openai.com.cdn.cloudflare.net
 DOMAIN,openaiapi-site.azureedge.net
+DOMAIN,openaiassets.blob.core.windows.net
 DOMAIN,openaicom.imgix.net
 DOMAIN,openaicomproductionae4b.blob.core.windows.net
 DOMAIN,ppl-ai-file-upload.s3.amazonaws.com
 DOMAIN,production-openaicom-storage.azureedge.net
 DOMAIN,q-developer-integration.us-east-1.api.aws
+DOMAIN,trae-api-sg.mchost.guru
 
 DOMAIN-SUFFIX,01.ai
 DOMAIN-SUFFIX,abacus.ai
@@ -44,6 +53,8 @@ DOMAIN-SUFFIX,antspace.dev
 DOMAIN-SUFFIX,anyscale.com
 DOMAIN-SUFFIX,anysphere.co
 DOMAIN-SUFFIX,anythingllm.com
+DOMAIN-SUFFIX,ap-northeast-1.maas.aliyuncs.com
+DOMAIN-SUFFIX,ap-southeast-1.maas.aliyuncs.com
 DOMAIN-SUFFIX,api.statsig.com
 DOMAIN-SUFFIX,arcade.dev
 DOMAIN-SUFFIX,arena.ai
@@ -88,6 +99,7 @@ DOMAIN-SUFFIX,claude.app
 DOMAIN-SUFFIX,claude.com
 DOMAIN-SUFFIX,claude.new
 DOMAIN-SUFFIX,claude.site
+DOMAIN-SUFFIX,claudemcpclient.com
 DOMAIN-SUFFIX,claudemcpcontent.com
 DOMAIN-SUFFIX,claudepages.dev
 DOMAIN-SUFFIX,claudestudio.com
@@ -95,6 +107,7 @@ DOMAIN-SUFFIX,claudeusercontent.com
 DOMAIN-SUFFIX,client-api.arkoselabs.com
 DOMAIN-SUFFIX,cline.bot
 DOMAIN-SUFFIX,clipdrop.co
+DOMAIN-SUFFIX,cn-hongkong.maas.aliyuncs.com
 DOMAIN-SUFFIX,codebuff.com
 DOMAIN-SUFFIX,codeium.com
 DOMAIN-SUFFIX,codeiumdata.com
@@ -142,6 +155,7 @@ DOMAIN-SUFFIX,elevenlabs.io
 DOMAIN-SUFFIX,elevenmusic.ai
 DOMAIN-SUFFIX,elevenreader.io
 DOMAIN-SUFFIX,emergent.sh
+DOMAIN-SUFFIX,eu-central-1.maas.aliyuncs.com
 DOMAIN-SUFFIX,exa.ai
 DOMAIN-SUFFIX,factory.ai
 DOMAIN-SUFFIX,fal.ai
@@ -210,11 +224,12 @@ DOMAIN-SUFFIX,langchain.com
 DOMAIN-SUFFIX,langflow.org
 DOMAIN-SUFFIX,langfuse.com
 DOMAIN-SUFFIX,langsmith.com
+DOMAIN-SUFFIX,lcicat.org
+DOMAIN-SUFFIX,lcicollections.org
 DOMAIN-SUFFIX,leonardo.ai
 DOMAIN-SUFFIX,letta.com
 DOMAIN-SUFFIX,librechat.ai
 DOMAIN-SUFFIX,limitless.ai
-DOMAIN-SUFFIX,lingyiwanwu.com
 DOMAIN-SUFFIX,liquid.ai
 DOMAIN-SUFFIX,litellm.ai
 DOMAIN-SUFFIX,livekit.cloud
@@ -234,7 +249,6 @@ DOMAIN-SUFFIX,marscode.com
 DOMAIN-SUFFIX,maxai.me
 DOMAIN-SUFFIX,mcbaas.work
 DOMAIN-SUFFIX,mcdemo.show
-DOMAIN-SUFFIX,mchost.guru
 DOMAIN-SUFFIX,mcp.so
 DOMAIN-SUFFIX,mcpservertest.online
 DOMAIN-SUFFIX,mem0.ai
@@ -254,6 +268,7 @@ DOMAIN-SUFFIX,moonshot.ai
 DOMAIN-SUFFIX,moonshotai.com
 DOMAIN-SUFFIX,moonvalley.com
 DOMAIN-SUFFIX,msty.ai
+DOMAIN-SUFFIX,muthos.com
 DOMAIN-SUFFIX,nebius.ai
 DOMAIN-SUFFIX,nousresearch.com
 DOMAIN-SUFFIX,novita.ai
@@ -351,6 +366,7 @@ DOMAIN-SUFFIX,together.xyz
 DOMAIN-SUFFIX,topazlabs.com
 DOMAIN-SUFFIX,trae.ai
 DOMAIN-SUFFIX,trae.guru
+DOMAIN-SUFFIX,traeapi.us
 DOMAIN-SUFFIX,tripo3d.ai
 DOMAIN-SUFFIX,trufo.ai
 DOMAIN-SUFFIX,trychroma.com
@@ -359,6 +375,7 @@ DOMAIN-SUFFIX,typeface.ai
 DOMAIN-SUFFIX,typingmind.com
 DOMAIN-SUFFIX,udio.com
 DOMAIN-SUFFIX,unsloth.ai
+DOMAIN-SUFFIX,us-east-1.maas.aliyuncs.com
 DOMAIN-SUFFIX,v0.app
 DOMAIN-SUFFIX,v0.dev
 DOMAIN-SUFFIX,vapi.ai

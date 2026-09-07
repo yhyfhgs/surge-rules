@@ -207,9 +207,11 @@ be "resolved" by a syntax-only change.
 | `Streaming` IP surface | Whether every CIDR still belongs to a streaming provider, and whether any range should move to a regional or service owner | Real traffic capture plus a shadow-routing comparison against the live profile |
 | OneDrive data plane | How deep `1drv.com` / `livefilestore.com` / `microsoftpersonalcontent.com` should be owned by `MicrosoftCN` versus `Microsoft`, given the poisoning stopgap | Connectivity measurement from a CN vantage point on both exits |
 
-Microsoft suffix fallback was approved on 2026-09-07 with existing direct and
-download exceptions preserved. Keep `MicrosoftFallback` after MicrosoftCN and
-all other specific owners; keep Microsoft before MicrosoftCN to preserve its
-narrow OneDrive/Office proxy exceptions. New first-party hosts under the four
-fallback parents now use the Microsoft policy; this does not certify endpoint
-connectivity or settle the OneDrive data-plane decision above.
+Microsoft suffixes belong in `Microsoft.list`. Keep `MicrosoftCN` before
+`Microsoft`, and DownloadCDN before both. On 2026-09-07 the user explicitly
+approved DIRECT for the former `files.1drv.com`, `content.office.net`,
+`cdn.designerapp.osi.office.net` and `odc.officeapps.live.com` exceptions, so no
+priority cycle or extra list is required. Prefer editing existing owner lists;
+do not add a separate manufacturer fallback list or inline configuration rules
+to preserve those superseded exceptions. This does not certify endpoint
+connectivity or settle the remaining OneDrive data-plane coverage question.

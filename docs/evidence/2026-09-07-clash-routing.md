@@ -1,5 +1,8 @@
 # 2026-09-07 routing and Clash verification
 
+The later [Microsoft list simplification](2026-09-07-microsoft-merge.md) supersedes
+the fallback-list design and its counts below.
+
 Scope: source-list suffix coverage, generated Mihomo configuration, and the
 user-confirmed private local migration file. No policy selection or live TUN change was performed. The follow-up request
 authorizes Git remote publication and jsDelivr refresh.

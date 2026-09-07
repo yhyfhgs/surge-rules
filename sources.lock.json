@@ -124,5 +124,210 @@
         "无上游，逐条人工裁决；可重建性由 git 历史 + tests/ 断言保证，不属 lock 的职责范围。"
       ]
     }
-  ]
+  ],
+  "ai_review": {
+    "at": "2026-09-07",
+    "provenance": "observed",
+    "note": "Raw inputs are revision/SHA-256 pinned and verified with tools/fetch_locked.py --lock. Lists remain manually curated; this is not a whole-list rebuild claim. See docs/evidence/2026-09-07-ai-upstream.md.",
+    "inputs": [
+      {
+        "id": "vps_all_list",
+        "provenance": "pinned",
+        "repository": "https://github.com/VPSDance/ai-proxy-rules",
+        "revision": "cc1d596a6b645986d293bd93f43a3e9ab114f3e8",
+        "revision_date": "2026-09-07T00:30:53Z",
+        "path": "rules/surge/all.list",
+        "url": "https://raw.githubusercontent.com/VPSDance/ai-proxy-rules/{revision}/{path}",
+        "sha256": "46e105aca83a6160ed69ac5f4b80676f31f0c7b5e4efe426f595a13865665f02",
+        "size": 13700
+      },
+      {
+        "id": "sukka_ai_conf",
+        "provenance": "pinned",
+        "repository": "https://github.com/SukkaW/Surge",
+        "revision": "81632ebcfaa6a2469721d63e7be16639db319f63",
+        "revision_date": "2026-09-05T11:56:32Z",
+        "path": "Source/non_ip/ai.conf",
+        "url": "https://raw.githubusercontent.com/SukkaW/Surge/{revision}/{path}",
+        "sha256": "bed0233de022ea01a85cf8f9cd2d65bde53ec7d9a7da506e37117f27ec0fb108",
+        "size": 3935
+      },
+      {
+        "id": "bm7_OpenAI_list",
+        "provenance": "pinned",
+        "repository": "https://github.com/blackmatrix7/ios_rule_script",
+        "revision": "5f06cacdb752a951bba8511b25eadde77ebc683c",
+        "revision_date": "2026-09-05T19:58:06Z",
+        "path": "rule/Surge/OpenAI/OpenAI.list",
+        "url": "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/{revision}/{path}",
+        "sha256": "6f4047cdbf6953cf5d9b38c4ccd6da7bc6f1acb91b7a87134f25d5b8f5d2408b",
+        "size": 1353
+      },
+      {
+        "id": "bm7_Anthropic_list",
+        "provenance": "pinned",
+        "repository": "https://github.com/blackmatrix7/ios_rule_script",
+        "revision": "5f06cacdb752a951bba8511b25eadde77ebc683c",
+        "revision_date": "2026-09-05T19:58:06Z",
+        "path": "rule/Surge/Anthropic/Anthropic.list",
+        "url": "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/{revision}/{path}",
+        "sha256": "ee68bf42bf5666943067127776e40643f6f52bdd911152b1be62b3ecb187dc8e",
+        "size": 263
+      },
+      {
+        "id": "bm7_Claude_list",
+        "provenance": "pinned",
+        "repository": "https://github.com/blackmatrix7/ios_rule_script",
+        "revision": "5f06cacdb752a951bba8511b25eadde77ebc683c",
+        "revision_date": "2026-09-05T19:58:06Z",
+        "path": "rule/Surge/Claude/Claude.list",
+        "url": "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/{revision}/{path}",
+        "sha256": "870e7e25d798e7f00338507f773b0eea4dfd15e25e9df0a27d5ae421ae1ab378",
+        "size": 244
+      },
+      {
+        "id": "bm7_Gemini_list",
+        "provenance": "pinned",
+        "repository": "https://github.com/blackmatrix7/ios_rule_script",
+        "revision": "5f06cacdb752a951bba8511b25eadde77ebc683c",
+        "revision_date": "2026-09-05T19:58:06Z",
+        "path": "rule/Surge/Gemini/Gemini.list",
+        "url": "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/{revision}/{path}",
+        "sha256": "db8f69154426dca76792ab80b3ad6b0e2d078ebe0e52e76faec1724245a4ec49",
+        "size": 605
+      },
+      {
+        "id": "bm7_BardAI_list",
+        "provenance": "pinned",
+        "repository": "https://github.com/blackmatrix7/ios_rule_script",
+        "revision": "5f06cacdb752a951bba8511b25eadde77ebc683c",
+        "revision_date": "2026-09-05T19:58:06Z",
+        "path": "rule/Surge/BardAI/BardAI.list",
+        "url": "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/{revision}/{path}",
+        "sha256": "3dc3871ee3dcd4045d32794de6b8e5ffd9123afb71d67b3f1115b5dd3d53e619",
+        "size": 508
+      },
+      {
+        "id": "bm7_Copilot_list",
+        "provenance": "pinned",
+        "repository": "https://github.com/blackmatrix7/ios_rule_script",
+        "revision": "5f06cacdb752a951bba8511b25eadde77ebc683c",
+        "revision_date": "2026-09-05T19:58:06Z",
+        "path": "rule/Surge/Copilot/Copilot.list",
+        "url": "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/{revision}/{path}",
+        "sha256": "12773330de34b84b7fd2f3f2af598480ea62d8574d8e9b8ae9d011a53c044d39",
+        "size": 1822
+      },
+      {
+        "id": "vps_anthropic_yaml",
+        "provenance": "pinned",
+        "repository": "https://github.com/VPSDance/ai-proxy-rules",
+        "revision": "cc1d596a6b645986d293bd93f43a3e9ab114f3e8",
+        "revision_date": "2026-09-07T00:30:53Z",
+        "path": "data/providers/anthropic.yaml",
+        "url": "https://raw.githubusercontent.com/VPSDance/ai-proxy-rules/{revision}/{path}",
+        "sha256": "b2da25315a89b141700c4b0f5d8ca023bc0e73f33c8c945816709a4bce8eea3a",
+        "size": 1699
+      },
+      {
+        "id": "vps_bytedance-ai-cn_yaml",
+        "provenance": "pinned",
+        "repository": "https://github.com/VPSDance/ai-proxy-rules",
+        "revision": "cc1d596a6b645986d293bd93f43a3e9ab114f3e8",
+        "revision_date": "2026-09-07T00:30:53Z",
+        "path": "data/providers/bytedance-ai-cn.yaml",
+        "url": "https://raw.githubusercontent.com/VPSDance/ai-proxy-rules/{revision}/{path}",
+        "sha256": "f2b57cd9ccb72575caba73efca92f071b153965a615270afc7fa2876b645cf92",
+        "size": 754
+      },
+      {
+        "id": "vps_bytedance-ai_yaml",
+        "provenance": "pinned",
+        "repository": "https://github.com/VPSDance/ai-proxy-rules",
+        "revision": "cc1d596a6b645986d293bd93f43a3e9ab114f3e8",
+        "revision_date": "2026-09-07T00:30:53Z",
+        "path": "data/providers/bytedance-ai.yaml",
+        "url": "https://raw.githubusercontent.com/VPSDance/ai-proxy-rules/{revision}/{path}",
+        "sha256": "c55f6b97e344775ecabf64483f1ad4c1de7ce6285e0b4a615af8efb41cc6c5cb",
+        "size": 668
+      },
+      {
+        "id": "vps_alibaba-ai_yaml",
+        "provenance": "pinned",
+        "repository": "https://github.com/VPSDance/ai-proxy-rules",
+        "revision": "cc1d596a6b645986d293bd93f43a3e9ab114f3e8",
+        "revision_date": "2026-09-07T00:30:53Z",
+        "path": "data/providers/alibaba-ai.yaml",
+        "url": "https://raw.githubusercontent.com/VPSDance/ai-proxy-rules/{revision}/{path}",
+        "sha256": "1fab2f71c35197fca56a5fc1bd3350e42b1378f344e38f9055b3677d25bb259d",
+        "size": 632
+      },
+      {
+        "id": "vps_moonshot-ai_yaml",
+        "provenance": "pinned",
+        "repository": "https://github.com/VPSDance/ai-proxy-rules",
+        "revision": "cc1d596a6b645986d293bd93f43a3e9ab114f3e8",
+        "revision_date": "2026-09-07T00:30:53Z",
+        "path": "data/providers/moonshot-ai.yaml",
+        "url": "https://raw.githubusercontent.com/VPSDance/ai-proxy-rules/{revision}/{path}",
+        "sha256": "3e073b0ef8892de083ef13ac9ea8d36e079ee27234b81401f582b623e9b16b7a",
+        "size": 307
+      },
+      {
+        "id": "vps_minimax_yaml",
+        "provenance": "pinned",
+        "repository": "https://github.com/VPSDance/ai-proxy-rules",
+        "revision": "cc1d596a6b645986d293bd93f43a3e9ab114f3e8",
+        "revision_date": "2026-09-07T00:30:53Z",
+        "path": "data/providers/minimax.yaml",
+        "url": "https://raw.githubusercontent.com/VPSDance/ai-proxy-rules/{revision}/{path}",
+        "sha256": "c6f268901e802e838df3518fa14e67c8e6ad3a8e4aa0fc391889df3557940fbe",
+        "size": 326
+      },
+      {
+        "id": "vps_zhipu-ai_yaml",
+        "provenance": "pinned",
+        "repository": "https://github.com/VPSDance/ai-proxy-rules",
+        "revision": "cc1d596a6b645986d293bd93f43a3e9ab114f3e8",
+        "revision_date": "2026-09-07T00:30:53Z",
+        "path": "data/providers/zhipu-ai.yaml",
+        "url": "https://raw.githubusercontent.com/VPSDance/ai-proxy-rules/{revision}/{path}",
+        "sha256": "70dd7d2f30d47e52b39ff0eeaa81f54abea3a8cc2c7179f95d4fa8157a6a13da",
+        "size": 345
+      },
+      {
+        "id": "vps_ppio_yaml",
+        "provenance": "pinned",
+        "repository": "https://github.com/VPSDance/ai-proxy-rules",
+        "revision": "cc1d596a6b645986d293bd93f43a3e9ab114f3e8",
+        "revision_date": "2026-09-07T00:30:53Z",
+        "path": "data/providers/ppio.yaml",
+        "url": "https://raw.githubusercontent.com/VPSDance/ai-proxy-rules/{revision}/{path}",
+        "sha256": "fdcb5fc2e0721be78505cc672af0a4d06505dfaaacc8e22a6b7a71c53bc72e5e",
+        "size": 245
+      },
+      {
+        "id": "vps_volcengine-ai_yaml",
+        "provenance": "pinned",
+        "repository": "https://github.com/VPSDance/ai-proxy-rules",
+        "revision": "cc1d596a6b645986d293bd93f43a3e9ab114f3e8",
+        "revision_date": "2026-09-07T00:30:53Z",
+        "path": "data/providers/volcengine-ai.yaml",
+        "url": "https://raw.githubusercontent.com/VPSDance/ai-proxy-rules/{revision}/{path}",
+        "sha256": "dcc28cc2d5d7cebe7a0ee90da2d970dc5c496d2b87d8f899dd259e2ddeceb04a",
+        "size": 321
+      },
+      {
+        "id": "vps_manus_yaml",
+        "provenance": "pinned",
+        "repository": "https://github.com/VPSDance/ai-proxy-rules",
+        "revision": "cc1d596a6b645986d293bd93f43a3e9ab114f3e8",
+        "revision_date": "2026-09-07T00:30:53Z",
+        "path": "data/providers/manus.yaml",
+        "url": "https://raw.githubusercontent.com/VPSDance/ai-proxy-rules/{revision}/{path}",
+        "sha256": "8c7dd211fccd5adffa7d88c24fa1b63fbbcce282c3fce1c6e6c13bb8a32aeff9",
+        "size": 228
+      }
+    ]
+  }
 }

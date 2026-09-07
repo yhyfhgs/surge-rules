@@ -10,16 +10,15 @@ entry, not any hardcoded number.
 
 ## Routing model
 
-Surge is first-match-wins. The manifest groups the lists into eight sections:
+Surge is first-match-wins. The manifest groups the lists into seven sections:
 
 | Section | Lists | Purpose |
 |---|---|---|
 | 局域直连 | PrivateLAN, PKU | Local and campus traffic |
 | 广告/恶意拦截 | Reject | Global reject overrides |
 | 下载 | GameDownloadCN, ModelDownloadCDN, DownloadCDN | Bulk-download planes whose narrow rules must beat broader service owners |
-| 代理 | YouTube, Google, Twitter, Meta, Microsoft, AI, TikTok, SocialOthers, Telegram, Streaming, Games, Payment, ProxyGFW | Service/session ownership, closed by the domain-only proxy residual |
-| 国内直连 | AppleCN, MicrosoftCN, Domestic, ChinaMedia, TencentCN, AlibabaCN, ByteDanceCN, BaiduCN, NetEaseCN, ChinaDomain, ChinaIP | One contiguous DIRECT run: vendor CN endpoints, curated domestic, generated long tail, authoritative CN ranges |
-| 微软兜底 | MicrosoftFallback | First-party Microsoft suffixes after all specific proxy/direct/download owners |
+| 服务分流 | YouTube, Google, Twitter, Meta, MicrosoftCN, Microsoft, AI, TikTok, SocialOthers, Telegram, Streaming, Games, Payment, ProxyGFW | Service/session ownership, closed by the domain-only proxy residual |
+| 国内直连 | AppleCN, Domestic, ChinaMedia, TencentCN, AlibabaCN, ByteDanceCN, BaiduCN, NetEaseCN, ChinaDomain, ChinaIP | One contiguous DIRECT run: vendor CN endpoints, curated domestic, generated long tail, authoritative CN ranges |
 | 地区分流 | Japan, US, UK, Europe | Region-bound domains plus each region's IP fallback in one hybrid list; sits after ChinaIP so GeoLite selectors cannot pull CN ranges abroad, with Japan first so `GEOIP,US` cannot capture the LINE/LY CIDRs |
 | 国内兜底 | ChinaTLD | Terminal DIRECT catch-all for `.cn` and the CNNIC IDN ccTLDs; sits after every regional list so each proxy-owned, rejected, or region-owned `.cn` host is already matched. It only recovers hosts that would otherwise fall through FINAL to a remote exit, because `GEOIP,CN` is `no-resolve` and never sees a hostname request |
 | Terminal | LAN, GEOIP CN, FINAL | Built-in safety and unmatched traffic |
@@ -112,7 +111,7 @@ Use the generated active rules and DNS/TUN merge settings in
 [`clash/rule-providers.yaml`](clash/rule-providers.yaml). Do not hand-edit files
 under `clash/`. Replace the matching configuration sections and supply your own
 policy groups; see [Clash DNS and deployment](docs/CLASH.md) for bootstrap,
-platform limitations and validation. `MicrosoftFallback` follows domestic
-exceptions before regional fallback to catch unlisted Microsoft subdomains.
+platform limitations and validation. `MicrosoftCN` precedes `Microsoft`;
+Microsoft first-party suffixes live in `Microsoft.list` itself.
 Upstream provenance is in [SOURCES.md](SOURCES.md); history is
 in [CHANGELOG.md](CHANGELOG.md).

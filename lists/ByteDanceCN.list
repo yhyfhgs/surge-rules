@@ -1,5 +1,7 @@
-# ByteDanceCN — 字节跳动系国内域直连（上游 blackmatrix7 ByteDance）；TikTok 与字节海外域归 TikTok.list
+# ByteDanceCN — 字节跳动系国内域直连（上游 blackmatrix7 ByteDance）；TikTok 与通用字节海外域归 TikTok.list；海外 AI 产品归 AI.list
 # 排序：规则类型分区，区内字母序
+
+DOMAIN,trae-api-cn.mchost.guru
 
 DOMAIN-SUFFIX,2333333333333.com
 DOMAIN-SUFFIX,365yg.com
@@ -66,6 +68,15 @@ DOMAIN-SUFFIX,cdndns1.com
 DOMAIN-SUFFIX,cdndns2.com
 DOMAIN-SUFFIX,changdunovel.com
 DOMAIN-SUFFIX,cookicut.com
+DOMAIN-SUFFIX,coze.cn
+DOMAIN-SUFFIX,cozeapp.net
+DOMAIN-SUFFIX,cozebaas.cn
+DOMAIN-SUFFIX,cozebuild.com
+DOMAIN-SUFFIX,cozecdn.com
+DOMAIN-SUFFIX,cozedeploy.com
+DOMAIN-SUFFIX,cozefn.cn
+DOMAIN-SUFFIX,cozeide.cn
+DOMAIN-SUFFIX,cozesdk.com
 DOMAIN-SUFFIX,csjplatform.com
 DOMAIN-SUFFIX,dailygn.com
 DOMAIN-SUFFIX,dcarapi.com

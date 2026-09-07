@@ -245,7 +245,7 @@
       "file": "MicrosoftCN.list",
       "rule": "DOMAIN,view.officeapps.live.com",
       "by": "DOMAIN-SUFFIX,officeapps.live.com",
-      "reason": "裁决锚点：CHANGELOG 2026-08-31 OneDrive 投毒止血，禁删；行为由 ms_boundary 断言锁定。2026-09-01 批次 3 清理同表冗余时，本条是唯一保留的被覆盖窄条目——它显式记录「office 系 live.com 子树仍 DIRECT」这一与 Microsoft.list 的 onedrive.live.com 窄豁免相对的边界，删掉会让该边界只剩隐式表达。同表同策略，保留无分流代价。"
+      "reason": "保留已验证的 Office 预览端点文档锚点；同表 officeapps.live.com suffix 已覆盖，无额外分流效果。MicrosoftCN 前置，整棵 Office 子树直连。"
     },
     {
       "check": "A9",
@@ -991,8 +991,8 @@
     },
     {
       "pattern": "DOMAIN-SUFFIX,microsoft.com",
-      "reason": "2026-09-07 用户要求补齐厂商 suffix；仅允许在 MicrosoftCN 与所有特例之后的 MicrosoftFallback，analyzer 验证顺序。",
-      "not_file": "MicrosoftFallback.list"
+      "reason": "2026-09-07 用户要求合回 Microsoft，MicrosoftCN 前置，保留直连优先；analyzer 验证顺序。",
+      "not_file": "Microsoft.list"
     },
     {
       "pattern": "DOMAIN-SUFFIX,cloud.microsoft",
@@ -1321,8 +1321,8 @@
     },
     {
       "pattern": "DOMAIN-SUFFIX,live.com",
-      "reason": "2026-09-07 用户要求补齐厂商 suffix；仅允许在 MicrosoftCN 与所有特例之后的 MicrosoftFallback，analyzer 验证顺序。",
-      "not_file": "MicrosoftFallback.list"
+      "reason": "2026-09-07 用户要求合回 Microsoft，MicrosoftCN 前置，保留直连优先；analyzer 验证顺序。",
+      "not_file": "Microsoft.list"
     },
     {
       "pattern": "DOMAIN-SUFFIX,sfx.ms",

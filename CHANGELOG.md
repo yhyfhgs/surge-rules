@@ -4,6 +4,13 @@
 
 ---
 
+## [2026-09-07·微软列表合并] 移除新增 Fallback，MicrosoftCN 优先
+
+- 用户要求不增设厂商 Fallback 表，尽量调整现有列表；进一步明确 MicrosoftCN 全部优先，4 处原代理例外也改为直连。
+- 将 microsoft.com / live.com / office.com / msn.com 合回 Microsoft.list，移除 24 条被宽后缀覆盖的窄规则与 4 条已改为直连的例外；撤销上批新增的 MicrosoftFallback 源表及 Clash 派生表。
+- 现有 MicrosoftCN 前移至 Microsoft 之前，下载仍优先于两者；无新增列表、无内联例外。Surge conf 与 Clash YAML 同源生成 35 个 CDN 列表引用，保持同序同策略。
+- 4,375 条场景断言全部通过（含 1,912 条 DNS 断言），50 个独立归属正负例通过。对既有测试请求逐个比较，只有获准的 4 个端点族产生策略变化；规则总数 142,188。发布完整检查和 CDN 核验结果见执行记录；[变更边界](docs/evidence/2026-09-07-microsoft-merge.md)。
+
 ## [2026-09-07·厂商 suffix 与 Clash DNS] 补齐厂商兜底、Clash 生效配置与无损镜像验证
 
 - 用户确认保留共用策略组及已验证的 YouTube / 下载 / 国内例外，另明确同意整个 googleapis.com（含租户端点）归 Google 网络。

@@ -148,7 +148,7 @@
   },
   {
     "name": "kw_direct_microsoftcn_onedrive_exact",
-    "desc": "OneDrive 国内端点保持 DIRECT；国际控制与数据端点归 Microsoft 组，避免会话跨出口。",
+    "desc": "2026-09-07 列表简化：MicrosoftCN 优先，Office/OneDrive 的四处旧代理例外随所属父域直连；其余请求维持各自既有策略。",
     "requests": [
       {"host": "1drv.ms", "note": "OneDrive 短链"},
       {"host": "1drv.com"},
@@ -156,7 +156,7 @@
       {"host": "api.onedrive.com"},
       {"host": "onedrive.live.com", "note": "R1-01 起由 Microsoft.list（前位）窄豁免认领，不再落 MicrosoftCN 的 live.com"},
       {"host": "skydrive.wns.windows.com", "note": "WNS 推送端点"},
-      {"host": "files.1drv.com", "note": "国际 OneDrive 数据面归 Microsoft owner"},
+      {"host": "files.1drv.com", "note": "2026-09-07 用户确认 MicrosoftCN 优先，归属直连"},
       {"host": "firestonedrivestore.com", "note": "负例：上游 Global 表域，串中含 onedrive"},
       {"host": "51drv.com", "note": "负例：上游 ChinaMax 表域，串中含 1drv"}
     ],
@@ -169,7 +169,7 @@
         {"host": "api.onedrive.com", "policy": "DIRECT", "reason": "DOMAIN-SUFFIX,onedrive.com（新增）"},
         {"host": "onedrive.live.com", "policy": "Google-X-Meta-MS", "reason": "R1-01 在 Microsoft.list（前位）加了 DOMAIN-SUFFIX,onedrive.live.com 窄豁免——CN 侧解析被投毒，直连必挂；与本场景删 keyword 无关"},
         {"host": "skydrive.wns.windows.com", "policy": "DIRECT", "reason": "DOMAIN-SUFFIX,skydrive.wns.windows.com（新增）"},
-        {"host": "files.1drv.com", "policy": "Google-X-Meta-MS", "reason": "OneDrive 数据面与国际控制面统一由 Microsoft.list 认领"},
+        {"host": "files.1drv.com", "policy": "DIRECT", "reason": "2026-09-07 用户确认 MicrosoftCN 优先，归属直连"},
         {"host": "firestonedrivestore.com", "policy": "Final", "reason": "原被 onedrive keyword 强制 DIRECT，属跨境误分流"},
         {"host": "51drv.com", "policy_in": ["Final", "DIRECT"], "reason": "无显式 owner 时落 Final；ChinaDomain 再生后可能按机器层证据回收为 DIRECT。"}
       ]

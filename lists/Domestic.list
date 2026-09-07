@@ -160,15 +160,6 @@ DOMAIN-SUFFIX,coolapkmarket.com
 DOMAIN-SUFFIX,coolapkmarket.net
 DOMAIN-SUFFIX,cowcs.com
 DOMAIN-SUFFIX,cowtransfer.com
-DOMAIN-SUFFIX,coze.cn
-DOMAIN-SUFFIX,cozeapp.net
-DOMAIN-SUFFIX,cozebaas.cn
-DOMAIN-SUFFIX,cozebuild.com
-DOMAIN-SUFFIX,cozecdn.com
-DOMAIN-SUFFIX,cozedeploy.com
-DOMAIN-SUFFIX,cozefn.cn
-DOMAIN-SUFFIX,cozeide.cn
-DOMAIN-SUFFIX,cozesdk.com
 DOMAIN-SUFFIX,cqcbank.com
 DOMAIN-SUFFIX,crl.globalsign.com
 DOMAIN-SUFFIX,crl.sectigo.com
@@ -360,6 +351,7 @@ DOMAIN-SUFFIX,lencr.org
 DOMAIN-SUFFIX,lenovomm.com
 DOMAIN-SUFFIX,letvimg.com
 DOMAIN-SUFFIX,lianjia.com
+DOMAIN-SUFFIX,lingyiwanwu.com
 DOMAIN-SUFFIX,linkedin.cn
 DOMAIN-SUFFIX,ljcdn.com
 DOMAIN-SUFFIX,lkcoffee.com
@@ -398,7 +390,6 @@ DOMAIN-SUFFIX,miui.com
 DOMAIN-SUFFIX,miyoushe.com
 DOMAIN-SUFFIX,mobike.com
 DOMAIN-SUFFIX,mobileservice.cn
-DOMAIN-SUFFIX,modelscope.cn
 DOMAIN-SUFFIX,mojicdn.com
 DOMAIN-SUFFIX,moonshot.cn
 DOMAIN-SUFFIX,msftconnecttest.com
@@ -478,7 +469,6 @@ DOMAIN-SUFFIX,qhres.com
 DOMAIN-SUFFIX,qhres2.com
 DOMAIN-SUFFIX,qhstatic.com
 DOMAIN-SUFFIX,qhupdate.com
-DOMAIN-SUFFIX,qianwen.com
 DOMAIN-SUFFIX,qichacha.com
 DOMAIN-SUFFIX,qihucdn.com
 DOMAIN-SUFFIX,qiku.com
@@ -486,7 +476,6 @@ DOMAIN-SUFFIX,qingcdn.com
 DOMAIN-SUFFIX,qiniu.com
 DOMAIN-SUFFIX,qixin.com
 DOMAIN-SUFFIX,qiyou.cn
-DOMAIN-SUFFIX,qoder.cn
 DOMAIN-SUFFIX,qyer.com
 DOMAIN-SUFFIX,qyerstatic.com
 DOMAIN-SUFFIX,realme.com
@@ -548,7 +537,6 @@ DOMAIN-SUFFIX,tapimg.com
 DOMAIN-SUFFIX,taptap.cn
 DOMAIN-SUFFIX,tianyancha.com
 DOMAIN-SUFFIX,tigerbbs.cn
-DOMAIN-SUFFIX,tongyi.com
 DOMAIN-SUFFIX,tool.lu
 DOMAIN-SUFFIX,tripcdn.cn
 DOMAIN-SUFFIX,tvmao.com

@@ -584,19 +584,20 @@
   },
   {
     "name": "domestic_ai_vendor_intl_to_ai_v2",
-    "desc": "配对任务（R1-24 的一半）：零一万物 01.ai 与 SiliconFlow siliconflow.com 是国内厂商的国际站段，原在 Domestic.list 直连，而同公司的 lingyiwanwu.com 早已判给 AI.list。按 D3 + qwenlm.ai 先例迁入 AI.list；对应 .cn 主域保持直连不动。AI.list 位次先于 Domestic，故本波两侧独立执行、互不等待",
+    "desc": "国内厂商按产品入口区域分流：01.ai / siliconflow.com 国际面保持 AI；lingyiwanwu.com 经 2026-09-07 中文官网与备案复核归 Domestic，siliconflow.cn 保持直连。",
     "requests": [
       {"host": "01.ai"},
       {"host": "api.01.ai", "note": "国际站 API"},
       {"host": "siliconflow.com"},
       {"host": "api.siliconflow.com"},
-      {"host": "lingyiwanwu.com", "note": "同公司域，早已在 AI.list，作为归属一致性对照"},
+      {"host": "lingyiwanwu.com", "note": "中文官网独立按国内服务归属，不由公司其他国际站推导出口"},
       {"host": "siliconflow.cn", "note": "中文主域，刻意保持直连"}
     ],
     "assert": {
       "same_policy": true, "policy": "AI", "no_dns_leak": true,
       "per_request": [
-        {"host": "siliconflow.cn", "policy": "DIRECT"}
+        {"host": "siliconflow.cn", "policy": "DIRECT"},
+        {"host": "lingyiwanwu.com", "policy": "DIRECT"}
       ]
     }
   }

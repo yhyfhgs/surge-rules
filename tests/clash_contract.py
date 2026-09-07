@@ -32,6 +32,16 @@ def main():
         total += len(source)
     assert clash['rules'] == [f"RULE-SET,{r['name']},{r['policy']},no-resolve" for r in manifest] + [
         'GEOIP,lan,DIRECT,no-resolve', 'GEOIP,CN,DIRECT,no-resolve', 'MATCH,Final']
+    # Verify the actual conf's list order and policies, independently of its renderer.
+    from urllib.parse import urlparse
+    actual = []
+    for line in Path(args.conf).read_text().splitlines():
+        parts = line.strip().split(',')
+        if parts[0] == 'RULE-SET' and parts[1] not in ('SYSTEM', 'LAN'):
+            actual.append((Path(urlparse(parts[1]).path).stem, parts[2]))
+    assert actual == [(r['name'], r['policy']) for r in manifest]
+    assert not any('Fallback' in name for name in names)
+    assert names.index('MicrosoftCN') < names.index('Microsoft')
     dns = clash['dns']
     assert dns['enable'] and dns['enhanced-mode'] == 'fake-ip'
     assert not dns['use-system-hosts'] and not dns['use-hosts']
@@ -52,10 +62,11 @@ def main():
         'Meta': ['a.b.facebook.com', 'a.b.fbcdn.net', 'a.b.instagram.com',
                  'a.b.cdninstagram.com', 'a.b.whatsapp.net', 'a.b.meta.ai', 'a.b.threads.com'],
         'Twitter': ['a.b.x.com', 'a.b.twitter.com', 'a.b.twimg.com', 'a.b.t.co', 'a.b.x.ai', 'a.b.grok.com'],
-        'Microsoft': ['outlook.cloud.microsoft', 'a.b.usercontent.microsoft', 'a.b.microsoftonline.com'],
-        'MicrosoftFallback': ['a.b.microsoft.com', 'a.b.live.com', 'a.b.office.com', 'a.b.msn.com'],
+        'Microsoft': ['outlook.cloud.microsoft', 'a.b.usercontent.microsoft', 'a.b.microsoftonline.com', 'a.b.microsoft.com', 'a.b.live.com', 'a.b.office.com', 'a.b.msn.com'],
         'YouTube': ['youtubei.googleapis.com', 'yt3.googleusercontent.com'],
-        'MicrosoftCN': ['download.microsoft.com', 'office.live.com', 'g.live.com'],
+        'MicrosoftCN': ['download.microsoft.com', 'office.live.com', 'g.live.com', 'odc.officeapps.live.com',
+                        'cdn.designerapp.osi.office.net', 'content.office.net',
+                        'support.content.office.net', 'files.1drv.com', 'a.b.files.1drv.com'],
         'DownloadCDN': ['dl.google.com', 'packages.microsoft.com'],
     }
     count = 0

@@ -509,7 +509,7 @@
   },
   {
     "name": "ms_explicit_owner_boundary",
-    "desc": "Microsoft first-party navigation/API namespaces stay with Microsoft while arbitrary Azure tenants and retired HockeyApp fall through to Final.",
+    "desc": "2026-09-07 列表简化：MicrosoftCN 优先，Office/OneDrive 的四处旧代理例外随所属父域直连；其余请求维持各自既有策略。",
     "requests": [
       {"host": "microsoft.com"},
       {"host": "officeclient.microsoft.com"},
@@ -529,7 +529,7 @@
         {"host": "officeclient.microsoft.com", "policy": "Google-X-Meta-MS"},
         {"host": "apis.live.net", "policy": "Google-X-Meta-MS"},
         {"host": "www.onenote.com", "policy": "Google-X-Meta-MS"},
-        {"host": "content.office.net", "policy": "Google-X-Meta-MS"},
+        {"host": "content.office.net", "policy": "DIRECT"},
         {"host": "p.sfx.ms", "policy": "Google-X-Meta-MS"},
         {"host": "sometenant.webpubsub.azure.com", "policy": "Final"},
         {"host": "sometenant.azureedge.net", "policy": "Final"},
@@ -540,7 +540,7 @@
   },
   {
     "name": "ms_explicit_subtrees_intact",
-    "desc": "微软控制/OneDrive 数据端点归 Microsoft owner；独立下载、Azure 监控包与 OpenAI 专属 WebPubSub 保持各自 owner。",
+    "desc": "2026-09-07 列表简化：MicrosoftCN 优先，Office/OneDrive 的四处旧代理例外随所属父域直连；其余请求维持各自既有策略。",
     "requests": [
       {"host": "d.docs.live.net", "note": "OneDrive 数据面与微软控制面同出口"},
       {"host": "contentsync.onenote.com"},
@@ -556,7 +556,7 @@
         {"host": "d.docs.live.net", "policy": "Google-X-Meta-MS"},
         {"host": "contentsync.onenote.com", "policy": "Google-X-Meta-MS"},
         {"host": "hierarchyapi.onenote.com", "policy": "Google-X-Meta-MS"},
-        {"host": "support.content.office.net", "policy": "Google-X-Meta-MS"},
+        {"host": "support.content.office.net", "policy": "DIRECT"},
         {"host": "monitor.azure.com", "policy": "下载"},
         {"host": "pkgs.dev.azure.com", "policy": "下载"},
         {"host": "chatgpt-async-webps-prod-eastus-1.webpubsub.azure.com", "policy": "AI"}
@@ -944,7 +944,7 @@
   },
   {
     "name": "major_vendor_split_boundaries",
-    "desc": "Major vendor cores stay with their owner while explicitly independent AI, media, download, and local endpoints keep their specialized policy.",
+    "desc": "2026-09-07 列表简化：MicrosoftCN 优先，Office/OneDrive 的四处旧代理例外随所属父域直连；其余请求维持各自既有策略。",
     "requests": [
       {"host": "account.adobe.com"},
       {"host": "auth.services.adobe.com"},
@@ -972,7 +972,7 @@
         {"host": "assets.fonts.adobe.com", "policy": "Proxy"},
         {"host": "account.microsoft.com", "policy": "Google-X-Meta-MS"},
         {"host": "api.onenote.com", "policy": "Google-X-Meta-MS"},
-        {"host": "support.content.office.net", "policy": "Google-X-Meta-MS"},
+        {"host": "support.content.office.net", "policy": "DIRECT"},
         {"host": "oneclient.sfx.ms", "policy": "DIRECT"},
         {"host": "api.adguard.com", "policy": "Proxy"},
         {"host": "local.adguard.org", "policy": "DIRECT"},

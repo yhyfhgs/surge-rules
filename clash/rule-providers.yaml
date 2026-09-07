@@ -129,6 +129,13 @@ rule-providers:
     url: https://cdn.jsdelivr.net/gh/yhyfhgs/surge-rules@main/clash/Meta.list
     path: ./rule-sets/surge-rules/Meta.list
     interval: 86400
+  MicrosoftCN:
+    type: http
+    behavior: classical
+    format: text
+    url: https://cdn.jsdelivr.net/gh/yhyfhgs/surge-rules@main/clash/MicrosoftCN.list
+    path: ./rule-sets/surge-rules/MicrosoftCN.list
+    interval: 86400
   Microsoft:
     type: http
     behavior: classical
@@ -199,13 +206,6 @@ rule-providers:
     url: https://cdn.jsdelivr.net/gh/yhyfhgs/surge-rules@main/clash/AppleCN.list
     path: ./rule-sets/surge-rules/AppleCN.list
     interval: 86400
-  MicrosoftCN:
-    type: http
-    behavior: classical
-    format: text
-    url: https://cdn.jsdelivr.net/gh/yhyfhgs/surge-rules@main/clash/MicrosoftCN.list
-    path: ./rule-sets/surge-rules/MicrosoftCN.list
-    interval: 86400
   Domestic:
     type: http
     behavior: classical
@@ -269,13 +269,6 @@ rule-providers:
     url: https://cdn.jsdelivr.net/gh/yhyfhgs/surge-rules@main/clash/ChinaIP.list
     path: ./rule-sets/surge-rules/ChinaIP.list
     interval: 86400
-  MicrosoftFallback:
-    type: http
-    behavior: classical
-    format: text
-    url: https://cdn.jsdelivr.net/gh/yhyfhgs/surge-rules@main/clash/MicrosoftFallback.list
-    path: ./rule-sets/surge-rules/MicrosoftFallback.list
-    interval: 86400
   Japan:
     type: http
     behavior: classical
@@ -323,6 +316,7 @@ rules:
   - RULE-SET,Google,Google-X-Meta-MS,no-resolve
   - RULE-SET,Twitter,Google-X-Meta-MS,no-resolve
   - RULE-SET,Meta,Google-X-Meta-MS,no-resolve
+  - RULE-SET,MicrosoftCN,DIRECT,no-resolve
   - RULE-SET,Microsoft,Google-X-Meta-MS,no-resolve
   - RULE-SET,AI,AI,no-resolve
   - RULE-SET,TikTok,社交媒体,no-resolve
@@ -333,7 +327,6 @@ rules:
   - RULE-SET,Payment,Payment,no-resolve
   - RULE-SET,ProxyGFW,Proxy,no-resolve
   - RULE-SET,AppleCN,DIRECT,no-resolve
-  - RULE-SET,MicrosoftCN,DIRECT,no-resolve
   - RULE-SET,Domestic,DIRECT,no-resolve
   - RULE-SET,ChinaMedia,DIRECT,no-resolve
   - RULE-SET,TencentCN,DIRECT,no-resolve
@@ -343,7 +336,6 @@ rules:
   - RULE-SET,NetEaseCN,DIRECT,no-resolve
   - RULE-SET,ChinaDomain,DIRECT,no-resolve
   - RULE-SET,ChinaIP,DIRECT,no-resolve
-  - RULE-SET,MicrosoftFallback,Google-X-Meta-MS,no-resolve
   - RULE-SET,Japan,🇯🇵日本节点,no-resolve
   - RULE-SET,US,🇺🇸美国节点,no-resolve
   - RULE-SET,UK,🇬🇧英国节点,no-resolve

@@ -41,7 +41,7 @@ and `Reject` precede ordinary routing owners.
 ## Section topology
 
 The manifest groups the lists into contiguous sections (see README for the table):
-局域直连 → 广告/恶意拦截 → 下载 → 代理 → 国内直连 → 微软兜底 → 地区分流 → 国内兜底 →
+局域直连 → 广告/恶意拦截 → 下载 → 服务分流 → 国内直连 → 地区分流 → 国内兜底 →
 built-in LAN / GEOIP,CN / FINAL.
 
 - Download-plane lists precede the service owners because their narrow rules
@@ -131,17 +131,18 @@ for `apple.com` (AppleCN), `aliyuncs.com` (AlibabaCN), `myqcloud.com`,
 `blizzard.com`, `gog.com`, `ubi.com`, `minecraft.net`, `minecraft-services.net`,
 `mojang.com` (Games, download planes in DownloadCDN), `visualstudio.com`,
 `dev.azure.com` (Microsoft), `nhk.jp` (Japan, behind Streaming), `formula1.com`
-(Streaming), `crypto.com` (ProxyGFW), `amazon.co.uk` (UK), `1drv.com`,
-`office.net` (MicrosoftCN), the terminal `cn` catch-all (ChinaTLD), plus the
-non-apex parent `officeapps.live.com` (MicrosoftCN). Because every child sits in
-an earlier list, the `topology.json` constraints are load-bearing: reordering a
+(Streaming), `crypto.com` (ProxyGFW), `amazon.co.uk` (UK),
+`microsoft.com`, `live.com`, `office.com`, `msn.com` (Microsoft), and the terminal
+`cn` catch-all (ChinaTLD). Because every child sits in an earlier list, the `topology.json` constraints are load-bearing: reordering a
 constrained pair silently kills the child.
 
-`MicrosoftFallback` follows the domestic lists and precedes regional fallback.
-Its `microsoft.com`, `live.com`, `office.com` and `msn.com` suffixes catch new
-first-party hosts only after Microsoft, downloads and MicrosoftCN exceptions.
-Keeping Microsoft ahead of MicrosoftCN also preserves the narrow proxy children
-of `1drv.com` and `office.net`. Google now has `google.com`, `googleapis.com`,
+`MicrosoftCN` precedes `Microsoft` in the service section. Microsoft itself owns
+`microsoft.com`, `live.com`, `office.com` and `msn.com`; its existing CN exceptions
+win first. The user approved direct priority for the former `files.1drv.com`,
+`content.office.net`, `cdn.designerapp.osi.office.net` and
+`odc.officeapps.live.com` proxy exceptions. No extra fallback list or inline
+exception is needed. DownloadCDN remains ahead of both lists.
+Google now has `google.com`, `googleapis.com`,
 `googleusercontent.com` and `ggpht.com` parents after YouTube/download exceptions.
 The user explicitly includes Google API tenant traffic by network operator.
 
