@@ -117,18 +117,37 @@ repository.
   entry rather than force every company domain into one policy.
 - Source/Clash contract: 35 providers, 142,205 exact source/provider rules,
   identical manifest order/policies, DNS contract and 73 ownership witnesses.
-- Surge native syntax accepted the candidate; the active profile's generated
-  Rule section already matches the manifest, so this batch does not rewrite it.
+- Surge native syntax accepted the candidate. A post-publication check detected
+  the saved profile had reverted MicrosoftCN behind Microsoft. Restored only the
+  reviewed generated Rule section and reloaded it; all other profile sections
+  were verified unchanged. The final saved profile again matches the manifest.
 - Mihomo native syntax passed with local provider files and neutral proxy
   placeholders. An isolated TUN-disabled instance loaded 35 providers and all
   142,205 rules, returned fake IPv4/IPv6 via UDP and TCP, and returned SERVFAIL
   when its proxy failed instead of falling back to direct DNS.
-- Shape and diff checks passed. The first candidate passed A1–A10 with no
-  P0/P1/P2 and the same three P3 information items, plus full Country/ASN-expanded
-  analysis with no unsafe splits or expired-domain re-entry. The final release
-  runs those gates again against the final lists before pushing.
+- Shape and diff checks passed. The final release passed A1–A10: 142,241 rules
+  including profile/built-in entries, no P0/P1/P2, and the same three P3
+  information items. Full Country/ASN-expanded analysis accounted for all
+  142,205 source rules with no unsafe splits or expired-domain re-entry.
 
-Git push and CDN publication are separate stages. `update.sh` must report its
-verified state; additionally verify all 71 current distribution files and both
-removed MicrosoftFallback paths. A successful local check alone does not mean a
-running client has fetched the new remote resources.
+## Publication and runtime result
+
+Routing release `0fffcbe` was pushed and origin/main SHA verified. Its two
+changed distribution files were purged and both CDN hashes matched. The earlier
+Microsoft release `d0adde3` had already included the first part of this AI batch
+from the shared working tree; this final release completes it without rewriting
+history.
+
+A subsequent full check matched all 71 current distribution files against the
+validated local MD5s. The retired `lists/MicrosoftFallback.list` still returned
+old cached bytes initially; both removed fallback paths were purged again,
+accepted by both jsDelivr providers without throttling, and both then returned
+HTTP 404. Result: **PUBLISHED_AND_VERIFIED**.
+
+All 35 canonical Surge resources were refreshed and reported ready with none
+still updating. Native `surge-cli rule explain` passed 12/12 public policy
+witnesses: CN/international DashScope, Coding Plan, CN/SG TRAE, Zero One, Claude,
+Gemini, HF downloads and three Microsoft DIRECT priority examples. The saved
+private Clash rule order and HTTP provider definitions match the public merge
+file; no running Clash application was available for a client refresh. Native
+Mihomo behavior was verified using the isolated instance described above.
