@@ -4,6 +4,13 @@
 
 ---
 
+## [2026-09-07·AI 上游维护] 固定来源复核与国内外入口归属
+
+- 核对 VPSDance `cc1d596`、blackmatrix7 `5f06cac`、Sukka `81632eb` 的 AI 来源；18 份 revision/SHA-256 输入经 locked fetch 全数验证，登记 `sources.lock.json:ai_review`。裁决与未采用项见 [证据记录](docs/evidence/2026-09-07-ai-upstream.md)。
+- 新增 18 条域名规则、移除跨国内外模型 API 的 `mchost.guru` 宽后缀，净增 17；Claude/OpenAI 专属资产、阿里国际 DashScope/Coding Plan 与 5 个境外 MaaS 区域、TRAE 国际域补齐。国内 TRAE 模型端点归 ByteDanceCN，已实测新加坡端点归 AI。
+- 14 条既有规则迁移 owner：通义/Qoder/ModelScope 与 Coze 国内域回归厂商 CN 表（13 条 DIRECT 不变），零一万物中文官网 `lingyiwanwu.com` 改归 Domestic。大厂 AI 继续原生态策略，国内模型与国际产品入口分别断言；HF 模型下载仍优先「下载」。不导入共享云/托管父域、进程或宽关键词规则。
+- Surge/Clash 共 35 表、142,205 条源规则逐条一致；344 场景 / 2,328 请求 / 4,557 断言全部通过，含 1,999 条 DNS 断言。Clash contract 73 个归属见证通过；Surge/Mihomo 原生语法及隔离 Mihomo 全 provider 加载、双栈 fake-IP、代理失败 DNS 不直连均通过。发布脚本再次执行全量 MMDB 关系审计与 A1–A10，再提交远端、purge 与核验 CDN。
+
 ## [2026-09-07·微软列表合并] 移除新增 Fallback，MicrosoftCN 优先
 
 - 用户要求不增设厂商 Fallback 表，尽量调整现有列表；进一步明确 MicrosoftCN 全部优先，4 处原代理例外也改为直连。

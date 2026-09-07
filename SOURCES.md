@@ -46,3 +46,18 @@ coverage follows its official endpoint guidance. Existing download/direct
 exceptions remain first-match owners. See the
 [dated evidence and official references](docs/evidence/2026-09-07-clash-routing.md).
 No upstream lock or IP allocation data changed.
+
+## 2026-09-07 AI upstream review
+
+Reviewed VPSDance/ai-proxy-rules `cc1d596a6b645986d293bd93f43a3e9ab114f3e8`
+(2026-09-07), blackmatrix7/ios_rule_script
+`5f06cacdb752a951bba8511b25eadde77ebc683c` (2026-09-05), and SukkaW/Surge
+`81632ebcfaa6a2469721d63e7be16639db319f63` (2026-09-05).
+`sources.lock.json:ai_review.inputs` records all 18 revision-addressed input
+files and their SHA-256/size. `fetch_locked.py` verified all 18 against the
+network. This pins review inputs only; hand-curated lists are not claimed to be
+whole-table rebuilds. Existing MIT / GPL-2.0 / AGPL-3.0 provenance applies.
+
+Official Alibaba Cloud regional API documentation and TRAE support evidence
+supplement the upstream lists. See the [decision and validation record](docs/evidence/2026-09-07-ai-upstream.md)
+for accepted entries, domestic/international ownership and deliberate omissions.

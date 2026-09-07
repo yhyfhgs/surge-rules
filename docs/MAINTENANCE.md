@@ -53,6 +53,46 @@ region-specific surface.
 - Prefer `DOMAIN`/`DOMAIN-SUFFIX`; use wildcard/keyword rules only with positive
   and negative witnesses.
 
+## AI upstream review
+
+Review upstream provider groups as candidate evidence, not as routing policies.
+Google, Microsoft/GitHub, Meta and X AI use their existing ecosystem owners.
+Independent international AI and international AI products from CN vendors use
+`AI`; CN products use `Domestic` or the matching CN vendor list. A vendor's
+nationality, a `.com`/`.ai` suffix, or an upstream `scope: cn` flag alone does not
+determine the route. Preserve explicit regional API and download exceptions.
+
+For Model Studio, international DashScope/Coding Plan and documented overseas
+`<region>.maas.aliyuncs.com` serving namespaces precede AlibabaCN. Beijing APIs,
+cloud account/login and cloud consoles retain the AlibabaCN family. Those
+API-key-authenticated regional endpoints are an evidenced regional split, not a
+reason to proxy all `aliyuncs.com` or `alibabacloud.com` traffic.
+
+TRAE's observed `trae-api-cn.mchost.guru` and `trae-api-sg.mchost.guru` endpoints
+belong to ByteDanceCN and AI respectively. Do not restore a blanket
+`mchost.guru` suffix: it crosses regional APIs. Other hosts require evidence.
+Generic ByteDance CDN/telemetry names are shared with non-AI products; upstream
+AI membership alone does not justify moving the whole shared namespace.
+
+Record immutable review inputs in `sources.lock.json` under `ai_review.inputs`,
+then verify them with the existing locked fetcher before using their bytes:
+
+```bash
+python3 - <<'PYLOCK'
+import json
+with open('sources.lock.json') as f:
+    inputs = json.load(f)['ai_review']['inputs']
+with open('/tmp/ai-review.lock.json', 'w') as f:
+    json.dump({'schema_version': 1, 'sources': inputs}, f)
+PYLOCK
+python3 tools/fetch_locked.py --lock /tmp/ai-review.lock.json --network --out /tmp/ai-review-inputs
+```
+
+These pins reproduce the upstream inputs, not the curated destination lists.
+Keep accepted moves, exclusions, regional evidence and actual gate results in a
+dated evidence record. The [2026-09-07 review](evidence/2026-09-07-ai-upstream.md)
+records the current decisions and limits.
+
 ## List sort order
 
 Every `lists/*.list` is stored in one canonical shape, produced and enforced by

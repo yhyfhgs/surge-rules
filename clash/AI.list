@@ -8,7 +8,6 @@ DOMAIN,anthropic-com.ghost.io
 DOMAIN,anthropic.skilljar.com
 DOMAIN,aws-language-servers.us-east-1.amazonaws.com
 DOMAIN,aws-toolkit-language-servers.amazonaws.com
-DOMAIN,bailian.console.alibabacloud.com
 DOMAIN,cdn.usefathom.com
 DOMAIN,chat.openai.com.cdn.cloudflare.net
 DOMAIN,client-telemetry.us-east-1.amazonaws.com
@@ -21,7 +20,6 @@ DOMAIN,dashscope-intl.aliyuncs.com
 DOMAIN,dashscope-us.aliyuncs.com
 DOMAIN,idetoolkits-hostedfiles.amazonaws.com
 DOMAIN,idetoolkits.amazonwebservices.com
-DOMAIN,modelstudio.console.alibabacloud.com
 DOMAIN,oaisidekickupdates.blob.core.windows.net
 DOMAIN,openai-api.arkoselabs.com
 DOMAIN,openai.com.cdn.cloudflare.net

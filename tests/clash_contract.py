@@ -67,6 +67,15 @@ def main():
         'MicrosoftCN': ['download.microsoft.com', 'office.live.com', 'g.live.com', 'odc.officeapps.live.com',
                         'cdn.designerapp.osi.office.net', 'content.office.net',
                         'support.content.office.net', 'files.1drv.com', 'a.b.files.1drv.com'],
+        'AI': ['api.claudemcpclient.com', 'openaiassets.blob.core.windows.net',
+               'dashscope-intl.aliyuncs.com', 'coding-intl.dashscope.aliyuncs.com',
+               'trial.ap-southeast-1.maas.aliyuncs.com', 'trae-api-sg.mchost.guru'],
+        'AlibabaCN': ['qianwen.com', 'tongyi.com', 'qoder.cn', 'modelscope.cn',
+                      'dashscope.aliyuncs.com', 'workspace.cn-beijing.maas.aliyuncs.com',
+                      'bailian.console.alibabacloud.com', 'signin.alibabacloud.com'],
+        'ByteDanceCN': ['coze.cn', 'cozeapp.net', 'cozecdn.com', 'trae-api-cn.mchost.guru'],
+        'Domestic': ['lingyiwanwu.com', 'kimi.com', 'api.minimaxi.com'],
+        'ModelDownloadCDN': ['us.aws.cdn.hf.co', 'cas-bridge.xethub.hf.co'],
         'DownloadCDN': ['dl.google.com', 'packages.microsoft.com'],
     }
     count = 0

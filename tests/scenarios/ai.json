@@ -1262,7 +1262,7 @@
   },
   {
     "name": "ai_refresh_20260907_alibaba_international",
-    "desc": "阿里官方国际地域 API 和控制台必须先于 AlibabaCN 父域匹配；workspace/trial 只覆盖已登记境外区域。",
+    "desc": "阿里官方国际地域 API 必须先于 AlibabaCN 父域匹配；workspace/trial 只覆盖已登记境外区域。云账号与控制台保留厂商规则。",
     "requests": [
       {
         "host": "qwen.ai"
@@ -1284,12 +1284,6 @@
       },
       {
         "host": "cn-hongkong.dashscope.aliyuncs.com"
-      },
-      {
-        "host": "bailian.console.alibabacloud.com"
-      },
-      {
-        "host": "modelstudio.console.alibabacloud.com"
       },
       {
         "host": "workspace.ap-southeast-1.maas.aliyuncs.com"
