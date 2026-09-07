@@ -40,8 +40,8 @@ and `Reject` precede ordinary routing owners.
 
 ## Section topology
 
-The manifest groups the lists into seven sections (see README for the table):
-局域直连 → 广告/恶意拦截 → 下载 → 代理 → 国内直连 → 地区分流 → 国内兜底 →
+The manifest groups the lists into contiguous sections (see README for the table):
+局域直连 → 广告/恶意拦截 → 下载 → 代理 → 国内直连 → 微软兜底 → 地区分流 → 国内兜底 →
 built-in LAN / GEOIP,CN / FINAL.
 
 - Download-plane lists precede the service owners because their narrow rules
@@ -137,6 +137,14 @@ non-apex parent `officeapps.live.com` (MicrosoftCN). Because every child sits in
 an earlier list, the `topology.json` constraints are load-bearing: reordering a
 constrained pair silently kills the child.
 
+`MicrosoftFallback` follows the domestic lists and precedes regional fallback.
+Its `microsoft.com`, `live.com`, `office.com` and `msn.com` suffixes catch new
+first-party hosts only after Microsoft, downloads and MicrosoftCN exceptions.
+Keeping Microsoft ahead of MicrosoftCN also preserves the narrow proxy children
+of `1drv.com` and `office.net`. Google now has `google.com`, `googleapis.com`,
+`googleusercontent.com` and `ggpht.com` parents after YouTube/download exceptions.
+The user explicitly includes Google API tenant traffic by network operator.
+
 ## Zero-local-DNS invariant
 
 1. Domain rules inspect the original host.
@@ -155,9 +163,12 @@ renders into a temporary directory, and atomically replaces generated outputs.
 Unknown rule types abort the transaction. The reference rule sequence in
 `clash/rule-providers.yaml` comes from the same manifest as Surge rendering.
 
-Surge `extended-matching` has no provider-level Mihomo equivalent; Mihomo users
-must enable HTTP/TLS sniffing to get SNI/Host matching for literal-IP
-connections (the contract is spelled out in `clash/rule-providers.yaml`).
+The generated merge file contains active ordered rules, DNS, TUN and sniffing
+settings from `config/mihomo-runtime.yaml`. Unsupported rule types fail closed.
+All provider references prohibit resolution during IP matching. Global sniffing
+approximates Surge `extended-matching`; SYSTEM remains unavailable and terminal
+LAN uses `GEOIP,lan`. See [the Clash contract](CLASH.md) for DNS resolver roles,
+bootstrap exceptions, platform limits and native validation.
 
 ## Verification layers
 

@@ -8,7 +8,6 @@ DOMAIN,api.msn.com
 DOMAIN,catalogartifact.azureedge.net
 DOMAIN,claritystatic.azureedge.net
 DOMAIN,connectcache20.azureedge.net
-DOMAIN,copilot.cloud.microsoft
 DOMAIN,copilotprodattachments.blob.core.windows.net
 DOMAIN,edge-cloud-resource-static.azureedge.net
 DOMAIN,edge-consumer-static.azureedge.net
@@ -20,7 +19,6 @@ DOMAIN,graph.microsoft.com
 DOMAIN,location.microsoft.com
 DOMAIN,login.live.com
 DOMAIN,login.microsoft.com
-DOMAIN,m365.cloud.microsoft
 DOMAIN,microsoft.com
 DOMAIN,mobilecenter.azureedge.net
 DOMAIN,odc.officeapps.live.com
@@ -39,6 +37,7 @@ DOMAIN-SUFFIX,bing.com
 DOMAIN-SUFFIX,bing.net
 DOMAIN-SUFFIX,bingapis.com
 DOMAIN-SUFFIX,cdn.designerapp.osi.office.net
+DOMAIN-SUFFIX,cloud.microsoft
 DOMAIN-SUFFIX,content.office.net
 DOMAIN-SUFFIX,copilot.com
 DOMAIN-SUFFIX,copilot.microsoft.com
@@ -83,5 +82,6 @@ DOMAIN-SUFFIX,prod-streaming-video-msn-com.akamaized.net
 DOMAIN-SUFFIX,skydrive.live.com
 DOMAIN-SUFFIX,skype.com
 DOMAIN-SUFFIX,support.microsoft.com
+DOMAIN-SUFFIX,usercontent.microsoft
 DOMAIN-SUFFIX,visualstudio.com
 DOMAIN-SUFFIX,vscode.dev

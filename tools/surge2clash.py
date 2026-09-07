@@ -16,9 +16,8 @@ The generation is transactional:
 
 Supported rule parameters, including ``no-resolve``, are passed through.
 Trailing comments are removed only after ``" #"`` and with the same delimiter
-as the semantic engine; leading comment lines are kept. ``USER-AGENT`` and
-``URL-REGEX`` are omitted because Mihomo has no matching layer. Unknown types
-fail with the complete list.
+as the semantic engine; leading comment lines are kept. Unsupported or forbidden types fail with the complete list; no source rule
+is silently omitted.
 
 Outputs are one classical file per manifest source plus
 ``rule-providers.yaml`` in manifest order, including policy and ``no-resolve``
@@ -47,9 +46,9 @@ PROVIDERS_NAME = "rule-providers.yaml"
 
 PASSTHROUGH = {
     "DOMAIN", "DOMAIN-SUFFIX", "DOMAIN-KEYWORD", "DOMAIN-WILDCARD",
-    "IP-CIDR", "IP-CIDR6", "GEOIP", "IP-ASN", "PROCESS-NAME",
+    "IP-CIDR", "IP-CIDR6", "GEOIP", "IP-ASN",
 }
-DROP = {"USER-AGENT", "URL-REGEX"}
+DROP = set()  # Never silently omit source rules: unsupported types fail closed.
 
 
 def strip_trailing_comment(s):
@@ -109,39 +108,17 @@ def render_list(name, body, dropped):
 
 
 def render_providers(routing):
-    extended_count = sum(bool(entry.get("extended_matching")) for entry in routing)
+    template = os.path.join(REPO_ROOT, "config", "mihomo-runtime.yaml")
+    with open(template, encoding="utf-8") as handle:
+        runtime = handle.read().rstrip()
     lines = [
-        "# AUTO-GENERATED — Clash Verge Rev 规则集配置（由 tools/surge2clash.py 生成，勿手工编辑）",
-        "# 用法：在 Clash Verge Rev 中对订阅配置使用「Merge」扩展，粘贴本文件的",
-        "# rule-providers 段；再参照文末注释的 rules 序列接入你自己的策略组。",
-        "# 各 provider 与 Surge 同名 .list 一一对应，优先级语义见仓库 README。",
-        "#",
-        "# ─── sniffer 合同（消费端必须履约）───────────────────────────────────────",
-        "# Surge 侧有 %d 张表在 conf 的 RULE-SET 行上开了 extended-matching（含 Payment /" % extended_count,
-        "# AI / Telegram），让规则除域名外**同时匹配 SNI / Host 等扩展信息**，从而接住",
-        "# 「客户端拿着字面量 IP 直连、但握手里带了域名」的连接。",
-        "#",
-        "# 这个开关**provider 携带不了**：它不是规则行上的参数，而是整张表的匹配语义，",
-        "# rule-provider 只承载规则集本身，无处安放它。Clash / Mihomo 侧要取回等价行为，",
-        "# **使用者必须在自己的 config 里显式开启 sniffer**，至少嗅探 TLS SNI 与 HTTP Host",
-        "# （QUIC 亦建议开启，否则 HTTP/3 连接同样拿不到 hostname）。",
-        "#",
-        "# 不配 sniffer **不会报任何错**，只会在上述连接上静默漏匹配：hostname 丢失后，",
-        "# 该连接会跳过全部域名规则，落到 IP 规则或最终的 MATCH 上 —— 这是本派生层最容易",
-        "# 被忽略的一处能力差。",
-        "#",
-        "# 参考最小配置（放在你自己的 config 顶层，不属于本文件的 Merge 内容）：",
-        "#   sniffer:",
-        "#     enable: true",
-        "#     sniff:",
-        "#       HTTP:  { ports: [80, 8080-8880], override-destination: true }",
-        "#       TLS:   { ports: [443, 8443] }",
-        "#       QUIC:  { ports: [443, 8443] }",
-        "#",
-        "# 与它并列的已知能力差另有两条：Surge 内建 SYSTEM 集在 Clash 端无等价物；",
-        "# 内建 LAN 集用 GEOIP,lan 近似。三条都是已知且刻意的取舍，不是 bug。",
-        "# 合同的书面落点有两处：本注释与 docs/ARCHITECTURE.md 的 Clash derivation，改一处必须同步另一处。",
-        "# ────────────────────────────────────────────────────────────────────────",
+        "# AUTO-GENERATED — edit lists/, config/routing.json or config/mihomo-runtime.yaml.",
+        "# Replace the corresponding top-level sections in your private Mihomo config.",
+        "# Supply the manifest policy groups and a Proxy group with a real remote exit.",
+        "# Source rules are lossless; SYSTEM has no portable equivalent; LAN uses GEOIP,lan.",
+        "# Global sniffing approximates Surge extended-matching; it is not identical.",
+        "# See docs/CLASH.md for DNS scope, bootstrap and deployment verification.",
+        runtime,
         "",
         "rule-providers:",
     ]
@@ -157,21 +134,16 @@ def render_providers(routing):
             "    path: ./rule-sets/surge-rules/%s" % name,
             "    interval: 86400",
         ]
-    lines += [
-        "",
-        "# ─── rules 参考序列（与 Surge.conf [Rule] 区逐行同序；取消注释并替换为你的策略组名）───",
-        "# Surge 内置 SYSTEM 集无 Clash 等价物（近似：本机常见系统域自行按需补充）；",
-        "# LAN 集的近似前置规则（置于最前）：",
-        "#  - GEOIP,lan,DIRECT,no-resolve",
-        "# rules:",
-    ]
+    lines += ["", "rules:"]
     for entry in routing:
-        suffix = ",no-resolve" if entry.get("no_resolve") else ""
-        lines.append("#  - RULE-SET,%s,%s%s"
-                     % (entry["name"], entry["policy"], suffix))
+        # Classical providers can contain IP selectors. Never resolve a host
+        # just to test one; Surge's source IP rules have the same invariant.
+        lines.append("  - RULE-SET,%s,%s,no-resolve"
+                     % (entry["name"], entry["policy"]))
     lines += [
-        "#  - GEOIP,CN,DIRECT,no-resolve",
-        "#  - MATCH,Final",
+        "  - GEOIP,lan,DIRECT,no-resolve",
+        "  - GEOIP,CN,DIRECT,no-resolve",
+        "  - MATCH,Final",
     ]
     return "\n".join(lines) + "\n"
 

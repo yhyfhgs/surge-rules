@@ -4,6 +4,14 @@
 
 ---
 
+## [2026-09-07·厂商 suffix 与 Clash DNS] 补齐厂商兜底、Clash 生效配置与无损镜像验证
+
+- 用户确认保留共用策略组及已验证的 YouTube / 下载 / 国内例外，另明确同意整个 googleapis.com（含租户端点）归 Google 网络。
+- Google 112 条窄规则归并为 google.com / googleapis.com / googleusercontent.com / ggpht.com 四个 suffix；Microsoft 补 cloud.microsoft / usercontent.microsoft；新增后置 MicrosoftFallback 四个 suffix，避免遮蔽 MicrosoftCN。Meta / Twitter 主域已是 suffix，新增归属反例验证。
+- Clash 生成器输出生效的 DNS / TUN / sniffer / rules；每个 RULE-SET 带 no-resolve；普通查询 DoH 绑定代理，bootstrap / DIRECT 使用独立加密 DNS；UDP/TCP 53 劫持与双栈 fake-IP。禁止静默丢弃不支持的源规则。
+- 一一对应 **36 表 / 142,216 条**，analyzer 0 遮蔽/顺序冲突；A1–A10 无 P0/P1/P2（3 条现有 P3 提示）；**336 场景 / 4,375 断言**全通过，含 **1,912 条 DNS 断言**；44 个独立归属正负例、3 个转换器回归检查通过。Surge 与 Mihomo 原生语法通过；Mihomo 隔离实例实际加载全部规则，验证 UDP/TCP A/AAAA fake-IP 和代理故障 SERVFAIL。
+- 用户要求本地迁移配置使用 CDN provider，统一引用本仓库分发列表，节点与策略组定义保持原样。未切换运行中的网络配置；系统级防泄漏仍需客户端加载后的抓包证明。详见 [证据与适用范围](docs/evidence/2026-09-07-clash-routing.md)、[Clash 部署约束](docs/CLASH.md)。本批次通过 `update.sh` 执行远端发布和 CDN 核验，实际完成状态见发布结果。
+
 ## [2026-09-02·全表复核与覆盖补录] .cn 直连兜底表 + 上游同步（ChinaIP / ChinaDomain 增量）+ 14 张手工表覆盖补录与属地归位
 
 **动机**:用户指令 —— 检查并更新全部 lists 内容,提高分流质量。方法:先跑全套离线门禁确认基线全绿,再用离线引擎对约 1,300 个主流域名做「落点普查」,把落到 FINAL 的主机按归属决策树逐个裁决;同时核对两张机器层相对上游 pin 的漂移,并用 `surge-cli rule explain` 在运行中的 Surge 上实证关键结论。

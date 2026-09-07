@@ -358,14 +358,14 @@
   },
   {
     "name": "google_colab_notebook",
-    "desc": "Colab control surfaces stay with Google; the path-multiplexed GCS tenant endpoint remains neutral Final.",
+    "desc": "2026-09-07 更新：厂商 suffix 接住未列名子域；既有国内/下载/YouTube 例外保持原落点。",
     "requests": [
       {
         "host": "colab.research.google.com"
       },
       {
         "host": "storage.googleapis.com",
-        "note": "数据集读取"
+        "note": "厂商 suffix 覆盖正例"
       },
       {
         "host": "accounts.google.com"
@@ -381,10 +381,7 @@
           "host": "colab.research.google.com",
           "policy": "Google-X-Meta-MS"
         },
-        {
-          "host": "storage.googleapis.com",
-          "policy": "Final"
-        },
+        {"host": "storage.googleapis.com", "policy": "Google-X-Meta-MS", "reason": "2026-09-07 厂商 suffix 兜底，保留前位下载/国内/YouTube 例外。"},
         {
           "host": "accounts.google.com",
           "policy": "Google-X-Meta-MS"

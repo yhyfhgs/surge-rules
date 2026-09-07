@@ -228,8 +228,8 @@ class AdversarialClashSyncTest(unittest.TestCase):
         self.assertEqual(surge2clash.strip_trailing_comment("DOMAIN,foo.com"), "DOMAIN,foo.com")
         self.assertEqual(surge2clash.strip_trailing_comment("DOMAIN,foo.com#not_a_comment"), "DOMAIN,foo.com#not_a_comment")
 
-    def test_drop_types_filtering(self):
-        """Test that USER-AGENT and URL-REGEX are counted in dropped dictionary."""
+    def test_unsupported_types_fail_closed(self):
+        """Unsupported types must be rejected, never silently removed from the mirror."""
         with tempfile.TemporaryDirectory(prefix="clash-drop-") as tmp:
             list_file = Path(tmp) / "DropTest.list"
             list_file.write_text("USER-AGENT,*Spotify*\nURL-REGEX,^https://api\\.example\\.com\nDOMAIN,valid.com\n", encoding="utf-8")
@@ -239,9 +239,8 @@ class AdversarialClashSyncTest(unittest.TestCase):
                 surge2clash.RULES_DIR = str(tmp)
                 body, kept, dropped, unknown = surge2clash.convert_file("DropTest.list")
                 self.assertEqual(kept, 1)
-                self.assertEqual(dropped.get("USER-AGENT"), 1)
-                self.assertEqual(dropped.get("URL-REGEX"), 1)
-                self.assertEqual(len(unknown), 0)
+                self.assertEqual(dropped, {})
+                self.assertEqual({row[2] for row in unknown}, {"USER-AGENT", "URL-REGEX"})
             finally:
                 surge2clash.RULES_DIR = saved_dir
 

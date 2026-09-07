@@ -1,0 +1,10 @@
+# AUTO-GENERATED — Clash(Mihomo) classical 规则，由 ../lists/MicrosoftFallback.list 派生
+# 勿手工编辑；修改 Surge 源后运行 python3 tools/surge2clash.py 重新生成
+
+# Microsoft first-party suffix fallback, AFTER MicrosoftCN and all specific owners.
+# Keep Microsoft.list ahead of MicrosoftCN for OneDrive/Office narrow proxy exceptions.
+
+DOMAIN-SUFFIX,live.com
+DOMAIN-SUFFIX,microsoft.com
+DOMAIN-SUFFIX,msn.com
+DOMAIN-SUFFIX,office.com

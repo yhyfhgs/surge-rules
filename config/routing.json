@@ -31,6 +31,7 @@
     {"name": "NetEaseCN", "policy": "DIRECT", "section": "国内直连"},
     {"name": "ChinaDomain", "policy": "DIRECT", "section": "国内直连"},
     {"name": "ChinaIP", "policy": "DIRECT", "no_resolve": true, "section": "国内直连"},
+    {"name": "MicrosoftFallback", "policy": "Google-X-Meta-MS", "extended_matching": true, "section": "微软兜底"},
     {"name": "Japan", "policy": "🇯🇵日本节点", "section": "地区分流"},
     {"name": "US", "policy": "🇺🇸美国节点", "section": "地区分流"},
     {"name": "UK", "policy": "🇬🇧英国节点", "section": "地区分流"},

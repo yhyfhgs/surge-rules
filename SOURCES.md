@@ -37,3 +37,12 @@
 - 上表末两行的 PSL / IANA 快照**不是规则上游**,不参与 `lists/` 的任何内容,只作 `tests/audit.py` A10 的离线判据;它们是本仓库唯一逐字节锁定并入库的外部数据。
 - 各上游版权归原作者,遵循其各自仓库的 LICENSE。本仓库对上游内容做了裁剪、重组、去重与归属重裁,**不保证与任一上游语义等同**;上游的收录裁决与本库的偏离逐条登记在 CHANGELOG.md 日期条目与 tests/allowlist.json 的 forbidden 段。
 - 本仓库自身尚未声明 LICENSE(同一报告 §13.7 同批建议,待裁决)。
+
+## 2026-09-07 manual suffix policy update
+
+The Google API namespace expansion is an explicit user routing decision,
+including tenant traffic, not an upstream list refresh. Microsoft unified-domain
+coverage follows its official endpoint guidance. Existing download/direct
+exceptions remain first-match owners. See the
+[dated evidence and official references](docs/evidence/2026-09-07-clash-routing.md).
+No upstream lock or IP allocation data changed.

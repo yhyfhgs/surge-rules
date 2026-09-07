@@ -163,6 +163,7 @@ These constrain the active profile, which lives outside this repository:
 ```bash
 python3 tools/surge2clash.py
 python3 tools/surge2clash.py --check
+python3 tests/clash_contract.py --conf /tmp/Surge.candidate.conf  # PyYAML required
 ./update.sh "describe the routing change"
 ```
 
@@ -206,7 +207,9 @@ be "resolved" by a syntax-only change.
 | `Streaming` IP surface | Whether every CIDR still belongs to a streaming provider, and whether any range should move to a regional or service owner | Real traffic capture plus a shadow-routing comparison against the live profile |
 | OneDrive data plane | How deep `1drv.com` / `livefilestore.com` / `microsoftpersonalcontent.com` should be owned by `MicrosoftCN` versus `Microsoft`, given the poisoning stopgap | Connectivity measurement from a CN vantage point on both exits |
 
-Microsoft session-face normalization is a third open item: `microsoft.com`,
-`live.com`, `msn.com`, and `office.com` keep their mixed exact/suffix shape
-because the `ms_boundary_*` scenarios in `tests/scenarios/services.json` lock
-the current boundary. Changing it needs new connectivity evidence.
+Microsoft suffix fallback was approved on 2026-09-07 with existing direct and
+download exceptions preserved. Keep `MicrosoftFallback` after MicrosoftCN and
+all other specific owners; keep Microsoft before MicrosoftCN to preserve its
+narrow OneDrive/Office proxy exceptions. New first-party hosts under the four
+fallback parents now use the Microsoft policy; this does not certify endpoint
+connectivity or settle the OneDrive data-plane decision above.

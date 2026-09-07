@@ -440,7 +440,7 @@
   },
   {
     "name": "funnel_google_api_endpoints_and_cn_mirror",
-    "desc": "§2 R3a/R3d/R3e：googleapis.com 是共享 API 租户命名空间（allowlist forbidden 段锁死整段后缀），因此以显式服务端点形态收编 android/fcm/play/safebrowsing 四条，并补齐 clients1–5.google.com；googleapis.cn 与 google.cn 同侧直连。YouTube(6) 的 youtubei/youtube/jnn-pa 前置占位不受影响。",
+    "desc": "2026-09-07 更新：厂商 suffix 接住未列名子域；既有国内/下载/YouTube 例外保持原落点。",
     "requests": [
       {"host": "android.googleapis.com"},
       {"host": "fcm.googleapis.com"},
@@ -458,7 +458,7 @@
       {"host": "youtubei.googleapis.com", "note": "前置占位负例：YouTube"},
       {"host": "youtube.googleapis.com"},
       {"host": "jnn-pa.googleapis.com"},
-      {"host": "storage.googleapis.com", "note": "锁定负例：共享租户命名空间不整段收编，保持 FINAL"}
+      {"host": "storage.googleapis.com", "note": "厂商 suffix 覆盖正例"}
     ],
     "assert": {
       "no_dns_leak": true,
@@ -479,7 +479,7 @@
         {"host": "youtubei.googleapis.com", "policy": "流媒体", "reason": "前置占位：YouTube.list"},
         {"host": "youtube.googleapis.com", "policy": "流媒体", "reason": "前置占位：YouTube.list"},
         {"host": "jnn-pa.googleapis.com", "policy": "流媒体", "reason": "前置占位：YouTube.list"},
-        {"host": "storage.googleapis.com", "policy": "Final", "reason": "锁定裁决：googleapis.com 为共享 API/租户命名空间，只认领显式端点"}
+        {"host": "storage.googleapis.com", "policy": "Google-X-Meta-MS", "reason": "2026-09-07 厂商 suffix 兜底，保留前位下载/国内/YouTube 例外。"}
       ]
     }
   },
@@ -665,7 +665,7 @@
   },
   {
     "name": "funnel_deferred_apexes_unchanged",
-    "desc": "本批次判据未通过、按 §0.2 不升级的顶点，全部保持原有精确形态与落点：qcloud.com（ProxyGFW 持后置 shortconn.im.qcloud.com）、mi.com（ProxyGFW 持后置 c.mi.com）、naver.com（Streaming 持后置 tv.naver.com）、azure.com（Streaming/DownloadCDN 共 5 条后置异策略子项）、longbridge.cn / microsoft.com / live.com / msn.com / office.com（锁定裁决或留用户决策）。该场景是这些顶点的回归护栏。",
+    "desc": "2026-09-07 更新：厂商 suffix 接住未列名子域；既有国内/下载/YouTube 例外保持原落点。",
     "requests": [
       {"host": "qcloud.com"},
       {"host": "unknown.qcloud.com"},
@@ -681,13 +681,13 @@
       {"host": "ai.azure.com"},
       {"host": "pkgs.dev.azure.com"},
       {"host": "microsoft.com"},
-      {"host": "unknown.microsoft.com"},
+      {"host": "unknown.microsoft.com", "note": "厂商 suffix 覆盖正例"},
       {"host": "live.com"},
-      {"host": "unknown.live.com"},
+      {"host": "unknown.live.com", "note": "厂商 suffix 覆盖正例"},
       {"host": "msn.com"},
-      {"host": "unknown.msn.com"},
+      {"host": "unknown.msn.com", "note": "厂商 suffix 覆盖正例"},
       {"host": "office.com"},
-      {"host": "unknown.office.com"}
+      {"host": "unknown.office.com", "note": "厂商 suffix 覆盖正例"}
     ],
     "assert": {
       "no_dns_leak": true,
@@ -706,13 +706,13 @@
         {"host": "ai.azure.com", "policy": "Google-X-Meta-MS", "reason": "2026-09-02 自 Streaming 迁入 Microsoft（Azure AI Foundry 是微软控制面）；作为 azure.com 的后置异策略子项它仍然存在，apex 继续不升级"},
         {"host": "pkgs.dev.azure.com", "policy": "下载", "reason": "DownloadCDN 后置条目"},
         {"host": "microsoft.com", "policy": "Google-X-Meta-MS", "reason": "会话面归一留用户决策，顶点形态不变"},
-        {"host": "unknown.microsoft.com", "policy": "Final", "reason": "未升级"},
+        {"host": "unknown.microsoft.com", "policy": "Google-X-Meta-MS", "reason": "2026-09-07 厂商 suffix 兜底，保留前位下载/国内/YouTube 例外。"},
         {"host": "live.com", "policy": "DIRECT", "reason": "MicrosoftCN 既有混合形态不变"},
-        {"host": "unknown.live.com", "policy": "Final", "reason": "未升级"},
+        {"host": "unknown.live.com", "policy": "Google-X-Meta-MS", "reason": "2026-09-07 厂商 suffix 兜底，保留前位下载/国内/YouTube 例外。"},
         {"host": "msn.com", "policy": "DIRECT", "reason": "MicrosoftCN 既有混合形态不变"},
-        {"host": "unknown.msn.com", "policy": "Final", "reason": "未升级"},
+        {"host": "unknown.msn.com", "policy": "Google-X-Meta-MS", "reason": "2026-09-07 厂商 suffix 兜底，保留前位下载/国内/YouTube 例外。"},
         {"host": "office.com", "policy": "DIRECT", "reason": "MicrosoftCN 既有混合形态不变"},
-        {"host": "unknown.office.com", "policy": "Final", "reason": "未升级"}
+        {"host": "unknown.office.com", "policy": "Google-X-Meta-MS", "reason": "2026-09-07 厂商 suffix 兜底，保留前位下载/国内/YouTube 例外。"}
       ]
     }
   },

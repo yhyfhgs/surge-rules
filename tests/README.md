@@ -191,3 +191,18 @@ AI 归各自生态（Gemini → Google、Grok → Twitter、Meta AI → Meta）�
 `IP-ASN` 用内置小表、`RULE-SET,SYSTEM`/`LAN` 用内置近似（`--crosscheck` 发现漏项
 按在线为准补进 `BUILTIN_SYSTEM_DOMAINS`）；要 MMDB 展开用
 `tools/analyze_rules.py --country-db/--asn-db`。
+
+## Clash 一致性与 DNS 合同检查
+
+在装有 PyYAML 的 Python 环境运行：
+
+```bash
+python3 tests/clash_contract.py --conf /tmp/Surge.candidate.conf
+python3 tests/adversarial_analyze_rules_test.py AdversarialClashSyncTest
+```
+
+逐条比较源表和 Clash payload、manifest 顺序、所有 provider 的 no-resolve，
+验证 DNS 配置路径，以及厂商 suffix 的真实 owner（不能只看共用策略组）。
+Mihomo 原生加载与 DNS 隔离测试的本批次结果见
+[2026-09-07 证据](../docs/evidence/2026-09-07-clash-routing.md)。
+语法通过不代表规则集初始化完成；必须确认实际 provider 计数并备齐真实 ASN/Country 数据库。

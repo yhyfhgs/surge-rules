@@ -307,7 +307,7 @@
       "check": "A10",
       "file": "Google.list",
       "kind": "psl-private",
-      "reason": "A10 baseline: 12 Google-operated PSL PRIVATE namespaces remain intentional. The shared googleapis.com parent is explicitly forbidden and no longer part of this exemption.",
+      "reason": "Google-operated namespaces; 2026-09-07 user explicitly includes googleapis.com tenant traffic by network operator, not content ownership.",
       "rule": "*"
     },
     {
@@ -414,7 +414,8 @@
     },
     {
       "pattern": "DOMAIN-SUFFIX,googleapis.com",
-      "reason": "googleapis.com is a shared API/tenant namespace; only explicit provider and service endpoints may be owned."
+      "reason": "2026-09-07 用户明确要求整个 googleapis.com 按 Google 网络归类（含 GCP 租户），保留前位 YouTube 例外。",
+      "not_file": "Google.list"
     },
     {
       "pattern": "DOMAIN-SUFFIX,addons.mozilla.org",
@@ -990,11 +991,13 @@
     },
     {
       "pattern": "DOMAIN-SUFFIX,microsoft.com",
-      "reason": "microsoft.com 下已按端点分属 Microsoft、MicrosoftCN 与 DownloadCDN；宽后缀会遮蔽 MicrosoftCN 当前 45 条可直连子树。Microsoft 只收明确主机/子树，任何表都不得恢复父后缀。"
+      "reason": "2026-09-07 用户要求补齐厂商 suffix；仅允许在 MicrosoftCN 与所有特例之后的 MicrosoftFallback，analyzer 验证顺序。",
+      "not_file": "MicrosoftFallback.list"
     },
     {
       "pattern": "DOMAIN-SUFFIX,cloud.microsoft",
-      "reason": "§8 裁决入表（R2-4 / W7-T02，34 条禁收缺口）：Microsoft —— cloud.microsoft 是微软新的 M365 统一域，整域收录会把国内可直连的部分一并带走；只以 DOMAIN 精确形收具体主机（copilot./m365. 已在表内）。"
+      "reason": "2026-09-07 按官方 Microsoft 365 统一域文档归 Microsoft；当前无国内子域例外，未来新增须验证顺序。",
+      "not_file": "Microsoft.list"
     },
     {
       "pattern": "DOMAIN-SUFFIX,revolut.com",
@@ -1318,7 +1321,8 @@
     },
     {
       "pattern": "DOMAIN-SUFFIX,live.com",
-      "reason": "live.com 下已按精确主机/子树拆分：onedrive.live.com / skydrive.live.com 归 Microsoft，office.live.com 与其他已验证主机归 MicrosoftCN。任何表恢复宽 live.com 后缀都会消除这个显式边界。"
+      "reason": "2026-09-07 用户要求补齐厂商 suffix；仅允许在 MicrosoftCN 与所有特例之后的 MicrosoftFallback，analyzer 验证顺序。",
+      "not_file": "MicrosoftFallback.list"
     },
     {
       "pattern": "DOMAIN-SUFFIX,sfx.ms",

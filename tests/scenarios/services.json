@@ -109,11 +109,11 @@
   },
   {
     "name": "google_api_owner_boundaries",
-    "desc": "Explicit Google and YouTube API hosts retain their owner; the shared GCS tenant endpoint remains Final.",
+    "desc": "2026-09-07 更新：厂商 suffix 接住未列名子域；既有国内/下载/YouTube 例外保持原落点。",
     "requests": [
       {"host": "lh3.googleusercontent.com", "note": "Google 相册/头像通用 CDN，必须仍归 Google 组"},
       {"host": "www.googleapis.com", "note": "Google API 主入口"},
-      {"host": "storage.googleapis.com"},
+      {"host": "storage.googleapis.com", "note": "厂商 suffix 覆盖正例"},
       {"host": "tenant-project.googleapis.com"}
     ],
     "assert": {
@@ -121,8 +121,8 @@
       "per_request": [
         {"host": "lh3.googleusercontent.com", "policy": "Google-X-Meta-MS"},
         {"host": "www.googleapis.com", "policy": "Google-X-Meta-MS"},
-        {"host": "storage.googleapis.com", "policy": "Final"},
-        {"host": "tenant-project.googleapis.com", "policy": "Final"}
+        {"host": "storage.googleapis.com", "policy": "Google-X-Meta-MS", "reason": "2026-09-07 厂商 suffix 兜底，保留前位下载/国内/YouTube 例外。"},
+        {"host": "tenant-project.googleapis.com", "policy": "Google-X-Meta-MS"}
       ]
     }
   },
@@ -231,7 +231,7 @@
   },
   {
     "name": "google_cdn_youtube_and_apex_boundaries",
-    "desc": "保留 Google、googleusercontent、ggpht apex DOMAIN；lh1-lh6 通用图片 CDN 归 Google，yt3/yt4 仍由 YouTube.list 认领，未知子域落 FINAL。",
+    "desc": "2026-09-07 更新：厂商 suffix 接住未列名子域；既有国内/下载/YouTube 例外保持原落点。",
     "requests": [
       {"host": "google.com"},
       {"host": "googleusercontent.com"},
@@ -252,35 +252,35 @@
       {"host": "yt4.googleusercontent.com"},
       {"host": "yt3.ggpht.com"},
       {"host": "yt4.ggpht.com"},
-      {"host": "unknown.google.com"},
-      {"host": "unknown.googleusercontent.com"},
+      {"host": "unknown.google.com", "note": "厂商 suffix 覆盖正例"},
+      {"host": "unknown.googleusercontent.com", "note": "厂商 suffix 覆盖正例"},
       {"host": "unknown.ggpht.com"}
     ],
     "assert": {
       "no_dns_leak": true,
       "per_request": [
-        {"host": "google.com", "policy": "Google-X-Meta-MS", "reason": "保留 DOMAIN,google.com apex"},
-        {"host": "googleusercontent.com", "policy": "Google-X-Meta-MS", "reason": "保留 DOMAIN,googleusercontent.com apex"},
-        {"host": "ggpht.com", "policy": "Google-X-Meta-MS", "reason": "保留 DOMAIN,ggpht.com apex"},
-        {"host": "lh1.googleusercontent.com", "policy": "Google-X-Meta-MS", "reason": "DOMAIN-SUFFIX,lh1.googleusercontent.com"},
-        {"host": "lh2.googleusercontent.com", "policy": "Google-X-Meta-MS", "reason": "DOMAIN-SUFFIX,lh2.googleusercontent.com"},
-        {"host": "lh3.googleusercontent.com", "policy": "Google-X-Meta-MS", "reason": "DOMAIN-SUFFIX,lh3.googleusercontent.com"},
-        {"host": "lh4.googleusercontent.com", "policy": "Google-X-Meta-MS", "reason": "DOMAIN-SUFFIX,lh4.googleusercontent.com"},
-        {"host": "lh5.googleusercontent.com", "policy": "Google-X-Meta-MS", "reason": "DOMAIN-SUFFIX,lh5.googleusercontent.com"},
-        {"host": "lh6.googleusercontent.com", "policy": "Google-X-Meta-MS", "reason": "DOMAIN-SUFFIX,lh6.googleusercontent.com"},
-        {"host": "lh1.ggpht.com", "policy": "Google-X-Meta-MS", "reason": "DOMAIN-SUFFIX,lh1.ggpht.com"},
-        {"host": "lh2.ggpht.com", "policy": "Google-X-Meta-MS", "reason": "DOMAIN-SUFFIX,lh2.ggpht.com"},
-        {"host": "lh3.ggpht.com", "policy": "Google-X-Meta-MS", "reason": "DOMAIN-SUFFIX,lh3.ggpht.com"},
-        {"host": "lh4.ggpht.com", "policy": "Google-X-Meta-MS", "reason": "DOMAIN-SUFFIX,lh4.ggpht.com"},
-        {"host": "lh5.ggpht.com", "policy": "Google-X-Meta-MS", "reason": "DOMAIN-SUFFIX,lh5.ggpht.com"},
-        {"host": "lh6.ggpht.com", "policy": "Google-X-Meta-MS", "reason": "DOMAIN-SUFFIX,lh6.ggpht.com"},
+        {"host": "google.com", "policy": "Google-X-Meta-MS", "reason": "DOMAIN-SUFFIX,google.com 覆盖 apex 与子域"},
+        {"host": "googleusercontent.com", "policy": "Google-X-Meta-MS", "reason": "DOMAIN-SUFFIX,googleusercontent.com 覆盖 apex 与子域"},
+        {"host": "ggpht.com", "policy": "Google-X-Meta-MS", "reason": "DOMAIN-SUFFIX,ggpht.com 覆盖 apex 与子域"},
+        {"host": "lh1.googleusercontent.com", "policy": "Google-X-Meta-MS", "reason": "DOMAIN-SUFFIX,googleusercontent.com"},
+        {"host": "lh2.googleusercontent.com", "policy": "Google-X-Meta-MS", "reason": "DOMAIN-SUFFIX,googleusercontent.com"},
+        {"host": "lh3.googleusercontent.com", "policy": "Google-X-Meta-MS", "reason": "DOMAIN-SUFFIX,googleusercontent.com"},
+        {"host": "lh4.googleusercontent.com", "policy": "Google-X-Meta-MS", "reason": "DOMAIN-SUFFIX,googleusercontent.com"},
+        {"host": "lh5.googleusercontent.com", "policy": "Google-X-Meta-MS", "reason": "DOMAIN-SUFFIX,googleusercontent.com"},
+        {"host": "lh6.googleusercontent.com", "policy": "Google-X-Meta-MS", "reason": "DOMAIN-SUFFIX,googleusercontent.com"},
+        {"host": "lh1.ggpht.com", "policy": "Google-X-Meta-MS", "reason": "DOMAIN-SUFFIX,ggpht.com"},
+        {"host": "lh2.ggpht.com", "policy": "Google-X-Meta-MS", "reason": "DOMAIN-SUFFIX,ggpht.com"},
+        {"host": "lh3.ggpht.com", "policy": "Google-X-Meta-MS", "reason": "DOMAIN-SUFFIX,ggpht.com"},
+        {"host": "lh4.ggpht.com", "policy": "Google-X-Meta-MS", "reason": "DOMAIN-SUFFIX,ggpht.com"},
+        {"host": "lh5.ggpht.com", "policy": "Google-X-Meta-MS", "reason": "DOMAIN-SUFFIX,ggpht.com"},
+        {"host": "lh6.ggpht.com", "policy": "Google-X-Meta-MS", "reason": "DOMAIN-SUFFIX,ggpht.com"},
         {"host": "yt3.googleusercontent.com", "policy": "流媒体", "reason": "YouTube.list 的 yt3 精确归属优先于 Google"},
         {"host": "yt4.googleusercontent.com", "policy": "流媒体", "reason": "YouTube.list 的 yt4 精确归属优先于 Google"},
         {"host": "yt3.ggpht.com", "policy": "流媒体", "reason": "YouTube.list 的 yt3 精确归属优先于 Google"},
         {"host": "yt4.ggpht.com", "policy": "流媒体", "reason": "YouTube.list 的 yt4 精确归属优先于 Google"},
-        {"host": "unknown.google.com", "policy": "Final", "reason": "apex DOMAIN 不扩展到未知子域"},
-        {"host": "unknown.googleusercontent.com", "policy": "Final", "reason": "apex DOMAIN 不扩展到未知子域"},
-        {"host": "unknown.ggpht.com", "policy": "Final", "reason": "apex DOMAIN 不扩展到未知子域"}
+        {"host": "unknown.google.com", "policy": "Google-X-Meta-MS", "reason": "2026-09-07 厂商 suffix 兜底，保留前位下载/国内/YouTube 例外。"},
+        {"host": "unknown.googleusercontent.com", "policy": "Google-X-Meta-MS", "reason": "2026-09-07 厂商 suffix 兜底，保留前位下载/国内/YouTube 例外。"},
+        {"host": "unknown.ggpht.com", "policy": "Google-X-Meta-MS", "reason": "2026-09-07 通用 suffix 接住新子域"}
       ]
     }
   },
@@ -987,7 +987,7 @@
   },
   {
     "name": "google_product_faces_backfill_20260902",
-    "desc": "2026-09-02 覆盖补录：Google 产品面继续走显式子树（不引入 google.com apex，unknown.google.com 仍落 FINAL 的裁决不变）。补录此前落 FINAL 的 Cloud / Firebase / Scholar / Developers / Fonts / One / Pay / Takeout / Admin / Chrome Web Store 等子树，以及 Firebase Auth / Firestore / Chrome 更新的 googleapis 显式端点；dl.google.com 作为批量下载面归 DownloadCDN。",
+    "desc": "2026-09-07 更新：厂商 suffix 接住未列名子域；既有国内/下载/YouTube 例外保持原落点。",
     "requests": [
       {"host": "cloud.google.com"},
       {"host": "console.cloud.google.com"},
@@ -1005,15 +1005,15 @@
       {"host": "securetoken.googleapis.com", "note": "Firebase Auth token"},
       {"host": "update.googleapis.com", "note": "Chrome 组件更新"},
       {"host": "clients2.googleusercontent.com", "note": "Chrome 扩展 CRX 下载"},
-      {"host": "unknown.google.com", "note": "负例：apex 不扩展到未知子域的裁决不变"},
-      {"host": "storage.googleapis.com", "note": "负例：GCS 租户端点仍不认领"},
+      {"host": "unknown.google.com", "note": "厂商 suffix 覆盖正例"},
+      {"host": "storage.googleapis.com", "note": "厂商 suffix 覆盖正例"},
       {"host": "dl.google.com", "note": "负例：批量下载面归 DownloadCDN"}
     ],
     "assert": {
       "same_policy": true, "policy": "Google-X-Meta-MS", "no_dns_leak": true,
       "per_request": [
-        {"host": "unknown.google.com", "policy": "Final", "reason": "显式子树设计：未知 google.com 子域仍落 FINAL"},
-        {"host": "storage.googleapis.com", "policy": "Final", "reason": "googleapis.com 共享租户命名空间，只认领显式端点"},
+        {"host": "unknown.google.com", "policy": "Google-X-Meta-MS", "reason": "2026-09-07 厂商 suffix 兜底，保留前位下载/国内/YouTube 例外。"},
+        {"host": "storage.googleapis.com", "policy": "Google-X-Meta-MS", "reason": "2026-09-07 厂商 suffix 兜底，保留前位下载/国内/YouTube 例外。"},
         {"host": "dl.google.com", "policy": "下载", "reason": "Chrome / Android SDK 安装包批量下载面，DownloadCDN 先于 Google"}
       ]
     }
