@@ -163,7 +163,7 @@
       {"ip": "159.89.0.1", "note": "DigitalOcean 段样本；实测落 🇪🇺欧洲节点(GEOIP DE)"},
       {"ip": "45.32.0.1", "note": "Vultr 段样本；实测落 🇺🇸美国节点(GEOIP US)"}
     ],
-    "assert": {"policy_in": ["AI", "Final", "🇪🇺欧洲节点", "🇺🇸美国节点"], "no_dns_leak": true}
+    "assert": {"policy_in": ["AI", "Final", "🇪🇺欧洲", "🇺🇸美国"], "no_dns_leak": true}
   },
   {
     "name": "campus_and_gov_direct",
@@ -428,7 +428,7 @@
   },
   {
     "name": "funnel_microsoft_global_session_faces",
-    "desc": "§3 Microsoft(10) 补录：graph / teams / login.microsoft.com 三条全球会话与 API 面，与既有 login.microsoftonline.com、account.microsoft.com 同侧；不改动 microsoft.com 顶点的精确形态（会话面归一留待连通性实测）。",
+    "desc": "2026-09-12 更新：共享登录已按用户要求直连，其余服务面保持原策略。历史背景：§3 Microsoft(10) 补录：graph / teams / login.microsoft.com 三条全球会话与 API 面，与既有 login.microsoftonline.com、account.microsoft.com 同侧；不改动 microsoft.com 顶点的精确形态（会话面归一留待连通性实测）。",
     "requests": [
       {"host": "graph.microsoft.com"},
       {"host": "teams.microsoft.com"},
@@ -436,7 +436,10 @@
       {"host": "login.microsoftonline.com"},
       {"host": "account.microsoft.com"}
     ],
-    "assert": {"same_policy": true, "policy": "Google-X-Meta-MS", "no_dns_leak": true}
+    "assert": {"same_policy": true, "policy": "Google-X-Meta-MS", "no_dns_leak": true, "per_request": [
+        {"host": "login.microsoft.com", "policy": "DIRECT", "reason": "2026-09-12 用户确认共享登录也直连"},
+        {"host": "login.microsoftonline.com", "policy": "DIRECT", "reason": "2026-09-12 用户确认共享登录也直连"}
+    ]}
   },
   {
     "name": "funnel_google_api_endpoints_and_cn_mirror",
@@ -594,21 +597,21 @@
     "assert": {
       "no_dns_leak": true,
       "per_request": [
-        {"host": "bild.de", "policy": "🇪🇺欧洲节点", "reason": "德国本地媒体"},
-        {"host": "ndr.de", "policy": "🇪🇺欧洲节点", "reason": "德国公共广播"},
-        {"host": "otto.de", "policy": "🇪🇺欧洲节点", "reason": "德国电商"},
-        {"host": "sueddeutsche.de", "policy": "🇪🇺欧洲节点", "reason": "德国本地媒体"},
-        {"host": "welt.de", "policy": "🇪🇺欧洲节点", "reason": "德国本地媒体"},
-        {"host": "mail.ru", "policy": "🇪🇺欧洲节点", "reason": "俄语平台，与在册 yandex.ru 同表"},
-        {"host": "ok.ru", "policy": "🇪🇺欧洲节点", "reason": "俄语平台"},
-        {"host": "rutube.ru", "policy": "🇪🇺欧洲节点", "reason": "俄语平台"},
-        {"host": "national-lottery.co.uk", "policy": "🇬🇧英国节点", "reason": "英国本地服务"},
-        {"host": "schwab.co.uk", "policy": "🇬🇧英国节点", "reason": "英国本地券商面；schwab.com 仍归 US"},
-        {"host": "standard.co.uk", "policy": "🇬🇧英国节点", "reason": "英国本地报刊"},
+        {"host": "bild.de", "policy": "🇪🇺欧洲", "reason": "德国本地媒体"},
+        {"host": "ndr.de", "policy": "🇪🇺欧洲", "reason": "德国公共广播"},
+        {"host": "otto.de", "policy": "🇪🇺欧洲", "reason": "德国电商"},
+        {"host": "sueddeutsche.de", "policy": "🇪🇺欧洲", "reason": "德国本地媒体"},
+        {"host": "welt.de", "policy": "🇪🇺欧洲", "reason": "德国本地媒体"},
+        {"host": "mail.ru", "policy": "🇪🇺欧洲", "reason": "俄语平台，与在册 yandex.ru 同表"},
+        {"host": "ok.ru", "policy": "🇪🇺欧洲", "reason": "俄语平台"},
+        {"host": "rutube.ru", "policy": "🇪🇺欧洲", "reason": "俄语平台"},
+        {"host": "national-lottery.co.uk", "policy": "🇬🇧英国", "reason": "英国本地服务"},
+        {"host": "schwab.co.uk", "policy": "🇬🇧英国", "reason": "英国本地券商面；schwab.com 仍归 US"},
+        {"host": "standard.co.uk", "policy": "🇬🇧英国", "reason": "英国本地报刊"},
         {"host": "dw.de", "policy": "Proxy", "reason": "国际广播，非德国本地面"},
         {"host": "dw-world.de", "policy": "Proxy", "reason": "国际广播，非德国本地面"},
         {"host": "deutsche-welle.de", "policy": "Proxy", "reason": "国际广播，非德国本地面"},
-        {"host": "prosieben.de", "policy": "🇪🇺欧洲节点", "reason": "既有条目，形态不变"}
+        {"host": "prosieben.de", "policy": "🇪🇺欧洲", "reason": "既有条目，形态不变"}
       ]
     }
   },
@@ -630,9 +633,9 @@
       {"host": "d2c.aws.amazon.com"}
     ],
     "assert": {
-      "same_policy": true, "policy": "🇯🇵日本节点", "no_dns_leak": true,
+      "same_policy": true, "policy": "🇯🇵日本", "no_dns_leak": true,
       "per_request": [
-        {"host": "theblaze.com", "policy": "🇺🇸美国节点", "reason": "美国本地媒体"},
+        {"host": "theblaze.com", "policy": "🇺🇸美国", "reason": "美国本地媒体"},
         {"host": "amazon.com", "policy": "Proxy", "reason": "锁定裁决：amazon 主站保留 ProxyGFW"},
         {"host": "www.amazon.com", "policy": "Proxy", "reason": "锁定裁决：vendor_family_unification 已锁 Proxy"},
         {"host": "d2c.aws.amazon.com", "policy": "Proxy", "reason": "既有条目，形态不变"}

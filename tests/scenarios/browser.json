@@ -330,7 +330,7 @@
   },
   {
     "name": "browser_client_hints_sec_ch_ua_microsoft",
-    "desc": "Edge / Chrome 访问微软服务时的 Client Hints 与身份鉴权链路",
+    "desc": "2026-09-12 用户确认 OneDrive 所用的共享微软身份鉴权链路也直连，其他服务访问相同主机时一并生效",
     "requests": [
       {
         "host": "login.live.com",
@@ -351,7 +351,7 @@
     ],
     "assert": {
       "same_policy": true,
-      "policy": "Google-X-Meta-MS",
+      "policy": "DIRECT",
       "no_dns_leak": true
     }
   },

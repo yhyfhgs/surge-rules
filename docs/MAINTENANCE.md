@@ -245,7 +245,7 @@ be "resolved" by a syntax-only change.
 | Item | What is unresolved | What would settle it |
 |---|---|---|
 | `Streaming` IP surface | Whether every CIDR still belongs to a streaming provider, and whether any range should move to a regional or service owner | Real traffic capture plus a shadow-routing comparison against the live profile |
-| OneDrive data plane | How deep `1drv.com` / `livefilestore.com` / `microsoftpersonalcontent.com` should be owned by `MicrosoftCN` versus `Microsoft`, given the poisoning stopgap | Connectivity measurement from a CN vantage point on both exits |
+| OneDrive direct connectivity | Routing is settled by the 2026-09-12 user decision: sync, storage and shared sign-in endpoints use MicrosoftCN/DIRECT. Local DNS still returns Meta-owned addresses for `onedrive.live.com` and `skyapi.onedrive.live.com`, and direct HEAD probes time out. | Correct DNS answers plus successful direct requests and a real authenticated client sync; rule matching alone cannot establish this. See the [evidence](evidence/2026-09-12-onedrive-direct.md). |
 
 Microsoft suffixes belong in `Microsoft.list`. Keep `MicrosoftCN` before
 `Microsoft`, and DownloadCDN before both. On 2026-09-07 the user explicitly
@@ -253,5 +253,14 @@ approved DIRECT for the former `files.1drv.com`, `content.office.net`,
 `cdn.designerapp.osi.office.net` and `odc.officeapps.live.com` exceptions, so no
 priority cycle or extra list is required. Prefer editing existing owner lists;
 do not add a separate manufacturer fallback list or inline configuration rules
-to preserve those superseded exceptions. This does not certify endpoint
-connectivity or settle the remaining OneDrive data-plane coverage question.
+to preserve those superseded exceptions.
+
+The 2026-09-12 user decision supersedes the earlier OneDrive proxy stopgap:
+keep the OneDrive hosts/subtrees and shared authentication endpoints in
+MicrosoftCN. The user explicitly accepted that other Microsoft applications
+using those same login hosts also go direct. Keep unrelated service parents
+in Microsoft; shared cloud namespaces are not OneDrive endpoints merely because
+the official allowlist contains broad compatibility entries. Do not restore a
+proxy exception silently to hide a connectivity failure. Record DNS and direct
+connection evidence separately from rule-policy verification. The current
+connectivity issue remains open as documented above.

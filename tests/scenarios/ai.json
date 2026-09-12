@@ -459,7 +459,7 @@
   },
   {
     "name": "microsoft_copilot_full_chain",
-    "desc": "Microsoft Copilot：copilot.microsoft.com 登录（MSA/AAD）→ Bing 后端检索 → Office substrate 取上下文。理想上一次会话应同组同出口",
+    "desc": "Microsoft Copilot：copilot.microsoft.com 登录（MSA/AAD）→ Bing 后端检索 → Office substrate 取上下文。2026-09-12 用户确认共享登录直连，Copilot 服务请求继续原代理策略",
     "note": "2026-08-25 架构调整：微软海外面自 AI.list 拆出为 Microsoft.list，随 Google/Twitter/Meta 走 Google-X-Meta-MS 组（大厂自有 AI 归各自生态）；GitHub 生态按 2026-08-29 裁决归 Microsoft，同走 Google-X-Meta-MS。",
     "requests": [
       {
@@ -507,7 +507,11 @@
     "assert": {
       "same_policy": true,
       "policy": "Google-X-Meta-MS",
-      "no_dns_leak": true
+      "no_dns_leak": true,
+      "per_request": [
+        {"host": "login.microsoftonline.com", "policy": "DIRECT", "reason": "2026-09-12 用户确认共享登录也直连"},
+        {"host": "login.live.com", "policy": "DIRECT", "reason": "2026-09-12 用户确认共享登录也直连"}
+      ]
     }
   },
   {

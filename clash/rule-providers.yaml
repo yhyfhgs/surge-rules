@@ -336,10 +336,10 @@ rules:
   - RULE-SET,NetEaseCN,DIRECT,no-resolve
   - RULE-SET,ChinaDomain,DIRECT,no-resolve
   - RULE-SET,ChinaIP,DIRECT,no-resolve
-  - RULE-SET,Japan,🇯🇵日本节点,no-resolve
-  - RULE-SET,US,🇺🇸美国节点,no-resolve
-  - RULE-SET,UK,🇬🇧英国节点,no-resolve
-  - RULE-SET,Europe,🇪🇺欧洲节点,no-resolve
+  - RULE-SET,Japan,🇯🇵日本,no-resolve
+  - RULE-SET,US,🇺🇸美国,no-resolve
+  - RULE-SET,UK,🇬🇧英国,no-resolve
+  - RULE-SET,Europe,🇪🇺欧洲,no-resolve
   - RULE-SET,ChinaTLD,DIRECT,no-resolve
   - GEOIP,lan,DIRECT,no-resolve
   - GEOIP,CN,DIRECT,no-resolve

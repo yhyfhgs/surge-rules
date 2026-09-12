@@ -1,18 +1,18 @@
 [
   {
-    "name": "onedrive_personal_carveout_proxy",
-    "desc": "R1-01 止血：OneDrive 个人版会话面全部走 Google-X-Meta-MS。CN 侧 onedrive.live.com 子树解析被投毒导致直连不可用；当前由 Microsoft.list 的显式子树认领，MicrosoftCN 只保留已验证的精确 live.com 主机/子树",
+    "name": "onedrive_personal_direct",
+    "desc": "2026-09-12 用户明确要求 OneDrive 同步与共享登录直连；前置 MicrosoftCN 认领个人版子树。路由断言不保证连通性，当前两个入口仍有 DNS 异常及直连超时，见当日证据。",
     "requests": [
       {"host": "onedrive.live.com", "note": "个人版 Web 入口"},
       {"host": "skyapi.onedrive.live.com", "note": "SkyDrive 遗留 API 端点，客户端同步用"},
       {"host": "photos.onedrive.live.com", "note": "相册面"},
       {"host": "snapshot.onedrive.live.com", "note": "缩略图/预览面"}
     ],
-    "assert": {"same_policy": true, "policy": "Google-X-Meta-MS", "no_dns_leak": true}
+    "assert": {"same_policy": true, "policy": "DIRECT", "no_dns_leak": true}
   },
   {
     "name": "onedrive_carveout_no_overreach_direct",
-    "desc": "R1-01 防误伤负例：onedrive.live.com 的窄后缀不得把其他 Office/账户面一起拽走；三条必须仍由 MicrosoftCN.list 的精确主机/子树走 DIRECT",
+    "desc": "2026-09-12 OneDrive 子树改直连后，既有 Office/重定向端点仍由 MicrosoftCN 直连。",
     "requests": [
       {"host": "office.live.com", "note": "Office 网页版入口"},
       {"host": "view.officeapps.live.com", "note": "Office 文档在线预览"},
@@ -43,7 +43,7 @@
       "per_request": [
         {"ip": "184.173.128.1", "policy": "Final"},
         {"ip": "54.235.23.242", "policy": "Final"},
-        {"ip": "119.235.224.1", "policy": "🇯🇵日本节点", "note": "落 JapanIP.list 的 119.235.224.0/21；LINE 段不属于 Meta 组"}
+        {"ip": "119.235.224.1", "policy": "🇯🇵日本", "note": "落 JapanIP.list 的 119.235.224.0/21；LINE 段不属于 Meta 组"}
       ]
     }
   },
@@ -491,8 +491,8 @@
     "name": "ms_mscn_direct_face_unshadowed",
     "desc": "W-MS 防遮蔽回归（负例）：迁入 Microsoft.list 的任何条目都不得把 MicrosoftCN 的国内直连面拽进代理。本组 13 条全部经双侧 dig 实证 CN 面（tdnsdl1.cn / cngslb.com / ksyuncdn.com / ctlcdn.cn / cn.akamaitech.net / Akamai CN POP），必须仍 DIRECT；任何一条翻成 Google-X-Meta-MS 即为「宽后缀回流 Microsoft.list」的信号",
     "requests": [
-      {"host": "oneclient.sfx.ms", "note": "CN 侧 a124.dscd.akamai.net.0.1.cn.akamaitech.net = Akamai 中国节点；与 ProxyGFW 的精确 p.sfx.ms 规则共同证明父后缀必须禁止"},
-      {"host": "office.live.com", "note": "R1-01 边界：onedrive.live.com 走代理，office.live.com 精确子树仍直连"},
+      {"host": "oneclient.sfx.ms", "note": "OneDrive 客户端资源直连；sfx.ms 仍只允许认领已知主机"},
+      {"host": "office.live.com", "note": "2026-09-12 OneDrive 与 Office 子树均直连"},
       {"host": "view.officeapps.live.com"},
       {"host": "g.live.com"},
       {"host": "www.msn.com", "note": "与新迁入的 msn.com.tw 的分界：msn.com 仍 DIRECT"},
@@ -509,14 +509,14 @@
   },
   {
     "name": "ms_explicit_owner_boundary",
-    "desc": "2026-09-07 列表简化：MicrosoftCN 优先，Office/OneDrive 的四处旧代理例外随所属父域直连；其余请求维持各自既有策略。",
+    "desc": "2026-09-12 补齐 OneDrive 同步与客户端端点直连。历史背景：2026-09-07 列表简化：MicrosoftCN 优先，Office/OneDrive 的四处旧代理例外随所属父域直连；其余请求维持各自既有策略。",
     "requests": [
       {"host": "microsoft.com"},
       {"host": "officeclient.microsoft.com"},
       {"host": "apis.live.net"},
       {"host": "www.onenote.com"},
       {"host": "content.office.net"},
-      {"host": "p.sfx.ms", "note": "Exact Microsoft host; oneclient.sfx.ms remains MicrosoftCN"},
+      {"host": "p.sfx.ms", "note": "2026-09-12 OneDrive 静态资源精确主机归 MicrosoftCN"},
       {"host": "sometenant.webpubsub.azure.com", "note": "任意 WebPubSub 租户不属于 AI 的 OpenAI 专属实例，azure.com 多租户宽后缀已移除"},
       {"host": "sometenant.azureedge.net", "note": "任意 Azure Edge 租户，宽兜底已移除"},
       {"host": "sometenant.azurewebsites.net", "note": "PSL 多租户边界，宽兜底已移除"},
@@ -526,11 +526,11 @@
       "same_policy": false, "no_dns_leak": true,
       "per_request": [
         {"host": "microsoft.com", "policy": "Google-X-Meta-MS"},
-        {"host": "officeclient.microsoft.com", "policy": "Google-X-Meta-MS"},
-        {"host": "apis.live.net", "policy": "Google-X-Meta-MS"},
+        {"host": "officeclient.microsoft.com", "policy": "DIRECT"},
+        {"host": "apis.live.net", "policy": "DIRECT"},
         {"host": "www.onenote.com", "policy": "Google-X-Meta-MS"},
         {"host": "content.office.net", "policy": "DIRECT"},
-        {"host": "p.sfx.ms", "policy": "Google-X-Meta-MS"},
+        {"host": "p.sfx.ms", "policy": "DIRECT"},
         {"host": "sometenant.webpubsub.azure.com", "policy": "Final"},
         {"host": "sometenant.azureedge.net", "policy": "Final"},
         {"host": "sometenant.azurewebsites.net", "policy": "Final"},
@@ -542,7 +542,7 @@
     "name": "ms_explicit_subtrees_intact",
     "desc": "2026-09-07 列表简化：MicrosoftCN 优先，Office/OneDrive 的四处旧代理例外随所属父域直连；其余请求维持各自既有策略。",
     "requests": [
-      {"host": "d.docs.live.net", "note": "OneDrive 数据面与微软控制面同出口"},
+      {"host": "d.docs.live.net", "note": "2026-09-12 OneDrive 文档数据面直连"},
       {"host": "contentsync.onenote.com"},
       {"host": "hierarchyapi.onenote.com"},
       {"host": "support.content.office.net"},
@@ -553,7 +553,7 @@
     "assert": {
       "no_dns_leak": true,
       "per_request": [
-        {"host": "d.docs.live.net", "policy": "Google-X-Meta-MS"},
+        {"host": "d.docs.live.net", "policy": "DIRECT"},
         {"host": "contentsync.onenote.com", "policy": "Google-X-Meta-MS"},
         {"host": "hierarchyapi.onenote.com", "policy": "Google-X-Meta-MS"},
         {"host": "support.content.office.net", "policy": "DIRECT"},
@@ -634,7 +634,7 @@
         {"host": "api.snapkit.com", "policy": "Final", "reason": "与 Snap 生态同出口，不再随 TikTok 走社交媒体组"},
         {"host": "sdk.snapkit.com", "policy": "Final"},
         {"host": "snapchat.com", "policy": "社交媒体", "reason": "由 SocialOthers.list 的 DOMAIN-SUFFIX,snapchat.com 承接"},
-        {"host": "cocacola.co.jp", "policy": "🇯🇵日本节点"}
+        {"host": "cocacola.co.jp", "policy": "🇯🇵日本"}
       ]
     }
   },
@@ -739,8 +739,8 @@
     ],
     "assert": {
       "per_request": [
-        {"ip": "35.192.0.1", "reason": "不再被业务表云段抢走。离线引擎判 Final（无 MaxMind，GEOIP,US 恒不匹配）；真实 Surge 在区 9 由 US.list 的 GEOIP,US,no-resolve 接住 ⇒ 双态均为正确落点。", "policy_in": ["Final", "🇺🇸美国节点"]},
-        {"ip": "18.194.0.1", "policy_in": ["Final", "🇪🇺欧洲节点"], "reason": "同上：离线引擎判 Final；真实 Surge 在区 9 由 Europe.list 的 GEOIP,DE,no-resolve 接住。"},
+        {"ip": "35.192.0.1", "reason": "不再被业务表云段抢走。离线引擎判 Final（无 MaxMind，GEOIP,US 恒不匹配）；真实 Surge 在区 9 由 US.list 的 GEOIP,US,no-resolve 接住 ⇒ 双态均为正确落点。", "policy_in": ["Final", "🇺🇸美国"]},
+        {"ip": "18.194.0.1", "policy_in": ["Final", "🇪🇺欧洲"], "reason": "同上：离线引擎判 Final；真实 Surge 在区 9 由 Europe.list 的 GEOIP,DE,no-resolve 接住。"},
         {"ip": "31.13.24.1", "policy": "Google-X-Meta-MS", "reason": "第一方专网保留"}
       ]
     }
@@ -840,19 +840,19 @@
     "assert": {
       "no_dns_leak": true,
       "per_request": [
-        {"host": "www.nasa.gov", "policy": "🇺🇸美国节点"},
-        {"host": "gibs-c.earthdata.nasa.gov", "policy": "🇺🇸美国节点"},
-        {"host": "www.mit.edu", "policy": "🇺🇸美国节点"},
-        {"host": "mirrors.mit.edu", "policy": "🇺🇸美国节点"},
-        {"host": "www.cmu.edu", "policy": "🇺🇸美国节点"},
-        {"host": "www.club.cc.cmu.edu", "policy": "🇺🇸美国节点"},
-        {"host": "www.cnet.com", "policy": "🇺🇸美国节点"},
-        {"host": "download.cnet.com", "policy": "🇺🇸美国节点"},
-        {"host": "mirror.grid.uchicago.edu", "policy": "🇺🇸美国节点"},
-        {"host": "mirror.its.umich.edu", "policy": "🇺🇸美国节点"},
-        {"host": "mail.yandex.ru", "policy": "🇪🇺欧洲节点"},
-        {"host": "mirror.yandex.ru", "policy": "🇪🇺欧洲节点"},
-        {"host": "www.bet365.com", "policy": "🇬🇧英国节点"}
+        {"host": "www.nasa.gov", "policy": "🇺🇸美国"},
+        {"host": "gibs-c.earthdata.nasa.gov", "policy": "🇺🇸美国"},
+        {"host": "www.mit.edu", "policy": "🇺🇸美国"},
+        {"host": "mirrors.mit.edu", "policy": "🇺🇸美国"},
+        {"host": "www.cmu.edu", "policy": "🇺🇸美国"},
+        {"host": "www.club.cc.cmu.edu", "policy": "🇺🇸美国"},
+        {"host": "www.cnet.com", "policy": "🇺🇸美国"},
+        {"host": "download.cnet.com", "policy": "🇺🇸美国"},
+        {"host": "mirror.grid.uchicago.edu", "policy": "🇺🇸美国"},
+        {"host": "mirror.its.umich.edu", "policy": "🇺🇸美国"},
+        {"host": "mail.yandex.ru", "policy": "🇪🇺欧洲"},
+        {"host": "mirror.yandex.ru", "policy": "🇪🇺欧洲"},
+        {"host": "www.bet365.com", "policy": "🇬🇧英国"}
       ]
     }
   },
@@ -1020,7 +1020,7 @@
   },
   {
     "name": "microsoft_dev_control_planes_backfill_20260902",
-    "desc": "2026-09-02 覆盖补录：Visual Studio / VS Code / Azure DevOps / Azure Portal / Azure AI Foundry / Edge 服务与 Entra 登录面归 Microsoft。azure.com 不做 apex（AI 表的 webpubsub 通配与 Streaming 之后的子域会被遮蔽），只收显式子树；DownloadCDN 前位的下载面保持不变。",
+    "desc": "2026-09-12 更新：共享 Entra 登录直连。历史背景：2026-09-02 覆盖补录：Visual Studio / VS Code / Azure DevOps / Azure Portal / Azure AI Foundry / Edge 服务与 Entra 登录面归 Microsoft。azure.com 不做 apex（AI 表的 webpubsub 通配与 Streaming 之后的子域会被遮蔽），只收显式子树；DownloadCDN 前位的下载面保持不变。",
     "requests": [
       {"host": "visualstudio.com"},
       {"host": "marketplace.visualstudio.com"},
@@ -1032,7 +1032,7 @@
       {"host": "ai.azure.com", "note": "自 Streaming 迁入（误归属）"},
       {"host": "edge.microsoft.com"},
       {"host": "login.windows.net"},
-      {"host": "login.microsoftonline.com", "note": "精确条目并入 microsoftonline.com 后缀"},
+      {"host": "login.microsoftonline.com", "note": "2026-09-12 由前置 MicrosoftCN 的登录子树直连"},
       {"host": "microsoftonline.com"},
       {"host": "update.code.visualstudio.com", "note": "负例：VS Code 更新包，DownloadCDN 先于 Microsoft"},
       {"host": "sts.online.visualstudio.com", "note": "负例：既有 DownloadCDN 条目"},
@@ -1042,6 +1042,8 @@
     "assert": {
       "same_policy": true, "policy": "Google-X-Meta-MS", "no_dns_leak": true,
       "per_request": [
+        {"host": "login.windows.net", "policy": "DIRECT", "reason": "2026-09-12 用户确认共享登录也直连"},
+        {"host": "login.microsoftonline.com", "policy": "DIRECT", "reason": "2026-09-12 用户确认共享登录也直连"},
         {"host": "update.code.visualstudio.com", "policy": "下载", "reason": "ordered-safe：DownloadCDN 子域先于 Microsoft 的 visualstudio.com 后缀"},
         {"host": "sts.online.visualstudio.com", "policy": "下载", "reason": "同上"},
         {"host": "chatgpt-async-webps-prod-eus.webpubsub.azure.com", "policy": "AI", "reason": "不引入 azure.com apex，AI 表通配保持"},

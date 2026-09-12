@@ -132,7 +132,8 @@ for `apple.com` (AppleCN), `aliyuncs.com` (AlibabaCN), `myqcloud.com`,
 `mojang.com` (Games, download planes in DownloadCDN), `visualstudio.com`,
 `dev.azure.com` (Microsoft), `nhk.jp` (Japan, behind Streaming), `formula1.com`
 (Streaming), `crypto.com` (ProxyGFW), `amazon.co.uk` (UK),
-`microsoft.com`, `live.com`, `office.com`, `msn.com` (Microsoft), and the terminal
+`microsoft.com`, `live.com`, `live.net`, `microsoftonline.com`, `gfx.ms`,
+`office.com`, `msn.com` (Microsoft), and the terminal
 `cn` catch-all (ChinaTLD). Because every child sits in an earlier list, the `topology.json` constraints are load-bearing: reordering a
 constrained pair silently kills the child.
 
@@ -142,6 +143,16 @@ win first. The user approved direct priority for the former `files.1drv.com`,
 `content.office.net`, `cdn.designerapp.osi.office.net` and
 `odc.officeapps.live.com` proxy exceptions. No extra fallback list or inline
 exception is needed. DownloadCDN remains ahead of both lists.
+On 2026-09-12 the user also selected DIRECT for OneDrive sync/storage and its
+shared sign-in dependencies. Their explicit hosts and subtrees live in
+MicrosoftCN, ahead of the broader Microsoft service owners. Authentication
+assets previously in Microsoft or DownloadCDN moved to MicrosoftCN; the same
+hosts are consequently direct when used by Copilot or Teams. Other Microsoft
+service requests retain their policies. This is a routing decision, not a claim
+that every endpoint is reachable: the
+[current evidence](evidence/2026-09-12-onedrive-direct.md) records two personal
+OneDrive hosts whose local DNS answers point into Meta-owned ranges and whose
+direct probes time out.
 Google now has `google.com`, `googleapis.com`,
 `googleusercontent.com` and `ggpht.com` parents after YouTube/download exceptions.
 The user explicitly includes Google API tenant traffic by network operator.

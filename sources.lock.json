@@ -329,5 +329,31 @@
         "size": 228
       }
     ]
+  },
+  "onedrive_review": {
+    "review_date": "2026-09-12",
+    "evidence": "docs/evidence/2026-09-12-onedrive-direct.md",
+    "decision": "User requests DIRECT for OneDrive sync, storage and shared sign-in endpoints; other Microsoft services keep their owners.",
+    "references": [
+      {
+        "id": "onedrive-consumer",
+        "provenance": "observed",
+        "url": "https://learn.microsoft.com/en-us/sharepoint/required-urls-and-ports",
+        "retrieved_at": "2026-09-12",
+        "sha256": "7426c3c54a01059a9974c548991099d8614959dd0047294a338cbccacf5dad6b",
+        "size": 50010,
+        "purpose": "Official endpoint ownership reference, not an upstream rule list or reproducible build input."
+      },
+      {
+        "id": "microsoft365-endpoints",
+        "provenance": "observed",
+        "url": "https://learn.microsoft.com/en-us/microsoft-365/enterprise/urls-and-ip-address-ranges?view=o365-worldwide",
+        "retrieved_at": "2026-09-12",
+        "sha256": "6dc0f72e91784224654efdcb82cdba6c0eca12c07c7844479643894432e7b4b2",
+        "size": 74628,
+        "purpose": "Official endpoint ownership reference, not an upstream rule list or reproducible build input."
+      }
+    ],
+    "note": "Curated routing decision. Observed official HTML hashes document the review inputs; mutable documentation is not claimed to be pinned or reproducibly rebuildable. No upstream list refresh or IP allocation change."
   }
 }

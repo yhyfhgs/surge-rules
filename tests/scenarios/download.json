@@ -552,19 +552,19 @@
     "assert": {
       "no_dns_leak": true,
       "per_request": [
-        {"host": "static.theguardian.com", "policy": "🇬🇧英国节点"},
-        {"host": "i.dailymail.co.uk", "policy": "🇬🇧英国节点"},
-        {"host": "static.giffgaff.com", "policy": "🇬🇧英国节点"},
-        {"host": "assets.vodafone.co.uk", "policy": "🇬🇧英国节点"},
-        {"host": "asset.booth.pm", "policy": "🇯🇵日本节点"},
-        {"host": "error.rakuten.co.jp", "policy": "🇯🇵日本节点"},
-        {"host": "file.chobit.cc", "policy": "🇯🇵日本节点"},
-        {"host": "cdn.ionos.de", "policy": "🇪🇺欧洲节点"},
-        {"host": "sp-spiegel-de.spiegel.de", "policy": "🇪🇺欧洲节点"},
-        {"host": "assets.scaleway.com", "policy": "🇪🇺欧洲节点"},
-        {"host": "c1.newegg.com", "policy": "🇺🇸美国节点"},
-        {"host": "static.inferno.iheart.com", "policy": "🇺🇸美国节点"},
-        {"host": "images.fandango.com", "policy": "🇺🇸美国节点"}
+        {"host": "static.theguardian.com", "policy": "🇬🇧英国"},
+        {"host": "i.dailymail.co.uk", "policy": "🇬🇧英国"},
+        {"host": "static.giffgaff.com", "policy": "🇬🇧英国"},
+        {"host": "assets.vodafone.co.uk", "policy": "🇬🇧英国"},
+        {"host": "asset.booth.pm", "policy": "🇯🇵日本"},
+        {"host": "error.rakuten.co.jp", "policy": "🇯🇵日本"},
+        {"host": "file.chobit.cc", "policy": "🇯🇵日本"},
+        {"host": "cdn.ionos.de", "policy": "🇪🇺欧洲"},
+        {"host": "sp-spiegel-de.spiegel.de", "policy": "🇪🇺欧洲"},
+        {"host": "assets.scaleway.com", "policy": "🇪🇺欧洲"},
+        {"host": "c1.newegg.com", "policy": "🇺🇸美国"},
+        {"host": "static.inferno.iheart.com", "policy": "🇺🇸美国"},
+        {"host": "images.fandango.com", "policy": "🇺🇸美国"}
       ]
     }
   },
@@ -580,7 +580,7 @@
       {"host": "static.independent.co.uk", "note": "R1-23 同批"},
       {"host": "video.dailymail.co.uk", "note": "R1-23 同批"}
     ],
-    "assert": {"same_policy": true, "policy": "🇬🇧英国节点", "no_dns_leak": true}
+    "assert": {"same_policy": true, "policy": "🇬🇧英国", "no_dns_leak": true}
   },
   {
     "name": "domestic_ai_vendor_intl_to_ai_v2",

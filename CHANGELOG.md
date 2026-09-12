@@ -4,6 +4,13 @@
 
 ---
 
+## [2026-09-12·OneDrive 直连] 同步、文件与共享登录端点统一直连
+
+- 用户要求 OneDrive 同步直连，并明确同意共享微软登录端点也直连。运行中的 Surge 原先将个人版入口、同步 API、文档数据面和登录面交给 Microsoft 代理策略；补齐 MicrosoftCN 的同步/身份端点，迁入 Microsoft 的 4 条和 DownloadCDN 的 1 条认证/客户端资源规则，保持唯一 owner。MicrosoftCN 85 → 125 条，全库净增 35 条。
+- 修复活动 profile 落后的列表顺序，恢复 MicrosoftCN 在 Microsoft 之前；manifest 的 4 个地区策略标签与当前已存在的组别名对齐，地区去向不变。Clash 与场景期望同步更新，不修改私有组定义。
+- 35 表 / 142,240 条规则；346 场景、2,409 请求、4,721 断言通过，含 2,080 条 DNS 断言。Clash 逐条一致，82 个归属见证通过；原生候选语法、关系分析及完整 MMDB 展开通过。A1–A10 无 P0/P1/P2，3 条既有 P3 信息项。发布继续执行标准门禁及 CDN 哈希核验。
+- **连通性限制**：两个个人版入口的本机 DNS 仍返回 Meta 地址，DIRECT 探测超时；微软两个登录端点直连得到 HTTP 响应。当前未捕获到 OneDrive 客户端同步流量，不将分流通过写成同步成功。官方来源、实测与边界见 [证据记录](docs/evidence/2026-09-12-onedrive-direct.md)。
+
 ## [2026-09-07·AI 上游维护] 固定来源复核与国内外入口归属
 
 - 核对 VPSDance `cc1d596`、blackmatrix7 `5f06cac`、Sukka `81632eb` 的 AI 来源；18 份 revision/SHA-256 输入经 locked fetch 全数验证，登记 `sources.lock.json:ai_review`。裁决与未采用项见 [证据记录](docs/evidence/2026-09-07-ai-upstream.md)。

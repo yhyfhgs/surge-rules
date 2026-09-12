@@ -269,7 +269,7 @@
     ],
     "assert": {
       "same_policy": true,
-      "policy": "🇯🇵日本节点",
+      "policy": "🇯🇵日本",
       "no_dns_leak": true
     }
   },

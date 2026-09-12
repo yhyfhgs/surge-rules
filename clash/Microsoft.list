@@ -1,7 +1,7 @@
 # AUTO-GENERATED — Clash(Mihomo) classical 规则，由 ../lists/Microsoft.list 派生
 # 勿手工编辑；修改 Surge 源后运行 python3 tools/surge2clash.py 重新生成
 
-# Microsoft — 微软国际控制面与 GitHub；国内 CDN 面归 MicrosoftCN
+# Microsoft — 微软国际服务与 GitHub；OneDrive、共享登录与国内 CDN 归 MicrosoftCN
 
 DOMAIN,catalogartifact.azureedge.net
 DOMAIN,claritystatic.azureedge.net
@@ -14,7 +14,6 @@ DOMAIN,edgeassetservice.azureedge.net
 DOMAIN,edgestatic.azureedge.net
 DOMAIN,edgestorewebcdn.azureedge.net
 DOMAIN,mobilecenter.azureedge.net
-DOMAIN,p.sfx.ms
 DOMAIN,xpaywalletcdn.azureedge.net
 
 DOMAIN-SUFFIX,ai.azure.com
@@ -41,7 +40,6 @@ DOMAIN-SUFFIX,img-s-msn-com.akamaized.net
 DOMAIN-SUFFIX,in.appcenter.ms
 DOMAIN-SUFFIX,live.com
 DOMAIN-SUFFIX,live.net
-DOMAIN-SUFFIX,login.windows.net
 DOMAIN-SUFFIX,m365copilot.com
 DOMAIN-SUFFIX,management.azure.com
 DOMAIN-SUFFIX,microsoft-falcon.io
@@ -49,8 +47,6 @@ DOMAIN-SUFFIX,microsoft.com
 DOMAIN-SUFFIX,microsoftapp.net
 DOMAIN-SUFFIX,microsoftonline.com
 DOMAIN-SUFFIX,microsofttranslator.com
-DOMAIN-SUFFIX,msauth.net
-DOMAIN-SUFFIX,msftauth.net
 DOMAIN-SUFFIX,msn.com
 DOMAIN-SUFFIX,msn.com.tw
 DOMAIN-SUFFIX,office.com

@@ -13,7 +13,7 @@
       {"host": "notbbc.co.uk", "note": "负例：品牌入表以注册域为单位，不外扩到含品牌串的他域"}
     ],
     "assert": {
-      "same_policy": true, "policy": "🇬🇧英国节点", "no_dns_leak": true,
+      "same_policy": true, "policy": "🇬🇧英国", "no_dns_leak": true,
       "per_request": [
         {"host": "bbc.example.com", "policy": "Final", "reason": "后缀匹配右锚在标签边界，bbc 作为最左标签不命中"},
         {"host": "notbbc.co.uk", "policy": "Final", "reason": "地区表按域枚举，.co.uk 后缀本身不是入表依据"}
@@ -31,7 +31,7 @@
       "same_policy": false, "no_dns_leak": true,
       "per_request": [
         {"host": "bbcfmt.s.llnwi.net", "policy": "流媒体", "reason": "多租户注册域（同表另有 DAZN / HBO Max / Viki），刻意留 Streaming —— 拆单个租户前缀进地区表会破坏该注册域的一致处置。"},
-        {"host": "bbc.mp-pxcdn.com", "policy": "🇬🇧英国节点", "reason": "advisor 裁决 6：BBC 专属形态随迁 UK.list（DOMAIN,bbc.mp-pxcdn.com @ UK.list），与 bbc.co.uk / bbci.co.uk 同出口，避免 iPlayer 播放面与门面分裂到两个出口触发属地拒绝。"}
+        {"host": "bbc.mp-pxcdn.com", "policy": "🇬🇧英国", "reason": "advisor 裁决 6：BBC 专属形态随迁 UK.list（DOMAIN,bbc.mp-pxcdn.com @ UK.list），与 bbc.co.uk / bbci.co.uk 同出口，避免 iPlayer 播放面与门面分裂到两个出口触发属地拒绝。"}
       ]
     }
   },
@@ -88,8 +88,8 @@
       "per_request": [
         {"host": "paravi.jp", "policy": "Final", "reason": "Japan.list 条目已删；跳转目标已被 unext.jp 承接，跳转壳本身无属地锁"},
         {"host": "www.paravi.jp", "policy": "Final"},
-        {"host": "unext.jp", "policy": "🇯🇵日本节点"},
-        {"host": "video.unext.jp", "policy": "🇯🇵日本节点"}
+        {"host": "unext.jp", "policy": "🇯🇵日本"},
+        {"host": "video.unext.jp", "policy": "🇯🇵日本"}
       ]
     }
   },
@@ -125,7 +125,7 @@
     "assert": {
       "policy": "Final", "no_dns_leak": true,
       "per_request": [
-        {"ip": "2600:1f18::1", "policy_in": ["Final", "🇺🇸美国节点"], "reason": "GEOIP 近似盲区：engine.py 无 MaxMind 库，7 条非 CN GEOIP 恒不匹配 ⇒ 离线判 Final；真实 Surge 在区 9 由 US.list 的 GEOIP,US,no-resolve 接住 ⇒ 🇺🇸美国节点。两态均为正确落点，硬断言任何一侧都会说谎。"},
+        {"ip": "2600:1f18::1", "policy_in": ["Final", "🇺🇸美国"], "reason": "GEOIP 近似盲区：engine.py 无 MaxMind 库，7 条非 CN GEOIP 恒不匹配 ⇒ 离线判 Final；真实 Surge 在区 9 由 US.list 的 GEOIP,US,no-resolve 接住 ⇒ 🇺🇸美国节点。两态均为正确落点，硬断言任何一侧都会说谎。"},
         {"ip": "2a03:2880:f003::1", "policy_in": ["Final", "Google-X-Meta-MS"], "reason": "IP-ASN 近似盲区：engine.py 无 ASN 样本库，IP-ASN 恒不匹配 ⇒ 离线判 Final；真实 Surge 由 Meta.list(conf:98) 的 IP-ASN,32934,no-resolve 接住 ⇒ Google-X-Meta-MS。位次上 Meta.list 远早于区 9 的地区表，故不会被 GEOIP 抢走。"}
       ]
     }
@@ -144,10 +144,10 @@
     "assert": {
       "no_dns_leak": true,
       "per_request": [
-        {"host": "www.zdf.de", "policy": "🇪🇺欧洲节点"},
-        {"host": "hetzner.com", "policy": "🇪🇺欧洲节点"},
-        {"host": "europa.eu", "policy": "🇪🇺欧洲节点"},
-        {"host": "n26.com", "policy": "🇪🇺欧洲节点"},
+        {"host": "www.zdf.de", "policy": "🇪🇺欧洲"},
+        {"host": "hetzner.com", "policy": "🇪🇺欧洲"},
+        {"host": "europa.eu", "policy": "🇪🇺欧洲"},
+        {"host": "n26.com", "policy": "🇪🇺欧洲"},
         {"host": "ing.com", "policy": "Final", "reason": "属地分支域入表不等于集团总域入表"},
         {"host": "bmw.de", "policy": "Final", "reason": "地区表按域枚举，.de 后缀本身不是入表依据"}
       ]
@@ -167,10 +167,10 @@
     "assert": {
       "no_dns_leak": true,
       "per_request": [
-        {"host": "www.pixiv.net", "policy": "🇯🇵日本节点"},
-        {"host": "i.pximg.net", "policy": "🇯🇵日本节点", "reason": "图床与主站同出口，防止跨出口取图 403"},
-        {"host": "radiko.jp", "policy": "🇯🇵日本节点"},
-        {"host": "www.mercari.com", "policy": "🇯🇵日本节点"},
+        {"host": "www.pixiv.net", "policy": "🇯🇵日本"},
+        {"host": "i.pximg.net", "policy": "🇯🇵日本", "reason": "图床与主站同出口，防止跨出口取图 403"},
+        {"host": "radiko.jp", "policy": "🇯🇵日本"},
+        {"host": "www.mercari.com", "policy": "🇯🇵日本"},
         {"host": "unlisted-example.co.jp", "policy": "Final", "reason": "地区表按域枚举，.co.jp 后缀本身不是入表依据"},
         {"host": "line.com", "policy": "Final"}
       ]
@@ -190,12 +190,12 @@
     "assert": {
       "no_dns_leak": true,
       "per_request": [
-        {"host": "www.bbc.com", "policy": "🇬🇧英国节点"},
-        {"host": "www.theguardian.com", "policy": "🇬🇧英国节点"},
-        {"host": "monzo.com", "policy": "🇬🇧英国节点"},
-        {"host": "www.nhs.uk", "policy": "🇬🇧英国节点"},
+        {"host": "www.bbc.com", "policy": "🇬🇧英国"},
+        {"host": "www.theguardian.com", "policy": "🇬🇧英国"},
+        {"host": "monzo.com", "policy": "🇬🇧英国"},
+        {"host": "www.nhs.uk", "policy": "🇬🇧英国"},
         {"host": "argos.co.uk", "policy": "Final", "reason": "地区表按域枚举，.co.uk 后缀本身不是入表依据"},
-        {"host": "bbc.co.uk", "policy": "🇬🇧英国节点", "reason": "全库唯一归属：bbc.co.uk 已迁入 UK.list；「流媒体」是全局单选组且无英国出口成员，属地锁服务的正确 owner 是地区表"}
+        {"host": "bbc.co.uk", "policy": "🇬🇧英国", "reason": "全库唯一归属：bbc.co.uk 已迁入 UK.list；「流媒体」是全局单选组且无英国出口成员，属地锁服务的正确 owner 是地区表"}
       ]
     }
   },
@@ -213,10 +213,10 @@
     "assert": {
       "no_dns_leak": true,
       "per_request": [
-        {"host": "www.chase.com", "policy": "🇺🇸美国节点"},
-        {"host": "schwab.com", "policy": "🇺🇸美国节点"},
-        {"host": "www.walmart.com", "policy": "🇺🇸美国节点"},
-        {"host": "irs.gov", "policy": "🇺🇸美国节点"},
+        {"host": "www.chase.com", "policy": "🇺🇸美国"},
+        {"host": "schwab.com", "policy": "🇺🇸美国"},
+        {"host": "www.walmart.com", "policy": "🇺🇸美国"},
+        {"host": "irs.gov", "policy": "🇺🇸美国"},
         {"host": "chase.co.uk", "policy": "Final", "reason": "品牌入表以域为单位，不外扩到其它 ccTLD 分支"},
         {"host": "walmart.cn", "policy": "DIRECT", "reason": "由 ChinaDomain 的 DOMAIN-SUFFIX,cn 承接直连"}
       ]
@@ -298,46 +298,46 @@
     "assert": {
       "no_dns_leak": true,
       "per_request": [
-        {"host": "nhk.or.jp", "policy": "🇯🇵日本节点"},
-        {"host": "www3.nhk.or.jp", "policy": "🇯🇵日本节点"},
-        {"host": "asahi.com", "policy": "🇯🇵日本节点"},
-        {"host": "mainichi.jp", "policy": "🇯🇵日本节点"},
-        {"host": "ana.co.jp", "policy": "🇯🇵日本节点"},
-        {"host": "jal.co.jp", "policy": "🇯🇵日本节点"},
-        {"host": "cygames.co.jp", "policy": "🇯🇵日本节点", "reason": "与在册 cygames.jp 同表"},
-        {"host": "sega.jp", "policy": "🇯🇵日本节点"},
-        {"host": "fromsoftware.jp", "policy": "🇯🇵日本节点"},
-        {"host": "goo.ne.jp", "policy": "🇯🇵日本节点", "reason": "自 ProxyGFW 迁入：日本门户"},
-        {"host": "hatena.ne.jp", "policy": "🇯🇵日本节点", "reason": "自 ProxyGFW 迁入"},
-        {"host": "livedoor.jp", "policy": "🇯🇵日本节点", "reason": "自 ProxyGFW 迁入"},
-        {"host": "excite.co.jp", "policy": "🇯🇵日本节点", "reason": "自 ProxyGFW 迁入"},
+        {"host": "nhk.or.jp", "policy": "🇯🇵日本"},
+        {"host": "www3.nhk.or.jp", "policy": "🇯🇵日本"},
+        {"host": "asahi.com", "policy": "🇯🇵日本"},
+        {"host": "mainichi.jp", "policy": "🇯🇵日本"},
+        {"host": "ana.co.jp", "policy": "🇯🇵日本"},
+        {"host": "jal.co.jp", "policy": "🇯🇵日本"},
+        {"host": "cygames.co.jp", "policy": "🇯🇵日本", "reason": "与在册 cygames.jp 同表"},
+        {"host": "sega.jp", "policy": "🇯🇵日本"},
+        {"host": "fromsoftware.jp", "policy": "🇯🇵日本"},
+        {"host": "goo.ne.jp", "policy": "🇯🇵日本", "reason": "自 ProxyGFW 迁入：日本门户"},
+        {"host": "hatena.ne.jp", "policy": "🇯🇵日本", "reason": "自 ProxyGFW 迁入"},
+        {"host": "livedoor.jp", "policy": "🇯🇵日本", "reason": "自 ProxyGFW 迁入"},
+        {"host": "excite.co.jp", "policy": "🇯🇵日本", "reason": "自 ProxyGFW 迁入"},
         {"host": "location-plus.nhk.jp", "policy": "流媒体", "reason": "ordered-safe：Streaming 子域先于 Japan 的 nhk.jp 后缀"},
-        {"host": "united.com", "policy": "🇺🇸美国节点"},
-        {"host": "delta.com", "policy": "🇺🇸美国节点"},
-        {"host": "aa.com", "policy": "🇺🇸美国节点"},
-        {"host": "nih.gov", "policy": "🇺🇸美国节点", "reason": "自 ProxyGFW 迁入：与在册 irs.gov / nasa.gov 同表"},
-        {"host": "stanford.edu", "policy": "🇺🇸美国节点", "reason": "自 ProxyGFW 迁入：与在册 mit.edu / cmu.edu 同表"},
-        {"host": "census.gov", "policy": "🇺🇸美国节点", "reason": "自 ProxyGFW 迁入"},
-        {"host": "amazon.co.uk", "policy": "🇬🇧英国节点", "reason": "与 Japan 的 amazon.co.jp 同构"},
-        {"host": "britishairways.com", "policy": "🇬🇧英国节点"},
-        {"host": "amazon.de", "policy": "🇪🇺欧洲节点"},
-        {"host": "lefigaro.fr", "policy": "🇪🇺欧洲节点"},
-        {"host": "corriere.it", "policy": "🇪🇺欧洲节点"},
-        {"host": "lufthansa.com", "policy": "🇪🇺欧洲节点"},
-        {"host": "airfrance.com", "policy": "🇪🇺欧洲节点"},
-        {"host": "klm.com", "policy": "🇪🇺欧洲节点"},
-        {"host": "lemonde.fr", "policy": "🇪🇺欧洲节点", "reason": "自 ProxyGFW 迁入：法国本地报刊，与 spiegel.de 同口径"},
-        {"host": "elpais.com", "policy": "🇪🇺欧洲节点", "reason": "自 ProxyGFW 迁入"},
-        {"host": "lematin.ch", "policy": "🇪🇺欧洲节点", "reason": "自 ProxyGFW 迁入"},
-        {"host": "nu.nl", "policy": "🇪🇺欧洲节点", "reason": "自 ProxyGFW 迁入"},
-        {"host": "trouw.nl", "policy": "🇪🇺欧洲节点", "reason": "自 ProxyGFW 迁入"},
-        {"host": "lesoir.be", "policy": "🇪🇺欧洲节点", "reason": "自 ProxyGFW 迁入"},
-        {"host": "nrk.no", "policy": "🇪🇺欧洲节点", "reason": "自 ProxyGFW 迁入"},
-        {"host": "nobel.se", "policy": "🇪🇺欧洲节点", "reason": "自 ProxyGFW 迁入"},
+        {"host": "united.com", "policy": "🇺🇸美国"},
+        {"host": "delta.com", "policy": "🇺🇸美国"},
+        {"host": "aa.com", "policy": "🇺🇸美国"},
+        {"host": "nih.gov", "policy": "🇺🇸美国", "reason": "自 ProxyGFW 迁入：与在册 irs.gov / nasa.gov 同表"},
+        {"host": "stanford.edu", "policy": "🇺🇸美国", "reason": "自 ProxyGFW 迁入：与在册 mit.edu / cmu.edu 同表"},
+        {"host": "census.gov", "policy": "🇺🇸美国", "reason": "自 ProxyGFW 迁入"},
+        {"host": "amazon.co.uk", "policy": "🇬🇧英国", "reason": "与 Japan 的 amazon.co.jp 同构"},
+        {"host": "britishairways.com", "policy": "🇬🇧英国"},
+        {"host": "amazon.de", "policy": "🇪🇺欧洲"},
+        {"host": "lefigaro.fr", "policy": "🇪🇺欧洲"},
+        {"host": "corriere.it", "policy": "🇪🇺欧洲"},
+        {"host": "lufthansa.com", "policy": "🇪🇺欧洲"},
+        {"host": "airfrance.com", "policy": "🇪🇺欧洲"},
+        {"host": "klm.com", "policy": "🇪🇺欧洲"},
+        {"host": "lemonde.fr", "policy": "🇪🇺欧洲", "reason": "自 ProxyGFW 迁入：法国本地报刊，与 spiegel.de 同口径"},
+        {"host": "elpais.com", "policy": "🇪🇺欧洲", "reason": "自 ProxyGFW 迁入"},
+        {"host": "lematin.ch", "policy": "🇪🇺欧洲", "reason": "自 ProxyGFW 迁入"},
+        {"host": "nu.nl", "policy": "🇪🇺欧洲", "reason": "自 ProxyGFW 迁入"},
+        {"host": "trouw.nl", "policy": "🇪🇺欧洲", "reason": "自 ProxyGFW 迁入"},
+        {"host": "lesoir.be", "policy": "🇪🇺欧洲", "reason": "自 ProxyGFW 迁入"},
+        {"host": "nrk.no", "policy": "🇪🇺欧洲", "reason": "自 ProxyGFW 迁入"},
+        {"host": "nobel.se", "policy": "🇪🇺欧洲", "reason": "自 ProxyGFW 迁入"},
         {"host": "rfi.fr", "policy": "Proxy", "reason": "国际广播，非法国本地面（G4 口径）"},
         {"host": "swissinfo.ch", "policy": "Proxy", "reason": "国际广播，非瑞士本地面（G4 口径）"},
         {"host": "dw.com", "policy": "Proxy", "reason": "国际广播（G4 口径）"},
-        {"host": "amazon.co.jp", "policy": "🇯🇵日本节点", "reason": "既有条目不变"},
+        {"host": "amazon.co.jp", "policy": "🇯🇵日本", "reason": "既有条目不变"},
         {"host": "amazon.com", "policy": "Proxy", "reason": "既有 ProxyGFW 精确条目不变"},
         {"host": "binance.us", "policy": "Proxy", "reason": "加密交易所家族随 binance.com 留 ProxyGFW"},
         {"host": "cgst.edu", "policy": "Proxy", "reason": "非美国 .edu 不迁 US"}
