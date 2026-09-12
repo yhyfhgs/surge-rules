@@ -4,6 +4,13 @@
 
 ---
 
+## [2026-09-12·OneDrive 恢复代理] 同步、文件与共享登录统一代理
+
+- 用户反馈直连打不开 OneDrive，修正上一轮要求，改为整条会话接入现有 Microsoft 代理策略；个人版、SharePoint 文件、同步 API、共享登录/认证资源及 Office 网页入口一并覆盖。
+- 从 MicrosoftCN 移除 53 条会话规则：25 条迁入 Microsoft，28 条由 Microsoft 既有父后缀直接承接，避免重复。MicrosoftCN 125 → 72，Microsoft 53 → 78，全库 142,212 条。其他更新/CDN/预览端点与列表顺序保持原样，无新增列表或 profile 改写。
+- 35 张 Surge/Clash 列表逐条一致；346 场景、2,409 请求、4,720 断言通过，含 2,080 条 DNS 断言；82 个 Clash 归属见证、原生候选语法和关系分析通过。A1–A10 无 P0/P1/P2，3 条既有 P3 信息项。发布继续执行标准门禁、完整 MMDB 和 CDN 哈希核验。
+- 直连试验保留为历史证据并明确标记已被替代；当前范围与验证见 [代理恢复记录](docs/evidence/2026-09-12-onedrive-proxy.md)。不将路由匹配或未登录探测写成文件同步成功。
+
 ## [2026-09-12·OneDrive 直连] 同步、文件与共享登录端点统一直连
 
 - 用户要求 OneDrive 同步直连，并明确同意共享微软登录端点也直连。运行中的 Surge 原先将个人版入口、同步 API、文档数据面和登录面交给 Microsoft 代理策略；补齐 MicrosoftCN 的同步/身份端点，迁入 Microsoft 的 4 条和 DownloadCDN 的 1 条认证/客户端资源规则，保持唯一 owner。MicrosoftCN 85 → 125 条，全库净增 35 条。

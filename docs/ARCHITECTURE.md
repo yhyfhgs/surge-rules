@@ -132,27 +132,26 @@ for `apple.com` (AppleCN), `aliyuncs.com` (AlibabaCN), `myqcloud.com`,
 `mojang.com` (Games, download planes in DownloadCDN), `visualstudio.com`,
 `dev.azure.com` (Microsoft), `nhk.jp` (Japan, behind Streaming), `formula1.com`
 (Streaming), `crypto.com` (ProxyGFW), `amazon.co.uk` (UK),
-`microsoft.com`, `live.com`, `live.net`, `microsoftonline.com`, `gfx.ms`,
-`office.com`, `msn.com` (Microsoft), and the terminal
+`microsoft.com`, `live.com`, `office.com`, `msn.com` (Microsoft), and the terminal
 `cn` catch-all (ChinaTLD). Because every child sits in an earlier list, the `topology.json` constraints are load-bearing: reordering a
 constrained pair silently kills the child.
 
 `MicrosoftCN` precedes `Microsoft` in the service section. Microsoft itself owns
 `microsoft.com`, `live.com`, `office.com` and `msn.com`; its existing CN exceptions
-win first. The user approved direct priority for the former `files.1drv.com`,
-`content.office.net`, `cdn.designerapp.osi.office.net` and
-`odc.officeapps.live.com` proxy exceptions. No extra fallback list or inline
-exception is needed. DownloadCDN remains ahead of both lists.
-On 2026-09-12 the user also selected DIRECT for OneDrive sync/storage and its
-shared sign-in dependencies. Their explicit hosts and subtrees live in
-MicrosoftCN, ahead of the broader Microsoft service owners. Authentication
-assets previously in Microsoft or DownloadCDN moved to MicrosoftCN; the same
-hosts are consequently direct when used by Copilot or Teams. Other Microsoft
-service requests retain their policies. This is a routing decision, not a claim
-that every endpoint is reachable: the
-[current evidence](evidence/2026-09-12-onedrive-direct.md) records two personal
-OneDrive hosts whose local DNS answers point into Meta-owned ranges and whose
-direct probes time out.
+win first. `content.office.net`, `cdn.designerapp.osi.office.net` and
+`odc.officeapps.live.com` retain their approved direct priority. No extra
+fallback list or inline exception is needed. DownloadCDN remains ahead of both.
+
+The latest 2026-09-12 user decision routes OneDrive sync, files and shared
+sign-in through Microsoft after the direct trial failed. Its explicit domains,
+SharePoint storage, authentication assets and shared Office web entry belong
+to Microsoft, or are covered by Microsoft's existing suffixes after removing
+the earlier MicrosoftCN exceptions. This includes `files.1drv.com` and replaces
+its earlier direct decision. Copilot and Teams use the same proxy policy for
+their shared login hosts again. Other MicrosoftCN update/CDN/preview endpoints
+retain their owners. See the [proxy restoration evidence](evidence/2026-09-12-onedrive-proxy.md);
+the [direct trial](evidence/2026-09-12-onedrive-direct.md) remains historical
+evidence of poisoned local DNS and direct timeouts.
 Google now has `google.com`, `googleapis.com`,
 `googleusercontent.com` and `ggpht.com` parents after YouTube/download exceptions.
 The user explicitly includes Google API tenant traffic by network operator.

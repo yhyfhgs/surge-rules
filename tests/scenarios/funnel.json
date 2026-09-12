@@ -388,7 +388,7 @@
   },
   {
     "name": "funnel_microsoft_cn_office_faces",
-    "desc": "2026-09-07 列表简化：MicrosoftCN 优先，Office/OneDrive 的四处旧代理例外随所属父域直连；其余请求维持各自既有策略。",
+    "desc": "Office 国内入口、预览与 CDN 保持 DIRECT；OneDrive 的 1drv 文件族按 2026-09-12 最新用户决定改走 Microsoft 代理。",
     "requests": [
       {"host": "officeapps.live.com"},
       {"host": "view.officeapps.live.com"},
@@ -415,20 +415,21 @@
       {"host": "shell.cdn.office.net"}
     ],
     "assert": {
-      "same_policy": true, "policy": "DIRECT", "no_dns_leak": true,
+      "same_policy": true,
+      "policy": "DIRECT",
+      "no_dns_leak": true,
       "per_request": [
-        {"host": "odc.officeapps.live.com", "policy": "DIRECT", "reason": "2026-09-07 用户确认 MicrosoftCN 优先，归属直连"},
-        {"host": "content.office.net", "policy": "DIRECT", "reason": "2026-09-07 用户确认 MicrosoftCN 优先，归属直连"},
-        {"host": "cdn.designerapp.osi.office.net", "policy": "DIRECT", "reason": "2026-09-07 用户确认 MicrosoftCN 优先，归属直连"},
-        {"host": "files.1drv.com", "policy": "DIRECT", "reason": "2026-09-07 用户确认 MicrosoftCN 优先，归属直连"},
+        {"host": "files.1drv.com", "policy": "Google-X-Meta-MS", "reason": "2026-09-12 用户修正为 OneDrive 与共享登录统一代理"},
         {"host": "attachments.office.net", "policy": "下载", "reason": "前置占位：DownloadCDN.list DOMAIN-SUFFIX,attachments.office.net"},
-        {"host": "shell.cdn.office.net", "policy": "下载", "reason": "前置占位：DownloadCDN.list DOMAIN-SUFFIX,shell.cdn.office.net"}
+        {"host": "shell.cdn.office.net", "policy": "下载", "reason": "前置占位：DownloadCDN.list DOMAIN-SUFFIX,shell.cdn.office.net"},
+        {"host": "1drv.com", "policy": "Google-X-Meta-MS", "reason": "2026-09-12 OneDrive 会话接回 Microsoft 代理"},
+        {"host": "by3301-a.1drv.com", "policy": "Google-X-Meta-MS", "reason": "2026-09-12 OneDrive 会话接回 Microsoft 代理"}
       ]
     }
   },
   {
     "name": "funnel_microsoft_global_session_faces",
-    "desc": "2026-09-12 更新：共享登录已按用户要求直连，其余服务面保持原策略。历史背景：§3 Microsoft(10) 补录：graph / teams / login.microsoft.com 三条全球会话与 API 面，与既有 login.microsoftonline.com、account.microsoft.com 同侧；不改动 microsoft.com 顶点的精确形态（会话面归一留待连通性实测）。",
+    "desc": "Microsoft Graph、Teams、共享登录与账户入口同属 Microsoft 代理；2026-09-12 撤销登录直连例外。",
     "requests": [
       {"host": "graph.microsoft.com"},
       {"host": "teams.microsoft.com"},
@@ -436,10 +437,11 @@
       {"host": "login.microsoftonline.com"},
       {"host": "account.microsoft.com"}
     ],
-    "assert": {"same_policy": true, "policy": "Google-X-Meta-MS", "no_dns_leak": true, "per_request": [
-        {"host": "login.microsoft.com", "policy": "DIRECT", "reason": "2026-09-12 用户确认共享登录也直连"},
-        {"host": "login.microsoftonline.com", "policy": "DIRECT", "reason": "2026-09-12 用户确认共享登录也直连"}
-    ]}
+    "assert": {
+      "same_policy": true,
+      "policy": "Google-X-Meta-MS",
+      "no_dns_leak": true
+    }
   },
   {
     "name": "funnel_google_api_endpoints_and_cn_mirror",

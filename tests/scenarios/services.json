@@ -1,24 +1,34 @@
 [
   {
-    "name": "onedrive_personal_direct",
-    "desc": "2026-09-12 用户明确要求 OneDrive 同步与共享登录直连；前置 MicrosoftCN 认领个人版子树。路由断言不保证连通性，当前两个入口仍有 DNS 异常及直连超时，见当日证据。",
+    "name": "onedrive_personal_proxy",
+    "desc": "2026-09-12 用户反馈直连打不开 OneDrive，个人版 Web、同步 API、相册与预览子树统一走 Microsoft 代理。",
     "requests": [
       {"host": "onedrive.live.com", "note": "个人版 Web 入口"},
       {"host": "skyapi.onedrive.live.com", "note": "SkyDrive 遗留 API 端点，客户端同步用"},
       {"host": "photos.onedrive.live.com", "note": "相册面"},
       {"host": "snapshot.onedrive.live.com", "note": "缩略图/预览面"}
     ],
-    "assert": {"same_policy": true, "policy": "DIRECT", "no_dns_leak": true}
+    "assert": {
+      "same_policy": true,
+      "policy": "Google-X-Meta-MS",
+      "no_dns_leak": true
+    }
   },
   {
-    "name": "onedrive_carveout_no_overreach_direct",
-    "desc": "2026-09-12 OneDrive 子树改直连后，既有 Office/重定向端点仍由 MicrosoftCN 直连。",
+    "name": "onedrive_shared_web_and_preview_boundaries",
+    "desc": "OneDrive 共用的 Office 网页入口与账户重定向走 Microsoft 代理；通用 Office 文档预览仍由 MicrosoftCN 直连。",
     "requests": [
       {"host": "office.live.com", "note": "Office 网页版入口"},
       {"host": "view.officeapps.live.com", "note": "Office 文档在线预览"},
       {"host": "g.live.com", "note": "Microsoft 账户重定向面"}
     ],
-    "assert": {"same_policy": true, "policy": "DIRECT"}
+    "assert": {
+      "policy": "DIRECT",
+      "per_request": [
+        {"host": "office.live.com", "policy": "Google-X-Meta-MS", "reason": "2026-09-12 OneDrive 会话接回 Microsoft 代理"},
+        {"host": "g.live.com", "policy": "Google-X-Meta-MS", "reason": "2026-09-12 OneDrive 会话接回 Microsoft 代理"}
+      ]
+    }
   },
   {
     "name": "meta_ip_first_party_literal",
@@ -489,10 +499,10 @@
   },
   {
     "name": "ms_mscn_direct_face_unshadowed",
-    "desc": "W-MS 防遮蔽回归（负例）：迁入 Microsoft.list 的任何条目都不得把 MicrosoftCN 的国内直连面拽进代理。本组 13 条全部经双侧 dig 实证 CN 面（tdnsdl1.cn / cngslb.com / ksyuncdn.com / ctlcdn.cn / cn.akamaitech.net / Akamai CN POP），必须仍 DIRECT；任何一条翻成 Google-X-Meta-MS 即为「宽后缀回流 Microsoft.list」的信号",
+    "desc": "OneDrive 客户端、Office 网页入口与账户重定向统一代理；其余微软国内 CDN 和文档预览端点仍直连。",
     "requests": [
-      {"host": "oneclient.sfx.ms", "note": "OneDrive 客户端资源直连；sfx.ms 仍只允许认领已知主机"},
-      {"host": "office.live.com", "note": "2026-09-12 OneDrive 与 Office 子树均直连"},
+      {"host": "oneclient.sfx.ms", "note": "2026-09-12 用户修正：随 OneDrive 会话走 Microsoft 代理"},
+      {"host": "office.live.com", "note": "2026-09-12 用户修正：随 OneDrive 会话走 Microsoft 代理"},
       {"host": "view.officeapps.live.com"},
       {"host": "g.live.com"},
       {"host": "www.msn.com", "note": "与新迁入的 msn.com.tw 的分界：msn.com 仍 DIRECT"},
@@ -505,32 +515,42 @@
       {"host": "oneocsp.microsoft.com"},
       {"host": "statics.teams.cdn.office.net", "note": "CN 侧 a1813.dscd.akamai.net.0.1.cn.akamaitech.net"}
     ],
-    "assert": {"same_policy": true, "policy": "DIRECT", "no_dns_leak": true}
+    "assert": {
+      "same_policy": true,
+      "policy": "DIRECT",
+      "no_dns_leak": true,
+      "per_request": [
+        {"host": "oneclient.sfx.ms", "policy": "Google-X-Meta-MS", "reason": "2026-09-12 OneDrive 会话接回 Microsoft 代理"},
+        {"host": "office.live.com", "policy": "Google-X-Meta-MS", "reason": "2026-09-12 OneDrive 会话接回 Microsoft 代理"},
+        {"host": "g.live.com", "policy": "Google-X-Meta-MS", "reason": "2026-09-12 OneDrive 会话接回 Microsoft 代理"}
+      ]
+    }
   },
   {
     "name": "ms_explicit_owner_boundary",
-    "desc": "2026-09-12 补齐 OneDrive 同步与客户端端点直连。历史背景：2026-09-07 列表简化：MicrosoftCN 优先，Office/OneDrive 的四处旧代理例外随所属父域直连；其余请求维持各自既有策略。",
+    "desc": "OneDrive 客户端和 Live API 随 Microsoft 服务代理；通用 Office CDN 直连，任意 Azure 租户不得被厂商宽后缀误收。",
     "requests": [
       {"host": "microsoft.com"},
       {"host": "officeclient.microsoft.com"},
       {"host": "apis.live.net"},
       {"host": "www.onenote.com"},
       {"host": "content.office.net"},
-      {"host": "p.sfx.ms", "note": "2026-09-12 OneDrive 静态资源精确主机归 MicrosoftCN"},
+      {"host": "p.sfx.ms", "note": "2026-09-12 用户修正：随 OneDrive 会话走 Microsoft 代理"},
       {"host": "sometenant.webpubsub.azure.com", "note": "任意 WebPubSub 租户不属于 AI 的 OpenAI 专属实例，azure.com 多租户宽后缀已移除"},
       {"host": "sometenant.azureedge.net", "note": "任意 Azure Edge 租户，宽兜底已移除"},
       {"host": "sometenant.azurewebsites.net", "note": "PSL 多租户边界，宽兜底已移除"},
       {"host": "hockeyapp.net", "note": "微软持有但已停服，NS/SOA 双侧无应答，已移除死域规则"}
     ],
     "assert": {
-      "same_policy": false, "no_dns_leak": true,
+      "same_policy": false,
+      "no_dns_leak": true,
       "per_request": [
         {"host": "microsoft.com", "policy": "Google-X-Meta-MS"},
-        {"host": "officeclient.microsoft.com", "policy": "DIRECT"},
-        {"host": "apis.live.net", "policy": "DIRECT"},
+        {"host": "officeclient.microsoft.com", "policy": "Google-X-Meta-MS", "reason": "2026-09-12 用户修正为 OneDrive 与共享登录统一代理"},
+        {"host": "apis.live.net", "policy": "Google-X-Meta-MS", "reason": "2026-09-12 用户修正为 OneDrive 与共享登录统一代理"},
         {"host": "www.onenote.com", "policy": "Google-X-Meta-MS"},
         {"host": "content.office.net", "policy": "DIRECT"},
-        {"host": "p.sfx.ms", "policy": "DIRECT"},
+        {"host": "p.sfx.ms", "policy": "Google-X-Meta-MS", "reason": "2026-09-12 用户修正为 OneDrive 与共享登录统一代理"},
         {"host": "sometenant.webpubsub.azure.com", "policy": "Final"},
         {"host": "sometenant.azureedge.net", "policy": "Final"},
         {"host": "sometenant.azurewebsites.net", "policy": "Final"},
@@ -540,9 +560,9 @@
   },
   {
     "name": "ms_explicit_subtrees_intact",
-    "desc": "2026-09-07 列表简化：MicrosoftCN 优先，Office/OneDrive 的四处旧代理例外随所属父域直连；其余请求维持各自既有策略。",
+    "desc": "OneDrive 文档数据和 OneNote 归 Microsoft 代理；Office CDN、开发下载与 OpenAI WebPubSub 保留各自既有策略。",
     "requests": [
-      {"host": "d.docs.live.net", "note": "2026-09-12 OneDrive 文档数据面直连"},
+      {"host": "d.docs.live.net", "note": "2026-09-12 用户修正：随 OneDrive 会话走 Microsoft 代理"},
       {"host": "contentsync.onenote.com"},
       {"host": "hierarchyapi.onenote.com"},
       {"host": "support.content.office.net"},
@@ -553,7 +573,7 @@
     "assert": {
       "no_dns_leak": true,
       "per_request": [
-        {"host": "d.docs.live.net", "policy": "DIRECT"},
+        {"host": "d.docs.live.net", "policy": "Google-X-Meta-MS", "reason": "2026-09-12 用户修正为 OneDrive 与共享登录统一代理"},
         {"host": "contentsync.onenote.com", "policy": "Google-X-Meta-MS"},
         {"host": "hierarchyapi.onenote.com", "policy": "Google-X-Meta-MS"},
         {"host": "support.content.office.net", "policy": "DIRECT"},
@@ -944,7 +964,7 @@
   },
   {
     "name": "major_vendor_split_boundaries",
-    "desc": "2026-09-07 列表简化：MicrosoftCN 优先，Office/OneDrive 的四处旧代理例外随所属父域直连；其余请求维持各自既有策略。",
+    "desc": "复核厂商服务与国内/下载例外边界；OneDrive 客户端资源按最新用户决定归 Microsoft 代理，其他厂商端点保持既有归属。",
     "requests": [
       {"host": "account.adobe.com"},
       {"host": "auth.services.adobe.com"},
@@ -973,7 +993,7 @@
         {"host": "account.microsoft.com", "policy": "Google-X-Meta-MS"},
         {"host": "api.onenote.com", "policy": "Google-X-Meta-MS"},
         {"host": "support.content.office.net", "policy": "DIRECT"},
-        {"host": "oneclient.sfx.ms", "policy": "DIRECT"},
+        {"host": "oneclient.sfx.ms", "policy": "Google-X-Meta-MS", "reason": "2026-09-12 用户修正为 OneDrive 与共享登录统一代理"},
         {"host": "api.adguard.com", "policy": "Proxy"},
         {"host": "local.adguard.org", "policy": "DIRECT"},
         {"host": "cdn.adguard.com", "policy": "下载"},
@@ -1020,7 +1040,7 @@
   },
   {
     "name": "microsoft_dev_control_planes_backfill_20260902",
-    "desc": "2026-09-12 更新：共享 Entra 登录直连。历史背景：2026-09-02 覆盖补录：Visual Studio / VS Code / Azure DevOps / Azure Portal / Azure AI Foundry / Edge 服务与 Entra 登录面归 Microsoft。azure.com 不做 apex（AI 表的 webpubsub 通配与 Streaming 之后的子域会被遮蔽），只收显式子树；DownloadCDN 前位的下载面保持不变。",
+    "desc": "Visual Studio、VS Code、Azure 服务与共享 Entra 登录归 Microsoft 代理；保留 DownloadCDN 与 OpenAI WebPubSub 的既有独立归属。",
     "requests": [
       {"host": "visualstudio.com"},
       {"host": "marketplace.visualstudio.com"},
@@ -1032,7 +1052,7 @@
       {"host": "ai.azure.com", "note": "自 Streaming 迁入（误归属）"},
       {"host": "edge.microsoft.com"},
       {"host": "login.windows.net"},
-      {"host": "login.microsoftonline.com", "note": "2026-09-12 由前置 MicrosoftCN 的登录子树直连"},
+      {"host": "login.microsoftonline.com", "note": "2026-09-12 用户修正：随 OneDrive 会话走 Microsoft 代理"},
       {"host": "microsoftonline.com"},
       {"host": "update.code.visualstudio.com", "note": "负例：VS Code 更新包，DownloadCDN 先于 Microsoft"},
       {"host": "sts.online.visualstudio.com", "note": "负例：既有 DownloadCDN 条目"},
@@ -1040,10 +1060,10 @@
       {"host": "applicationinsights.azure.com", "note": "负例：既有 DownloadCDN 条目"}
     ],
     "assert": {
-      "same_policy": true, "policy": "Google-X-Meta-MS", "no_dns_leak": true,
+      "same_policy": true,
+      "policy": "Google-X-Meta-MS",
+      "no_dns_leak": true,
       "per_request": [
-        {"host": "login.windows.net", "policy": "DIRECT", "reason": "2026-09-12 用户确认共享登录也直连"},
-        {"host": "login.microsoftonline.com", "policy": "DIRECT", "reason": "2026-09-12 用户确认共享登录也直连"},
         {"host": "update.code.visualstudio.com", "policy": "下载", "reason": "ordered-safe：DownloadCDN 子域先于 Microsoft 的 visualstudio.com 后缀"},
         {"host": "sts.online.visualstudio.com", "policy": "下载", "reason": "同上"},
         {"host": "chatgpt-async-webps-prod-eus.webpubsub.azure.com", "policy": "AI", "reason": "不引入 azure.com apex，AI 表通配保持"},

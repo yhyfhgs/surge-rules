@@ -147,29 +147,29 @@
     }
   },
   {
-    "name": "kw_direct_microsoftcn_onedrive_exact",
-    "desc": "2026-09-07 列表简化：MicrosoftCN 优先，Office/OneDrive 的四处旧代理例外随所属父域直连；其余请求维持各自既有策略。",
+    "name": "kw_proxy_microsoft_onedrive_exact",
+    "desc": "OneDrive 精确域名和所属子树统一代理；字符串相似的 firestonedrivestore.com 与 51drv.com 仍按独立归属断言，禁止恢复关键词。",
     "requests": [
       {"host": "1drv.ms", "note": "OneDrive 短链"},
       {"host": "1drv.com"},
       {"host": "by3301-a.1drv.com", "note": "区域数据面主机名"},
       {"host": "api.onedrive.com"},
-      {"host": "onedrive.live.com", "note": "2026-09-12 用户要求直连，由前置 MicrosoftCN 的窄子树认领"},
+      {"host": "onedrive.live.com", "note": "2026-09-12 用户修正：随 OneDrive 会话走 Microsoft 代理"},
       {"host": "skydrive.wns.windows.com", "note": "WNS 推送端点"},
-      {"host": "files.1drv.com", "note": "2026-09-07 用户确认 MicrosoftCN 优先，归属直连"},
+      {"host": "files.1drv.com", "note": "2026-09-12 用户修正：随 OneDrive 会话走 Microsoft 代理"},
       {"host": "firestonedrivestore.com", "note": "负例：上游 Global 表域，串中含 onedrive"},
       {"host": "51drv.com", "note": "负例：上游 ChinaMax 表域，串中含 1drv"}
     ],
     "assert": {
       "no_dns_leak": true,
       "per_request": [
-        {"host": "1drv.ms", "policy": "DIRECT", "reason": "DOMAIN-SUFFIX,1drv.ms（新增）"},
-        {"host": "1drv.com", "policy": "DIRECT", "reason": "DOMAIN-SUFFIX,1drv.com（新增）"},
-        {"host": "by3301-a.1drv.com", "policy": "DIRECT", "reason": "DOMAIN-SUFFIX,1drv.com（新增）"},
-        {"host": "api.onedrive.com", "policy": "DIRECT", "reason": "DOMAIN-SUFFIX,onedrive.com（新增）"},
-        {"host": "onedrive.live.com", "policy": "DIRECT", "reason": "2026-09-12 用户直连裁决取代旧代理止血；保持窄子树，不扩宽 live.com"},
-        {"host": "skydrive.wns.windows.com", "policy": "DIRECT", "reason": "DOMAIN-SUFFIX,skydrive.wns.windows.com（新增）"},
-        {"host": "files.1drv.com", "policy": "DIRECT", "reason": "2026-09-07 用户确认 MicrosoftCN 优先，归属直连"},
+        {"host": "1drv.ms", "policy": "Google-X-Meta-MS", "reason": "2026-09-12 用户修正为 OneDrive 与共享登录统一代理"},
+        {"host": "1drv.com", "policy": "Google-X-Meta-MS", "reason": "2026-09-12 用户修正为 OneDrive 与共享登录统一代理"},
+        {"host": "by3301-a.1drv.com", "policy": "Google-X-Meta-MS", "reason": "2026-09-12 用户修正为 OneDrive 与共享登录统一代理"},
+        {"host": "api.onedrive.com", "policy": "Google-X-Meta-MS", "reason": "2026-09-12 用户修正为 OneDrive 与共享登录统一代理"},
+        {"host": "onedrive.live.com", "policy": "Google-X-Meta-MS", "reason": "2026-09-12 用户修正为 OneDrive 与共享登录统一代理"},
+        {"host": "skydrive.wns.windows.com", "policy": "Google-X-Meta-MS", "reason": "2026-09-12 用户修正为 OneDrive 与共享登录统一代理"},
+        {"host": "files.1drv.com", "policy": "Google-X-Meta-MS", "reason": "2026-09-12 用户修正为 OneDrive 与共享登录统一代理"},
         {"host": "firestonedrivestore.com", "policy": "Final", "reason": "原被 onedrive keyword 强制 DIRECT，属跨境误分流"},
         {"host": "51drv.com", "policy_in": ["Final", "DIRECT"], "reason": "无显式 owner 时落 Final；ChinaDomain 再生后可能按机器层证据回收为 DIRECT。"}
       ]

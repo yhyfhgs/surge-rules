@@ -332,8 +332,8 @@
   },
   "onedrive_review": {
     "review_date": "2026-09-12",
-    "evidence": "docs/evidence/2026-09-12-onedrive-direct.md",
-    "decision": "User requests DIRECT for OneDrive sync, storage and shared sign-in endpoints; other Microsoft services keep their owners.",
+    "evidence": "docs/evidence/2026-09-12-onedrive-proxy.md",
+    "decision": "The user supersedes the failed DIRECT trial: OneDrive sync, storage and shared sign-in use the existing Microsoft proxy policy; unrelated MicrosoftCN update/CDN/preview endpoints retain their owners.",
     "references": [
       {
         "id": "onedrive-consumer",
@@ -354,6 +354,7 @@
         "purpose": "Official endpoint ownership reference, not an upstream rule list or reproducible build input."
       }
     ],
-    "note": "Curated routing decision. Observed official HTML hashes document the review inputs; mutable documentation is not claimed to be pinned or reproducibly rebuildable. No upstream list refresh or IP allocation change."
+    "note": "Curated routing decision. Observed official HTML hashes document the review inputs; mutable documentation is not claimed to be pinned or reproducibly rebuildable. No upstream list refresh or IP allocation change.",
+    "supersedes_evidence": "docs/evidence/2026-09-12-onedrive-direct.md"
   }
 }

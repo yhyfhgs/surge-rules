@@ -1326,7 +1326,7 @@
     },
     {
       "pattern": "DOMAIN-SUFFIX,sfx.ms",
-      "reason": "2026-09-12 OneDrive 的 oneclient.sfx.ms 与 p.sfx.ms 均归 MicrosoftCN；只认领已知端点，不把整个 sfx.ms 共享命名空间归 OneDrive，因此仍禁宽后缀。"
+      "reason": "2026-09-12 用户修正：OneDrive 的 oneclient.sfx.ms 与 p.sfx.ms 均归 Microsoft 代理；只认领已知端点，不把整个 sfx.ms 共享命名空间归 OneDrive，因此仍禁宽后缀。"
     },
     {
       "pattern": "DOMAIN-SUFFIX,azure.com",

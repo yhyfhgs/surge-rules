@@ -1,7 +1,7 @@
 [
   {
-    "name": "onedrive_sync_storage_and_identity_direct",
-    "desc": "2026-09-12 用户要求同步、文件和共享登录均直连；覆盖个人版、企业版、旧 API、嵌套存储主机、认证静态资源和 MFA。域名来自微软官方端点文档，测试不携带真实租户或账户标识。",
+    "name": "onedrive_sync_storage_and_identity_proxy",
+    "desc": "2026-09-12 用户反馈直连不可用，改为同步、文件、共享登录全链路代理；覆盖个人版、企业版、旧 API、嵌套存储主机、认证资源与 MFA。测试不携带真实租户或账户标识。",
     "requests": [
       {"host": "onedrive.live.com"},
       {"host": "skyapi.onedrive.live.com"},
@@ -71,11 +71,15 @@
       {"host": "a.phonefactor.net"},
       {"host": "a.hip.live.com"}
     ],
-    "assert": {"same_policy": true, "policy": "DIRECT", "no_dns_leak": true}
+    "assert": {
+      "same_policy": true,
+      "policy": "Google-X-Meta-MS",
+      "no_dns_leak": true
+    }
   },
   {
-    "name": "onedrive_direct_preserves_service_and_domain_boundaries",
-    "desc": "直连窄子树不得扩宽为微软全站、live.com/live.net、共享云或 OneDrive 关键词；Copilot/Teams 服务面与其他微软管理 API 保持原策略。",
+    "name": "onedrive_proxy_preserves_service_and_domain_boundaries",
+    "desc": "OneDrive 代理保持精确归属，不引入共享云或宽关键词；Copilot/Teams 服务面与其他微软 API 保持 Microsoft 策略，伪装域名和任意租户不得被误收。",
     "requests": [
       {"host": "copilot.microsoft.com"},
       {"host": "teams.microsoft.com"},

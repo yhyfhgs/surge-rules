@@ -1,10 +1,12 @@
 # AUTO-GENERATED — Clash(Mihomo) classical 规则，由 ../lists/Microsoft.list 派生
 # 勿手工编辑；修改 Surge 源后运行 python3 tools/surge2clash.py 重新生成
 
-# Microsoft — 微软国际服务与 GitHub；OneDrive、共享登录与国内 CDN 归 MicrosoftCN
+# Microsoft — 微软国际服务、GitHub、OneDrive 同步与共享登录
+# OneDrive 代理恢复：docs/evidence/2026-09-12-onedrive-proxy.md
 
 DOMAIN,catalogartifact.azureedge.net
 DOMAIN,claritystatic.azureedge.net
+DOMAIN,clientconfig.microsoftonline-p.net
 DOMAIN,connectcache20.azureedge.net
 DOMAIN,copilotprodattachments.blob.core.windows.net
 DOMAIN,edge-cloud-resource-static.azureedge.net
@@ -14,8 +16,13 @@ DOMAIN,edgeassetservice.azureedge.net
 DOMAIN,edgestatic.azureedge.net
 DOMAIN,edgestorewebcdn.azureedge.net
 DOMAIN,mobilecenter.azureedge.net
+DOMAIN,p.sfx.ms
+DOMAIN,posarprodcssservice.accesscontrol.windows.net
+DOMAIN,redemptionservices.accesscontrol.windows.net
 DOMAIN,xpaywalletcdn.azureedge.net
 
+DOMAIN-SUFFIX,1drv.com
+DOMAIN-SUFFIX,1drv.ms
 DOMAIN-SUFFIX,ai.azure.com
 DOMAIN-SUFFIX,bing.com
 DOMAIN-SUFFIX,bing.net
@@ -40,20 +47,39 @@ DOMAIN-SUFFIX,img-s-msn-com.akamaized.net
 DOMAIN-SUFFIX,in.appcenter.ms
 DOMAIN-SUFFIX,live.com
 DOMAIN-SUFFIX,live.net
+DOMAIN-SUFFIX,livefilestore.com
+DOMAIN-SUFFIX,login.windows.net
 DOMAIN-SUFFIX,m365copilot.com
 DOMAIN-SUFFIX,management.azure.com
+DOMAIN-SUFFIX,mesh.com
 DOMAIN-SUFFIX,microsoft-falcon.io
 DOMAIN-SUFFIX,microsoft.com
 DOMAIN-SUFFIX,microsoftapp.net
+DOMAIN-SUFFIX,microsoftonline-p.com
 DOMAIN-SUFFIX,microsoftonline.com
+DOMAIN-SUFFIX,microsoftpersonalcontent.com
 DOMAIN-SUFFIX,microsofttranslator.com
+DOMAIN-SUFFIX,msauth.net
+DOMAIN-SUFFIX,msauthimages.net
+DOMAIN-SUFFIX,msftauth.net
+DOMAIN-SUFFIX,msftauthimages.net
+DOMAIN-SUFFIX,msftidentity.com
+DOMAIN-SUFFIX,msidentity.com
 DOMAIN-SUFFIX,msn.com
 DOMAIN-SUFFIX,msn.com.tw
 DOMAIN-SUFFIX,office.com
+DOMAIN-SUFFIX,oneclient.sfx.ms
+DOMAIN-SUFFIX,onedrive.com
 DOMAIN-SUFFIX,onenote.com
+DOMAIN-SUFFIX,phonefactor.net
 DOMAIN-SUFFIX,portal.azure.com
 DOMAIN-SUFFIX,prod-streaming-video-msn-com.akamaized.net
+DOMAIN-SUFFIX,sharepoint.com
+DOMAIN-SUFFIX,sharepointonline.com
 DOMAIN-SUFFIX,skype.com
+DOMAIN-SUFFIX,spoprod-a.akamaihd.net
+DOMAIN-SUFFIX,svc.ms
 DOMAIN-SUFFIX,usercontent.microsoft
 DOMAIN-SUFFIX,visualstudio.com
 DOMAIN-SUFFIX,vscode.dev
+DOMAIN-SUFFIX,wns.windows.com

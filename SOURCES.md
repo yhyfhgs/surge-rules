@@ -64,12 +64,15 @@ for accepted entries, domestic/international ownership and deliberate omissions.
 
 ## 2026-09-12 OneDrive endpoint review
 
-The user selected DIRECT for OneDrive sync, storage and shared sign-in hosts.
+The user initially selected DIRECT for OneDrive sync, storage and shared sign-in
+hosts, then reported direct access failure and requested Microsoft proxy routing.
 Endpoint ownership was checked against Microsoft's
 [consumer OneDrive endpoint reference](https://learn.microsoft.com/en-us/sharepoint/required-urls-and-ports)
 and [Microsoft 365 endpoint reference](https://learn.microsoft.com/en-us/microsoft-365/enterprise/urls-and-ip-address-ranges?view=o365-worldwide).
 `sources.lock.json:onedrive_review` records retrieval dates and observed HTML
 hashes. These are mutable documentation snapshots, not pinned upstream rule
 inputs or reproducible build promises. No upstream list or IP data was refreshed.
-The [evidence record](docs/evidence/2026-09-12-onedrive-direct.md) separates the
-user's routing decision from actual direct connectivity.
+The [direct-trial evidence](docs/evidence/2026-09-12-onedrive-direct.md) and
+[current proxy restoration](docs/evidence/2026-09-12-onedrive-proxy.md) separate
+routing decisions from actual connectivity. The endpoint reference inputs are
+unchanged; this correction is a user policy decision, not an upstream refresh.

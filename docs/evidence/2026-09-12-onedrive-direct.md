@@ -1,5 +1,9 @@
 # OneDrive direct routing — 2026-09-12
 
+**Historical trial, superseded later on the same day:** the user reported that
+OneDrive could not open directly and requested proxy routing. The current
+decision is recorded in the [proxy restoration](2026-09-12-onedrive-proxy.md).
+
 The user requested DIRECT for OneDrive synchronization and explicitly included
 shared Microsoft sign-in endpoints, accepting the effect on other Microsoft
 applications that use the same hosts.

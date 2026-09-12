@@ -245,7 +245,7 @@ be "resolved" by a syntax-only change.
 | Item | What is unresolved | What would settle it |
 |---|---|---|
 | `Streaming` IP surface | Whether every CIDR still belongs to a streaming provider, and whether any range should move to a regional or service owner | Real traffic capture plus a shadow-routing comparison against the live profile |
-| OneDrive direct connectivity | Routing is settled by the 2026-09-12 user decision: sync, storage and shared sign-in endpoints use MicrosoftCN/DIRECT. Local DNS still returns Meta-owned addresses for `onedrive.live.com` and `skyapi.onedrive.live.com`, and direct HEAD probes time out. | Correct DNS answers plus successful direct requests and a real authenticated client sync; rule matching alone cannot establish this. See the [evidence](evidence/2026-09-12-onedrive-direct.md). |
+| OneDrive authenticated synchronization | The latest 2026-09-12 user decision replaces the failed direct trial with Microsoft proxy routing for sync, storage and shared sign-in. Rule matching does not establish completed file synchronization. | A real authenticated client sync; successful unauthenticated probes only establish endpoint reachability. See the [proxy restoration](evidence/2026-09-12-onedrive-proxy.md) and [direct-trial evidence](evidence/2026-09-12-onedrive-direct.md). |
 
 Microsoft suffixes belong in `Microsoft.list`. Keep `MicrosoftCN` before
 `Microsoft`, and DownloadCDN before both. On 2026-09-07 the user explicitly
@@ -255,12 +255,13 @@ priority cycle or extra list is required. Prefer editing existing owner lists;
 do not add a separate manufacturer fallback list or inline configuration rules
 to preserve those superseded exceptions.
 
-The 2026-09-12 user decision supersedes the earlier OneDrive proxy stopgap:
-keep the OneDrive hosts/subtrees and shared authentication endpoints in
-MicrosoftCN. The user explicitly accepted that other Microsoft applications
-using those same login hosts also go direct. Keep unrelated service parents
-in Microsoft; shared cloud namespaces are not OneDrive endpoints merely because
-the official allowlist contains broad compatibility entries. Do not restore a
-proxy exception silently to hide a connectivity failure. Record DNS and direct
-connection evidence separately from rule-policy verification. The current
-connectivity issue remains open as documented above.
+The latest 2026-09-12 instruction supersedes both the OneDrive direct trial and
+the older DIRECT decision for `files.1drv.com`: the user reported that OneDrive
+could not open directly and requested proxy routing. Keep its sync, file and
+shared authentication endpoints in Microsoft. `office.live.com`, used by the
+OneDrive/Office web session, also uses Microsoft; generic Office preview and
+domestic update/CDN endpoints retain MicrosoftCN. Do not reintroduce the removed
+OneDrive direct exceptions during an upstream refresh. Shared cloud namespaces
+are not OneDrive endpoints merely because Microsoft's allowlist contains broad
+compatibility entries. Record reachability and authenticated-sync evidence
+separately from rule-policy verification.
