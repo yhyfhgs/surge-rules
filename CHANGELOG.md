@@ -10,6 +10,7 @@
 - CIDR 折叠发布门禁改为保留并分别校验尾参，修复旧工具强制 `no-resolve` 与分区解析的冲突；跨尾参集合差异仍拒绝通过。
 - **4,750 条场景断言、84 条对抗断言通过**；静态无 P0/P1/P2，3 个既有 P3；52 个 Mihomo provider 实际加载计数一致，双栈 DNS 和故障 SERVFAIL 验证通过。真实登录/同步/支付/播放及日常 Final 降幅不以匿名探针代替。
 - `8c92cbb` 已推送并发布，状态 **PUBLISHED_AND_VERIFIED**：103 个变更分发文件经先验/刷新核验通过，另对 `@main` 与固定提交各验 **105/105** 文件 SHA-256。Surge 与 Clash 私有配置均切换到同一固定版本，节点与证书保留；Surge 52/52 资源就绪、90/90 原生匹配通过（OneDrive 67/67）。本机未运行生产 Clash，更新后的 YAML 经隔离 Mihomo 从 CDN 加载 52 表 / 140,282 条、双栈 DNS 与 8/8 连接策略验证通过，测试进程已停止。[完整发布证据与逐表数量](docs/evidence/2026-09-13-domain-ip-v2.md)。
+- 后续按用户要求恢复正式 `@main` URL：Surge 的 102 处列表引用（含 Host DNS 与集合排除）和 Clash 的 52 个 provider 地址均移除提交编码，Clash 使用常规 v2 缓存目录。重新核验 CDN 105/105；双端语法通过，Surge 重载/刷新后 52/52 资源就绪、90/90 原生匹配通过。规则、节点与证书未改。
 
 保留最近批次的动机、结果与验证；旧日志中的命令实录、重复统计和已替代设计
 统一从 [精简前的完整记录](https://github.com/yhyfhgs/surge-rules/blob/9ebce49d8644dbe982fdcddfc62eb46296a7b277/CHANGELOG.md)

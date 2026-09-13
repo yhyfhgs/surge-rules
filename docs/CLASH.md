@@ -67,12 +67,10 @@ replace their HTTP definitions with local `type: file`, `behavior: classical`,
 compares every source rule independently and checks first-match ownership,
 including nested subdomains, lookalike negative cases and existing exceptions.
 
-The public merge file refers to CDN `main` and uses a v2 cache directory. Private
-profiles prepared with an immutable revision use that same revision in both
-clients, and revision-specific Mihomo cache paths avoid old/new content mixing.
-
-The public merge file refers to CDN `main`. A local validation does not publish
-those bytes. Release the inspected routing batch before deploying HTTP providers
+The public merge file and production private profiles use the official CDN
+`@main` URLs and the v2 cache directory. Immutable revision URLs are for
+verification or an explicitly requested fixed version. A local validation does
+not publish those bytes. Release the inspected routing batch before deploying HTTP providers
 that reference a newly added list; otherwise use the validated local provider
 files. A saved migration file is not evidence that a running client loaded it.
 

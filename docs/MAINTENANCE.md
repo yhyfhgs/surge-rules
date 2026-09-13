@@ -124,6 +124,12 @@ policy groups, and checks proxy definitions and MITM material remain intact.
 Candidates must pass validation before installation. Re-render managed DNS
 mappings whenever domain-list order or ownership changes.
 
+Production Surge and Clash profiles use the official CDN `@main` URLs under
+`https://cdn.jsdelivr.net/gh/yhyfhgs/surge-rules@main/`. Immutable revision URLs
+are useful for verification; do not leave production profiles pinned unless
+the user explicitly requests a fixed version. Surge's managed Host DNS list
+references must use the same official base as its Rule section.
+
 ```bash
 python3 tools/prepare_profiles.py \
   --surge-in ../Surge.conf --surge-out /tmp/Surge.candidate.conf \
