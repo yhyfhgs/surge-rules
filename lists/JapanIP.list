@@ -1,0 +1,18 @@
+# JapanIP — maintained routing owner.
+# Topology and matching options: config/routing.json.
+# Sources and review decisions: SOURCES.md.
+
+IP-CIDR,103.2.28.0/22
+IP-CIDR,119.235.224.0/21
+IP-CIDR,119.235.232.0/23
+IP-CIDR,119.235.235.0/24
+IP-CIDR,125.6.146.0/24
+IP-CIDR,125.6.149.0/24
+IP-CIDR,125.6.190.0/24
+IP-CIDR,147.92.128.0/17
+IP-CIDR,203.104.103.0/24
+IP-CIDR,203.104.128.0/19
+IP-CIDR,203.174.66.64/26
+IP-CIDR,203.174.77.0/24
+
+GEOIP,JP

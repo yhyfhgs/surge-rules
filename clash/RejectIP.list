@@ -1,0 +1,15 @@
+# AUTO-GENERATED — Clash(Mihomo) classical 规则，由 ../lists/RejectIP.list 派生
+# 勿手工编辑；修改 Surge 源后运行 python3 tools/surge2clash.py 重新生成
+
+# RejectIP — maintained routing owner.
+# Topology and matching options: config/routing.json.
+# Sources and review decisions: SOURCES.md.
+
+IP-CIDR,119.29.29.98/31
+IP-CIDR,180.76.2.18/32
+IP-CIDR,180.76.76.112/32
+IP-CIDR,180.76.76.200/32
+IP-CIDR,180.76.76.220/32
+IP-CIDR,182.254.116.117/32
+IP-CIDR,182.254.118.119/32
+IP-CIDR,203.107.1.0/24

@@ -1,8 +1,9 @@
 # AUTO-GENERATED — Clash(Mihomo) classical 规则，由 ../lists/MicrosoftCN.list 派生
 # 勿手工编辑；修改 Surge 源后运行 python3 tools/surge2clash.py 重新生成
 
-# MicrosoftCN — 微软国内 CDN、更新与 Office 预览端点
-# OneDrive/共享登录代理范围：docs/evidence/2026-09-12-onedrive-proxy.md
+# MicrosoftCN — maintained routing owner.
+# Topology and matching options: config/routing.json.
+# Sources and review decisions: SOURCES.md.
 
 DOMAIN,al.msn.com
 DOMAIN,c.live.com
@@ -19,7 +20,6 @@ DOMAIN,profile.live.com
 DOMAIN,sa.msn.com
 DOMAIN,support.office.com
 DOMAIN,templates.office.com
-DOMAIN,view.officeapps.live.com
 DOMAIN,www.msn.com
 DOMAIN,www.office.com
 

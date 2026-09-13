@@ -38,7 +38,11 @@
       {"ip": "129.134.200.5", "note": "原 129.134.0.0/17 未覆盖的后半段"},
       {"ip": "57.144.220.1", "note": "facebook.com 当前实际落点，补录前本表零覆盖"}
     ],
-    "assert": {"same_policy": true, "policy": "Google-X-Meta-MS", "no_dns_leak": true}
+    "assert": {
+      "same_policy": true,
+      "policy": "Google-X-Meta-MS",
+      "no_dns_leak": true
+    }
   },
   {
     "name": "meta_ip_foreign_ranges_removed",
@@ -49,10 +53,11 @@
       {"ip": "119.235.224.1", "note": "LY Corporation/LINE 段；删除 Meta 误收后由 JapanIP.list 的 119.235.224.0/21 接住，同样不是 Meta"}
     ],
     "assert": {
-      "same_policy": false, "no_dns_leak": true,
+      "same_policy": false,
+      "no_dns_leak": true,
       "per_request": [
-        {"ip": "184.173.128.1", "policy": "Final"},
-        {"ip": "54.235.23.242", "policy": "Final"},
+        {"ip": "184.173.128.1", "policy": "🇺🇸美国", "reason": "2026-09-13：收窄未明确归属的父域/IP，或用真实锁定MMDB替代旧GeoIP不匹配近似；不改变已确认服务正例。"},
+        {"ip": "54.235.23.242", "policy": "🇺🇸美国", "reason": "2026-09-13：收窄未明确归属的父域/IP，或用真实锁定MMDB替代旧GeoIP不匹配近似；不改变已确认服务正例。"},
         {"ip": "119.235.224.1", "policy": "🇯🇵日本", "note": "落 JapanIP.list 的 119.235.224.0/21；LINE 段不属于 Meta 组"}
       ]
     }
@@ -64,7 +69,11 @@
       {"ip": "108.177.8.1", "note": "ARIN 108.177.0.0/17 = GOOGLE；删除前是归属错误 + 被 Google.list 前位遮蔽的死规则"},
       {"ip": "108.177.15.254", "note": "同段另一端，取两个点避免单点巧合"}
     ],
-    "assert": {"same_policy": true, "policy_in": ["Final", "Google-X-Meta-MS"], "no_dns_leak": true}
+    "assert": {
+      "same_policy": true,
+      "policy_in": ["Final", "Google-X-Meta-MS"],
+      "no_dns_leak": true
+    }
   },
   {
     "name": "meta_runtime_surface_kept",
@@ -77,29 +86,37 @@
       {"host": "graph.oculus.com", "note": "Quest 设备 API"},
       {"host": "www.meta.com"}
     ],
-    "assert": {"same_policy": true, "policy": "Google-X-Meta-MS", "no_dns_leak": true}
+    "assert": {
+      "same_policy": true,
+      "policy": "Google-X-Meta-MS",
+      "no_dns_leak": true
+    }
   },
   {
     "name": "meta_defensive_and_foreign_domains_removed",
     "desc": "R1-09/R3-6 负例：X 档非 Meta 所有 3 条与 D 档防御/停放域 411 条已迁出本表（原文存 reference/meta-defensive-inventory-20260831.txt，不入库不分发），落 Final 而非 Google-X-Meta-MS",
     "requests": [
-      {"host": "musespark.ai", "note": "X 档：第三方 AI 产品，2025-09 由个人经 GNAME 注册，与 Meta 无关"},
-      {"host": "facebookquotes4u.com", "note": "X 档：Dynadot 注册 / Trellian 停放"},
-      {"host": "acebook.com", "note": "D 档：Meta 自持防御域，NS=*.ns.facebook.com + A=57.144/14 的 .141 停放地址 + 无证书"},
-      {"host": "facebookporn.org", "note": "D 档：同上，品牌防御注册"}
+      {"host": "musespark.ai", "note": "X 档：第三方 AI 产品，2025-09 由个人经 GNAME 注册，与 Meta 无关", "stage": "domain"},
+      {"host": "facebookquotes4u.com", "note": "X 档：Dynadot 注册 / Trellian 停放", "stage": "domain"},
+      {"host": "acebook.com", "note": "D 档：Meta 自持防御域，NS=*.ns.facebook.com + A=57.144/14 的 .141 停放地址 + 无证书", "stage": "domain"},
+      {"host": "facebookporn.org", "note": "D 档：同上，品牌防御注册", "stage": "domain"}
     ],
-    "assert": {"same_policy": true, "policy": "Final"}
+    "assert": {
+      "same_policy": true,
+      "policy": "Final"
+    }
   },
   {
     "name": "meta_dead_domains_removed",
     "desc": "R1-09 负例：N 档 14 条无委派/死区域已删。crowdtangle.com 与 fbf8.com 是悬空的 Route53 委派（任何人建同名托管区并抽中相同 NS 组即可接管解析），删除另有安全理由",
     "requests": [
-      {"host": "crowdtangle.com", "note": "CrowdTangle 2024-08 关停，托管区已删"},
-      {"host": "igcdn.com", "note": "两台自建 NS 均不应答，任何 *.igcdn.com 当前不可解析"},
-      {"host": "fbcdn-a.akamaihd.net", "note": "CNAME 到 edgesuite.net 但无 A，Akamai 旧边缘主机名已停用"}
+      {"host": "crowdtangle.com", "note": "CrowdTangle 2024-08 关停，托管区已删", "stage": "domain"},
+      {"host": "igcdn.com", "note": "两台自建 NS 均不应答，任何 *.igcdn.com 当前不可解析", "stage": "domain"},
+      {"host": "fbcdn-a.akamaihd.net", "note": "CNAME 到 edgesuite.net 但无 A，Akamai 旧边缘主机名已停用", "stage": "domain"}
     ],
     "assert": {
-      "same_policy": true, "policy": "Final",
+      "same_policy": true,
+      "policy": "Final",
       "per_request": [
         {"host": "fbcdn-a.akamaihd.net", "policy": "Final", "reason": "Akamai 旧边缘死域已从 Meta.list 删除，也不再由 akamaihd.net 宽后缀兜底，三条死域均落 FINAL。"}
       ]
@@ -115,7 +132,11 @@
       {"host": "yt3.ggpht.com", "note": "旧形态，保留；本条证明新旧形态终于同组"},
       {"host": "yt4.ggpht.com"}
     ],
-    "assert": {"same_policy": true, "policy": "流媒体", "no_dns_leak": true}
+    "assert": {
+      "same_policy": true,
+      "policy": "流媒体",
+      "no_dns_leak": true
+    }
   },
   {
     "name": "google_api_owner_boundaries",
@@ -143,24 +164,31 @@
       {"ip": "34.100.1.1", "note": "AS19527 通告的 GCP 客户段首字节分布主体"},
       {"ip": "35.200.1.1", "note": "AS43515 同类"}
     ],
-    "assert": {"same_policy": true, "policy": "Final", "no_dns_leak": true}
+    "assert": {
+      "same_policy": true,
+      "policy": "Final",
+      "no_dns_leak": true
+    }
   },
   {
     "name": "ecosystem_dead_entries_fall_through",
     "desc": "R1-08/10/11/12/15：各表死条目与第三方停放域删除后一律落 Final。2026-08-31 双侧 dig +tcp 复核：前两条 NXDOMAIN，gvt0.com 等 SERVFAIL，其余为停放商/私网地址",
     "requests": [
-      {"host": "gateway.bingviz.microsoft.net", "note": "Microsoft.list：NXDOMAIN 双侧一致"},
-      {"host": "app-measurement.net", "note": "Google.list：NXDOMAIN"},
-      {"host": "gvt0.com", "note": "Google.list：SERVFAIL"},
-      {"host": "xn--ggle-55da.com", "note": "Google.list：上游历史残留 IDN，SERVFAIL"},
-      {"host": "twimg.org", "note": "Twitter.list：2025-12 被第三方重注册，NameCheap 停放 162.255.119.245"},
-      {"host": "tellapart.com", "note": "Twitter.list：TellApart 2017 关停后域名释放，Network Solutions 停放"},
-      {"host": "twitteroauth.com", "note": "Twitter.list：abraham/twitteroauth 第三方开源库文档站，GitHub Pages"},
-      {"host": "telegramdownload.com", "note": "Telegram.list：Trellian/DSParking 变现停放页"},
-      {"host": "courses.snapsolve.com", "note": "TikTok.list：SOA=ns1.sedoparking.com，观察期结束"},
-      {"host": "bytedance.net", "note": "TikTok.list：解析出 RFC1918 私网 10.8.6.210，任何策略组都处理不了"}
+      {"host": "gateway.bingviz.microsoft.net", "note": "Microsoft.list：NXDOMAIN 双侧一致", "stage": "domain"},
+      {"host": "app-measurement.net", "note": "Google.list：NXDOMAIN", "stage": "domain"},
+      {"host": "gvt0.com", "note": "Google.list：SERVFAIL", "stage": "domain"},
+      {"host": "xn--ggle-55da.com", "note": "Google.list：上游历史残留 IDN，SERVFAIL", "stage": "domain"},
+      {"host": "twimg.org", "note": "Twitter.list：2025-12 被第三方重注册，NameCheap 停放 162.255.119.245", "stage": "domain"},
+      {"host": "tellapart.com", "note": "Twitter.list：TellApart 2017 关停后域名释放，Network Solutions 停放", "stage": "domain"},
+      {"host": "twitteroauth.com", "note": "Twitter.list：abraham/twitteroauth 第三方开源库文档站，GitHub Pages", "stage": "domain"},
+      {"host": "telegramdownload.com", "note": "Telegram.list：Trellian/DSParking 变现停放页", "stage": "domain"},
+      {"host": "courses.snapsolve.com", "note": "TikTok.list：SOA=ns1.sedoparking.com，观察期结束", "stage": "domain"},
+      {"host": "bytedance.net", "note": "TikTok.list：解析出 RFC1918 私网 10.8.6.210，任何策略组都处理不了", "stage": "domain"}
     ],
-    "assert": {"same_policy": true, "policy": "Final"}
+    "assert": {
+      "same_policy": true,
+      "policy": "Final"
+    }
   },
   {
     "name": "ecosystem_neighbours_unaffected",
@@ -173,7 +201,8 @@
       {"host": "copilotprodattachments.blob.core.windows.net", "note": "Microsoft.list 的多租户平台精确形收录样板"}
     ],
     "assert": {
-      "same_policy": false, "no_dns_leak": true,
+      "same_policy": false,
+      "no_dns_leak": true,
       "per_request": [
         {"host": "twimg.com", "policy": "Google-X-Meta-MS"},
         {"host": "abs.twimg.com", "policy": "Google-X-Meta-MS"},
@@ -192,11 +221,12 @@
       {"ip": "196.55.216.167", "note": "AfriNIC 无 RDAP 数据，保留观察 90 天"}
     ],
     "assert": {
-      "same_policy": false, "no_dns_leak": true,
+      "same_policy": false,
+      "no_dns_leak": true,
       "per_request": [
-        {"ip": "194.221.250.50", "policy": "Final"},
-        {"ip": "139.59.210.98", "policy": "Telegram"},
-        {"ip": "196.55.216.167", "policy": "Telegram"}
+        {"ip": "194.221.250.50", "policy": "🇬🇧英国", "reason": "2026-09-13：收窄未明确归属的父域/IP，或用真实锁定MMDB替代旧GeoIP不匹配近似；不改变已确认服务正例。"},
+        {"ip": "139.59.210.98", "policy": "🇪🇺欧洲", "reason": "2026-09-13：收窄未明确归属的父域/IP，或用真实锁定MMDB替代旧GeoIP不匹配近似；不改变已确认服务正例。"},
+        {"ip": "196.55.216.167", "policy": "Final", "reason": "2026-09-13：收窄未明确归属的父域/IP，或用真实锁定MMDB替代旧GeoIP不匹配近似；不改变已确认服务正例。"}
       ]
     }
   },
@@ -209,7 +239,14 @@
       {"ip": "149.154.167.51"},
       {"ip": "2a0a:f280::1", "note": "RIPE VG-TELEGRAM-20210616 / org Telegram Messenger Inc"}
     ],
-    "assert": {"same_policy": true, "policy": "Telegram", "no_dns_leak": true}
+    "assert": {
+      "same_policy": true,
+      "policy": "Telegram",
+      "no_dns_leak": true,
+      "per_request": [
+        {"ip": "5.28.200.1", "policy": "🇪🇺欧洲", "reason": "2026-09-13：收窄未明确归属的父域/IP，或用真实锁定MMDB替代旧GeoIP不匹配近似；不改变已确认服务正例。"}
+      ]
+    }
   },
   {
     "name": "google_workspace_and_first_party_surfaces",
@@ -237,7 +274,11 @@
       {"host": "support.google.com"},
       {"host": "myaccount.google.com"}
     ],
-    "assert": {"same_policy": true, "policy": "Google-X-Meta-MS", "no_dns_leak": true}
+    "assert": {
+      "same_policy": true,
+      "policy": "Google-X-Meta-MS",
+      "no_dns_leak": true
+    }
   },
   {
     "name": "google_cdn_youtube_and_apex_boundaries",
@@ -304,7 +345,7 @@
       {"host": "store.steampowered.com"},
       {"host": "api.steampowered.com"},
       {"host": "cm.steampowered.com"},
-      {"host": "unknown.steampowered.com"}
+      {"host": "unknown.steampowered.com", "stage": "domain"}
     ],
     "assert": {
       "no_dns_leak": true,
@@ -333,7 +374,11 @@
       {"host": "codeload.github.com", "note": "zip/tarball 下载"},
       {"host": "collector.github.com", "note": "前端遥测"}
     ],
-    "assert": {"same_policy": true, "policy": "Google-X-Meta-MS", "no_dns_leak": true}
+    "assert": {
+      "same_policy": true,
+      "policy": "Google-X-Meta-MS",
+      "no_dns_leak": true
+    }
   },
   {
     "name": "netflix_watch",
@@ -347,7 +392,11 @@
       {"host": "nflxext.com"},
       {"host": "assets.nflxext.com", "note": "海报/剧照资源"}
     ],
-    "assert": {"same_policy": true, "policy": "流媒体", "no_dns_leak": true}
+    "assert": {
+      "same_policy": true,
+      "policy": "流媒体",
+      "no_dns_leak": true
+    }
   },
   {
     "name": "spotify_playback",
@@ -360,7 +409,11 @@
       {"host": "i.scdn.co", "note": "封面图"},
       {"host": "audio-fa.scdn.co", "note": "音频分发"}
     ],
-    "assert": {"same_policy": true, "policy": "流媒体", "no_dns_leak": true}
+    "assert": {
+      "same_policy": true,
+      "policy": "流媒体",
+      "no_dns_leak": true
+    }
   },
   {
     "name": "discord_chat_voice",
@@ -373,7 +426,11 @@
       {"host": "media.discordapp.net"},
       {"host": "discord.gg"}
     ],
-    "assert": {"same_policy": true, "policy": "社交媒体", "no_dns_leak": true}
+    "assert": {
+      "same_policy": true,
+      "policy": "社交媒体",
+      "no_dns_leak": true
+    }
   },
   {
     "name": "reddit_browse",
@@ -387,7 +444,11 @@
       {"host": "oauth.reddit.com", "note": "客户端 OAuth API"},
       {"host": "redd.it"}
     ],
-    "assert": {"same_policy": true, "policy": "社交媒体", "no_dns_leak": true}
+    "assert": {
+      "same_policy": true,
+      "policy": "社交媒体",
+      "no_dns_leak": true
+    }
   },
   {
     "name": "wikipedia_article",
@@ -400,7 +461,11 @@
       {"host": "wikimedia.org"},
       {"host": "upload.wikimedia.org", "note": "条目内图片/媒体"}
     ],
-    "assert": {"same_policy": true, "policy": "Proxy", "no_dns_leak": true}
+    "assert": {
+      "same_policy": true,
+      "policy": "Proxy",
+      "no_dns_leak": true
+    }
   },
   {
     "name": "steam_store_community",
@@ -413,7 +478,11 @@
       {"host": "cdn.akamai.steamstatic.com"},
       {"host": "steamcdn-a.akamaihd.net"}
     ],
-    "assert": {"same_policy": true, "policy": "游戏", "no_dns_leak": true}
+    "assert": {
+      "same_policy": true,
+      "policy": "游戏",
+      "no_dns_leak": true
+    }
   },
   {
     "name": "steam_cn_download_split",
@@ -425,7 +494,10 @@
       {"host": "dl.steam.clngaa.com"},
       {"host": "steamcontent.com"}
     ],
-    "assert": {"same_policy": true, "policy": "DIRECT"}
+    "assert": {
+      "same_policy": true,
+      "policy": "DIRECT"
+    }
   },
   {
     "name": "telegram_domains_and_ips",
@@ -439,7 +511,11 @@
       {"ip": "149.154.167.51", "note": "DC4 段（149.154.160.0/20）"},
       {"ip": "91.108.56.100", "note": "DC 段（91.108.0.0/16）"}
     ],
-    "assert": {"same_policy": true, "policy": "Telegram", "no_dns_leak": true}
+    "assert": {
+      "same_policy": true,
+      "policy": "Telegram",
+      "no_dns_leak": true
+    }
   },
   {
     "name": "docker_hub_pull",
@@ -451,7 +527,11 @@
       {"host": "registry-1.docker.io"},
       {"host": "production.cloudflare.docker.com", "note": "blob 分发"}
     ],
-    "assert": {"same_policy": true, "policy": "下载", "no_dns_leak": true}
+    "assert": {
+      "same_policy": true,
+      "policy": "下载",
+      "no_dns_leak": true
+    }
   },
   {
     "name": "npm_pypi_install",
@@ -463,7 +543,11 @@
       {"host": "pypi.org"},
       {"host": "files.pythonhosted.org"}
     ],
-    "assert": {"same_policy": true, "policy": "下载", "no_dns_leak": true}
+    "assert": {
+      "same_policy": true,
+      "policy": "下载",
+      "no_dns_leak": true
+    }
   },
   {
     "name": "twitch_stream",
@@ -476,7 +560,11 @@
       {"host": "usher.ttvnw.net", "note": "HLS 播放列表"},
       {"host": "video-weaver.lax03.hls.ttvnw.net", "note": "HLS 分片"}
     ],
-    "assert": {"same_policy": true, "policy": "流媒体", "no_dns_leak": true}
+    "assert": {
+      "same_policy": true,
+      "policy": "流媒体",
+      "no_dns_leak": true
+    }
   },
   {
     "name": "ms_gfw_to_microsoft_migration",
@@ -495,7 +583,11 @@
       {"host": "www.skype.com", "note": "双侧均落 s-msedge 52.123.128-131.14，无投毒无 CN 面"},
       {"host": "login.skype.com", "note": "登录面随主域同组"}
     ],
-    "assert": {"same_policy": true, "policy": "Google-X-Meta-MS", "no_dns_leak": true}
+    "assert": {
+      "same_policy": true,
+      "policy": "Google-X-Meta-MS",
+      "no_dns_leak": true
+    }
   },
   {
     "name": "ms_mscn_direct_face_unshadowed",
@@ -536,10 +628,10 @@
       {"host": "www.onenote.com"},
       {"host": "content.office.net"},
       {"host": "p.sfx.ms", "note": "2026-09-12 用户修正：随 OneDrive 会话走 Microsoft 代理"},
-      {"host": "sometenant.webpubsub.azure.com", "note": "任意 WebPubSub 租户不属于 AI 的 OpenAI 专属实例，azure.com 多租户宽后缀已移除"},
-      {"host": "sometenant.azureedge.net", "note": "任意 Azure Edge 租户，宽兜底已移除"},
-      {"host": "sometenant.azurewebsites.net", "note": "PSL 多租户边界，宽兜底已移除"},
-      {"host": "hockeyapp.net", "note": "微软持有但已停服，NS/SOA 双侧无应答，已移除死域规则"}
+      {"host": "sometenant.webpubsub.azure.com", "note": "任意 WebPubSub 租户不属于 AI 的 OpenAI 专属实例，azure.com 多租户宽后缀已移除", "stage": "domain"},
+      {"host": "sometenant.azureedge.net", "note": "任意 Azure Edge 租户，宽兜底已移除", "stage": "domain"},
+      {"host": "sometenant.azurewebsites.net", "note": "PSL 多租户边界，宽兜底已移除", "stage": "domain"},
+      {"host": "hockeyapp.net", "note": "微软持有但已停服，NS/SOA 双侧无应答，已移除死域规则", "stage": "domain"}
     ],
     "assert": {
       "same_policy": false,
@@ -616,7 +708,11 @@
       {"host": "qwen.ai"},
       {"host": "chat.qwen.ai", "note": "跳转落地"}
     ],
-    "assert": {"same_policy": true, "policy": "AI", "no_dns_leak": true}
+    "assert": {
+      "same_policy": true,
+      "policy": "AI",
+      "no_dns_leak": true
+    }
   },
   {
     "name": "paypal_official_only",
@@ -625,8 +721,8 @@
       {"host": "www.paypal.com", "note": "checkout/3DS 主链"},
       {"host": "paypal.me", "note": "收款链接"},
       {"host": "www.paypalobjects.com", "note": "静态资源"},
-      {"host": "paypal-verify-account.com", "note": "仿冒形态负例"},
-      {"host": "mypaypal-checkout.com", "note": "品牌子串第三方负例"}
+      {"host": "paypal-verify-account.com", "note": "仿冒形态负例", "stage": "domain"},
+      {"host": "mypaypal-checkout.com", "note": "品牌子串第三方负例", "stage": "domain"}
     ],
     "assert": {
       "no_dns_leak": true,
@@ -643,8 +739,8 @@
     "name": "tiktok_foreign_assets_removed",
     "desc": "Snap Kit 域（api.snapkit.com@TikTok、sdk.snapkit.com@DownloadCDN）属 Snap 官方资产，cocacola.co.jp 属日本可口可乐——移除后两条 Snap Kit 域落 FINAL→Final，snapchat.com 由 SocialOthers.list 承接走社交媒体组；可口可乐迁 Japan.list 走日本出口",
     "requests": [
-      {"host": "api.snapkit.com"},
-      {"host": "sdk.snapkit.com"},
+      {"host": "api.snapkit.com", "stage": "domain"},
+      {"host": "sdk.snapkit.com", "stage": "domain"},
       {"host": "snapchat.com", "note": "Snap 生态参照"},
       {"host": "cocacola.co.jp"}
     ],
@@ -666,8 +762,8 @@
       {"host": "www.baidu.com"},
       {"host": "hnagroup.com", "note": "keyword 删除后由 Domestic 新增精确后缀承接"},
       {"host": "officecdn.microsoft.com", "note": "由 MicrosoftCN 既有精确后缀承接"},
-      {"host": "taobao-promo2026.com", "note": "品牌子串仿冒形态负例"},
-      {"host": "fakebaidu-login.com", "note": "品牌子串仿冒形态负例"}
+      {"host": "taobao-promo2026.com", "note": "品牌子串仿冒形态负例", "stage": "domain"},
+      {"host": "fakebaidu-login.com", "note": "品牌子串仿冒形态负例", "stage": "domain"}
     ],
     "assert": {
       "no_dns_leak": true,
@@ -690,13 +786,17 @@
       {"host": "cacerts.digicert.com"},
       {"host": "www.digicert.com"}
     ],
-    "assert": {"same_policy": true, "policy": "DIRECT", "no_dns_leak": true}
+    "assert": {
+      "same_policy": true,
+      "policy": "DIRECT",
+      "no_dns_leak": true
+    }
   },
   {
     "name": "sony_group_not_games",
     "desc": "sony.com 是集团总域（相机/影视/半导体/企业站），非游戏会话依赖，自 Games 移除落 FINAL；PlayStation/SIE 业务域保持游戏组",
     "requests": [
-      {"host": "www.sony.com"},
+      {"host": "www.sony.com", "stage": "domain"},
       {"host": "www.playstation.com"},
       {"host": "sonyentertainmentnetwork.com"}
     ],
@@ -713,7 +813,7 @@
     "name": "cf_insights_neutral",
     "desc": "裁决更正（2026-08-31）：static.cloudflareinsights.com 是 Cloudflare Web Analytics 性能 beacon，与 Turnstile 验证码无关，「降低验证码率」理由不成立——移出 AI 组落 FINAL；challenges.cloudflare.com（真 Turnstile，ChatGPT/Claude 登录链）仍留 AI",
     "requests": [
-      {"host": "static.cloudflareinsights.com"},
+      {"host": "static.cloudflareinsights.com", "stage": "domain"},
       {"host": "challenges.cloudflare.com"}
     ],
     "assert": {
@@ -733,8 +833,8 @@
       {"host": "cool-adnow.com", "note": "*-adnow.com 应拦"},
       {"host": "dnserror.wo.com.cn", "note": "运营商 DNS 劫持页，dnserror.* 应拦"},
       {"host": "hostingcloud.racing", "note": "挖矿域族，hostingcloud.* 应拦"},
-      {"host": "cdnserror-page.com", "note": "负例：含 dnserror 子串但非劫持页形态"},
-      {"host": "myhostingcloudapp.com", "note": "负例：含 hostingcloud 子串的普通应用域"}
+      {"host": "cdnserror-page.com", "note": "负例：含 dnserror 子串但非劫持页形态", "stage": "domain"},
+      {"host": "myhostingcloudapp.com", "note": "负例：含 hostingcloud 子串的普通应用域", "stage": "domain"}
     ],
     "assert": {
       "no_dns_leak": true,
@@ -781,18 +881,24 @@
       {"host": "content.online-metrix.net", "note": "ThreatMetrix 探针资源域，同后缀承接"},
       {"host": "www.cardinalcommerce.com", "note": "对照：3DS 目录服务器，表内既有条目，同属风控层"}
     ],
-    "assert": {"same_policy": true, "policy": "Payment", "no_dns_leak": true}
+    "assert": {
+      "same_policy": true,
+      "policy": "Payment",
+      "no_dns_leak": true
+    }
   },
   {
     "name": "payment_threatmetrix_boundary",
     "desc": "ThreatMetrix 收录边界回归：只收 online-metrix.net 这一个注册域，形态为 DOMAIN-SUFFIX（标签边界）。既不得回退成无边界子串把 myonline-metrix.net 一类同名不同域吃进来，也不得越界到未验证的其他 TLD。反例落 Final 即证明边界正确",
     "requests": [
-      {"host": "myonline-metrix.net", "note": "反例：串前无标签边界，DOMAIN-SUFFIX 不得命中"},
-      {"host": "online-metrix.com", "note": "反例：同名不同 TLD，刻意未收"},
+      {"host": "myonline-metrix.net", "note": "反例：串前无标签边界，DOMAIN-SUFFIX 不得命中", "stage": "domain"},
+      {"host": "online-metrix.com", "note": "反例：同名不同 TLD，刻意未收", "stage": "domain"},
       {"host": "online-metrix.net", "note": "正例：apex 本身由 DOMAIN-SUFFIX 覆盖"}
     ],
     "assert": {
-      "same_policy": true, "policy": "Final", "no_dns_leak": true,
+      "same_policy": true,
+      "policy": "Final",
+      "no_dns_leak": true,
       "per_request": [
         {"host": "online-metrix.net", "policy": "Payment", "reason": "DOMAIN-SUFFIX,online-metrix.net 含 apex"}
       ]
@@ -923,9 +1029,9 @@
     "name": "download_owners_and_neutral_apexes",
     "desc": "Download-only namespaces stay unified; general project apexes remain neutral while their verified repositories use Download.",
     "requests": [
-      {"host": "www.anaconda.com"},
+      {"host": "www.anaconda.com", "stage": "domain"},
       {"host": "repo.anaconda.com"},
-      {"host": "www.apache.org"},
+      {"host": "www.apache.org", "stage": "domain"},
       {"host": "repo.maven.apache.org"},
       {"host": "www.apkmirror.com"},
       {"host": "downloadr2.apkmirror.com"},
@@ -1030,7 +1136,9 @@
       {"host": "dl.google.com", "note": "负例：批量下载面归 DownloadCDN"}
     ],
     "assert": {
-      "same_policy": true, "policy": "Google-X-Meta-MS", "no_dns_leak": true,
+      "same_policy": true,
+      "policy": "Google-X-Meta-MS",
+      "no_dns_leak": true,
       "per_request": [
         {"host": "unknown.google.com", "policy": "Google-X-Meta-MS", "reason": "2026-09-07 厂商 suffix 兜底，保留前位下载/国内/YouTube 例外。"},
         {"host": "storage.googleapis.com", "policy": "Google-X-Meta-MS", "reason": "2026-09-07 厂商 suffix 兜底，保留前位下载/国内/YouTube 例外。"},

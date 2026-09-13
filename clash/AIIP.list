@@ -1,0 +1,16 @@
+# AUTO-GENERATED — Clash(Mihomo) classical 规则，由 ../lists/AIIP.list 派生
+# 勿手工编辑；修改 Surge 源后运行 python3 tools/surge2clash.py 重新生成
+
+# AIIP — maintained routing owner.
+# Topology and matching options: config/routing.json.
+# Sources and review decisions: SOURCES.md.
+
+IP-CIDR,153.61.0.0/16
+IP-CIDR,160.79.104.0/21
+IP-CIDR,216.73.216.0/22
+
+IP-CIDR6,2604:f20::/32
+IP-CIDR6,2607:6bc0::/32
+
+IP-ASN,399358
+IP-ASN,401518

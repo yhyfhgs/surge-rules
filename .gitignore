@@ -1,24 +1,20 @@
+.DS_Store
 __pycache__/
 *.pyc
 
-# 本地上游克隆的落点。2026-09-01 起本机没有这个目录了（约 430MB 已删，各上游按
-# SOURCES.md 的 revision 随时可重新浅克隆）；条目保留是防线——将来谁再 clone 一份
-# 进来，`git add -A` 也不会把上游整仓提交进本库。
-reference/
-
+# Local settings and private routing data
+.agents/
+.claude/
 tests/live_check_local.json
 tests/expected_asn.json
+
+# Reproducible inputs, diagnostics and probe state
+reference/
+build/
+tools/state/
+config/dead_domains_state.json
 live_report.md
 tests/live_report.md
-
-# 审计 / 探测的中间产物：机器生成、体量大、含实测原始数据，不入库
 findings.jsonl
 report.md
 *.tsv
-
-# tools/fetch_locked.py 的默认输出目录（build/upstream/ 下是上游整表副本，~800KB）。
-# update.sh 走 `git add -A`，不排除就会把上游快照提交进本仓库。
-build/
-
-# 多智能体编排残留(含渲染候选配置,绝不可发布)
-.agents/

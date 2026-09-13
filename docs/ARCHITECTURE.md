@@ -2,198 +2,129 @@
 
 ## Sources of truth
 
-- `lists/*.list`: rule content.
-- `config/routing.json`: complete list order, policy, `extended_matching`,
-  list-level `no_resolve` metadata, and the contiguous `section` grouping the
-  renderer prints as `[Rule]` partition comments.
-- `clash/`: generated output; never edit it directly.
-- The active Surge profile: local proxy-group definitions and the rendered
-  `[Rule]` section.
+| Path | Responsibility |
+|---|---|
+| `lists/*.list` | Rule content |
+| `config/routing.json` | Complete list order, policies, modifiers and contiguous section labels |
+| `config/mihomo-runtime.yaml` | DNS, TUN and sniffing settings for the generated Mihomo merge file |
+| `clash/` | Generated distribution files |
+| `../Surge.conf` | Private local settings and the rendered `[Rule]` section |
 
-`tools/routing_manifest.py` validates a strict bijection between the manifest and
-all source lists. Duplicate JSON keys/names, missing lists, unknown fields, and
-invalid metadata fail immediately.
+`tools/routing_manifest.py` enforces a bijection between manifest entries and
+source lists. Duplicate keys/names, missing lists, unknown fields and invalid
+metadata fail immediately. Never maintain a second list-order table.
 
-## First-match state machine
+## First-match routing
 
-For a request key $x$ and ordered rules $r_1,\ldots,r_n$, routing is
+The earliest matching rule selects the policy. An exact duplicate or a narrow
+rule behind its broad coverer adds no coverage. A broad parent may follow
+narrower different-policy children: this **ordered-safe split** preserves their
+routes and supplies the remaining subtree's fallback. Putting the parent ahead
+of any such child creates an active shadow and fails validation.
 
-$$
-P(x)=\operatorname{policy}(r_k),\qquad
-k=\min\{i\mid r_i\text{ matches }x\}.
-$$
+The v2 manifest separates non-IP and IP stages. Each stage runs Reject, service
+proxy, region, then DIRECT lists. YouTube/Streaming are adjacent; Telegram
+precedes the other social lists. SYSTEM sits in the DIRECT non-IP block; FINAL
+is the only terminal rule. No mixed LAN or unconditional GEOIP,CN tail is emitted.
 
-Consequences:
+- Before moving MicrosoftCN behind Microsoft, Microsoft's four broad parents
+  are narrowed to explicit service scopes. OneDrive storage/authentication and
+  the approved DIRECT exceptions remain protected by independent witnesses.
+- Download exceptions precede service owners. Games uses explicit Blizzard
+  scopes so the later DIRECT download.blizzard.com remains effective.
+- ProxyGFW precedes domestic and regional domain owners. ChinaTLD closes the
+  domain stage, preserving prior proxy/Reject/regional .cn exceptions.
+- Regional IP calls use AND/NOT to subtract PrivateLANIP, PKUIP, AppleCNIP and
+  ChinaIP. This is a boolean exclusion, not an early DIRECT rule. Japan's
+  verified LINE/LY prefixes still precede the other regions.
 
-1. An exact duplicate in a later list is dead.
-2. If a broad rule precedes a narrower different-policy rule, the narrow rule is
-   dead.
-3. If a narrow exception precedes a broad owner, list order is a semantic
-   dependency.
-4. A broad parent behind every different-policy child is an **ordered-safe
-   split**: each child keeps its own policy by first match and the parent only
-   restores the fallback for the rest of the subtree. A parent that precedes any
-   different-policy child is an active shadow and the gate rejects it.
+Within a list, all rules share a policy. `tools/sort_lists.py` canonicalizes type
+buckets and ordering without changing routing. Cross-list order is semantic;
+manifest sections only control rendered comments.
 
-The only general exception is the immutable security ordering: local/system rules
-and `Reject` precede ordinary routing owners.
+## ProxyGFW contract
 
-## Section topology
+ProxyGFW selects `Proxy`; unmatched traffic selects `Final`. Its rules require
+current evidence of blocking and no specific ecosystem, service, domestic or
+regional owner. It accepts no IP rules, PSL-boundary suffixes, or domains listed
+in `config/proxygfw-expired.txt`. Different-policy descendants require narrowing
+the GFW rule; shared-cloud CIDRs never establish service ownership.
 
-The manifest groups the lists into contiguous sections (see README for the table):
-局域直连 → 广告/恶意拦截 → 下载 → 服务分流 → 国内直连 → 地区分流 → 国内兜底 →
-built-in LAN / GEOIP,CN / FINAL.
+Registered blocked multitenant platforms may remain whole in this residual
+layer. This differs from assigning a tenant namespace to one service. Preserve
+`wordpress.com`, `medium.com`, `substack.com`, `fc2.com`, `typepad.com`,
+`over-blog.com`, `weebly.com`, `squarespace.com`, `strikingly.com`, `angelfire.com`,
+`geocities.jp`, `geocities.co.jp`, `narod.ru`, `no-ip.com`, the `dynamicdns`
+family, `mixpanel.com`, `bitbucket.org` and `imgur.com`.
 
-- Download-plane lists precede the service owners because their narrow rules
-  must beat broader service suffixes (`GameDownloadCN` < `Games`,
-  `ModelDownloadCDN` < `AI`).
-- `ProxyGFW` closes the proxy section: domain-only, no PSL-boundary suffixes, no
-  cloud CIDRs, no cross-policy intersection with the domestic or regional lists
-  that follow it, and it still precedes `ChinaDomain` — which is what the
-  poisoned-domain protection actually requires.
-- Each regional list carries its domains and its IP fallback (explicit CIDRs,
-  then ASN, then GEOIP — every IP line with `no-resolve`). The regional section
-  sits after `ChinaIP` because the pinned GeoLite databases contain regional
-  selectors that intersect ChinaIP-owned ranges. `Japan` leads the section
-  because MaxMind marks part of the verified LINE/LY CIDRs as US; those ranges
-  stay as explicit CIDRs inside `Japan`, disjoint from ChinaIP — a property the
-  A9 gate keeps guarded.
+## DNS and observation states
 
-- `ChinaTLD` closes the list order with the `.cn` / CNNIC IDN ccTLD catch-all
-  (`cn`, `xn--fiqs8s`, `xn--fiqz9s`, `xn--55qx5d`, `xn--io0a7i`). Under the
-  zero-local-DNS invariant `GEOIP,CN,no-resolve` never sees a hostname request,
-  so without this list every unlisted `.cn` host fell through `FINAL` to the
-  remote exit (verified with `surge-cli rule explain icbc.com.cn`). Placing the
-  catch-all last makes it ordered-safe by construction: every different-policy
-  `.cn` child (Reject, ProxyGFW carriers, `schwab.com.cn` in US) precedes it.
-  `com.cn` remains forbidden inside service lists — a registration boundary
-  must never sit in an owner list, only in this terminal funnel.
+Domain entries match the requested host and, with extended matching, available
+TLS SNI/HTTP Host. The IP stage may resolve an unmatched domain through verified
+encrypted DNS. `no-resolve` prevents initiating a lookup; it does not disable a
+rule after an address is available. Per-list modifiers belong to the manifest.
 
-All IP-class rules use `no-resolve`; a domain request skips every IP rule
-without local DNS resolution.
+The engine distinguishes pre-resolved addresses, a successful/failed lookup,
+and missing observations. It uses actual Country/ASN MMDB records and never
+substitutes small sample networks for release conclusions. A missing DNS answer
+returns an incomplete result. `stage=domain` explicitly tests domain ownership;
+its Final fallback is not an end-to-end routing claim. Multi-address/family
+behavior is checked separately from single-address interval proofs.
 
-## `ProxyGFW` contract
+Private candidates use global DoH over proxy paths for unmatched classification,
+ordered per-list resolver mappings for known domains, and domestic DoH for
+DIRECT services. PrivateLAN uses system resolution. Proxy servers on the DNS
+paths are verified as IP literals to avoid bootstrap recursion. Keep
+`use-local-host-item-for-proxy` false and certificate verification enabled.
 
-`ProxyGFW` selects `Proxy`; unmatched traffic selects `Final`. A rule in
-`ProxyGFW` must satisfy all of the following:
+## Evidence-controlled IP content
 
-- no specific ecosystem, service, regional, or domestic owner exists;
-- current evidence says proxying is required;
-- it is not a shared-cloud CIDR;
-- it is not in `config/proxygfw-expired.txt`;
-- if children route elsewhere, the GFW rule is exact or explicitly narrowed, not
-  a broad registrable-domain suffix.
+`config/ip-review-exclusions.json` prevents quarantined historical IP rules from
+reappearing unchanged. Its readmission records cite fresh registered ownership;
+a missing ASN mapping alone is not proof of reassignment. Streaming retains
+verified Netflix network scope, Telegram uses the exact published CIDR set,
+and stale/shared game probe addresses do not become broad service owners.
+ChinaIP remains locked and rebuilt with explicit exclusion/retention guards.
 
-The multi-tenant clause is directional: a multi-tenant or public-suffix
-namespace must never be filed under a *single-service* owner list, but keeping a
-blocked platform's whole namespace in `ProxyGFW` is the correct outcome —
-`ProxyGFW` is the residual layer, not a service-ownership table. Registered
-namespaces held there: `wordpress.com`, `medium.com`, `substack.com`, `fc2.com`,
-`typepad.com`, `over-blog.com`, `weebly.com`, `squarespace.com`,
-`strikingly.com`, `angelfire.com`, `geocities.jp`, `geocities.co.jp`,
-`narod.ru`, `no-ip.com`, the `dynamicdns` family, `mixpanel.com`,
-`bitbucket.org`, and `imgur.com`.
+## Relationship analyzer
 
-## Exhaustive analyzer
+`tools/analyze_rules.py` writes the following under `--out`:
 
-`tools/analyze_rules.py` emits, under `--out`:
+| Output | Meaning |
+|---|---|
+| `rules.jsonl` | Every non-comment source rule |
+| `relationships.jsonl` | Proven covers, equivalent and overlapping pairs |
+| `relationship_aggregates.jsonl` | Exact high-cardinality intersection counts by list/policy |
+| `split_apex.jsonl`, `split_parent.jsonl` | Broad parents with different-policy descendants |
+| `fragmented_domains.jsonl` | Registrable domains spanning policies |
+| `topology.json` | Required list-order edges and strongly connected components |
+| `summary.json` | Counts, input hashes, MMDB metadata and diagnostics |
 
-- `rules.jsonl` — one record per non-comment source rule;
-- `relationships.jsonl` — provable `covers` / `equivalent` / `overlaps` edges;
-- `relationship_aggregates.jsonl` — exact high-cardinality intersection counts,
-  weighted by list and policy bucket (syntactically possible pairs, not traffic);
-- `split_apex.jsonl` / `split_parent.jsonl` — broad parents with
-  different-policy descendants (registrable-domain view / general view);
-- `fragmented_domains.jsonl` — registrable domains spanning policies;
-- `topology.json` — list-order constraints and strongly connected components;
-- `summary.json` — counts, input hashes, MMDB paths/hashes/epochs, diagnostics.
+Reversed-label aggregation and exact maps prove domain containment/equality;
+glob-automaton products compute keyword/wildcard intersections. The locked PSL
+identifies registration boundaries. CIDR prefix ancestry and optional MMDB
+interval expansion compare IP selectors. Logical exclusions subtract the
+protected address intervals before coverage/intersection analysis. Country/ASN database paths, hashes and
+build epochs make MMDB conclusions reproducible. Aggregate counts describe
+syntactic intersections, not traffic.
 
-Domain algorithms: reversed-label suffix aggregation proves containment; exact
-maps prove equivalents; keywords and wildcards compile to glob automata whose
-products compute every possible intersection exactly; the locked Public Suffix
-List computes registrable-domain boundaries. IP algorithms: canonical prefix
-ancestry for CIDRs; optional MMDB expansion converts every `GEOIP` / `IP-ASN`
-selector to merged intervals for exact cross-matching, with database path,
-SHA-256, and build epoch recorded so results are reproducible.
+`--fail-on-shadow` rejects active shadows, conflicting equivalents, unsafe
+splits, expired-GFW re-entry, GFW IP/PSL-boundary rules and empty MMDB selectors.
+The `ordered_safe_split_apex` / `ordered_safe_split_parents` outputs are the
+current split registry; `order_unsafe_*` entries require correction. Do not copy
+that changing registry into documentation or reorder a constrained pair.
 
-With `--fail-on-shadow` the gate rejects: active shadows, conflicting
-equivalents, expired-GFW re-entry, GFW IP rules, GFW PSL-boundary suffixes,
-empty MMDB selectors, and order-unsafe splits (`order_unsafe_split_apex` /
-`order_unsafe_split_parents` in `summary.json`).
+## Derived output and verification
 
-**Ordered-safe split registry.** Non-security splits are permitted only in
-ordered-safe form — every different-policy child placed in an earlier list. The
-authoritative registry is the analyzer's `ordered_safe_split_apex` /
-`ordered_safe_split_parents` output; current members restore the FINAL funnel
-for `apple.com` (AppleCN), `aliyuncs.com` (AlibabaCN), `myqcloud.com`,
-`smtcdns.com`, `wechat.com` (TencentCN), `byteimg.com` (ByteDanceCN),
-`bilivideo.com`, `iqiyi.com`, `smtcdns.net` (ChinaMedia), `hf.co` (AI),
-`blizzard.com`, `gog.com`, `ubi.com`, `minecraft.net`, `minecraft-services.net`,
-`mojang.com` (Games, download planes in DownloadCDN), `visualstudio.com`,
-`dev.azure.com` (Microsoft), `nhk.jp` (Japan, behind Streaming), `formula1.com`
-(Streaming), `crypto.com` (ProxyGFW), `amazon.co.uk` (UK),
-`microsoft.com`, `live.com`, `office.com`, `msn.com` (Microsoft), and the terminal
-`cn` catch-all (ChinaTLD). Because every child sits in an earlier list, the `topology.json` constraints are load-bearing: reordering a
-constrained pair silently kills the child.
+`tools/surge2clash.py` validates sources, renders to a temporary directory and
+atomically replaces generated outputs. Unknown rule types abort conversion.
+Provider order comes from the same manifest as Surge. Global sniffing
+approximates `extended-matching`; SYSTEM is unavailable and the explicit
+PrivateLAN/PrivateLANIP lists replace the mixed LAN tail. See the [Clash contract](CLASH.md) for resolver and platform limits.
 
-`MicrosoftCN` precedes `Microsoft` in the service section. Microsoft itself owns
-`microsoft.com`, `live.com`, `office.com` and `msn.com`; its existing CN exceptions
-win first. `content.office.net`, `cdn.designerapp.osi.office.net` and
-`odc.officeapps.live.com` retain their approved direct priority. No extra
-fallback list or inline exception is needed. DownloadCDN remains ahead of both.
-
-The latest 2026-09-12 user decision routes OneDrive sync, files and shared
-sign-in through Microsoft after the direct trial failed. Its explicit domains,
-SharePoint storage, authentication assets and shared Office web entry belong
-to Microsoft, or are covered by Microsoft's existing suffixes after removing
-the earlier MicrosoftCN exceptions. This includes `files.1drv.com` and replaces
-its earlier direct decision. Copilot and Teams use the same proxy policy for
-their shared login hosts again. Other MicrosoftCN update/CDN/preview endpoints
-retain their owners. See the [proxy restoration evidence](evidence/2026-09-12-onedrive-proxy.md);
-the [direct trial](evidence/2026-09-12-onedrive-direct.md) remains historical
-evidence of poisoned local DNS and direct timeouts.
-Google now has `google.com`, `googleapis.com`,
-`googleusercontent.com` and `ggpht.com` parents after YouTube/download exceptions.
-The user explicitly includes Google API tenant traffic by network operator.
-
-## Zero-local-DNS invariant
-
-1. Domain rules inspect the original host.
-2. Every IP rule has `no-resolve`; it only sees literal-IP traffic.
-3. An unmatched domain reaches `FINAL,Final,dns-failed` and is resolved by the
-   selected remote path.
-4. `use-local-host-item-for-proxy` remains false and HTTPS/SVCB hints must not
-   bypass the hostname rule path.
-
-The scenario suite carries dedicated DNS-leak assertions for this invariant.
-
-## Clash derivation
-
-`tools/surge2clash.py` loads the canonical manifest, validates all source files,
-renders into a temporary directory, and atomically replaces generated outputs.
-Unknown rule types abort the transaction. The reference rule sequence in
-`clash/rule-providers.yaml` comes from the same manifest as Surge rendering.
-
-The generated merge file contains active ordered rules, DNS, TUN and sniffing
-settings from `config/mihomo-runtime.yaml`. Unsupported rule types fail closed.
-All provider references prohibit resolution during IP matching. Global sniffing
-approximates Surge `extended-matching`; SYSTEM remains unavailable and terminal
-LAN uses `GEOIP,lan`. See [the Clash contract](CLASH.md) for DNS resolver roles,
-bootstrap exceptions, platform limits and native validation.
-
-## Verification layers
-
-| Layer | Command | Purpose |
-|---|---|---|
-| Shape | `tools/sort_lists.py --check` | Canonical in-list type buckets and ordering |
-| Relationship | `tools/analyze_rules.py … --fail-on-shadow` | Exhaustive inventory and topology |
-| Static | `tests/audit.py --check all --fail-on P1` | A1–A10: DNS, duplicates, shadows, PSL, forbidden rules |
-| Behavioral | `tests/runsuite.py` | Scenario assertions (counts per CHANGELOG) |
-| Native syntax | `surge-cli --check <profile>` | Surge profile acceptance |
-| Derived | `tools/surge2clash.py --check` | Source/Clash equality and manifest order |
-| Live | `tests/live_check.py` / `tests/realworld.py` | Running-Surge semantics, exits, DNS behavior |
-
-No gate substitutes synthetic fallback data for an unexpected error; parsing,
-missing files, unknown types, and invalid topology fail loudly. Release analysis
-is never syntax-only: `update.sh` requires `maxminddb`, readable Country/ASN
-MMDB files, and a successful full MMDB-expanded analyzer run.
+The [maintenance workflow](MAINTENANCE.md#validate-a-change) combines shape,
+relationship, static, behavioral, native syntax and derived-output checks.
+Release analysis requires readable Country/ASN MMDB files and `maxminddb`.
+Live tests establish runtime behavior; even exact static address-set proofs
+cannot replace authenticated application testing. Current service decisions and unresolved traffic questions live in
+[Maintenance](MAINTENANCE.md#current-decisions), with dated evidence links.

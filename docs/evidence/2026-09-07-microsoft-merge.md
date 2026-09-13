@@ -1,5 +1,8 @@
 # 2026-09-07 Microsoft list simplification
 
+Historical record: the 2026-09-12 [OneDrive proxy restoration](2026-09-12-onedrive-proxy.md)
+supersedes the DIRECT decision for `files.1drv.com` below. List priority remains.
+
 The user requested removing the newly introduced fallback list and retaining
 simple conf/YAML references to existing owner lists. The user then explicitly
 approved MicrosoftCN taking priority, including four formerly proxied exceptions.

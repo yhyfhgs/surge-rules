@@ -10,7 +10,8 @@ RULE-SET 内联展开成一张按 conf 顺序的全局规则表，再按首次�
 DOMAIN-WILDCARD / IP-CIDR / IP-CIDR6 / IP-ASN / GEOIP，加上 conf 里的
 RULE-SET / FINAL 与内置 SYSTEM / LAN 的近似展开。其余类型（含 A8 禁用的
 USER-AGENT / PROCESS-NAME / URL-REGEX）解析时告警并跳过，不参与匹配。
-离线近似：GEOIP,CN 用 ChinaIP.list，IP-ASN 用内置样本段；纯 IP 结论以在线为准。
+IP/GEOIP/ASN 使用明确的地址观测和真实 MMDB；缺少 DNS 答案时返回未完成状态。
+stage=domain 仅检查域名阶段，不把该阶段的 Final 当作完整连接结果。
 
 真实策略组名 / 线路商映射不入库：由本地覆盖档提供（环境变量 LIVE_CHECK_LOCAL
 指定路径，或 tests/live_check_local.json，已 gitignore；与 live_check.py 共用
@@ -30,6 +31,10 @@ import json
 import os
 import re
 import sys
+from pathlib import Path
+import functools
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "tools"))
+from rule_syntax import parse_ruleset_call, list_name
 
 # ---------------------------------------------------------------------------
 # 本地私有覆盖档（不入库；schema 与 live_check.py 共用）
@@ -218,10 +223,11 @@ class Rule(object):
     """展开后的一条规则。idx 即全局优先级（越小越先匹配）。"""
 
     __slots__ = ("idx", "type", "value", "policy", "modifiers", "source",
-                 "line", "raw", "set_modifiers")
+                 "line", "raw", "set_modifiers", "exclusions")
 
     def __init__(self, idx, rtype, value, policy, modifiers, source, line,
                  raw, set_modifiers=()):
+        self.exclusions = ()
         self.idx = idx
         self.type = rtype
         self.value = value
@@ -264,7 +270,11 @@ class Rule(object):
 
 class Engine(object):
 
-    def __init__(self, conf_path, rules_dir=None):
+    def __init__(self, conf_path, rules_dir=None, country_db=None, asn_db=None):
+        self.country_db = country_db or os.environ.get("SURGE_COUNTRY_DB_PATH") or str(Path.home() / "Library/Application Support/com.nssurge.surge-mac/GeoLite2-Country.mmdb")
+        self.asn_db = asn_db or os.environ.get("SURGE_ASN_DB_PATH") or "/Applications/Surge.app/Contents/Resources/GeoLite2-ASN.mmdb"
+        self._db_readers = {}
+        self._exclusion_networks = {}
         self.conf_path = os.path.abspath(conf_path)
         base = os.path.dirname(self.conf_path)
         # 默认布局：<conf 同级>/rules/lists/；显式传入 rules_dir 时原样使用。
@@ -323,14 +333,15 @@ class Engine(object):
 
     def _add_conf_rule(self, text, conf_lineno):
         """把 conf [Rule] 的一行加入规则表（RULE-SET 内联展开）。"""
-        toks = [t.strip() for t in text.split(",")]
-        head = toks[0].upper()
-        if head == "RULE-SET":
-            if len(toks) < 3:
-                self._warn("conf:%d RULE-SET 行字段不足，跳过：%s" % (conf_lineno, text))
-                return
-            mods = [m.lower() for m in toks[3:] if m]
-            self._expand_ruleset(toks[1], toks[2], mods, conf_lineno)
+        call = parse_ruleset_call(text)
+        if call is not None:
+            ref, policy, mods, exclusions = call
+            start = len(self.rules)
+            self._expand_ruleset(ref, policy, mods, conf_lineno)
+            for rule in self.rules[start:]:
+                rule.exclusions = tuple(list_name(x) for x in exclusions)
+                if exclusions and not rule.is_ip_class:
+                    raise ValueError("non-IP ruleset with exclusions")
             return
         rule = self._parse_rule_line(text, with_policy=True,
                                      source=os.path.basename(self.conf_path),
@@ -525,110 +536,148 @@ class Engine(object):
 
     # -- 匹配 --------------------------------------------------------------
 
-    def match(self, host=None, ip=None):
-        """离线模拟一次请求的分流判定，返回结果 JSON（schema 见 _result）。
+    def _db_lookup(self, kind, ip_obj):
+        if kind not in self._db_readers:
+            path = self.country_db if kind == "country" else self.asn_db
+            if not path or not os.path.isfile(path):
+                raise ValueError("missing %s MMDB; provide SURGE_%s_DB_PATH" % (kind, kind.upper()))
+            try:
+                import maxminddb
+            except ImportError as exc:
+                raise RuntimeError("install requirements-analysis.txt for IP matching") from exc
+            self._db_readers[kind] = maxminddb.open_database(path)
+        return self._db_readers[kind].get(str(ip_obj)) or {}
 
-        no-resolve 语义：域名请求时带 no-resolve 的 IP 规则一律跳过；
-        缺 no-resolve 的 IP 规则记 dns_leak（离线不真解析）；显式给了 --ip
-        则视为已解析，允许非 no-resolve 的 IP 规则命中（泄漏照记）。
+    def _excluded(self, rule, ip_obj):
+        for name in rule.exclusions:
+            if name not in self._exclusion_networks:
+                path = Path(self.rules_dir) / name
+                nets = []
+                for raw in path.read_text().splitlines():
+                    text = strip_comment(raw)
+                    if not text:
+                        continue
+                    parts = text.split(",")
+                    if parts[0] not in ("IP-CIDR", "IP-CIDR6"):
+                        raise ValueError("exclusions require CIDR-only sets: " + name)
+                    nets.append(ipaddress.ip_network(parts[1], strict=True))
+                if not nets:
+                    raise ValueError("empty exclusion set: " + name)
+                self._exclusion_networks[name] = nets
+            if any(ip_obj.version == n.version and ip_obj in n for n in self._exclusion_networks[name]):
+                return True
+        return False
+
+    def match(self, host=None, ip=None, *, sni=None, http_host=None,
+              resolved_ips=None, dns_status=None, stage=None):
+        """Evaluate supplied observations; never fabricate a DNS/MMDB answer.
+
+        ip / dns_status=resolved represent an address already available before
+        matching. dns_status=success/failed model one lookup at the first
+        resolving IP rule. Without an answer, an unmatched domain is explicitly
+        indeterminate (stage=domain may inspect its domain-stage fallback).
         """
-        q_host, q_ip = host, ip
+        q_host, literal = host, ip
         if host and is_ip_literal(host):
-            q_ip, q_host = host, None
+            q_host, literal = None, host
         if q_host:
             q_host = q_host.strip().rstrip(".").lower()
-
+        if resolved_ips is not None and dns_status not in ("resolved", "success"):
+            raise ValueError("resolved_ips require an explicit resolved/success state")
+        if dns_status not in (None, "resolved", "success", "failed"):
+            raise ValueError("unknown DNS status: " + str(dns_status))
+        if stage not in (None, "domain"):
+            raise ValueError("unknown matching stage")
         best = None
-        is_domain_query = bool(q_host)
-
         def consider(idx):
             nonlocal best
             if best is None or idx < best:
                 best = idx
-
-        if q_host:
-            hits = self.by_domain.get(q_host)
-            if hits:
-                consider(hits[0])
-            for suf in host_suffixes(q_host):
-                hits = self.by_suffix.get(suf)
-                if hits:
-                    consider(hits[0])
-            for kw, idx in self.by_keyword:
-                if (best is None or idx < best) and kw in q_host:
+        for value, extended_only in [(q_host, False), (sni, True), (http_host, True)]:
+            if not value:
+                continue
+            value = value.lower().rstrip(".")
+            def domain_hit(idx):
+                r = self.rules[idx]
+                if not extended_only or "extended-matching" in r.modifiers or "extended-matching" in r.set_modifiers:
                     consider(idx)
-            for rx, idx in self.by_wildcard:
-                if (best is None or idx < best) and rx.match(q_host):
-                    consider(idx)
+            for idx in self.by_domain.get(value, ()):
+                domain_hit(idx)
+            for suffix in host_suffixes(value):
+                for idx in self.by_suffix.get(suffix, ()):
+                    domain_hit(idx)
+            for keyword, idx in self.by_keyword:
+                if keyword in value:
+                    domain_hit(idx)
+            for regex, idx in self.by_wildcard:
+                if regex.fullmatch(value):
+                    domain_hit(idx)
+        pre_resolved = bool(literal) or dns_status == "resolved"
+        boundary = next((idx for idx, r in self.leaky_ip_rules if best is None or idx < best), None)
+        trigger = bool(q_host and not pre_resolved and boundary is not None)
+        secure_dns = (bool(self.general.get("encrypted-dns-server"))
+                      and self.general.get("encrypted-dns-server") != "off"
+                      and self.general.get("encrypted-dns-skip-cert-verification", "false").lower() != "true"
+                      and all(v.strip().startswith(("https://", "h3://", "tls://", "quic://"))
+                              for v in self.general.get("encrypted-dns-server", "").split(",")))
+        leak_at = self.rules[boundary].rule_str() if trigger and not secure_dns else None
+        trace = []
+        if trigger:
+            trace.append("IP boundary requires encrypted DNS" if secure_dns else "IP boundary has no verified encrypted resolver")
+        def result(rule, complete=True, pending=False):
+            out = self._result(q_host, literal, rule, trace, leak_at)
+            out.update(dns_leak=bool(leak_at), dns_leak_at=leak_at, trace=trace,
+                       dns_resolution_triggered=trigger, dns_resolution_count=int(trigger),
+                       resolution_required=pending, routing_complete=complete,
+                       dns_status=dns_status, stage=stage or "full")
+            return out
+        if stage == "domain":
+            pending, trigger, leak_at = bool(trigger and best is None), False, None
+            trace = []
+            return result(self.rules[best] if best is not None else self.final_rule,
+                          complete=best is not None, pending=pending)
+        if trigger and dns_status == "failed":
+            allowed = self.final_rule and "dns-failed" in self.final_rule.modifiers
+            return result(self.final_rule if allowed else None)
+        if trigger and dns_status is None:
+            return result(None, complete=False, pending=True)
+        observations = ([literal] if literal else []) + list(resolved_ips or [])
+        ips = {}
+        for text in observations:
+            addr = ipaddress.ip_address(text)
+            ips.setdefault(addr.version, addr)
+        if dns_status in ("resolved", "success") and not ips:
+            raise ValueError("resolved/success DNS status requires address observations")
+        if ips:
+            first_usable = 0 if pre_resolved or not q_host else boundary
+            for rule in self.rules:
+                if not rule.is_ip_class or (best is not None and rule.idx > best):
+                    continue
+                if q_host and not pre_resolved and (first_usable is None or rule.idx < first_usable):
+                    continue
+                obj = ips.get(6) if rule.type == "IP-CIDR6" else (ips.get(4) or (ips.get(6) if rule.type in ("GEOIP", "IP-ASN") else None))
+                if obj is None or any(self._excluded(rule, known) for known in ips.values()):
+                    continue
+                if rule.type in ("IP-CIDR", "IP-CIDR6"):
+                    hit = obj in ipaddress.ip_network(rule.value, strict=True)
+                elif rule.type == "IP-ASN":
+                    hit = self._asn_match(rule.value, obj)
+                else:
+                    hit = self._geoip_match(rule.value, obj, int(obj), obj.version)
+                if hit:
+                    consider(rule.idx)
+        return result(self.rules[best] if best is not None else self.final_rule)
 
-        ip_obj = None
-        if q_ip:
-            try:
-                ip_obj = ipaddress.ip_address(q_ip)
-            except ValueError:
-                self._warn("非法 IP：%s" % q_ip)
-        if ip_obj is not None:
-            ip_int, ver = int(ip_obj), ip_obj.version
-            for r_ver, net_int, mask, idx in self.ip_nets:
-                if r_ver != ver or (best is not None and idx > best):
-                    continue
-                if not self._ip_rule_usable(idx, is_domain_query):
-                    continue
-                if (ip_int & mask) == net_int:
-                    consider(idx)
-            for asn, idx in self.asn_rules:
-                if best is not None and idx > best:
-                    continue
-                if not self._ip_rule_usable(idx, is_domain_query):
-                    continue
-                if self._asn_match(asn, ip_obj):
-                    consider(idx)
-            for cc, idx in self.geoip_rules:
-                if best is not None and idx > best:
-                    continue
-                if not self._ip_rule_usable(idx, is_domain_query):
-                    continue
-                if self._geoip_match(cc, ip_obj, ip_int, ver):
-                    consider(idx)
-
-        matched = self.rules[best] if best is not None else self.final_rule
-        if matched is None:
-            return self._result(q_host, q_ip, None, [], None)
-
-        trace, leak_at = [], None
-        if is_domain_query:
-            for idx, r in self.leaky_ip_rules:
-                if idx >= matched.idx:
-                    break
-                trace.append("%s (%s:%s → %s) 缺 no-resolve，域名请求到此会触发本地 DNS 解析"
-                             % (r.rule_str(), r.source, r.line, r.policy))
-                if leak_at is None:
-                    leak_at = r.rule_str()
-        return self._result(q_host, q_ip, matched, trace, leak_at)
-
-    def _ip_rule_usable(self, idx, is_domain_query):
-        """域名请求时：带 no-resolve 的 IP 规则一律跳过。"""
-        return not is_domain_query or not self.rules[idx].no_resolve
+    def _ip_rule_usable(self, idx, is_domain_query, resolved=False):
+        return not is_domain_query or resolved or not self.rules[idx].no_resolve
 
     def _asn_match(self, asn, ip_obj):
-        sample = BUILTIN_ASN_SAMPLES.get(str(asn))
-        if not sample:
-            self._warn("IP-ASN,%s 无内置近似样本，离线判定为不匹配" % asn)
-            return False
-        for cidr in sample:
-            p = self._parse_cidr(cidr)
-            if p and p[0] == ip_obj.version and (int(ip_obj) & p[2]) == p[1]:
-                return True
-        return False
+        return self._db_lookup("asn", ip_obj).get("autonomous_system_number") == int(str(asn).lower().removeprefix("as"))
 
     def _geoip_match(self, cc, ip_obj, ip_int, ver):
-        if cc == "CN":
-            for r_ver, net_int, mask in self._china_ip_nets():
-                if r_ver == ver and (ip_int & mask) == net_int:
-                    return True
-            return False
-        self._warn("GEOIP,%s 离线无 MaxMind 库，判定为不匹配（近似）" % cc)
-        return False
+        data = self._db_lookup("country", ip_obj)
+        country = data.get("country") or data.get("registered_country") or {}
+        return country.get("iso_code") == cc.upper()
 
     def _result(self, host, ip, matched, trace, leak_at):
         if matched is None:
@@ -657,28 +706,20 @@ class Engine(object):
 # 默认路径解析
 # ---------------------------------------------------------------------------
 
-_FALLBACK_CONF = "/Users/fhgs/Library/Application Support/Surge/Profiles/Surge.conf"
-
-
 def default_conf_path():
-    """<tests>/../../Surge.conf；开发期回落到已知绝对路径。"""
+    """SURGE_CONF 优先，否则使用仓库相邻的 Surge.conf。"""
     env = os.environ.get("SURGE_CONF")
     if env and os.path.isfile(env):
         return env
     here = os.path.dirname(os.path.abspath(__file__))
-    cand = os.path.abspath(os.path.join(here, "..", "..", "Surge.conf"))
-    if os.path.isfile(cand):
-        return cand
-    if os.path.isfile(_FALLBACK_CONF):
-        return _FALLBACK_CONF
-    return cand
+    return os.path.abspath(os.path.join(here, "..", "..", "Surge.conf"))
 
 
 def build_engine(conf=None, rules=None):
     path = conf or default_conf_path()
     if not os.path.isfile(path):
         raise SystemExit("找不到 Surge 配置：%s（用 --conf 指定）" % path)
-    return Engine(path, rules)
+    return Engine(path, rules or os.environ.get("SURGE_RULES_DIR"))
 
 
 # ---------------------------------------------------------------------------
@@ -772,8 +813,14 @@ def run_selftest(verbose=True):
             with open(os.path.join(rules_dir, name), "w", encoding="utf-8") as fh:
                 fh.write(body)
         e = Engine(conf, rules_dir)
+        e._db_lookup = lambda kind, address: ({"autonomous_system_number": 399358}
+            if kind == "asn" and address in ipaddress.ip_network("160.79.104.0/21")
+            else {})
 
         def m(**kw):
+            # These pre-v2 probes test domain shape, not unspecified DNS results.
+            if kw.get("host") and not is_ip_literal(kw["host"]) and not kw.get("ip"):
+                kw.setdefault("stage", "domain")
             return e.match(**kw)
 
         # --- 域名类 ------------------------------------------------------
@@ -824,7 +871,7 @@ def run_selftest(verbose=True):
               m(host="www.cn-direct.example.cn")["policy"], "DIRECT")
 
         # --- no-resolve / DNS 泄漏路径 ------------------------------------
-        leak = m(host="www.cn-direct.example.cn")
+        leak = e.match(host="www.cn-direct.example.cn")
         check("T22 泄漏标记：路径经过缺 no-resolve 的 IP 规则",
               leak["dns_leak"], True)
         check("T23 泄漏定位到具体规则",
@@ -861,7 +908,8 @@ def run_selftest(verbose=True):
               sorted(m(host="exact.example.com").keys()),
               sorted(["query", "matched_rule", "rule_index", "source", "policy",
                       "physical_exit", "exit_class", "dns_leak", "dns_leak_at",
-                      "trace"]))
+                      "trace", "dns_resolution_count", "dns_resolution_triggered",
+                      "dns_status", "stage", "resolution_required", "routing_complete"]))
         check("T38 不支持的类型被跳过并告警（USER-AGENT）",
               (any("USER-AGENT" in w for w in e.warnings),
                any(r.type == "USER-AGENT" for r in e.rules)),
@@ -914,13 +962,16 @@ def run_selftest(verbose=True):
             check("R12 私网 IP 192.168.1.1 → DIRECT",
                   re_engine.match(host="192.168.1.1")["policy"], "DIRECT")
             check("R13 未知域名兜底 → Final 组",
-                  re_engine.match(host="zzz-nonexistent-brand-77.tld")["policy"],
+                  re_engine.match(host="zzz-nonexistent-brand-77.tld", stage="domain")["policy"],
                   "Final")
             check("R13b RFC6761 特殊 TLD .invalid → PrivateLAN 直连",
                   re_engine.match(host="no-such-domain-zzz.invalid")["source"],
                   "PrivateLAN.list")
-            check("R14 零本地解析约束：全表无缺 no-resolve 的 IP 类规则",
-                  len(re_engine.leaky_ip_rules), 0)
+            resolving = re_engine.leaky_ip_rules
+            boundary = min((idx for idx, _rule in resolving), default=len(re_engine.rules))
+            ordered = not any(r.type in DOMAIN_TYPES and r.idx > boundary for r in re_engine.rules)
+            check("R14 域名在解析IP边界之前；启用解析时必须有加密DNS",
+                  ordered and (not resolving or bool(re_engine.general.get("encrypted-dns-server"))), True)
             check("R15 任意代理域名判定 dns_leak=False",
                   re_engine.match(host="chatgpt.com")["dns_leak"], False)
         except Exception as exc:  # pragma: no cover
@@ -981,6 +1032,11 @@ def main(argv=None):
     p_match = sub.add_parser("match", parents=[common], help="模拟一次请求判定")
     p_match.add_argument("host", help="域名或 IP")
     p_match.add_argument("--ip", help="已解析 IP（域名请求时视为已知解析结果）")
+    p_match.add_argument("--stage", choices=["domain"], help="仅检查域名阶段，不宣称完整最终分流")
+    p_match.add_argument("--dns-status", choices=["resolved", "success", "failed"])
+    p_match.add_argument("--resolved-ip", action="append", dest="resolved_ips")
+    p_match.add_argument("--sni")
+    p_match.add_argument("--http-host")
 
     p_dump = sub.add_parser("dump-index", parents=[common],
                             help="导出展开后的全规则表")
@@ -1001,7 +1057,8 @@ def main(argv=None):
     eng = build_engine(args.conf, args.rules)
 
     if args.cmd == "match":
-        res = eng.match(host=args.host, ip=args.ip)
+        res = eng.match(host=args.host, ip=args.ip, stage=args.stage, dns_status=args.dns_status,
+                        resolved_ips=args.resolved_ips, sni=args.sni, http_host=args.http_host)
         if args.json:
             out = dict(res)
             out["warnings"] = eng.warnings

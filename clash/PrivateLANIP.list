@@ -1,0 +1,26 @@
+# AUTO-GENERATED — Clash(Mihomo) classical 规则，由 ../lists/PrivateLANIP.list 派生
+# 勿手工编辑；修改 Surge 源后运行 python3 tools/surge2clash.py 重新生成
+
+# PrivateLANIP — maintained routing owner.
+# Topology and matching options: config/routing.json.
+# Sources and review decisions: SOURCES.md.
+
+IP-CIDR,0.0.0.0/8
+IP-CIDR,10.0.0.0/8
+IP-CIDR,100.64.0.0/10
+IP-CIDR,127.0.0.0/8
+IP-CIDR,169.254.0.0/16
+IP-CIDR,172.16.0.0/12
+IP-CIDR,192.0.0.0/24
+IP-CIDR,192.0.2.0/24
+IP-CIDR,192.88.99.0/24
+IP-CIDR,192.168.0.0/16
+IP-CIDR,198.18.0.0/15
+IP-CIDR,198.51.100.0/24
+IP-CIDR,203.0.113.0/24
+IP-CIDR,224.0.0.0/3
+
+IP-CIDR6,::/127
+IP-CIDR6,fc00::/7
+IP-CIDR6,fe80::/10
+IP-CIDR6,ff00::/8

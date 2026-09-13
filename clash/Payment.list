@@ -1,7 +1,9 @@
 # AUTO-GENERATED — Clash(Mihomo) classical 规则，由 ../lists/Payment.list 派生
 # 勿手工编辑；修改 Surge 源后运行 python3 tools/surge2clash.py 重新生成
 
-# International payment services requiring a stable exit; ecosystem-owned payment surfaces stay with their owner.
+# Payment — maintained routing owner.
+# Topology and matching options: config/routing.json.
+# Sources and review decisions: SOURCES.md.
 
 DOMAIN-SUFFIX,2checkout.com
 DOMAIN-SUFFIX,2co.com

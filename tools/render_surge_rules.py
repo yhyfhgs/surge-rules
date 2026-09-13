@@ -4,6 +4,7 @@
 import argparse
 import difflib
 import os
+import re
 import sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -11,12 +12,13 @@ ROOT = os.path.dirname(HERE)
 sys.path.insert(0, HERE)
 
 from routing_manifest import load_routing_manifest  # noqa: E402
+from rule_syntax import render_call, parse_ruleset_call
 
 
 BASE_URL = "https://cdn.jsdelivr.net/gh/yhyfhgs/surge-rules@main/lists"
 
 
-def render_rules(entries):
+def render_rules(entries, base_url=BASE_URL):
     """Render the [Rule] block, one ``# <index> <section>`` header per section.
 
     Sections are the manifest's own grouping (validated contiguous there); the
@@ -25,24 +27,21 @@ def render_rules(entries):
     nothing about matching: Surge, the analyzer, the audit engine, and the
     scenario engine all drop ``#`` lines before parsing.
     """
-    lines = ["[Rule]", "RULE-SET,SYSTEM,DIRECT"]
+    v2 = getattr(entries, "version", 1) == 2
+    lines = ["[Rule]"] + ([] if v2 else ["RULE-SET,SYSTEM,DIRECT"])
     section, index = None, -1
     for entry in entries:
         if entry["section"] != section:
             section = entry["section"]
             index += 1
             lines.append("# %d %s" % (index, section))
-        parts = ["RULE-SET", "%s/%s.list" % (BASE_URL, entry["name"]), entry["policy"]]
-        if entry.get("extended_matching"):
-            parts.append("extended-matching")
-        if entry.get("no_resolve"):
-            parts.append("no-resolve")
-        lines.append(",".join(parts))
-    lines += [
-        "RULE-SET,LAN,DIRECT,no-resolve",
-        "GEOIP,CN,DIRECT,no-resolve",
-        "FINAL,Final,dns-failed",
-    ]
+        if v2 and entries.system and entry["name"] == entries.system["before"]:
+            lines.append("RULE-SET,SYSTEM," + entries.system["policy"])
+        lines.append(render_call(entry, lambda name: base_url.rstrip("/") + "/" + name + ".list"))
+    if v2:
+        lines.append("FINAL," + entries.final["policy"] + (",dns-failed" if entries.final["dns_failed"] else ""))
+    else:
+        lines += ["RULE-SET,LAN,DIRECT,no-resolve", "GEOIP,CN,DIRECT,no-resolve", "FINAL,Final,dns-failed"]
     return "\n".join(lines)
 
 
@@ -73,6 +72,26 @@ def extract_rule_section(profile):
     return "\n".join(section)
 
 
+def inferred_base(profile, rules_dir):
+    """Accept one known distribution revision or the explicit source directory."""
+    bases = set()
+    for line in extract_rule_section(profile).splitlines()[1:]:
+        text = line.strip()
+        if not text or text.startswith("#"):
+            continue
+        call = parse_ruleset_call(text)
+        if call and call[0] not in ("SYSTEM", "LAN"):
+            for reference in (call[0],) + call[3]:
+                bases.add(reference.rsplit("/", 1)[0])
+    if len(bases) != 1:
+        raise ValueError("profile must use one distribution base")
+    base = bases.pop()
+    known = re.fullmatch(r"https://cdn\.jsdelivr\.net/gh/yhyfhgs/surge-rules@(?:main|[0-9a-f]{40})/lists", base)
+    if not known and os.path.abspath(base) != os.path.abspath(rules_dir):
+        raise ValueError("unknown distribution base; provide --base-url explicitly")
+    return base
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("profile")
@@ -81,6 +100,7 @@ def main():
                         help="check the profile [Rule] section without writing a file")
     parser.add_argument("--manifest", default=os.path.join(ROOT, "config", "routing.json"))
     parser.add_argument("--rules-dir", default=os.path.join(ROOT, "lists"))
+    parser.add_argument("--base-url", default=None, help="immutable CDN base or absolute local lists directory")
     args = parser.parse_args()
     if args.check and args.output is not None:
         parser.error("--check accepts only the profile path")
@@ -89,7 +109,8 @@ def main():
     entries = load_routing_manifest(args.manifest, args.rules_dir)
     with open(args.profile, encoding="utf-8") as handle:
         profile = handle.read()
-    block = render_rules(entries)
+    base = args.base_url or (inferred_base(profile, args.rules_dir) if args.check else BASE_URL)
+    block = render_rules(entries, base)
     if args.check:
         actual = extract_rule_section(profile)
         if actual != block:

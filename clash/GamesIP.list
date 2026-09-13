@@ -1,0 +1,15 @@
+# AUTO-GENERATED — Clash(Mihomo) classical 规则，由 ../lists/GamesIP.list 派生
+# 勿手工编辑；修改 Surge 源后运行 python3 tools/surge2clash.py 重新生成
+
+# GamesIP — maintained routing owner.
+# Topology and matching options: config/routing.json.
+# Sources and review decisions: SOURCES.md.
+
+IP-CIDR,24.105.30.129/32
+IP-CIDR,24.105.62.129/32
+IP-CIDR,103.4.114.233/32
+IP-CIDR,103.4.115.248/32
+IP-CIDR,137.221.105.2/32
+IP-CIDR,185.60.112.157/32
+IP-CIDR,185.60.112.158/32
+IP-CIDR,185.60.114.159/32

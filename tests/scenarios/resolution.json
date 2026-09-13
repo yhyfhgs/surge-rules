@@ -1,0 +1,38 @@
+[
+  {
+    "name": "v2_known_domain_before_failed_dns",
+    "desc": "已知服务域在IP解析边界之前命中，不受后续模拟解析失败影响。",
+    "requests": [{"host":"chatgpt.com","dns_status":"failed"}],
+    "assert": {"policy":"AI","no_dns_leak":true,"routing_complete":true,"dns_resolution_count":0}
+  },
+  {
+    "name": "v2_unknown_domain_dns_failed_fallback",
+    "desc": "未归属域的DNS失败由FINAL dns-failed承接，明确提供失败观测。",
+    "requests": [{"host":"routing-v2-unknown.example.net","dns_status":"failed"}],
+    "assert": {"policy":"Final","no_dns_leak":true,"routing_complete":true,"dns_resolution_count":1}
+  },
+  {
+    "name": "v2_unknown_domain_requires_observation",
+    "desc": "缺少DNS观测时不得假装得到完整最终策略；此处只验证状态。",
+    "requests": [{"host":"routing-v2-pending.example.net"}],
+    "assert": {"no_dns_leak":true,"routing_complete":false,"dns_resolution_count":1}
+  },
+  {
+    "name": "v2_resolved_cn_domain_uses_ip_funnel",
+    "desc": "用已知国内DNS地址作为合成解析结果，验证域名未命中后ChinaIP承接。",
+    "requests": [{"host":"routing-v2-cn.example.net","dns_status":"success","resolved_ips":["223.5.5.5"]}],
+    "assert": {"policy":"DIRECT","no_dns_leak":true,"routing_complete":true,"dns_resolution_count":1}
+  },
+  {
+    "name": "v2_pre_resolved_private_address",
+    "desc": "已有地址不再次触发DNS；前位地区规则须排除私有直连集合。",
+    "requests": [{"host":"routing-v2-private.example.net","dns_status":"resolved","resolved_ips":["192.168.20.1"]}],
+    "assert": {"policy":"DIRECT","no_dns_leak":true,"routing_complete":true,"dns_resolution_count":0}
+  },
+  {
+    "name": "v2_ip_literal_with_service_sni",
+    "desc": "连接字面IP但可见SNI属于AI，启用扩展匹配后域名阶段优先。",
+    "requests": [{"host":"192.0.2.10","sni":"chatgpt.com"}],
+    "assert": {"policy":"AI","no_dns_leak":true,"routing_complete":true,"dns_resolution_count":0}
+  }
+]

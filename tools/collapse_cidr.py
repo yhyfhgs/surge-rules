@@ -8,8 +8,8 @@ collapse 输出是集合的唯一规范表示，故 collapse(A)==collapse(B) ⟺
 集合逐位相同；`--verify` 据此逐条比对并输出集合 SHA-256（可 `--against` 基线）。
 
 格式约定：头注释原样保留；类型分区沿用首次出现顺序、区间空一行；CIDR 区内按
-网络地址升序；尾参不同的行分组折叠、绝不跨组合并；默认强制 IP 规则带
-no-resolve（`--add-no-resolve` 可自动补齐）。
+网络地址升序；尾参不同的行分组折叠、绝不跨组合并；默认保留尾参，解析策略
+由路由 manifest 决定。旧配置可显式要求或补齐 no-resolve。
 
 用法：collapse_cidr.py <list> [--check|--dry-run|--verify [--against F]|-o OUT]
 退出码：0 = 成功 / 集合等价；1 = 不等价、--check 漂移或输入非法。
@@ -153,7 +153,7 @@ def covered_by(net, canon_sorted):
 
 
 def check_no_resolve(sections, add_missing):
-    """约束：所有 IP 类规则必须带 no-resolve。"""
+    """可选的旧配置约束：要求或补齐 IP 规则的 no-resolve。"""
     missing = []
     for sec in sections:
         if sec.rtype not in IP_TYPES:
@@ -285,12 +285,16 @@ def main(argv=None):
     ap.add_argument("--against", metavar="BASELINE",
                     help="与 --verify 合用：拿 BASELINE 文件的地址集合作对照"
                          "（默认与 path 自身折叠前的集合对照）")
-    ap.add_argument("--add-no-resolve", action="store_true",
-                    help="自动为缺失 no-resolve 的 IP 规则补上（默认缺失即报错）")
+    dns_flags = ap.add_mutually_exclusive_group()
+    dns_flags.add_argument("--require-no-resolve", action="store_true",
+                           help="旧配置检查：IP 规则缺失 no-resolve 即报错")
+    dns_flags.add_argument("--add-no-resolve", action="store_true",
+                           help="显式为 IP 规则补上 no-resolve（默认保留原尾参）")
     args = ap.parse_args(argv)
 
     header, sections = parse_list(args.path)
-    missing = check_no_resolve(sections, args.add_no_resolve)
+    missing = (check_no_resolve(sections, args.add_no_resolve)
+               if args.require_no_resolve or args.add_no_resolve else [])
     if missing:
         for m in missing[:20]:
             sys.stderr.write("collapse_cidr: 缺 no-resolve：%s\n" % m)
@@ -307,7 +311,8 @@ def main(argv=None):
     if args.verify:
         if args.against:
             base_header, base_sections = parse_list(args.against)
-            check_no_resolve(base_sections, True)
+            if args.add_no_resolve:
+                check_no_resolve(base_sections, True)
             lb, la = os.path.basename(args.against), os.path.basename(args.path)
             src_sections, dst_sections = base_sections, sections
             print("等价校验：%s（基线） ↔ %s（当前）" % (lb, la))

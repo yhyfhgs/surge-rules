@@ -4,7 +4,7 @@ This directory is the public `surge-rules` repository. Commands below run here. 
 
 ## Source and privacy boundaries
 
-- Routing is first-match-wins. `config/routing.json` alone defines list order, policies, modifiers and sections. Edit it and/or `lists/*.list`, render a candidate, verify it, then review the diff before replacing only the profile's generated `[Rule]` section.
+- Routing is first-match-wins. `config/routing.json` alone defines list order, policies, modifiers and sections. Edit it and/or `lists/*.list`, render a candidate, verify it, then review the diff before replacing the generated `[Rule]` section. Use `tools/prepare_profiles.py` for explicitly scoped DNS/group migrations while preserving private nodes and certificate material.
 - Cross-list order is semantic; ordered-safe broad parents must remain behind every different-policy child (Reject exceptions follow the documented contract). Canonicalize within-list shape with `tools/sort_lists.py --write`.
 - Regenerate `clash/`, `lists/ChinaDomain.list`, and `lists/ChinaIP.list` through their respective workflows: `tools/surge2clash.py`, `tools/regen_chinadomain.py`, and locked `tools/rebuild.py --id blackmatrix7_china_ip`. Preserve ChinaIP exclusions and collapse checks; re-admission needs fresh documented RDAP evidence.
 - Keep node names, exit IP/ASN/ISP mappings, policy internals, certificates and credentials out of public files. Use neutral test placeholders. `tests/live_check_local.json` is private/ignored: verify `git check-ignore` before committing. Put diagnostic artifacts outside the repository. Do not dump private profile contents into logs or reports.
@@ -12,7 +12,7 @@ This directory is the public `surge-rules` repository. Commands below run here. 
 
 ## Routing invariants
 
-- Maintain one owner per rule when moving it between lists. All IP-class rules carry `no-resolve`.
+- Maintain one owner per rule when moving it between lists. Keep domain and IP sets separate. Reviewed IP sets may resolve only after the domain stage; matching modifiers are controlled by the v2 manifest.
 - `ProxyGFW` is a domain-only residual: no IP, PSL-boundary suffix, specifically owned domain or denylisted expired domain. Preserve registered multitenant namespaces; removing an expired-domain denial needs fresh DNS evidence.
 - `USER-AGENT`, `PROCESS-NAME`, and `URL-REGEX` are forbidden repository-wide without exemptions. Every allowlist exemption needs a reason.
 - Treat redirect/login/API/CDN endpoints as one session family; split only evidenced download or regional surfaces. Resolve live-traffic decisions in `docs/MAINTENANCE.md` with the required traffic evidence.
@@ -26,7 +26,7 @@ For rule changes, follow the full workflow in `docs/MAINTENANCE.md`:
 python3 tools/sort_lists.py --check
 python3 tools/render_surge_rules.py ../Surge.conf /tmp/Surge.candidate.conf
 surge-cli --check /tmp/Surge.candidate.conf
-python3 tools/analyze_rules.py --conf /tmp/Surge.candidate.conf --rules lists --out /tmp/rule-analysis --fail-on-shadow
+python3 tools/analyze_rules.py --conf /tmp/Surge.candidate.conf --rules lists --country-db "$HOME/Library/Application Support/com.nssurge.surge-mac/GeoLite2-Country.mmdb" --asn-db /Applications/Surge.app/Contents/Resources/GeoLite2-ASN.mmdb --out /tmp/rule-analysis --fail-on-shadow
 python3 tests/audit.py --conf /tmp/Surge.candidate.conf --rules lists --check all --fail-on P1
 python3 tests/runsuite.py --conf /tmp/Surge.candidate.conf --rules lists
 python3 tools/surge2clash.py --check

@@ -33,8 +33,8 @@ QUERY_KEYS = ("host", "ip")
 
 # schema 键白名单；未知键在加载期报错。
 SCENARIO_KEYS = ("assert", "desc", "name", "note", "requests")
-REQUEST_KEYS = ("host", "ip", "note")
-ASSERT_KEYS = ("no_dns_leak", "per_request", "policy", "policy_in", "same_policy")
+REQUEST_KEYS = ("host", "ip", "note", "stage", "sni", "http_host", "dns_status", "resolved_ips")
+ASSERT_KEYS = ("no_dns_leak", "per_request", "policy", "policy_in", "same_policy", "routing_complete", "dns_resolution_count")
 PERREQ_KEYS = ("host", "ip", "note", "policy", "policy_in", "reason")
 
 
@@ -55,15 +55,17 @@ class Engine(object):
             raise SuiteError(str(e))
 
     def query(self, q):
-        key = tuple(q.get(k) for k in QUERY_KEYS)
+        key = json.dumps({k:v for k,v in q.items() if k != "note"}, sort_keys=True)
         if key not in self._cache:
-            res = self._eng.match(host=q.get("host"), ip=q.get("ip"))
+            res = self._eng.match(**{k:v for k,v in q.items() if k != "note"})
             self._cache[key] = {
                 "policy": res.get("policy"),
                 "matched_rule": res.get("matched_rule"),
                 "source": res.get("source"),
                 "dns_leak": bool(res.get("dns_leak")),
                 "dns_leak_at": res.get("dns_leak_at"),
+                "routing_complete": res.get("routing_complete"),
+                "dns_resolution_count": res.get("dns_resolution_count"),
             }
         return self._cache[key]
 
@@ -190,6 +192,16 @@ def validate_scenarios(files):
                         continue
                     _unknown_keys(r, REQUEST_KEYS, "request", rtag, errors)
                     _check_target(r, rtag, errors)
+                    if r.get("stage") not in (None, "domain"):
+                        errors.append(rtag + ": invalid stage")
+                    if r.get("dns_status") not in (None, "resolved", "success", "failed"):
+                        errors.append(rtag + ": invalid dns_status")
+                    for field in ("sni", "http_host"):
+                        if field in r and check_host(r[field]):
+                            errors.append(rtag + ": invalid " + field)
+                    if "resolved_ips" in r and (not isinstance(r["resolved_ips"], list) or
+                            any(check_ip(v) for v in r["resolved_ips"])):
+                        errors.append(rtag + ": invalid resolved_ips")
                     req_keys.append(qkey(r))
 
             asrt = scn.get("assert")
@@ -207,10 +219,21 @@ def validate_scenarios(files):
                 if (not isinstance(pin, list) or not pin
                         or not all(isinstance(x, str) and x for x in pin)):
                     errors.append("%s：assert.policy_in 必须是非空的字符串数组" % tag)
-            for k in ("same_policy", "no_dns_leak"):
+            for k in ("same_policy", "no_dns_leak", "routing_complete"):
                 if k in asrt and not isinstance(asrt[k], bool):
                     errors.append("%s：assert.%s 必须是布尔值" % (tag, k))
 
+            if "dns_resolution_count" in asrt and (type(asrt["dns_resolution_count"]) is not int or asrt["dns_resolution_count"] not in (0,1)):
+                errors.append(tag + ": dns_resolution_count must be 0 or 1")
+            contexts = {}
+            for request in reqs if isinstance(reqs,list) else []:
+                if not isinstance(request,dict):
+                    continue
+                key = qkey(request)
+                observation = json.dumps({k:v for k,v in request.items() if k != "note"},sort_keys=True)
+                if key in contexts and contexts[key] != observation:
+                    errors.append(tag + ": differing observations for the same host/ip need separate scenarios")
+                contexts[key]=observation
             per = asrt.get("per_request", [])
             if "per_request" in asrt and not isinstance(per, list):
                 errors.append("%s：assert.per_request 必须是数组" % tag)
@@ -248,6 +271,7 @@ def validate_scenarios(files):
             if not (("policy" in asrt) or ("policy_in" in asrt)
                     or asrt.get("same_policy") is True
                     or asrt.get("no_dns_leak") is True
+                    or "routing_complete" in asrt or "dns_resolution_count" in asrt
                     or bool(per)):
                 errors.append("%s：assert 里没有任何有效断言（policy / policy_in / "
                               "same_policy:true / no_dns_leak:true / 非空 per_request）" % tag)
@@ -312,10 +336,14 @@ def run_scenario(scn, eng):
 
     if asrt.get("no_dns_leak"):
         for q, r in results:
-            add("no_dns_leak", q, "无本地解析",
+            add("no_dns_leak", q, "无未经允许的明文DNS解析",
                 ("泄漏于 " + str(r["dns_leak_at"])) if r["dns_leak"] else "无泄漏",
                 not r["dns_leak"])
 
+    for field in ("routing_complete", "dns_resolution_count"):
+        if field in asrt:
+            for q,r in results:
+                add(field, q, asrt[field], r[field], r[field] == asrt[field])
     return out, None
 
 

@@ -1,7 +1,9 @@
 # AUTO-GENERATED — Clash(Mihomo) classical 规则，由 ../lists/Reject.list 派生
 # 勿手工编辑；修改 Surge 源后运行 python3 tools/surge2clash.py 重新生成
 
-# Security-first blocking for HTTPDNS, hijacking, malicious advertising, phishing, and mining; analytics/APM are excluded.
+# Reject — maintained routing owner.
+# Topology and matching options: config/routing.json.
+# Sources and review decisions: SOURCES.md.
 
 DOMAIN,aedns.weixin.qq.com
 DOMAIN,apidns-js.kwd.inkuai.com
@@ -102,6 +104,7 @@ DOMAIN-SUFFIX,adnxs.com
 DOMAIN-SUFFIX,adroll.com
 DOMAIN-SUFFIX,adsame.com
 DOMAIN-SUFFIX,adsrvr.org
+DOMAIN-SUFFIX,adtech.redventures.io
 DOMAIN-SUFFIX,advertising.com
 DOMAIN-SUFFIX,akuai.top
 DOMAIN-SUFFIX,alienskins.cn
@@ -318,12 +321,3 @@ DOMAIN-KEYWORD,advertmarket
 DOMAIN-KEYWORD,nimiqpool
 DOMAIN-KEYWORD,packetsdk
 DOMAIN-KEYWORD,pangolin-sdk-toutiao
-
-IP-CIDR,119.29.29.98/31,no-resolve
-IP-CIDR,180.76.2.18/32,no-resolve
-IP-CIDR,180.76.76.112/32,no-resolve
-IP-CIDR,180.76.76.200/32,no-resolve
-IP-CIDR,180.76.76.220/32,no-resolve
-IP-CIDR,182.254.116.117/32,no-resolve
-IP-CIDR,182.254.118.119/32,no-resolve
-IP-CIDR,203.107.1.0/24,no-resolve

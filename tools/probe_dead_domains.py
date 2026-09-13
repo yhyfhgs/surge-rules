@@ -9,7 +9,7 @@ Implements Requirement R3 (Features F6, F7, F8):
     Tier 3: Authoritative TLD Nameserver Query (verify registry-level delegation status).
     Tier 4: HTTP Parking & Domain Sale Page Fingerprint Detection.
 - Temporal Hysteresis: Requires consecutive unresolvable sweeps across time before
-  classifying as dead, guaranteeing ZERO false-positive pruning of live domains.
+  classifying as dead. Timeouts and parking hints alone never authorize pruning.
 - Full CLI interface (--input, --output, --state, --concurrency, --timeout,
   --hysteresis, --check-only, --dry-run, --format, --verbose, --selftest).
 """
@@ -17,7 +17,6 @@ Implements Requirement R3 (Features F6, F7, F8):
 import argparse
 import asyncio
 import datetime
-import http.client
 import ipaddress
 import json
 import os
@@ -25,10 +24,10 @@ import re
 import socket
 import ssl
 import struct
-import sys
 import tempfile
 import time
 import unittest
+import weakref
 import urllib.error
 import urllib.parse
 import urllib.request
@@ -477,6 +476,12 @@ async def probe_tier1_cn_dns(domain: str, timeout: float = 4.0) -> Tier1Result:
                 if ans.data in GFW_POISON_IPS or is_bogon_or_private(ans.data):
                     poisoned_hits.append(ans.data)
 
+    # A local fake-IP/interception answer is not evidence of censorship.
+    if poisoned_hits and all(is_bogon_or_private(ip) for ip in poisoned_hits):
+        return Tier1Result(status="CN_INTERCEPTED", answers=collected_ips,
+                           is_poisoned=False,
+                           details="Private/synthetic answers; local interception cannot establish blocking")
+
     if poisoned_hits:
         return Tier1Result(
             status="CN_POLLUTED",
@@ -501,30 +506,43 @@ async def probe_tier1_cn_dns(domain: str, timeout: float = 4.0) -> Tier1Result:
         return Tier1Result(status="CN_NODATA", details=f"CN resolvers returned empty answers, rcodes: {rcodes}")
 
 
-async def query_doh_provider(provider: Dict[str, Any], domain: str, timeout: float = 5.0) -> Tuple[str, Optional[Dict[str, Any]]]:
-    """Asynchronously query a single DoH provider using JSON API."""
-    url = f"{provider['url']}?{provider['json_param']}={urllib.parse.quote(domain)}&type=A"
-    req = urllib.request.Request(
-        url,
-        headers={
-            "Accept": "application/dns-json",
-            "User-Agent": "SurgeRuleAuditor/2.0 (+https://github.com/yhyfhgs/surge-rules)",
-        },
-    )
+_HTTP_LIMITS = weakref.WeakKeyDictionary()
 
+
+async def bounded_http(callback, timeout):
+    """Start the timeout after admission, not while queued behind other probes."""
     loop = asyncio.get_running_loop()
-    try:
-        def _fetch():
-            ctx = ssl.create_default_context()
-            with urllib.request.urlopen(req, timeout=timeout, context=ctx) as response:
-                if response.status == 200:
-                    return json.loads(response.read().decode("utf-8"))
-                return None
+    semaphore = _HTTP_LIMITS.setdefault(loop, asyncio.Semaphore(16))
+    await semaphore.acquire()
+    future = loop.run_in_executor(None, callback)
+    # A timed-out coroutine must not free the slot while its thread still runs.
+    future.add_done_callback(lambda _future: semaphore.release())
+    return await asyncio.wait_for(asyncio.shield(future), timeout + 1.0)
 
-        data = await asyncio.wait_for(loop.run_in_executor(None, _fetch), timeout=timeout)
-        return provider["name"], data
-    except Exception:
-        return provider["name"], None
+
+async def query_doh_provider(provider: Dict[str, Any], domain: str, timeout: float = 5.0) -> Tuple[str, Optional[Dict[str, Any]]]:
+    """Bound the complete TLS/DNS transfer, including DNS bootstrap time."""
+    url = f"{provider['url']}?{provider['json_param']}={urllib.parse.quote(domain)}&type=A"
+    loop = asyncio.get_running_loop()
+    semaphore = _HTTP_LIMITS.setdefault(loop, asyncio.Semaphore(16))
+    async with semaphore:
+        process = await asyncio.create_subprocess_exec(
+            "curl", "-q", "-fsSL", "--proto", "=https", "--proto-redir", "=https",
+            "--connect-timeout", str(min(timeout, 4.0)), "--max-time", str(timeout),
+            "--max-filesize", "1048576", "-H", "Accept: application/dns-json",
+            "-A", "SurgeRuleAuditor/2.0", url,
+            stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.DEVNULL)
+        try:
+            output, _ = await asyncio.wait_for(process.communicate(), timeout + 2.0)
+            if process.returncode != 0:
+                return provider["name"], None
+            return provider["name"], json.loads(output)
+        except (asyncio.TimeoutError, ValueError):
+            return provider["name"], None
+        finally:
+            if process.returncode is None:
+                process.kill()
+                await process.wait()
 
 
 async def probe_tier2_clean_doh(domain: str, timeout: float = 5.0) -> Tier2Result:
@@ -562,7 +580,7 @@ async def probe_tier2_clean_doh(domain: str, timeout: float = 5.0) -> Tier2Resul
             details=f"Resolved active records via {', '.join(responding_providers)}: {', '.join(sorted(set(alive_answers)))}",
         )
 
-    if responding_providers and all_nxdomain:
+    if len(responding_providers) >= 2 and all_nxdomain:
         return Tier2Result(
             status="DOH_NXDOMAIN",
             providers_responding=responding_providers,
@@ -641,11 +659,11 @@ async def probe_tier3_authoritative_tld(domain: str, timeout: float = 4.0) -> Ti
             details=f"Active NS delegation found at TLD level: {', '.join(sorted(set(ns_delegations)))}",
         )
 
-    if is_nxdomain or is_soa_at_tld:
+    if sum(resp.rcode == RCODE_NXDOMAIN and bool(resp.flags & 0x0400) for resp in valid_resps) >= 2:
         return Tier3Result(
             status="NOT_DELEGATED",
             tld=tld,
-            details=f"Domain {sld} is not delegated at TLD .{tld} (NXDOMAIN or parent SOA)",
+            details=f"Domain {sld} has two authoritative NXDOMAIN confirmations at .{tld}",
         )
 
     return Tier3Result(
@@ -669,8 +687,6 @@ async def probe_tier4_http_parking(domain: str, ip_hint: Optional[str] = None, t
     def _fetch_http(proto: str) -> Tuple[Optional[int], str, str, str]:
         url = f"{proto}://{domain}"
         ctx = ssl.create_default_context()
-        ctx.check_hostname = False
-        ctx.verify_mode = ssl.CERT_NONE
 
         req = urllib.request.Request(
             url,
@@ -684,7 +700,16 @@ async def probe_tier4_http_parking(domain: str, ip_hint: Optional[str] = None, t
             with urllib.request.urlopen(req, timeout=timeout, context=ctx) as resp:
                 code = resp.status
                 headers = dict(resp.headers)
-                body = resp.read(65536).decode("utf-8", errors="replace")
+                deadline = time.monotonic() + timeout
+                chunks, size = [], 0
+                read_chunk = getattr(resp, "read1", resp.read)
+                while size < 65536 and time.monotonic() < deadline:
+                    chunk = read_chunk(min(8192, 65536 - size))
+                    if not chunk:
+                        break
+                    chunks.append(chunk)
+                    size += len(chunk)
+                body = b"".join(chunks).decode("utf-8", errors="replace")
                 return code, body, headers.get("Server", ""), resp.geturl()
         except urllib.error.HTTPError as he:
             try:
@@ -697,10 +722,7 @@ async def probe_tier4_http_parking(domain: str, ip_hint: Optional[str] = None, t
 
     for proto in ("https", "http"):
         try:
-            code, body, server, final_url = await asyncio.wait_for(
-                loop.run_in_executor(None, _fetch_http, proto),
-                timeout=timeout + 1.0,
-            )
+            code, body, server, final_url = await bounded_http(lambda: _fetch_http(proto), timeout)
             if code is not None:
                 title_match = re.search(r"<title[^>]*>(.*?)</title>", body, re.I | re.S)
                 title = title_match.group(1).strip() if title_match else ""
@@ -749,7 +771,7 @@ async def probe_tier4_http_parking(domain: str, ip_hint: Optional[str] = None, t
 # 4-Tier Triangulation Engine
 # ---------------------------------------------------------------------------
 
-async def triangulate_domain(domain: str, timeout: float = 5.0) -> TriangulationVerdict:
+async def triangulate_domain(domain: str, timeout: float = 5.0, dns_only: bool = False) -> TriangulationVerdict:
     """Execute complete 4-tier triangulation algorithm for a single domain."""
     domain = domain.strip().lower()
 
@@ -770,7 +792,8 @@ async def triangulate_domain(domain: str, timeout: float = 5.0) -> Triangulation
             except ValueError:
                 pass
 
-        t4_res = await probe_tier4_http_parking(domain, ip_hint=first_ip, timeout=timeout)
+        t4_res = (Tier4Result(status="SKIPPED", details="DNS-only review") if dns_only else
+                  await probe_tier4_http_parking(domain, ip_hint=first_ip, timeout=timeout))
         t3_dummy = Tier3Result(status="SKIPPED", details="Skipped Tier 3 because DoH resolved")
 
         if t4_res.status == "PARKED":
@@ -780,9 +803,9 @@ async def triangulate_domain(domain: str, timeout: float = 5.0) -> Triangulation
                 tier2=t2_res,
                 tier3=t3_dummy,
                 tier4=t4_res,
-                verdict="DEAD_PARKED",
-                is_dead=True,
-                reason=f"Domain resolves to parking page ({t4_res.matched_fingerprint})",
+                verdict="SUSPECT_PARKED",
+                is_dead=False,
+                reason=f"Parking hint requires manual ownership review ({t4_res.matched_fingerprint})",
             )
 
         if t1_res.status == "CN_POLLUTED" or t1_res.is_poisoned:
@@ -808,7 +831,15 @@ async def triangulate_domain(domain: str, timeout: float = 5.0) -> Triangulation
             reason="Active records verified via clean DoH.",
         )
 
-    # Step 3: If DoH returned NXDOMAIN or NODATA, query Tier 3 Authoritative TLD
+    # Transport errors, SERVFAIL and NODATA are not NXDOMAIN evidence.
+    if t2_res.status != "DOH_NXDOMAIN" or len(t2_res.providers_responding) < 2:
+        return TriangulationVerdict(
+            domain=domain, tier1=t1_res, tier2=t2_res,
+            tier3=Tier3Result(status="SKIPPED", details="No clean NXDOMAIN quorum"),
+            tier4=Tier4Result(status="SKIPPED"), verdict="UNKNOWN_UNRESOLVED",
+            is_dead=False, reason="No independent clean NXDOMAIN quorum; retained.")
+
+    # Only a clean NXDOMAIN quorum permits a registry-level confirmation attempt.
     t3_res = await probe_tier3_authoritative_tld(domain, timeout=timeout)
     t4_skipped = Tier4Result(status="SKIPPED", details="Skipped Tier 4 because domain does not resolve")
 
@@ -822,18 +853,6 @@ async def triangulate_domain(domain: str, timeout: float = 5.0) -> Triangulation
             verdict="DEAD_UNREGISTERED",
             is_dead=True,
             reason=f"DoH returned NXDOMAIN and TLD .{t3_res.tld} confirms domain is not delegated",
-        )
-
-    if t3_res.status == "LAME_DELEGATION" or (t2_res.status == "DOH_NXDOMAIN" and t3_res.status == "UNKNOWN"):
-        return TriangulationVerdict(
-            domain=domain,
-            tier1=t1_res,
-            tier2=t2_res,
-            tier3=t3_res,
-            tier4=t4_skipped,
-            verdict="DEAD_LAME_DELEGATION",
-            is_dead=True,
-            reason="DoH returned NXDOMAIN and Authoritative NS are dead or non-responsive",
         )
 
     # Inconclusive fallback
@@ -863,13 +882,15 @@ class DomainStateRecord:
     last_probed: str
     last_verdict: str
     last_reason: str
+    last_streak_at: Optional[str] = None
 
 
 class HysteresisManager:
     """Manages multi-sweep temporal hysteresis state to prevent transient drops."""
 
-    def __init__(self, state_path: Optional[Path] = None, required_sweeps: int = 3):
+    def __init__(self, state_path: Optional[Path] = None, required_sweeps: int = 3, minimum_interval_seconds: int = 86400):
         self.state_path = state_path
+        self.minimum_interval_seconds = minimum_interval_seconds
         self.required_sweeps = required_sweeps
         self.records: Dict[str, DomainStateRecord] = {}
         if state_path and state_path.exists():
@@ -920,15 +941,20 @@ class HysteresisManager:
                 last_probed=now_str,
                 last_verdict=verdict.verdict,
                 last_reason=verdict.reason,
+                last_streak_at=now_str if verdict.is_dead else None,
             )
         else:
+            prior = rec.last_streak_at or rec.last_probed
+            elapsed = (datetime.datetime.fromisoformat(now_str) - datetime.datetime.fromisoformat(prior)).total_seconds()
             rec.total_sweeps += 1
             rec.last_probed = now_str
             rec.last_verdict = verdict.verdict
             rec.last_reason = verdict.reason
 
             if verdict.is_dead:
-                rec.consecutive_dead_sweeps += 1
+                if elapsed >= self.minimum_interval_seconds:
+                    rec.consecutive_dead_sweeps += 1
+                    rec.last_streak_at = now_str
                 if not rec.first_seen_dead:
                     rec.first_seen_dead = now_str
                 if rec.consecutive_dead_sweeps >= self.required_sweeps:
@@ -938,6 +964,7 @@ class HysteresisManager:
             else:
                 rec.consecutive_dead_sweeps = 0
                 rec.first_seen_dead = None
+                rec.last_streak_at = None
                 rec.status = "BLOCKED_BY_GFW" if verdict.verdict == "BLOCKED_BY_GFW" else "ALIVE"
 
         self.records[verdict.domain] = rec
@@ -987,6 +1014,7 @@ async def probe_domain_batch(
     hysteresis_mgr: Optional[HysteresisManager] = None,
     dry_run: bool = False,
     verbose: bool = False,
+    dns_only: bool = False,
 ) -> Tuple[List[TriangulationVerdict], List[DomainStateRecord]]:
     """Execute asynchronous batch probing with concurrency throttling."""
     semaphore = asyncio.Semaphore(concurrency)
@@ -998,7 +1026,7 @@ async def probe_domain_batch(
     async def _worker(dom: str):
         nonlocal completed
         async with semaphore:
-            verd = await triangulate_domain(dom, timeout=timeout)
+            verd = await triangulate_domain(dom, timeout=timeout, dns_only=True) if dns_only else await triangulate_domain(dom, timeout=timeout)
             completed += 1
             if verbose or completed % 50 == 0 or completed == total:
                 dead_tag = f"[{verd.verdict}]" if verd.is_dead else f"[{verd.verdict}]"
@@ -1205,11 +1233,13 @@ class ProbeDeadDomainsSelfTest(unittest.TestCase):
             self.assertEqual(rec1.status, "CANDIDATE_DEAD")
 
             # Sweep 2: CANDIDATE_DEAD (streak = 2)
+            v_dead.timestamp=(datetime.datetime.fromisoformat(v_dead.timestamp)+datetime.timedelta(days=1)).isoformat()
             rec2 = mgr.update(v_dead)
             self.assertEqual(rec2.consecutive_dead_sweeps, 2)
             self.assertEqual(rec2.status, "CANDIDATE_DEAD")
 
             # Sweep 3: CONFIRMED_DEAD (streak = 3 >= 3)
+            v_dead.timestamp=(datetime.datetime.fromisoformat(v_dead.timestamp)+datetime.timedelta(days=1)).isoformat()
             rec3 = mgr.update(v_dead)
             self.assertEqual(rec3.consecutive_dead_sweeps, 3)
             self.assertEqual(rec3.status, "CONFIRMED_DEAD")
@@ -1302,6 +1332,7 @@ class ProbeDeadDomainsSelfTest(unittest.TestCase):
         parser.add_argument("--dry-run", action="store_true")
         parser.add_argument("--format", choices=["json", "text", "table", "surge"], default="json")
         parser.add_argument("-v", "--verbose", action="store_true")
+        parser.add_argument("--dns-only", action="store_true", help="Check DNS liveness without fetching website content")
         parser.add_argument("--selftest", action="store_true")
 
         args = parser.parse_args(["--input", "foo.com", "--dry-run", "--format", "json", "--concurrency", "20"])
@@ -1340,6 +1371,7 @@ def main() -> int:
     parser.add_argument("--dry-run", action="store_true", help="Simulate run without writing output or state")
     parser.add_argument("--format", choices=["json", "text", "table", "surge"], default="json", help="Output format")
     parser.add_argument("-v", "--verbose", action="store_true", help="Verbose real-time progress logging")
+    parser.add_argument("--dns-only", action="store_true", help="Check DNS liveness without fetching website content")
     parser.add_argument("--selftest", action="store_true", help="Run comprehensive built-in unit tests")
 
     args = parser.parse_args()
@@ -1356,7 +1388,7 @@ def main() -> int:
         return 0
 
     print(f"Loaded {len(domains)} target domains to probe.")
-    state_path = Path(args.state) if not args.check_only else None
+    state_path = Path(args.state)
     hysteresis_mgr = HysteresisManager(state_path=state_path, required_sweeps=args.hysteresis)
 
     print(f"Starting 4-tier triangulation (Concurrency={args.concurrency}, Timeout={args.timeout}s, Hysteresis={args.hysteresis})...")
@@ -1370,6 +1402,7 @@ def main() -> int:
             hysteresis_mgr=hysteresis_mgr,
             dry_run=args.dry_run or args.check_only,
             verbose=args.verbose,
+            dns_only=args.dns_only,
         )
     )
 

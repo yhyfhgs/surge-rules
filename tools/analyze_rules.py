@@ -13,6 +13,7 @@ from collections import Counter, defaultdict, deque
 from dataclasses import asdict, dataclass
 from pathlib import Path
 from urllib.parse import urlparse
+from rule_syntax import parse_ruleset_call, list_name
 
 
 DOMAIN_TYPES = {"DOMAIN", "DOMAIN-SUFFIX", "DOMAIN-KEYWORD", "DOMAIN-WILDCARD"}
@@ -31,6 +32,8 @@ class Ref:
     policy: str
     rank: int
     line: int
+    modifiers: tuple[str, ...] = ()
+    exclusions: tuple[str, ...] = ()
 
 
 @dataclass(frozen=True)
@@ -47,6 +50,7 @@ class Rule:
     list_rank: int | None
     global_rank: int | None
     registrable: str | None
+    exclusions: tuple[str, ...] = ()
 
 
 class PSL:
@@ -114,13 +118,14 @@ def parse_refs(conf: Path) -> list[Ref]:
         text = strip_comment(raw)
         if not text:
             continue
-        parts = [part.strip() for part in text.split(",")]
-        if parts[0].upper() != "RULE-SET" or len(parts) < 3:
+        call = parse_ruleset_call(text)
+        if call is None:
             continue
-        parsed = urlparse(parts[1])
-        name = Path(parsed.path).name
-        if parsed.scheme in ("http", "https") and name.endswith(".list"):
-            refs.append(Ref(name, parts[2], len(refs), lineno))
+        reference, policy, modifiers, excluded = call
+        name = list_name(reference)
+        if name.endswith(".list"):
+            refs.append(Ref(name, policy, len(refs), lineno, modifiers,
+                            tuple(list_name(value) for value in excluded)))
     duplicates = [name for name, count in Counter(r.name for r in refs).items()
                   if count > 1]
     if duplicates:
@@ -179,9 +184,9 @@ def extract(rules_dir: Path, refs: list[Ref], psl: PSL) -> list[Rule]:
                 reg = None
             rules.append(Rule(
                 f"{path.name}:{lineno}", path.name, lineno, rule_type, value, norm,
-                tuple(part.lower() for part in parts[2:]), family(rule_type),
+                tuple(part.lower() for part in parts[2:]) + (ref.modifiers if ref else ()), family(rule_type),
                 ref.policy if ref else None, ref.rank if ref else None,
-                global_rank if ref else None, reg,
+                global_rank if ref else None, reg, ref.exclusions if ref else (),
             ))
             if ref:
                 global_rank += 1
@@ -471,7 +476,7 @@ class Relations:
             })
 
     def build_ips(self):
-        cidrs = [rule for rule in self.rules if rule.type in CIDR_TYPES]
+        cidrs = [rule for rule in self.rules if rule.type in CIDR_TYPES and not rule.exclusions]
         network_rules, parsed = defaultdict(list), {}
         for rule in cidrs:
             network = ipaddress.ip_network(rule.norm, strict=True)
@@ -487,10 +492,10 @@ class Relations:
                 for coverer in group:
                     kind = "equivalent" if prefix == network.prefixlen else "covers"
                     self.add(kind, coverer, target, "CIDR containment")
-        selectors = [rule for rule in self.rules if rule.type in SELECTOR_TYPES]
+        selectors = [rule for rule in self.rules if rule.type in SELECTOR_TYPES or rule.exclusions]
         signatures = defaultdict(list)
         for rule in selectors:
-            signatures[(rule.type, rule.norm)].append(rule)
+            signatures[(rule.type, rule.norm, rule.exclusions)].append(rule)
         for group in signatures.values():
             self.equivalent_group(group, "same selector")
         expanded = [rule for rule in selectors if rule.id in self.expansions]
@@ -508,7 +513,7 @@ class Relations:
                     self.add("overlaps", selector, cidr, "MMDB/CIDR intersection")
         for index, left in enumerate(expanded):
             for right in expanded[index + 1:]:
-                if left.type == right.type and left.norm != right.norm:
+                if left.type == right.type and left.type in SELECTOR_TYPES and left.norm != right.norm:
                     continue
                 relation = interval_relation(self.expansions[left.id], self.expansions[right.id])
                 if relation == "left-covers":
@@ -638,6 +643,56 @@ def load_mmdb(rules: list[Rule], country_db: Path | None, asn_db: Path | None):
     return expansions, metadata
 
 
+def subtract_intervals(base, excluded):
+    """Subtract two normalized v4/v6 interval sets without expanding CIDRs."""
+    result = {4: [], 6: []}
+    for version in (4, 6):
+        cuts = excluded.get(version, [])
+        cursor = 0
+        for start, end in base.get(version, []):
+            while cursor < len(cuts) and cuts[cursor][1] < start:
+                cursor += 1
+            point, index = start, cursor
+            while index < len(cuts) and cuts[index][0] <= end:
+                lo, hi = cuts[index]
+                if lo > point:
+                    result[version].append((point, min(end, lo - 1)))
+                point = max(point, hi + 1)
+                if point > end:
+                    break
+                index += 1
+            if point <= end:
+                result[version].append((point, end))
+    return result
+
+
+def apply_rule_exclusions(rules, expansions):
+    by_source = defaultdict(list)
+    for rule in rules:
+        by_source[rule.source].append(rule)
+    protected = {}
+    for rule in rules:
+        if not rule.exclusions:
+            continue
+        if rule.family != "ip":
+            raise ValueError("non-IP rule with exclusions: " + rule.id)
+        if rule.type in CIDR_TYPES:
+            original = merge_networks([ipaddress.ip_network(rule.norm)])
+        elif rule.id in expansions:
+            original = expansions[rule.id]
+        else:
+            raise ValueError("logical IP selector needs its MMDB: " + rule.id)
+        for name in rule.exclusions:
+            if name not in protected:
+                members = by_source.get(name)
+                if not members or any(r.type not in CIDR_TYPES or r.policy != "DIRECT" or r.exclusions for r in members):
+                    raise ValueError("exclusion must reference an unfiltered DIRECT CIDR set: " + name)
+                protected[name] = merge_networks(ipaddress.ip_network(r.norm) for r in members)
+            original = subtract_intervals(original, protected[name])
+        expansions[rule.id] = original
+    return expansions
+
+
 def db_meta(path: Path, epoch: int) -> dict:
     return {"path": str(path.resolve()), "build_epoch": epoch,
             "sha256": hashlib.sha256(path.read_bytes()).hexdigest()}
@@ -751,6 +806,7 @@ def main() -> int:
     psl = PSL(args.psl)
     rules = extract(args.rules, refs, psl)
     expansions, mmdb_meta = load_mmdb(rules, args.country_db, args.asn_db)
+    expansions = apply_rule_exclusions(rules, expansions)
     empty_selectors = [
         rule.id for rule in rules
         if rule.id in expansions and not any(expansions[rule.id].values())

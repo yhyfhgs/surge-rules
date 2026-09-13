@@ -1,11 +1,15 @@
 # AUTO-GENERATED — Clash(Mihomo) classical 规则，由 ../lists/AI.list 派生
 # 勿手工编辑；修改 Surge 源后运行 python3 tools/surge2clash.py 重新生成
 
-# Independent AI and CN vendors' international AI surfaces; Google/X/Meta/Microsoft AI stays with its ecosystem.
-# Shared components are admitted only when same-exit session behavior is documented in tests/allowlist.json.
+# AI — maintained routing owner.
+# Topology and matching options: config/routing.json.
+# Sources and review decisions: SOURCES.md.
 
 DOMAIN,anthropic-com.ghost.io
 DOMAIN,anthropic.skilljar.com
+DOMAIN,apple-relay.apple.com
+DOMAIN,apple-relay.cloudflare.com
+DOMAIN,apple-relay.fastly-edge.com
 DOMAIN,aws-language-servers.us-east-1.amazonaws.com
 DOMAIN,aws-toolkit-language-servers.amazonaws.com
 DOMAIN,cdn.usefathom.com
@@ -20,6 +24,7 @@ DOMAIN,dashscope-intl.aliyuncs.com
 DOMAIN,dashscope-us.aliyuncs.com
 DOMAIN,idetoolkits-hostedfiles.amazonaws.com
 DOMAIN,idetoolkits.amazonwebservices.com
+DOMAIN,models.dev
 DOMAIN,oaisidekickupdates.blob.core.windows.net
 DOMAIN,openai-api.arkoselabs.com
 DOMAIN,openai.com.cdn.cloudflare.net
@@ -403,13 +408,3 @@ DOMAIN-SUFFIX,zilliz.com
 DOMAIN-WILDCARD,browser-intake-*-datadoghq.com
 DOMAIN-WILDCARD,chatgpt-async-webps-prod-*.webpubsub.azure.com
 DOMAIN-WILDCARD,openaicom-api-*.azurefd.net
-
-IP-CIDR,153.61.0.0/16,no-resolve
-IP-CIDR,160.79.104.0/21,no-resolve
-IP-CIDR,216.73.216.0/22,no-resolve
-
-IP-CIDR6,2604:f20::/32,no-resolve
-IP-CIDR6,2607:6bc0::/32,no-resolve
-
-IP-ASN,399358,no-resolve
-IP-ASN,401518,no-resolve

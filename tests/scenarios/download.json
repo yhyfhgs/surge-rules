@@ -8,7 +8,11 @@
       {"host": "unpkg.com"},
       {"host": "cdnjs.cloudflare.com"}
     ],
-    "assert": {"same_policy": true, "policy": "下载", "no_dns_leak": true}
+    "assert": {
+      "same_policy": true,
+      "policy": "下载",
+      "no_dns_leak": true
+    }
   },
   {
     "name": "google_fonts_and_ajax",
@@ -18,7 +22,11 @@
       {"host": "fonts.gstatic.com", "note": "字体文件"},
       {"host": "ajax.googleapis.com", "note": "Hosted Libraries"}
     ],
-    "assert": {"same_policy": true, "policy": "Google-X-Meta-MS", "no_dns_leak": true}
+    "assert": {
+      "same_policy": true,
+      "policy": "Google-X-Meta-MS",
+      "no_dns_leak": true
+    }
   },
   {
     "name": "gravatar_avatars",
@@ -29,7 +37,11 @@
       {"host": "secure.gravatar.com"},
       {"host": "0.gravatar.com"}
     ],
-    "assert": {"same_policy": true, "policy": "下载", "no_dns_leak": true}
+    "assert": {
+      "same_policy": true,
+      "policy": "下载",
+      "no_dns_leak": true
+    }
   },
   {
     "name": "stackoverflow_main_vs_cdn",
@@ -41,7 +53,9 @@
       {"host": "i.stack.imgur.com"}
     ],
     "assert": {
-      "same_policy": true, "policy": "Proxy", "no_dns_leak": true,
+      "same_policy": true,
+      "policy": "Proxy",
+      "no_dns_leak": true,
       "per_request": [
         {"host": "cdn.sstatic.net", "policy": "下载", "reason": "刻意保留：sstatic.net 是 DownloadCDN 的独立注册域，不在 FIX-D7『同注册域 Final|下载 分裂』作用域内；DownloadCDN 分层的既有代价（见 allowlist）。"}
       ]
@@ -56,7 +70,11 @@
       {"host": "miro.medium.com"},
       {"host": "cdn-images-1.medium.com"}
     ],
-    "assert": {"same_policy": true, "policy": "Proxy", "no_dns_leak": true}
+    "assert": {
+      "same_policy": true,
+      "policy": "Proxy",
+      "no_dns_leak": true
+    }
   },
   {
     "name": "notion_main_vs_static",
@@ -65,10 +83,12 @@
       {"host": "www.notion.so"},
       {"host": "notion.so"},
       {"host": "notion-static.com"},
-      {"host": "s3-us-west-2.amazonaws.com", "note": "Notion 附件所在 S3 区域桶；2026-08-31 起不再由 DownloadCDN 单列"}
+      {"host": "s3-us-west-2.amazonaws.com", "note": "Notion 附件所在 S3 区域桶；2026-08-31 起不再由 DownloadCDN 单列", "stage": "domain"}
     ],
     "assert": {
-      "same_policy": true, "policy": "Proxy", "no_dns_leak": true,
+      "same_policy": true,
+      "policy": "Proxy",
+      "no_dns_leak": true,
       "per_request": [
         {"host": "notion-static.com", "policy": "下载", "reason": "刻意保留：独立注册域，不在 FIX-D7 作用域内。"},
         {"host": "s3-us-west-2.amazonaws.com", "policy": "Final", "reason": "R1-12 删除 S3 多租户区域端点后，该共享 AWS 主机不再命中 DownloadCDN 或 ProxyGFW，落 FINAL 兜底。"}
@@ -96,12 +116,14 @@
     "name": "figma_app_vs_static",
     "desc": "Figma：应用（未被任何域名规则命中，落 FINAL）+ static.figma.com 资源",
     "requests": [
-      {"host": "www.figma.com"},
-      {"host": "figma.com"},
+      {"host": "www.figma.com", "stage": "domain"},
+      {"host": "figma.com", "stage": "domain"},
       {"host": "static.figma.com"}
     ],
     "assert": {
-      "same_policy": true, "policy": "Final", "no_dns_leak": true,
+      "same_policy": true,
+      "policy": "Final",
+      "no_dns_leak": true,
       "per_request": [
         {"host": "static.figma.com", "policy": "下载", "reason": "刻意保留：figma.com 主域无任何 list 收录（靠 FINAL 兜底），不构成 FIX-D7 的『同注册域跨组』分裂样本。"}
       ]
@@ -116,11 +138,13 @@
       {"host": "i.imgur.com"},
       {"host": "unsplash.com"},
       {"host": "images.unsplash.com"},
-      {"host": "www.shopify.com"},
+      {"host": "www.shopify.com", "stage": "domain"},
       {"host": "cdn.shopify.com"}
     ],
     "assert": {
-      "same_policy": true, "policy": "Proxy", "no_dns_leak": true,
+      "same_policy": true,
+      "policy": "Proxy",
+      "no_dns_leak": true,
       "per_request": [
         {"host": "cdn.shopify.com", "policy": "下载", "reason": "刻意保留：shopify.com 主域无 list 收录（靠 FINAL 兜底），不构成 FIX-D7 的同注册域分裂样本。"},
         {"host": "www.shopify.com", "policy": "Final", "reason": "2026-09-01 起 ProxyGFW 独立挂 Proxy 组（与收尾 FINAL 解耦）：本场景的 imgur / unsplash 命中 ProxyGFW 落 Proxy，而 shopify.com 主域不在 ProxyGFW（无任何表收录）仍落 FINAL→Final。两者分属不同站点，「同页并行引用需同组」的真实信号只在同一注册域内成立，故用 per_request 把它移出 same_policy 分组而非放宽断言。"}
@@ -131,19 +155,19 @@
     "name": "dlcdn_multitenant_suffixes_removed",
     "desc": "审计 P1-01：DownloadCDN 删除 13 条多租户托管平台宽后缀（任意租户共用同一后缀，后缀不代表业务所有者，更不代表「大流量批量下载」）。租户域不再被强制送下载出口，回落 Final；同表内真正的单一注册者下载域不受影响",
     "requests": [
-      {"host": "mytenant.blob.core.windows.net", "note": "任意 Azure Blob 租户"},
-      {"host": "d111111abcdef8.cloudfront.net", "note": "任意 CloudFront distribution"},
-      {"host": "myspace.nyc3.digitaloceanspaces.com", "note": "任意 DigitalOcean Spaces 租户"},
-      {"host": "someuser.github.io", "note": "任意 GitHub Pages 站点"},
-      {"host": "someuser.gitlab.io", "note": "任意 GitLab Pages 站点"},
-      {"host": "myapp.netlify.app", "note": "任意 Netlify 应用（含 API / OAuth 回调）"},
-      {"host": "myapp.now.sh", "note": "任意 Vercel 旧域应用"},
-      {"host": "myapp.onrender.com", "note": "任意 Render 应用"},
-      {"host": "myapp.pages.dev", "note": "任意 Cloudflare Pages 租户"},
-      {"host": "mybucket.s3.amazonaws.com", "note": "任意 S3 bucket"},
-      {"host": "abcdefghijkl.supabase.co", "note": "任意 Supabase 项目（含 Auth/DB API）"},
-      {"host": "myapp.vercel.app", "note": "任意 Vercel 租户"},
-      {"host": "myworker.workers.dev", "note": "任意 Cloudflare Worker"},
+      {"host": "mytenant.blob.core.windows.net", "note": "任意 Azure Blob 租户", "stage": "domain"},
+      {"host": "d111111abcdef8.cloudfront.net", "note": "任意 CloudFront distribution", "stage": "domain"},
+      {"host": "myspace.nyc3.digitaloceanspaces.com", "note": "任意 DigitalOcean Spaces 租户", "stage": "domain"},
+      {"host": "someuser.github.io", "note": "任意 GitHub Pages 站点", "stage": "domain"},
+      {"host": "someuser.gitlab.io", "note": "任意 GitLab Pages 站点", "stage": "domain"},
+      {"host": "myapp.netlify.app", "note": "任意 Netlify 应用（含 API / OAuth 回调）", "stage": "domain"},
+      {"host": "myapp.now.sh", "note": "任意 Vercel 旧域应用", "stage": "domain"},
+      {"host": "myapp.onrender.com", "note": "任意 Render 应用", "stage": "domain"},
+      {"host": "myapp.pages.dev", "note": "任意 Cloudflare Pages 租户", "stage": "domain"},
+      {"host": "mybucket.s3.amazonaws.com", "note": "任意 S3 bucket", "stage": "domain"},
+      {"host": "abcdefghijkl.supabase.co", "note": "任意 Supabase 项目（含 Auth/DB API）", "stage": "domain"},
+      {"host": "myapp.vercel.app", "note": "任意 Vercel 租户", "stage": "domain"},
+      {"host": "myworker.workers.dev", "note": "任意 Cloudflare Worker", "stage": "domain"},
       {"host": "cloudfront.net.in", "note": "正例：与 cloudfront.net 形近但属独立注册者，本表刻意保留"},
       {"host": "unpkg.com", "note": "正例：单一注册者的 npm 包内容 CDN，与 jsDelivr/cdnjs 同属包 registry 保留类，本轮未删（见完成报告观察项）"}
     ],
@@ -178,7 +202,7 @@
       {"host": "cloudsync-prod.s3.amazonaws.com", "note": "游戏存档同步桶，Games.list 精确后缀"},
       {"host": "d151l6v8er5bdm.cloudfront.net", "note": "流媒体 distribution，Streaming.list 精确域"},
       {"host": "claudepages.dev", "note": "与 pages.dev 形近但属独立注册者，AI.list 认领"},
-      {"host": "sometenant.blob.core.windows.net", "note": "负例：同平台的未认领租户，删后不再被下载组吸走"}
+      {"host": "sometenant.blob.core.windows.net", "note": "负例：同平台的未认领租户，删后不再被下载组吸走", "stage": "domain"}
     ],
     "assert": {
       "no_dns_leak": true,
@@ -206,9 +230,9 @@
       {"host": "cfx.re", "note": "Cfx.re 主域，改前无规则命中落 Final"},
       {"host": "content.cfx.re", "note": "内容分发"},
       {"host": "forum.cfx.re", "note": "社区论坛"},
-      {"host": "fivem.com", "note": "负例：非 Cfx.re 注册域"},
-      {"host": "fivemods.net", "note": "负例：第三方 mod 站，含品牌子串"},
-      {"host": "cfx.re.hostmirror.net", "note": "负例：把 cfx.re 塞进左侧标签的第三方域，后缀匹配不得命中"}
+      {"host": "fivem.com", "note": "负例：非 Cfx.re 注册域", "stage": "domain"},
+      {"host": "fivemods.net", "note": "负例：第三方 mod 站，含品牌子串", "stage": "domain"},
+      {"host": "cfx.re.hostmirror.net", "note": "负例：把 cfx.re 塞进左侧标签的第三方域，后缀匹配不得命中", "stage": "domain"}
     ],
     "assert": {
       "no_dns_leak": true,
@@ -237,7 +261,7 @@
       {"host": "account-api.bandainamcoid.com", "note": "登录 API"},
       {"host": "object-bnolauncher-pf.bandainamco-ol.jp", "note": "负例：launcher 对象存储属大文件下载面，留在 DownloadCDN"},
       {"host": "bandainamcoshanghai.com", "note": "负例：国服品牌域由 ChinaDomain 直连，不随国际账号域出海"},
-      {"host": "mybandainamcoid.com", "note": "负例：含品牌子串的第三方域，后缀匹配不得命中"}
+      {"host": "mybandainamcoid.com", "note": "负例：含品牌子串的第三方域，后缀匹配不得命中", "stage": "domain"}
     ],
     "assert": {
       "no_dns_leak": true,
@@ -255,16 +279,16 @@
     "name": "dlcdn_saas_component_keywords_removed",
     "desc": "审计 P1-01/P1-04：Trustpilot 评价组件、Algolia 搜索 DSN、Zendesk 工单资产是通用 SaaS 组件（出现在成千上万个与下载无关的站点里），8 条 DOMAIN-KEYWORD 删除后统一落 Final，与各自品牌主域同组，不再出现「同品牌资产被拆到下载出口」的分裂；负例证明删除是外科手术式的，本表真正的镜像/包 CDN 保留类不受影响",
     "requests": [
-      {"host": "assets.trustpilot.net"},
-      {"host": "cdn.trustpilot.net"},
-      {"host": "images.trustpilot.com"},
-      {"host": "images.trustpilot.net"},
-      {"host": "scripts.trustpilot.com"},
-      {"host": "static.trustpilot.com"},
-      {"host": "trustpilot.com", "note": "品牌主域：改前后都是 Final，删关键词后组件与主域终于同组"},
-      {"host": "abcdefg-dsn.algolia.net", "note": "Algolia 搜索 DSN，任意站点均可用"},
-      {"host": "web-assets.zendesk.com", "note": "Zendesk 工单静态资产"},
-      {"host": "zendesk.com", "note": "品牌主域，Final"},
+      {"host": "assets.trustpilot.net", "stage": "domain"},
+      {"host": "cdn.trustpilot.net", "stage": "domain"},
+      {"host": "images.trustpilot.com", "stage": "domain"},
+      {"host": "images.trustpilot.net", "stage": "domain"},
+      {"host": "scripts.trustpilot.com", "stage": "domain"},
+      {"host": "static.trustpilot.com", "stage": "domain"},
+      {"host": "trustpilot.com", "note": "品牌主域：改前后都是 Final，删关键词后组件与主域终于同组", "stage": "domain"},
+      {"host": "abcdefg-dsn.algolia.net", "note": "Algolia 搜索 DSN，任意站点均可用", "stage": "domain"},
+      {"host": "web-assets.zendesk.com", "note": "Zendesk 工单静态资产", "stage": "domain"},
+      {"host": "zendesk.com", "note": "品牌主域，Final", "stage": "domain"},
       {"host": "mirrors.xtom.com", "note": "正例：OS/软件发行镜像站，保留类，仍走下载出口"},
       {"host": "cdn.jsdelivr.net", "note": "正例：包内容 CDN 保留类，仍走下载出口"}
     ],
@@ -299,16 +323,16 @@
       {"host": "99avcdn1.net", "note": "正例：同族另一 TLD"},
       {"host": "cdn.adultempire.com", "note": "正例：改精确 DOMAIN"},
       {"host": "vod-adaptive.akamaized.net", "note": "正例：改精确 DOMAIN"},
-      {"host": "docs.gitbook.io", "note": "负例：GitBook 文档面不是文件面，*-files.gitbook.io 之外落 FINAL 兜底"},
-      {"host": "akamaized.net", "note": "负例：Akamai 共享 CDN 主后缀不被精确 DOMAIN 泛化"},
-      {"host": "my99avcdn.com", "note": "负例：左锚定后，前缀带字的域不再命中"},
-      {"host": "cdn1-assets.worldsex.com.tracker.net", "note": "负例：把串塞进左侧标签的第三方域"},
-      {"host": "v1-cdn.eporner.com.evilproxy.net", "note": "负例：同上"},
-      {"host": "t1-thumbs.pornhost.com.evilproxy.net", "note": "负例：同上"},
-      {"host": "x-files.gitbook.io.mirror.net", "note": "负例：同上"},
-      {"host": "image-res.cloudinary.com.thief.net", "note": "负例：同上"},
-      {"host": "cdn.adultempire.com.proxy.net", "note": "负例：同上"},
-      {"host": "vod-adaptive.akamaized.net.cdnwrap.net", "note": "负例：同上"}
+      {"host": "docs.gitbook.io", "note": "负例：GitBook 文档面不是文件面，*-files.gitbook.io 之外落 FINAL 兜底", "stage": "domain"},
+      {"host": "akamaized.net", "note": "负例：Akamai 共享 CDN 主后缀不被精确 DOMAIN 泛化", "stage": "domain"},
+      {"host": "my99avcdn.com", "note": "负例：左锚定后，前缀带字的域不再命中", "stage": "domain"},
+      {"host": "cdn1-assets.worldsex.com.tracker.net", "note": "负例：把串塞进左侧标签的第三方域", "stage": "domain"},
+      {"host": "v1-cdn.eporner.com.evilproxy.net", "note": "负例：同上", "stage": "domain"},
+      {"host": "t1-thumbs.pornhost.com.evilproxy.net", "note": "负例：同上", "stage": "domain"},
+      {"host": "x-files.gitbook.io.mirror.net", "note": "负例：同上", "stage": "domain"},
+      {"host": "image-res.cloudinary.com.thief.net", "note": "负例：同上", "stage": "domain"},
+      {"host": "cdn.adultempire.com.proxy.net", "note": "负例：同上", "stage": "domain"},
+      {"host": "vod-adaptive.akamaized.net.cdnwrap.net", "note": "负例：同上", "stage": "domain"}
     ],
     "assert": {
       "no_dns_leak": true,
@@ -344,8 +368,8 @@
       {"host": "steambroadcast.akamaized.net"},
       {"host": "steamstore-a.akamaihd.net"},
       {"host": "steamuserimages-a.akamaihd.net"},
-      {"host": "epicgames-free.example.com", "note": "品牌子串负例"},
-      {"host": "mysteamstore-mirror.com", "note": "品牌子串负例"}
+      {"host": "epicgames-free.example.com", "note": "品牌子串负例", "stage": "domain"},
+      {"host": "mysteamstore-mirror.com", "note": "品牌子串负例", "stage": "domain"}
     ],
     "assert": {
       "no_dns_leak": true,
@@ -374,7 +398,11 @@
       {"host": "transfer.xethub.hf.co", "note": "Xet 传输面"},
       {"host": "cas-bridge.xethub.hf.co", "note": "Xet CAS 桥接面"}
     ],
-    "assert": {"same_policy": true, "policy": "下载", "no_dns_leak": true}
+    "assert": {
+      "same_policy": true,
+      "policy": "下载",
+      "no_dns_leak": true
+    }
   },
   {
     "name": "hf_site_and_api_stay_ai_v2",
@@ -385,11 +413,13 @@
       {"host": "api-inference.huggingface.co", "note": "推理 API"},
       {"host": "hf.co", "note": "短域主站"},
       {"host": "api.hf.co"},
-      {"host": "hf.space", "note": "R1-13：PSL PRIVATE 多租户边界，已删"},
-      {"host": "someuser-somedemo.hf.space", "note": "任意用户 Space，落 Final"}
+      {"host": "hf.space", "note": "R1-13：PSL PRIVATE 多租户边界，已删", "stage": "domain"},
+      {"host": "someuser-somedemo.hf.space", "note": "任意用户 Space，落 Final", "stage": "domain"}
     ],
     "assert": {
-      "same_policy": true, "policy": "AI", "no_dns_leak": true,
+      "same_policy": true,
+      "policy": "AI",
+      "no_dns_leak": true,
       "per_request": [
         {"host": "hf.space", "policy": "Final"},
         {"host": "someuser-somedemo.hf.space", "policy": "Final"}
@@ -401,20 +431,22 @@
     "desc": "R1-12 负例：删除 280 条 s3[.-]*.amazonaws.com 区域端点后缀后，任意租户的任意 bucket 都不得再落「下载」或代理专用组。<bucket>.s3.<region>.amazonaws.com 与已入 forbidden 的 <bucket>.s3.amazonaws.com 是同一 bucket 的两种寻址形式；PSL PRIVATE 段收录全部该形态 = 官方认定为注册边界。删后由 FINAL 兜底，不断连",
     "note": "R1-12 删族后，任意租户桶由 FINAL 兜底；第一方 ppl-ai-file-upload.s3.amazonaws.com 仍由 AI.list 的精确规则承接。断言的真实内容是任意租户桶都不得再落「下载」或代理专用组。",
     "requests": [
-      {"host": "acme-prod-assets.s3.us-east-1.amazonaws.com", "note": "区域端点，任意 bucket"},
-      {"host": "randomtenant7.s3.ap-northeast-1.amazonaws.com"},
-      {"host": "some-static-site.s3-website.eu-west-1.amazonaws.com", "note": "S3 静态站，等同 github.io 类"},
-      {"host": "some-static-site.s3-website-us-east-1.amazonaws.com", "note": "连字符旧形态"},
-      {"host": "tenant-ap.s3-accesspoint.ap-southeast-2.amazonaws.com"},
-      {"host": "tenant-ap.s3-accesspoint-fips.us-east-1.amazonaws.com"},
-      {"host": "tenant-ol.s3-object-lambda.us-east-2.amazonaws.com"},
-      {"host": "tenant-f.s3-fips.us-gov-west-1.amazonaws.com"},
-      {"host": "tenant-d.s3-deprecated.eu-west-1.amazonaws.com"},
-      {"host": "tenant-ds.s3.dualstack.ap-south-1.amazonaws.com"},
+      {"host": "acme-prod-assets.s3.us-east-1.amazonaws.com", "note": "区域端点，任意 bucket", "stage": "domain"},
+      {"host": "randomtenant7.s3.ap-northeast-1.amazonaws.com", "stage": "domain"},
+      {"host": "some-static-site.s3-website.eu-west-1.amazonaws.com", "note": "S3 静态站，等同 github.io 类", "stage": "domain"},
+      {"host": "some-static-site.s3-website-us-east-1.amazonaws.com", "note": "连字符旧形态", "stage": "domain"},
+      {"host": "tenant-ap.s3-accesspoint.ap-southeast-2.amazonaws.com", "stage": "domain"},
+      {"host": "tenant-ap.s3-accesspoint-fips.us-east-1.amazonaws.com", "stage": "domain"},
+      {"host": "tenant-ol.s3-object-lambda.us-east-2.amazonaws.com", "stage": "domain"},
+      {"host": "tenant-f.s3-fips.us-gov-west-1.amazonaws.com", "stage": "domain"},
+      {"host": "tenant-d.s3-deprecated.eu-west-1.amazonaws.com", "stage": "domain"},
+      {"host": "tenant-ds.s3.dualstack.ap-south-1.amazonaws.com", "stage": "domain"},
       {"host": "ppl-ai-file-upload.s3.amazonaws.com", "note": "正面样板：第一方 bucket 用精确 DOMAIN 收进生态表，不受族删除影响"}
     ],
     "assert": {
-      "same_policy": true, "policy": "Final", "no_dns_leak": true,
+      "same_policy": true,
+      "policy": "Final",
+      "no_dns_leak": true,
       "per_request": [
         {"host": "ppl-ai-file-upload.s3.amazonaws.com", "policy": "AI"}
       ]
@@ -424,19 +456,21 @@
     "name": "s3_compat_multitenant_wildcards_removed_v2",
     "desc": "Shared S3 tenant wildcards remain absent; explicitly owned Backblaze, Brave, and Figma download endpoints stay in Download.",
     "requests": [
-      {"host": "s3.wasabisys.com", "note": "裁决 3 已删的后缀本体，作为同厂一致性锚点"},
-      {"host": "s3.eu-central-2.wasabisys.com", "note": "原被 DOMAIN-WILDCARD,s3.*.wasabisys.com 接住；闭合后必须与上一行同落"},
-      {"host": "s3.us-west-000.backblazeb2.com", "note": "原被 DOMAIN-WILDCARD,s3.*.backblazeb2.com 接住"},
-      {"host": "s3.eu-central-003.backblazeb2.com", "note": "同上，欧洲区"},
-      {"host": "bucket.s3.us-west-000.backblazeb2.com", "note": "虚拟主机寻址；原被 DOMAIN-WILDCARD,*.s3.*.backblazeb2.com 接住"},
-      {"host": "randomtenant9.s3.eu-central-2.wasabisys.com", "note": "任意租户桶，闭合后不得再落「下载」"},
+      {"host": "s3.wasabisys.com", "note": "裁决 3 已删的后缀本体，作为同厂一致性锚点", "stage": "domain"},
+      {"host": "s3.eu-central-2.wasabisys.com", "note": "原被 DOMAIN-WILDCARD,s3.*.wasabisys.com 接住；闭合后必须与上一行同落", "stage": "domain"},
+      {"host": "s3.us-west-000.backblazeb2.com", "note": "原被 DOMAIN-WILDCARD,s3.*.backblazeb2.com 接住", "stage": "domain"},
+      {"host": "s3.eu-central-003.backblazeb2.com", "note": "同上，欧洲区", "stage": "domain"},
+      {"host": "bucket.s3.us-west-000.backblazeb2.com", "note": "虚拟主机寻址；原被 DOMAIN-WILDCARD,*.s3.*.backblazeb2.com 接住", "stage": "domain"},
+      {"host": "randomtenant9.s3.eu-central-2.wasabisys.com", "note": "任意租户桶，闭合后不得再落「下载」", "stage": "domain"},
       {"host": "f000.backblazeb2.com", "note": "对照组：B2 原生下载端点，刻意保留在「下载」"},
       {"host": "f004.backblazeb2.com", "note": "对照组"},
       {"host": "s3.brave.com", "note": "对照组：第一方 s3.<brand> 主机，非租户边界"},
       {"host": "s3-alpha.figma.com", "note": "对照组：第一方，s3-*.figma.com 通配刻意保留"}
     ],
     "assert": {
-      "same_policy": true, "policy": "Final", "no_dns_leak": true,
+      "same_policy": true,
+      "policy": "Final",
+      "no_dns_leak": true,
       "per_request": [
         {"host": "f000.backblazeb2.com", "policy": "下载"},
         {"host": "f004.backblazeb2.com", "policy": "下载"},
@@ -449,14 +483,16 @@
     "name": "steam_untrusted_parked_removed_v2",
     "desc": "R1-04：GameDownloadCN 区 2 的两条 DIRECT 白名单删除。steambroadcast.com 非 Valve 资产（2026-04-27 注册 / Registrar.eu / Cloudflare NS，真 Valve 域一律 MarkMonitor，301 跳 faceit.com）—— 留在区 2 等于给易主域一条绕过 Reject 的白名单；steamcontent.net apex 落 AS60819 SafeNames 停放页，是死规则。边界：真 Valve 直播资产与 steamcontent.com 不受影响",
     "requests": [
-      {"host": "steambroadcast.com", "note": "信任面缺陷，删后落 Final 走代理，无功能损失"},
-      {"host": "cdn.steambroadcast.com", "note": "原后缀覆盖的任意子域，一并失去 DIRECT"},
-      {"host": "steamcontent.net", "note": "停放页死规则"},
+      {"host": "steambroadcast.com", "note": "信任面缺陷，删后落 Final 走代理，无功能损失", "stage": "domain"},
+      {"host": "cdn.steambroadcast.com", "note": "原后缀覆盖的任意子域，一并失去 DIRECT", "stage": "domain"},
+      {"host": "steamcontent.net", "note": "停放页死规则", "stage": "domain"},
       {"host": "steambroadcast.akamaized.net", "note": "真 Valve 直播资产，Games.list 精确后缀，归属不变"},
       {"host": "steamcontent.com", "note": "真 Valve 内容域，仍在 GameDownloadCN 拿 DIRECT"}
     ],
     "assert": {
-      "same_policy": true, "policy": "Final", "no_dns_leak": true,
+      "same_policy": true,
+      "policy": "Final",
+      "no_dns_leak": true,
       "per_request": [
         {"host": "steambroadcast.akamaized.net", "policy": "游戏"},
         {"host": "steamcontent.com", "policy": "DIRECT"}
@@ -467,32 +503,34 @@
     "name": "dlcdn_multitenant_psl_removed_v2",
     "desc": "R1-13：DownloadCDN 删 40 条多租户/PSL 边界后缀（家族封闭失败的第二批 —— 上轮只删了 13 条具名项，同族兄弟仍在）。后缀之下是互不相关的租户，后缀既不代表业务所有者也不代表「大流量批量下载」。删后落 Final，不断连",
     "requests": [
-      {"host": "someproject.vercel.dev", "note": "vercel.app 已禁收，.dev 同族漏网"},
-      {"host": "v0-demo.vusercontent.net", "note": "Vercel v0 用户内容"},
-      {"host": "mybucket.r2.dev", "note": "pages.dev / workers.dev 已禁收"},
-      {"host": "mystorage.file.core.windows.net", "note": "blob.core.windows.net 已禁收"},
-      {"host": "someuser.bitbucket.io", "note": "github.io / gitlab.io 已禁收"},
-      {"host": "someuser.codeberg.page"},
-      {"host": "myrepo.gitapp.si"},
-      {"host": "myapp.azurestaticapps.net"},
-      {"host": "sandbox123.csb.app", "note": "CodeSandbox"},
-      {"host": "proj.w-corp-staticblitz.com", "note": "StackBlitz"},
-      {"host": "bucket.linodeobjects.com", "note": "digitaloceanspaces.com 已禁收"},
-      {"host": "bucket.vultrobjects.com"},
-      {"host": "bucket.storage.yandexcloud.net"},
-      {"host": "bucket.s3.fr-par.scw.cloud", "note": "Scaleway 对象存储，PSL PRIVATE"},
-      {"host": "bucket.s3.isk01.sakurastorage.jp", "note": "SAKURA 对象存储，PSL PRIVATE"},
-      {"host": "mypage.js.org", "note": "多租户子域托管"},
-      {"host": "myproject.readthedocs.io", "note": "多租户文档托管"},
-      {"host": "QmbWqxBEKC3P8tqsKc98xmWNzrzDtRLMiMPL8wBuTGsMnR.cf-ipfs.com", "note": "公共 IPFS 网关，任意 CID"},
-      {"host": "QmbWqxBEKC3P8tqsKc98xmWNzrzDtRLMiMPL8wBuTGsMnR.dweb.link"},
-      {"host": "user.fedorapeople.org", "note": "组织内多用户"},
+      {"host": "someproject.vercel.dev", "note": "vercel.app 已禁收，.dev 同族漏网", "stage": "domain"},
+      {"host": "v0-demo.vusercontent.net", "note": "Vercel v0 用户内容", "stage": "domain"},
+      {"host": "mybucket.r2.dev", "note": "pages.dev / workers.dev 已禁收", "stage": "domain"},
+      {"host": "mystorage.file.core.windows.net", "note": "blob.core.windows.net 已禁收", "stage": "domain"},
+      {"host": "someuser.bitbucket.io", "note": "github.io / gitlab.io 已禁收", "stage": "domain"},
+      {"host": "someuser.codeberg.page", "stage": "domain"},
+      {"host": "myrepo.gitapp.si", "stage": "domain"},
+      {"host": "myapp.azurestaticapps.net", "stage": "domain"},
+      {"host": "sandbox123.csb.app", "note": "CodeSandbox", "stage": "domain"},
+      {"host": "proj.w-corp-staticblitz.com", "note": "StackBlitz", "stage": "domain"},
+      {"host": "bucket.linodeobjects.com", "note": "digitaloceanspaces.com 已禁收", "stage": "domain"},
+      {"host": "bucket.vultrobjects.com", "stage": "domain"},
+      {"host": "bucket.storage.yandexcloud.net", "stage": "domain"},
+      {"host": "bucket.s3.fr-par.scw.cloud", "note": "Scaleway 对象存储，PSL PRIVATE", "stage": "domain"},
+      {"host": "bucket.s3.isk01.sakurastorage.jp", "note": "SAKURA 对象存储，PSL PRIVATE", "stage": "domain"},
+      {"host": "mypage.js.org", "note": "多租户子域托管", "stage": "domain"},
+      {"host": "myproject.readthedocs.io", "note": "多租户文档托管", "stage": "domain"},
+      {"host": "QmbWqxBEKC3P8tqsKc98xmWNzrzDtRLMiMPL8wBuTGsMnR.cf-ipfs.com", "note": "公共 IPFS 网关，任意 CID", "stage": "domain"},
+      {"host": "QmbWqxBEKC3P8tqsKc98xmWNzrzDtRLMiMPL8wBuTGsMnR.dweb.link", "stage": "domain"},
+      {"host": "user.fedorapeople.org", "note": "组织内多用户", "stage": "domain"},
       {"host": "claude.app", "note": "A10 预豁免：PSL 收录但注册者唯一，第一方，刻意保留"},
       {"host": "claudeusercontent.com", "note": "A10 预豁免：第一方 AI 产品用户内容"},
       {"host": "oaiusercontent.com", "note": "A10 预豁免：第一方 AI 产品用户内容"}
     ],
     "assert": {
-      "same_policy": true, "policy": "Final", "no_dns_leak": true,
+      "same_policy": true,
+      "policy": "Final",
+      "no_dns_leak": true,
       "per_request": [
         {"host": "claude.app", "policy": "AI"},
         {"host": "claudeusercontent.com", "policy": "AI"},
@@ -504,18 +542,22 @@
     "name": "dlcdn_saas_components_removed_v2",
     "desc": "R1-14：DownloadCDN 删 19 条通用 SaaS 组件（客服 Freshdesk 8 / 特性开关 Split.io 6 / SAP CIAM 身份 Gigya 3 / CDP Segment 1 / Braze EU wildcard 1）。这些不是下载面；Gigya 尤其危险 —— 它是身份认证组件，绑到下载出口意味着任意使用 SAP CIAM 的站点登录都走「下载」组。braze.com 本已在 forbidden，漏了 .eu 变体",
     "requests": [
-      {"host": "cdn.gigya.com", "note": "SAP CIAM 身份组件"},
-      {"host": "cdns.eu1.gigya.com", "note": "原 DOMAIN-WILDCARD 覆盖形态"},
-      {"host": "assets7.freshdesk.com", "note": "客服"},
-      {"host": "cdn.freshdesk.com"},
-      {"host": "assets11.freshdesk.com", "note": "原 DOMAIN-WILDCARD,assets*.freshdesk.com 覆盖形态"},
-      {"host": "sdk.split.io", "note": "特性开关"},
-      {"host": "streaming.split.io"},
-      {"host": "telemetry.split.io"},
-      {"host": "cdn.segment.com", "note": "CDP"},
-      {"host": "sdk.fra-01.braze.eu", "note": "Braze EU，braze.com 已在 forbidden"}
+      {"host": "cdn.gigya.com", "note": "SAP CIAM 身份组件", "stage": "domain"},
+      {"host": "cdns.eu1.gigya.com", "note": "原 DOMAIN-WILDCARD 覆盖形态", "stage": "domain"},
+      {"host": "assets7.freshdesk.com", "note": "客服", "stage": "domain"},
+      {"host": "cdn.freshdesk.com", "stage": "domain"},
+      {"host": "assets11.freshdesk.com", "note": "原 DOMAIN-WILDCARD,assets*.freshdesk.com 覆盖形态", "stage": "domain"},
+      {"host": "sdk.split.io", "note": "特性开关", "stage": "domain"},
+      {"host": "streaming.split.io", "stage": "domain"},
+      {"host": "telemetry.split.io", "stage": "domain"},
+      {"host": "cdn.segment.com", "note": "CDP", "stage": "domain"},
+      {"host": "sdk.fra-01.braze.eu", "note": "Braze EU，braze.com 已在 forbidden", "stage": "domain"}
     ],
-    "assert": {"same_policy": true, "policy": "Final", "no_dns_leak": true}
+    "assert": {
+      "same_policy": true,
+      "policy": "Final",
+      "no_dns_leak": true
+    }
   },
   {
     "name": "intercom_four_domains_unified_ai_v2",
@@ -529,7 +571,11 @@
       {"host": "intercomcdn.io", "note": "原 DownloadCDN，本波迁入 AI"},
       {"host": "downloads.intercomcdn.io"}
     ],
-    "assert": {"same_policy": true, "policy": "AI", "no_dns_leak": true}
+    "assert": {
+      "same_policy": true,
+      "policy": "AI",
+      "no_dns_leak": true
+    }
   },
   {
     "name": "dlcdn_static_subdomains_to_region_v2",
@@ -580,7 +626,11 @@
       {"host": "static.independent.co.uk", "note": "R1-23 同批"},
       {"host": "video.dailymail.co.uk", "note": "R1-23 同批"}
     ],
-    "assert": {"same_policy": true, "policy": "🇬🇧英国", "no_dns_leak": true}
+    "assert": {
+      "same_policy": true,
+      "policy": "🇬🇧英国",
+      "no_dns_leak": true
+    }
   },
   {
     "name": "domestic_ai_vendor_intl_to_ai_v2",
@@ -594,7 +644,9 @@
       {"host": "siliconflow.cn", "note": "中文主域，刻意保持直连"}
     ],
     "assert": {
-      "same_policy": true, "policy": "AI", "no_dns_leak": true,
+      "same_policy": true,
+      "policy": "AI",
+      "no_dns_leak": true,
       "per_request": [
         {"host": "siliconflow.cn", "policy": "DIRECT"},
         {"host": "lingyiwanwu.com", "policy": "DIRECT"}

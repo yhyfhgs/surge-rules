@@ -1,81 +1,69 @@
 # Maintenance
 
-## Ownership decision
+Commands run from the repository root. The [architecture](ARCHITECTURE.md)
+defines ordering and DNS invariants; `config/routing.json` alone defines list
+order and policy. Keep private profiles, credentials and diagnostic output
+outside this public repository. Never touch `../Backup/`.
 
-Assign each rule to one owner:
+## Edit rules
 
-1. Local/system or campus traffic → `PrivateLAN` / `PKU`.
-2. Confirmed blocking target → `Reject`.
-3. CN game/model bulk download exception → `GameDownloadCN` / `ModelDownloadCDN`.
-4. Specific ecosystem/service → its owner list (`Google`, `Microsoft`, `AI`,
-   `Streaming`, `Games`, …).
-5. Verified Apple/Microsoft CN endpoint → `AppleCN` / `MicrosoftCN`.
-6. Curated domestic domain → `Domestic` or the corresponding CN vendor list.
-7. Region-bound domain → `Japan`, `UK`, `Europe`, or `US`.
-8. Confirmed proxy-required domain with no owner → `ProxyGFW`.
-9. Domestic long tail → generated `ChinaDomain`; never hand-add a rule there.
-10. `.cn` / CNNIC IDN host with no owner above → nothing to add: the terminal
-    `ChinaTLD` catch-all already routes it DIRECT. Add an explicit `.cn` entry
-    to `Domestic` only when it must precede a broader different-policy rule.
+1. Find the current owner with `rg -n 'example\.com' lists`.
+2. Use local/campus or Reject ownership first, then evidenced bulk-download
+   exceptions, service owners, domestic owners, regions, or residual ProxyGFW.
+   Google/Microsoft/Meta/X AI stays with its ecosystem. Independent international
+   AI uses AI; domestic products use Domestic or their CN vendor owner.
+3. Move rules instead of duplicating them. Keep redirects, login, API and CDN
+   endpoints in one session family; split only evidenced download/regional
+   surfaces. A broad parent must follow every different-policy child.
+4. Prefer DOMAIN/DOMAIN-SUFFIX. Wildcards and keywords need positive and negative
+   witnesses. Never use a shared-cloud CIDR, public suffix or tenant boundary as
+   a single-service owner. Registered blocked platforms may remain in ProxyGFW.
+5. Keep domain and IP sets separate. The manifest controls `no_resolve` and
+   extended matching; reviewed IP sets may initiate encrypted resolution only
+   after the domain stage. USER-AGENT, PROCESS-NAME and URL-REGEX source rules
+   remain forbidden. Every allowlist exemption needs a reason.
+6. Add behavioral assertions and run `python3 tools/sort_lists.py --write`.
+   The sorter preserves rule modifiers and trailing comments.
 
-Steps 5–7 are mutually exclusive by construction: no host matched by the
-domestic-direct lists is matched by any regional list, so the tree reads
-top-down without backtracking. `config/routing.json` is the canonical order —
-do not copy it into another script or document.
+Never hand-add to ChinaDomain. Unowned `.cn` / CNNIC IDN hosts already match
+terminal ChinaTLD; an explicit Domestic entry is needed only for earlier
+priority. ProxyGFW must remain domain-only with no PSL-boundary suffix, expired
+domain or specifically owned service.
 
-Before adding `example.com`, find its current owner first:
+## Generated layers and upstreams
 
-```bash
-rg -n 'example\.com' lists
-```
+- **ChinaDomain:** use `tools/regen_chinadomain.py --help` and its shadow workflow.
+  Preserve DNS, blast-radius, pin, post-removal routing and hysteresis gates;
+  retain probe state between runs. `--additions-only` probes new candidates and
+  admits only KEEP results while retaining the existing layer. Same-day retries
+  cannot advance deletion hysteresis. A failed resolution-rate gate leaves the
+  source unchanged; never lower the gate just to obtain output.
+- **ChinaIP:** run `python3 tools/collapse_cidr.py lists/ChinaIP.list --check` and
+  locked `python3 tools/rebuild.py --id blackmatrix7_china_ip`. The source is a
+  geolocation export, not an RIR feed. Its `exclude_cidr` transform subtracts
+  `config/chinaip-exclusions.txt`; re-admission requires fresh RDAP evidence
+  beside the entry. Evidence-conflicted ranges deliberately remain DIRECT.
+  Recompute intersections before moving CIDRs across ChinaIP or regional lists;
+  preserve collapse/address-set verification on refresh. Explicit `include_cidr`
+  retention must name exclusion guards; `--write` cannot bypass locked expected
+  counts/hashes. `output_params` separates verified upstream parameters from
+  the manifest-controlled output matching policy. The CIDR collapser preserves
+  modifiers and compares each modifier group separately; it never adds
+  `no-resolve` unless explicitly requested for a legacy profile.
+- **ProxyGFW expiry:** `config/proxygfw-expired.txt` guards confirmed DNS failures
+  against re-entry. Removal from this denylist needs fresh DNS and ownership
+  evidence. Migration or misspelling removals do not belong in it. The liveness
+  prober requires at least two clean NXDOMAIN responses plus authoritative
+  confirmation. Timeout/NODATA/parking hints are not death evidence; confirmed
+  expiry needs observations at least 24 hours apart. Under a running proxy,
+  domestic DNS anomaly labels do not independently establish blocking.
+- **Clash:** edit sources and `config/mihomo-runtime.yaml`, then regenerate with
+  `python3 tools/surge2clash.py`. Follow [CLASH.md](CLASH.md) for deployment.
 
-If the service has redirects, login, API, media, and CDN endpoints, treat them
-as one session family; split only source-IP-independent bulk data or a proven
-region-specific surface.
-
-## Rule invariants
-
-- Move a rule; do not duplicate it in the destination.
-- A broad suffix/wildcard/keyword parent may keep a different-policy child only
-  **ordered-safe**: every such child must sit in an earlier list, proven by list
-  indices in `config/routing.json` before promoting an apex. One failing child
-  means the apex is not promoted. `Reject` children are the explicit security
-  exception (Reject precedes every routing owner).
-- Never classify a whole shared-cloud CIDR, DDNS namespace, public suffix, or
-  private tenant boundary as one service. (Blocked multi-tenant platforms
-  staying whole in `ProxyGFW` is not such a classification — it is the residual
-  layer.)
-- `ProxyGFW` is domain-only: no IP rules, no PSL-boundary suffixes, no expired
-  domains, no domains with a specific owner.
-- Every IP rule has `no-resolve`.
-- `USER-AGENT`, `PROCESS-NAME`, and `URL-REGEX` are forbidden repo-wide (A8, no
-  exemptions).
-- Prefer `DOMAIN`/`DOMAIN-SUFFIX`; use wildcard/keyword rules only with positive
-  and negative witnesses.
-
-## AI upstream review
-
-Review upstream provider groups as candidate evidence, not as routing policies.
-Google, Microsoft/GitHub, Meta and X AI use their existing ecosystem owners.
-Independent international AI and international AI products from CN vendors use
-`AI`; CN products use `Domestic` or the matching CN vendor list. A vendor's
-nationality, a `.com`/`.ai` suffix, or an upstream `scope: cn` flag alone does not
-determine the route. Preserve explicit regional API and download exceptions.
-
-For Model Studio, international DashScope/Coding Plan and documented overseas
-`<region>.maas.aliyuncs.com` serving namespaces precede AlibabaCN. Beijing APIs,
-cloud account/login and cloud consoles retain the AlibabaCN family. Those
-API-key-authenticated regional endpoints are an evidenced regional split, not a
-reason to proxy all `aliyuncs.com` or `alibabacloud.com` traffic.
-
-TRAE's observed `trae-api-cn.mchost.guru` and `trae-api-sg.mchost.guru` endpoints
-belong to ByteDanceCN and AI respectively. Do not restore a blanket
-`mchost.guru` suffix: it crosses regional APIs. Other hosts require evidence.
-Generic ByteDance CDN/telemetry names are shared with non-AI products; upstream
-AI membership alone does not justify moving the whole shared namespace.
-
-Record immutable review inputs in `sources.lock.json` under `ai_review.inputs`,
-then verify them with the existing locked fetcher before using their bytes:
+Record upstream provenance in [SOURCES.md](../SOURCES.md) and `sources.lock.json`.
+Apply upstream changes through the locked fetch/rebuild tools. AI review inputs
+are pinned evidence, not policies or promises to rebuild curated lists. Verify
+those inputs before using them:
 
 ```bash
 python3 - <<'PYLOCK'
@@ -88,135 +76,96 @@ PYLOCK
 python3 tools/fetch_locked.py --lock /tmp/ai-review.lock.json --network --out /tmp/ai-review-inputs
 ```
 
-These pins reproduce the upstream inputs, not the curated destination lists.
-Keep accepted moves, exclusions, regional evidence and actual gate results in a
-dated evidence record. The [2026-09-07 review](evidence/2026-09-07-ai-upstream.md)
-records the current decisions and limits.
-
-## List sort order
-
-Every `lists/*.list` is stored in one canonical shape, produced and enforced by
-`tools/sort_lists.py`: rules grouped into fixed type buckets (`DOMAIN` →
-`DOMAIN-SUFFIX` → `DOMAIN-WILDCARD` → `DOMAIN-KEYWORD` → `IP-CIDR` →
-`IP-CIDR6` → `IP-ASN` → `GEOIP`; any other type is an error), deterministic
-order inside each bucket, trailing comments and `,no-resolve` traveling with
-their rule byte for byte, buckets separated by one blank line.
-
-Order inside a list carries no routing meaning — a rule-set has a single policy.
-Only the list order in `config/routing.json` is load-bearing. Do not hand-sort:
-run `python3 tools/sort_lists.py --write` and let `--check` gate it.
-
-The manifest also groups rulesets into contiguous named `section`s;
-`tools/render_surge_rules.py` prints one `# <index> <section>` comment per
-switch. Sections are presentation only.
-
-## Generated machine layers
-
-### ChinaDomain
-
-`tools/regen_chinadomain.py` loads the routing manifest and removes forbidden
-types/values, rules already owned by earlier lists, and broad generated parents
-containing an earlier different-policy child. Run its shadow/hysteresis workflow
-described by `--help`; do not bypass its DNS, blast-radius, pin, or post-removal
-routing gates.
-
-### ChinaIP
-
-```bash
-python3 tools/collapse_cidr.py lists/ChinaIP.list --check
-python3 tools/rebuild.py --id blackmatrix7_china_ip
-```
-
-The upstream is a geolocation-database export, not an RIR feed, and it carries
-foreign allocations. `config/chinaip-exclusions.txt` holds every range the
-ownership audit proved non-CN under the RIR/RDAP tier; the `exclude_cidr`
-transform in `sources.lock.json` subtracts it during every rebuild, so an
-upstream refresh cannot silently re-import them. Re-admitting a range requires
-fresh RDAP evidence recorded next to its line. Evidence-conflicted segments stay
-in ChinaIP deliberately — conservative direct.
-
-ChinaIP precedes regional GeoIP fallback because pinned GeoLite regional
-selectors intersect ChinaIP-owned ranges. A verified service range only needs
-its own list ahead of ChinaIP when the two actually intersect; when disjoint it
-belongs in the regional list it shares a policy with (the LINE/LY CIDRs in
-`Japan` are the worked example). Recompute that disjointness before moving any
-CIDR across the ChinaIP boundary; A9 rejects a regression.
-
-### ProxyGFW expiry
-
-`config/proxygfw-expired.txt` records domains removed after dual-resolver
-NXDOMAIN/authority-failure sweeps; the analyzer rejects their re-entry. A domain
-may be removed from the denylist only with new DNS and ownership evidence.
-Domains dropped for a non-DNS reason (migration, misspelling) are removed from
-`ProxyGFW` without being registered here — the denylist means "resolves
-nowhere", not "should not be proxied".
+Keep accepted moves, omissions, regional evidence and actual validation in a
+dated evidence record. Do not classify endpoints from vendor nationality,
+`.com`/`.ai`, or an upstream `scope: cn` flag alone.
 
 ## Validate a change
 
 ```bash
 python3 tools/sort_lists.py --check
-
 python3 tools/render_surge_rules.py ../Surge.conf /tmp/Surge.candidate.conf
 surge-cli --check /tmp/Surge.candidate.conf
-
 python3 tools/analyze_rules.py --conf /tmp/Surge.candidate.conf --rules lists \
+  --country-db "$HOME/Library/Application Support/com.nssurge.surge-mac/GeoLite2-Country.mmdb" \
+  --asn-db /Applications/Surge.app/Contents/Resources/GeoLite2-ASN.mmdb \
   --out /tmp/rule-analysis --fail-on-shadow
-
 python3 tests/audit.py --conf /tmp/Surge.candidate.conf --rules lists \
   --check all --fail-on P1
 python3 tests/runsuite.py --conf /tmp/Surge.candidate.conf --rules lists
+python3 tools/surge2clash.py --check
 ```
 
-For IP relationship changes, run the MMDB expansion too (command in README).
-Inspect `relationships.jsonl`, `relationship_aggregates.jsonl`,
-`split_apex.jsonl`, `split_parent.jsonl`, and `topology.json`. Aggregate weights
-are exact syntactic intersection counts, not traffic. A non-security record in
-`split_parent.jsonl` must either be ordered-safe (listed under
-`ordered_safe_split_parents`) or be narrowed or assigned one owner; anything
-under `order_unsafe_*` fails the gate.
+Regenerate Clash before its check if sources changed. Filtered regional selectors
+require MMDB expansion; a syntax-only run cannot evaluate their address sets. For IP/GEOIP/ASN changes,
+install `requirements-analysis.txt` and also expand against the Country/ASN
+MMDB files used by the active profile. A profile with `geoip-maxmind-url` uses
+Surge's downloaded Country database; otherwise use its bundled Country file:
 
-## Update the active profile
+```bash
+python3 tools/analyze_rules.py --conf /tmp/Surge.candidate.conf --rules lists \
+  --country-db "$HOME/Library/Application Support/com.nssurge.surge-mac/GeoLite2-Country.mmdb" \
+  --asn-db /Applications/Surge.app/Contents/Resources/GeoLite2-ASN.mmdb \
+  --out /tmp/rule-analysis-mmdb --fail-on-shadow
+```
 
-After the candidate passes, replace the active profile only after reviewing the
-`[Rule]` diff. The renderer changes only that section; proxy groups, nodes,
-MITM, and other private settings are preserved.
+Review relationships, split records and topology before accepting broad parents
+or list reordering. Every non-security split must be ordered-safe; all
+`order_unsafe_*` findings require correction. See [Tests](../tests/README.md) for
+tool self-tests and live diagnostics. Documentation-only edits need link, path
+and diff checks; run affected existing tests for tool changes.
 
-Re-render whenever `config/routing.json` changes, not only when a list changes.
-The active profile has silently fallen a batch behind before;
-`render_surge_rules.py --check ../Surge.conf` is the gate that catches it — run
-it as part of every batch.
+## Active profile and publication
 
-### Profile red lines
+For rule-only changes, review and replace the generated `[Rule]` section. For
+this v2 migration, prepare both clients with `tools/prepare_profiles.py`: it
+updates generated routing and ordered DNS mappings, removes DIRECT from proxy
+policy groups, and checks proxy definitions and MITM material remain intact.
+Candidates must pass validation before installation. Re-render managed DNS
+mappings whenever domain-list order or ownership changes.
 
-These constrain the active profile, which lives outside this repository:
+```bash
+python3 tools/prepare_profiles.py \
+  --surge-in ../Surge.conf --surge-out /tmp/Surge.candidate.conf \
+  --clash-in ../Clash/Clash.yaml --clash-out /tmp/Clash.candidate.yaml \
+  --rules-base "$PWD/lists" --clash-provider-dir "$PWD/clash"
+```
 
-- Certificate material — the CA `.p12` and its passphrase — must never enter
-  this repository (public, permanent history).
-- Do not write an `enable` key into `[MITM]`; Surge strips it on normalization
-  and the switch lives in the GUI runtime.
-- While `[MITM] hostname` is non-empty, `auto-quic-block` must be `true`,
-  otherwise HTTP/3 to a decrypted host bypasses MITM. `tests/realworld.py
-  --ua-routing` asserts the pair.
+The renderer's check recognizes one canonical CDN main/immutable base or the
+source directory. Check the installed sequence with:
 
-## Derive and publish
+```bash
+python3 tools/render_surge_rules.py --check ../Surge.conf
+```
+
+Never publish profile contents, certificates or credentials. Never write an
+`enable` key in `[MITM]`; its switch belongs to the GUI runtime. A nonempty MITM
+hostname requires `auto-quic-block = true` to prevent HTTP/3 bypass.
+
+For an inspected routing release on main:
 
 ```bash
 python3 tools/surge2clash.py
-python3 tools/surge2clash.py --check
 python3 tests/clash_contract.py --conf /tmp/Surge.candidate.conf  # PyYAML required
-./update.sh "describe the routing change"
+SURGE_RELEASE_PROFILE=/tmp/Surge.candidate.conf ./update.sh "describe the routing change"
 ```
 
-`update.sh` requires `requirements-analysis.txt` installed and readable
-Country/ASN databases (`SURGE_COUNTRY_DB_PATH` / `SURGE_ASN_DB_PATH` override
-discovery). It runs the full MMDB-expanded analysis, static audit, scenarios,
-transactional Clash generation, branch/SHA verification, then purges exactly the
-published distribution surface (`lists/*.list`, `clash/*.list`,
-`clash/rule-providers.yaml`) and verifies CDN md5.
+`SURGE_RELEASE_PROFILE` selects the validated candidate, so a migration can be
+published before replacing the live profile. Without it, update.sh uses the
+active profile. The release checks native Surge syntax, CIDR collapse, engine
+and v2/expiry safety self-tests, full MMDB
+relationships, static audit, scenarios and Clash generation. It requires
+`requirements-analysis.txt` plus readable databases; override discovery with
+`SURGE_COUNTRY_DB_PATH` / `SURGE_ASN_DB_PATH` when needed. It then runs
+`git add -A`, commits, pushes main, verifies the remote SHA, purges changed
+`lists/*.list` / `clash/*.list` / `clash/rule-providers.yaml`, and checks CDN md5.
+Inspect the entire working tree first. Commit documentation-only work by exact
+paths instead of using this release script.
 
-Final status: `VALIDATED_NOT_PUBLISHED` (gates passed, no distribution change) /
-`PUBLISHED_AND_VERIFIED` / `PUBLISHED_BUT_UNVERIFIED` (nonzero — rerun later to
-re-purge; never report an unverified publish as complete).
+Report the actual state: `VALIDATED_NOT_PUBLISHED`, `PUBLISHED_AND_VERIFIED`, or
+`PUBLISHED_BUT_UNVERIFIED`. The last is nonzero and awaits CDN verification;
+a successful push alone does not establish publication. Rerunning a release
+without new distribution changes performs the full CDN recheck.
 
 ## Debugging
 
@@ -225,43 +174,57 @@ python3 tests/engine.py match example.com --conf /tmp/Surge.candidate.conf --jso
 surge-cli rule explain example.com
 ```
 
-- Expected owner loses to an earlier rule → remove/narrow the earlier coverer.
-- Expected owner absent, request reaches `Final` → add an explicit rule to the
-  correct owner, or restore the apex suffix once ordered-safe placement is
-  proved for every different-policy child.
-- Literal IP reaches the wrong region → compare service IP, ChinaIP, and MMDB
-  interval edges in the analyzer output.
-- DNS assertion fails → locate an IP rule without `no-resolve`; do not add a
-  downstream DNS workaround.
+Missing address observations return `routing_complete=false`; use `--stage domain`
+for a domain-only boundary check, or supply `--dns-status` and `--resolved-ip`
+for a controlled full-routing witness. An explicit `--ip` is already resolved.
 
-The running Surge result is authoritative for runtime semantics; the analyzer
-records the exact MMDB bytes needed to reproduce GeoIP/ASN conclusions.
+If an earlier rule steals ownership, narrow/remove that coverer. If the owner is
+missing, add it or restore a parent only after proving safe placement. For IP
+misrouting, inspect service/ChinaIP/MMDB interval edges. For DNS assertion
+failures, inspect the resolution boundary, encrypted resolver configuration and
+actual request state rather than blindly restoring `no-resolve`. Running Surge is authoritative
+for runtime semantics. L3/L4 need a relevant live-testing task and must not
+change configuration or policy selections.
 
-## Open decisions
+## Current decisions
 
-These cannot be settled by static analysis; neither is a defect, and neither may
-be "resolved" by a syntax-only change.
+- **Microsoft / OneDrive:** v2 places Microsoft before the later DIRECT block.
+  Its `microsoft.com`, `live.com`, `office.com`, `msn.com` parents are narrowed
+  to service scopes so MicrosoftCN exceptions remain effective. The 2026-09-12 decision routes OneDrive sync/storage/shared sign-in
+  and `office.live.com` through Microsoft after direct access failed. This also
+  supersedes the former DIRECT exception for `files.1drv.com`. Other approved
+  MicrosoftCN update/CDN/preview endpoints retain DIRECT. Do not reintroduce
+  OneDrive direct exceptions on refresh. See [proxy restoration](evidence/2026-09-12-onedrive-proxy.md)
+  and the superseded [direct trial](evidence/2026-09-12-onedrive-direct.md).
+- **Google:** Google owns `google.com`, `googleapis.com`, `googleusercontent.com`
+  and `ggpht.com` after YouTube/download exceptions. The user explicitly included
+  Google API tenant traffic; see [the decision](evidence/2026-09-07-clash-routing.md).
+- **Regional AI:** International DashScope/Coding Plan and documented overseas
+  `<region>.maas.aliyuncs.com` precede AlibabaCN; Beijing APIs, account/login and
+  consoles retain AlibabaCN. TRAE's observed `trae-api-cn.mchost.guru` belongs to
+  ByteDanceCN and `trae-api-sg.mchost.guru` to AI. Do not restore blanket
+  `mchost.guru`, `aliyuncs.com` or shared ByteDance CDN ownership in AI.
+  See [reviewed endpoints and omissions](evidence/2026-09-07-ai-upstream.md).
 
-| Item | What is unresolved | What would settle it |
-|---|---|---|
-| `Streaming` IP surface | Whether every CIDR still belongs to a streaming provider, and whether any range should move to a regional or service owner | Real traffic capture plus a shadow-routing comparison against the live profile |
-| OneDrive authenticated synchronization | The latest 2026-09-12 user decision replaces the failed direct trial with Microsoft proxy routing for sync, storage and shared sign-in. Rule matching does not establish completed file synchronization. | A real authenticated client sync; successful unauthenticated probes only establish endpoint reachability. See the [proxy restoration](evidence/2026-09-12-onedrive-proxy.md) and [direct-trial evidence](evidence/2026-09-12-onedrive-direct.md). |
+The v2 evidence record distinguishes IP readmission, quarantine and native
+connection witnesses. Unknown historical Streaming ranges remain quarantined;
+expanding that set requires real capture and a shadow-routing comparison.
+OneDrive synchronization still needs a real authenticated client sync. Rule matches and unauthenticated HTTP responses
+establish neither. Broad compatibility entries in vendor documentation do not
+make shared cloud namespaces OneDrive owners.
 
-Microsoft suffixes belong in `Microsoft.list`. Keep `MicrosoftCN` before
-`Microsoft`, and DownloadCDN before both. On 2026-09-07 the user explicitly
-approved DIRECT for the former `files.1drv.com`, `content.office.net`,
-`cdn.designerapp.osi.office.net` and `odc.officeapps.live.com` exceptions, so no
-priority cycle or extra list is required. Prefer editing existing owner lists;
-do not add a separate manufacturer fallback list or inline configuration rules
-to preserve those superseded exceptions.
 
-The latest 2026-09-12 instruction supersedes both the OneDrive direct trial and
-the older DIRECT decision for `files.1drv.com`: the user reported that OneDrive
-could not open directly and requested proxy routing. Keep its sync, file and
-shared authentication endpoints in Microsoft. `office.live.com`, used by the
-OneDrive/Office web session, also uses Microsoft; generic Office preview and
-domestic update/CDN endpoints retain MicrosoftCN. Do not reintroduce the removed
-OneDrive direct exceptions during an upstream refresh. Shared cloud namespaces
-are not OneDrive endpoints merely because Microsoft's allowlist contains broad
-compatibility entries. Record reachability and authenticated-sync evidence
-separately from rule-policy verification.
+## Coordinated v2 rollout
+
+Old clients expect mixed lists and must not consume the split files with their
+old rule sequence. Keep the active old profile on its prior immutable revision
+while publishing the new distribution. After all new files are verified, prepare
+both private profiles with the same new immutable `--rules-base` URL. The helper
+uses that revision for Clash URLs and cache paths too. Validate and install the
+candidates, then verify native matching. Do not claim an isolated Mihomo test
+means the user's separate Clash client has reloaded.
+
+Keep rollback material outside the repository and outside `../Backup/`: original
+Rule/DNS/group values and the old revision are sufficient; never export the
+certificate into public artifacts. The publish script's push/CDN statuses and
+local activation are separate results.

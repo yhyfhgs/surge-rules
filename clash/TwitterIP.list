@@ -1,0 +1,18 @@
+# AUTO-GENERATED — Clash(Mihomo) classical 规则，由 ../lists/TwitterIP.list 派生
+# 勿手工编辑；修改 Surge 源后运行 python3 tools/surge2clash.py 重新生成
+
+# TwitterIP — maintained routing owner.
+# Topology and matching options: config/routing.json.
+# Sources and review decisions: SOURCES.md.
+
+IP-CIDR,69.195.160.0/19
+IP-CIDR,104.244.40.0/21
+IP-CIDR,192.133.76.0/22
+IP-CIDR,199.16.156.0/22
+IP-CIDR,199.59.148.0/22
+IP-CIDR,199.96.56.0/21
+IP-CIDR,202.160.128.0/22
+IP-CIDR,209.237.192.0/19
+
+IP-ASN,13414
+IP-ASN,35995

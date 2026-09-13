@@ -1,0 +1,16 @@
+# AUTO-GENERATED — Clash(Mihomo) classical 规则，由 ../lists/GoogleIP.list 派生
+# 勿手工编辑；修改 Surge 源后运行 python3 tools/surge2clash.py 重新生成
+
+# GoogleIP — maintained routing owner.
+# Topology and matching options: config/routing.json.
+# Sources and review decisions: SOURCES.md.
+
+IP-CIDR,8.8.4.4/32
+IP-CIDR,8.8.8.8/32
+IP-CIDR,74.125.0.0/16
+IP-CIDR,173.194.0.0/16
+
+IP-CIDR6,2001:4860:4860::8844/128
+IP-CIDR6,2001:4860:4860::8888/128
+
+IP-ASN,15169

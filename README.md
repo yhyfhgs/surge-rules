@@ -1,117 +1,49 @@
 # surge-rules
 
-Surge rules with a generated Mihomo/Clash mirror. `lists/*.list` are the rule
-sources; [`config/routing.json`](config/routing.json) is the only source of list
-order, policies, `extended-matching`, and `no-resolve` metadata.
+Surge rule lists with a generated Mihomo/Clash mirror. Edit [lists/](lists/) for
+rule content and [config/routing.json](config/routing.json) for list order,
+policies and modifiers. Routing is first-match-wins.
 
-Baseline counts (lists, rules, scenarios, assertions, relations) drift every
-batch: the truth is the command output below and the latest `CHANGELOG.md`
-entry, not any hardcoded number.
-
-## Routing model
-
-Surge is first-match-wins. The manifest groups the lists into seven sections:
-
-| Section | Lists | Purpose |
-|---|---|---|
-| 局域直连 | PrivateLAN, PKU | Local and campus traffic |
-| 广告/恶意拦截 | Reject | Global reject overrides |
-| 下载 | GameDownloadCN, ModelDownloadCDN, DownloadCDN | Bulk-download planes whose narrow rules must beat broader service owners |
-| 服务分流 | YouTube, Google, Twitter, Meta, MicrosoftCN, Microsoft, AI, TikTok, SocialOthers, Telegram, Streaming, Games, Payment, ProxyGFW | Service/session ownership, closed by the domain-only proxy residual |
-| 国内直连 | AppleCN, Domestic, ChinaMedia, TencentCN, AlibabaCN, ByteDanceCN, BaiduCN, NetEaseCN, ChinaDomain, ChinaIP | One contiguous DIRECT run: vendor CN endpoints, curated domestic, generated long tail, authoritative CN ranges |
-| 地区分流 | Japan, US, UK, Europe | Region-bound domains plus each region's IP fallback in one hybrid list; sits after ChinaIP so GeoLite selectors cannot pull CN ranges abroad, with Japan first so `GEOIP,US` cannot capture the LINE/LY CIDRs |
-| 国内兜底 | ChinaTLD | Terminal DIRECT catch-all for `.cn` and the CNNIC IDN ccTLDs; sits after every regional list so each proxy-owned, rejected, or region-owned `.cn` host is already matched. It only recovers hosts that would otherwise fall through FINAL to a remote exit, because `GEOIP,CN` is `no-resolve` and never sees a hostname request |
-| Terminal | LAN, GEOIP CN, FINAL | Built-in safety and unmatched traffic |
-
-`ProxyGFW` uses `Proxy`; terminal `FINAL` uses `Final`. They are deliberately
-different policies. Shared cloud CIDRs, public-suffix tenant spaces, dead domains,
-and domains with a specific service owner do not belong in `ProxyGFW`.
-
-## Repository
+## Use
 
 ```text
-config/routing.json             canonical topology
-config/chinaip-exclusions.txt   audited non-CN ranges subtracted on ChinaIP rebuild
-config/proxygfw-expired.txt     dead-domain re-entry denylist
-lists/*.list                    Surge sources
-clash/*.list                    generated Mihomo sources
-tools/analyze_rules.py          exhaustive relationship analyzer
-tools/sort_lists.py             in-list type-bucket sorter and its gate
-tools/render_surge_rules.py     render manifest order into a Surge profile
-tools/surge2clash.py            regenerate Clash outputs
-tools/collapse_cidr.py          canonical CIDR folding for the IP layers
-tools/fetch_locked.py           checksum-verified upstream fetch (sources.lock.json)
-tools/rebuild.py                rebuild pinned machine layers and diff them
-tools/regen_chinadomain.py      guarded ChinaDomain regeneration pipeline
-tests/engine.py … realworld.py  L0–L4 test suite (see tests/README.md)
-docs/ARCHITECTURE.md            invariants and algorithms
-docs/MAINTENANCE.md             edit/verify/publish workflow
-```
-
-Per-batch evidence and decisions live in `CHANGELOG.md`; superseded diagnostic
-reports are recoverable from git history, cited from the entry that replaced them.
-
-## Verify
-
-```bash
-# Every list is in canonical type-bucket order.
-python3 tools/sort_lists.py --check
-
-# Render and validate a candidate profile without touching the active profile.
-python3 tools/render_surge_rules.py ../Surge.conf /tmp/Surge.candidate.conf
-surge-cli --check /tmp/Surge.candidate.conf
-
-# Exhaustive relationship analysis; rejects shadows and order-unsafe splits.
-python3 tools/analyze_rules.py \
-  --conf /tmp/Surge.candidate.conf --rules lists \
-  --out /tmp/rule-analysis --fail-on-shadow
-
-python3 tests/audit.py --conf /tmp/Surge.candidate.conf --rules lists \
-  --check all --fail-on P1
-python3 tests/runsuite.py --conf /tmp/Surge.candidate.conf --rules lists
-
-# Derived layer must match the sources and manifest.
-python3 tools/surge2clash.py --check
-```
-
-For a complete ASN/GEOIP cross-match, pass Surge's pinned MMDB files and make
-`maxminddb` available (`pip install -r requirements-analysis.txt`):
-
-```bash
-python3 tools/analyze_rules.py \
-  --conf /tmp/Surge.candidate.conf --rules lists \
-  --country-db "$HOME/Library/Application Support/com.nssurge.surge-mac/GeoLite2-Country.mmdb" \
-  --asn-db /Applications/Surge.app/Contents/Resources/GeoLite2-ASN.mmdb \
-  --out /tmp/rule-analysis-mmdb --fail-on-shadow
-```
-
-The active profile sets `geoip-maxmind-url`, so Surge stores the runtime Country
-database in its app-support directory; the ASN database remains bundled.
-Analyze the same pair the running profile uses.
-
-## Edit and publish
-
-1. Move a rule from its old owner to its new owner; never duplicate it.
-2. Do not add a broad suffix, wildcard, or keyword parent when narrower rules use
-   another policy, unless the placement is ordered-safe (see ARCHITECTURE.md).
-3. Every IP rule must include `no-resolve`.
-4. Run the verification commands above.
-5. Run `python3 tools/surge2clash.py` to refresh `clash/`.
-6. Publish with `./update.sh "message"` — it runs all gates plus the full
-   MMDB-expanded analysis, then push, jsDelivr purge, and CDN md5 verification.
-
-## Consumers
-
-```text
-Surge : https://cdn.jsdelivr.net/gh/yhyfhgs/surge-rules@main/lists/<Name>.list
+Surge:  https://cdn.jsdelivr.net/gh/yhyfhgs/surge-rules@main/lists/<Name>.list
 Mihomo: https://cdn.jsdelivr.net/gh/yhyfhgs/surge-rules@main/clash/<Name>.list
 ```
 
-Use the generated active rules and DNS/TUN merge settings in
-[`clash/rule-providers.yaml`](clash/rule-providers.yaml). Do not hand-edit files
-under `clash/`. Replace the matching configuration sections and supply your own
-policy groups; see [Clash DNS and deployment](docs/CLASH.md) for bootstrap,
-platform limitations and validation. `MicrosoftCN` precedes `Microsoft`;
-Microsoft first-party suffixes live in `Microsoft.list` itself.
-Upstream provenance is in [SOURCES.md](SOURCES.md); history is
-in [CHANGELOG.md](CHANGELOG.md).
+This is the domain/IP-separated v2 layout. Upgrade the rule sequence and list
+files together; old mixed-list configurations should remain on their previous
+commit. Use immutable commit URLs for a coherent rollout.
+
+Mihomo users can merge [clash/rule-providers.yaml](clash/rule-providers.yaml)
+and supply their own policy groups. Follow the [Clash deployment contract](docs/CLASH.md)
+for DNS, TUN and runtime limits. Files under `clash/` are generated.
+
+## Maintain
+
+Assign each rule to one owner, keep domain rules before the encrypted-resolution
+IP stage, and preserve list-order dependencies. Regional IP selectors subtract
+the DIRECT protection sets; matching modifiers live in the v2 manifest. The local `../Surge.conf` contains private settings;
+the renderer replaces only `[Rule]`. `tools/prepare_profiles.py` additionally
+prepares reviewed DNS/group changes and verifies private proxy/certificate
+sections remain intact. It never activates a candidate.
+
+The [maintenance guide](docs/MAINTENANCE.md#validate-a-change) is the single
+command reference for candidate validation, MMDB analysis and publication.
+For a quick source/mirror check:
+
+```bash
+python3 tools/sort_lists.py --check
+python3 tools/surge2clash.py --check
+```
+
+| Reference | Contents |
+|---|---|
+| [Architecture](docs/ARCHITECTURE.md) | Ownership, ordering, DNS invariants and analyzer output |
+| [Maintenance](docs/MAINTENANCE.md) | Edit, regenerate, validate, debug and release |
+| [Tests](tests/README.md) | Offline and live test entry points, data and limits |
+| [Sources](SOURCES.md) / [lock](sources.lock.json) | Upstream provenance and reproducible inputs |
+| [Changelog](CHANGELOG.md) | Batch decisions, validation and historical records |
+
+Current rule and test counts come from tool output. Dated evidence is linked
+from the changelog and source register; obsolete reports remain in Git history.

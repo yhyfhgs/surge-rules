@@ -35,6 +35,7 @@ import tempfile
 import time
 
 from routing_manifest import load_routing_manifest
+from rule_syntax import render_call
 
 # Resolve repository paths from this file; do not hard-code an absolute root.
 REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -131,20 +132,19 @@ def render_providers(routing):
             "    behavior: classical",
             "    format: text",
             "    url: %s/%s" % (CDN_BASE, name),
-            "    path: ./rule-sets/surge-rules/%s" % name,
+            "    path: ./rule-sets/surge-rules/%s%s" % ("v2/" if getattr(routing, "version", 1) == 2 else "", name),
             "    interval: 86400",
         ]
     lines += ["", "rules:"]
     for entry in routing:
-        # Classical providers can contain IP selectors. Never resolve a host
-        # just to test one; Surge's source IP rules have the same invariant.
-        lines.append("  - RULE-SET,%s,%s,no-resolve"
-                     % (entry["name"], entry["policy"]))
-    lines += [
-        "  - GEOIP,lan,DIRECT,no-resolve",
-        "  - GEOIP,CN,DIRECT,no-resolve",
-        "  - MATCH,Final",
-    ]
+        if getattr(routing, "version", 1) == 2:
+            lines.append("  - " + render_call(entry, lambda name: name, clash=True))
+        else:
+            lines.append("  - RULE-SET,%s,%s,no-resolve" % (entry["name"], entry["policy"]))
+    if getattr(routing, "version", 1) == 2:
+        lines.append("  - MATCH," + routing.final["policy"])
+    else:
+        lines += ["  - GEOIP,lan,DIRECT,no-resolve", "  - GEOIP,CN,DIRECT,no-resolve", "  - MATCH,Final"]
     return "\n".join(lines) + "\n"
 
 

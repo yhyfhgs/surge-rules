@@ -10,8 +10,8 @@ pin 重建（534 条差异无法解释）」列为 P1，而 ChinaIP 是全库唯
 流水线（每一步都由 lock 的 transform 数组显式声明，脚本不藏任何隐式处理）：
     fetch_locked.py 取到已校验的上游原文
         → require_types   出现声明外的规则类型即失败（上游加新类型不会被静默吞掉）
-        → require_param   每条必须带该尾参（ChinaIP 的 no-resolve 是硬语义，
-                           丢了会让 IP 规则触发 DNS 解析，等于泄漏）
+        → require_param   校验上游尾参；输出尾参由 output_params 显式指定，
+                           解析行为遵循当前 routing manifest
         → collapse_cidr   用 tools/collapse_cidr.py 的同一套折叠 + 集合指纹
         → 比对 expect      rules / per_type / set_sha256
         → 比对本地表        地址集合逐条 diff
@@ -34,7 +34,6 @@ pin 重建（534 条差异无法解释）」列为 P1，而 ChinaIP 是全库唯
 import argparse
 import io
 import ipaddress
-import json
 import os
 import sys
 
@@ -172,11 +171,33 @@ def op_exclude_cidr(step, by_type, params, other, log):
     return out
 
 
+def op_include_cidr(step, by_type, params, other, log):
+    """Explicit retention; an inclusion must never bypass hard exclusions."""
+    guards = [ipaddress.ip_network(v, strict=True) for v in step.get("guard_values", [])]
+    for file in step.get("guard_files", []):
+        guards.extend(_load_exclude_file(file))
+    if not guards:
+        raise RebuildError("include_cidr requires explicit exclusion guards")
+    requested = [ipaddress.ip_network(v, strict=True) for v in step.get("values", [])]
+    if step.get("file"):
+        requested.extend(_load_exclude_file(step["file"]))
+    if not requested:
+        raise RebuildError("include_cidr must be nonempty")
+    result = {t: list(nets) for t, nets in by_type.items()}
+    for network in requested:
+        if any(network.version == g.version and network.overlaps(g) for g in guards):
+            raise RebuildError("include_cidr would bypass an exclusion: %s" % network)
+        result.setdefault("IP-CIDR" if network.version == 4 else "IP-CIDR6", []).append(network)
+    log.append("include_cidr: %d explicitly approved retained ranges" % len(requested))
+    return {t: list(ipaddress.collapse_addresses(nets)) for t, nets in result.items()}
+
+
 OPS = {
     "require_types": op_require_types,
     "require_param": op_require_param,
     "collapse_cidr": op_collapse_cidr,
     "exclude_cidr": op_exclude_cidr,
+    "include_cidr": op_include_cidr,
 }
 
 
@@ -238,6 +259,13 @@ def diff_against_local(src, by_type, problems, diff_lines):
                 diff_lines.append("+ %s,%s   (重建有，lists/%s 无)" % (t, n, target))
             for n in only_local:
                 diff_lines.append("- %s,%s   (lists/%s 有，重建无)" % (t, n, target))
+        # Address equality is not sufficient when output matching parameters changed.
+        current_lines = [line.split(" #", 1)[0].strip() for line in read_text(path).splitlines()
+                         if line.strip() and not line.lstrip().startswith("#")]
+        expected_lines = [line.strip() for line in render_target(src, by_type, target).splitlines()
+                          if line.strip() and not line.lstrip().startswith("#")]
+        if current_lines != expected_lines and not (added or removed):
+            problems.append("lists/%s output parameters or canonical form differ" % target)
         results.append((target, added, removed))
         if added or removed:
             problems.append("lists/%s 与重建结果不一致：重建独有 %d 条 / 本地独有 %d 条"
@@ -259,6 +287,11 @@ def render_target(src, by_type, target):
     for step in src.get("transform", []):
         if step.get("op") == "require_param":
             param = "," + step["param"]
+    if "output_params" in src:
+        output_params = src["output_params"]
+        if not isinstance(output_params, list) or any(v != "no-resolve" for v in output_params):
+            raise RebuildError("unsupported output_params")
+        param = ("," + ",".join(output_params)) if output_params else ""
     blocks = []
     for t in IP_TYPES:
         if t not in by_type:
@@ -291,6 +324,10 @@ def rebuild_one(src, prefer_network, write, diff_lines):
         sys.stderr.write("✗ %s transform 失败：%s\n" % (sid, e))
         return 2
     check_expect(src, by_type, problems, log)
+    if problems:
+        for problem in problems:
+            sys.stderr.write("  expectation failure: %s\n" % problem)
+        return 2  # --write never bypasses locked counts or address-set hashes.
     results = diff_against_local(src, by_type, problems, diff_lines)
 
     for line in log:

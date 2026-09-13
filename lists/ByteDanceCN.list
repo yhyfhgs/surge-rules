@@ -1,5 +1,6 @@
-# ByteDanceCN — 字节跳动系国内域直连（上游 blackmatrix7 ByteDance）；TikTok 与通用字节海外域归 TikTok.list；海外 AI 产品归 AI.list
-# 排序：规则类型分区，区内字母序
+# ByteDanceCN — maintained routing owner.
+# Topology and matching options: config/routing.json.
+# Sources and review decisions: SOURCES.md.
 
 DOMAIN,trae-api-cn.mchost.guru
 

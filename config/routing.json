@@ -1,40 +1,453 @@
 {
-  "version": 1,
+  "version": 2,
   "rulesets": [
-    {"name": "PrivateLAN", "policy": "DIRECT", "section": "局域直连"},
-    {"name": "PKU", "policy": "DIRECT", "section": "局域直连"},
-    {"name": "Reject", "policy": "REJECT", "section": "广告/恶意拦截"},
-    {"name": "GameDownloadCN", "policy": "DIRECT", "section": "下载"},
-    {"name": "ModelDownloadCDN", "policy": "下载", "section": "下载"},
-    {"name": "DownloadCDN", "policy": "下载", "section": "下载"},
-    {"name": "YouTube", "policy": "流媒体", "extended_matching": true, "section": "服务分流"},
-    {"name": "Google", "policy": "Google-X-Meta-MS", "extended_matching": true, "section": "服务分流"},
-    {"name": "Twitter", "policy": "Google-X-Meta-MS", "extended_matching": true, "section": "服务分流"},
-    {"name": "Meta", "policy": "Google-X-Meta-MS", "extended_matching": true, "section": "服务分流"},
-    {"name": "MicrosoftCN", "policy": "DIRECT", "section": "服务分流"},
-    {"name": "Microsoft", "policy": "Google-X-Meta-MS", "extended_matching": true, "section": "服务分流"},
-    {"name": "AI", "policy": "AI", "extended_matching": true, "section": "服务分流"},
-    {"name": "TikTok", "policy": "社交媒体", "extended_matching": true, "section": "服务分流"},
-    {"name": "SocialOthers", "policy": "社交媒体", "extended_matching": true, "section": "服务分流"},
-    {"name": "Telegram", "policy": "Telegram", "extended_matching": true, "section": "服务分流"},
-    {"name": "Streaming", "policy": "流媒体", "extended_matching": true, "section": "服务分流"},
-    {"name": "Games", "policy": "游戏", "section": "服务分流"},
-    {"name": "Payment", "policy": "Payment", "extended_matching": true, "section": "服务分流"},
-    {"name": "ProxyGFW", "policy": "Proxy", "section": "服务分流"},
-    {"name": "AppleCN", "policy": "DIRECT", "section": "国内直连"},
-    {"name": "Domestic", "policy": "DIRECT", "section": "国内直连"},
-    {"name": "ChinaMedia", "policy": "DIRECT", "section": "国内直连"},
-    {"name": "TencentCN", "policy": "DIRECT", "section": "国内直连"},
-    {"name": "AlibabaCN", "policy": "DIRECT", "section": "国内直连"},
-    {"name": "ByteDanceCN", "policy": "DIRECT", "section": "国内直连"},
-    {"name": "BaiduCN", "policy": "DIRECT", "section": "国内直连"},
-    {"name": "NetEaseCN", "policy": "DIRECT", "section": "国内直连"},
-    {"name": "ChinaDomain", "policy": "DIRECT", "section": "国内直连"},
-    {"name": "ChinaIP", "policy": "DIRECT", "no_resolve": true, "section": "国内直连"},
-    {"name": "Japan", "policy": "🇯🇵日本", "section": "地区分流"},
-    {"name": "US", "policy": "🇺🇸美国", "section": "地区分流"},
-    {"name": "UK", "policy": "🇬🇧英国", "section": "地区分流"},
-    {"name": "Europe", "policy": "🇪🇺欧洲", "section": "地区分流"},
-    {"name": "ChinaTLD", "policy": "DIRECT", "section": "国内兜底"}
-  ]
+    {
+      "name": "Reject",
+      "policy": "REJECT",
+      "section": "非IP·屏蔽",
+      "extended_matching": true,
+      "no_resolve": false,
+      "kind": "domain"
+    },
+    {
+      "name": "ModelDownloadCDN",
+      "policy": "下载",
+      "section": "非IP·服务代理",
+      "extended_matching": true,
+      "no_resolve": false,
+      "kind": "domain"
+    },
+    {
+      "name": "DownloadCDN",
+      "policy": "下载",
+      "section": "非IP·服务代理",
+      "extended_matching": true,
+      "no_resolve": false,
+      "kind": "domain"
+    },
+    {
+      "name": "YouTube",
+      "policy": "流媒体",
+      "section": "非IP·服务代理",
+      "extended_matching": true,
+      "no_resolve": false,
+      "kind": "domain"
+    },
+    {
+      "name": "Streaming",
+      "policy": "流媒体",
+      "section": "非IP·服务代理",
+      "extended_matching": true,
+      "no_resolve": false,
+      "kind": "domain"
+    },
+    {
+      "name": "Google",
+      "policy": "Google-X-Meta-MS",
+      "section": "非IP·服务代理",
+      "extended_matching": true,
+      "no_resolve": false,
+      "kind": "domain"
+    },
+    {
+      "name": "Twitter",
+      "policy": "Google-X-Meta-MS",
+      "section": "非IP·服务代理",
+      "extended_matching": true,
+      "no_resolve": false,
+      "kind": "domain"
+    },
+    {
+      "name": "Meta",
+      "policy": "Google-X-Meta-MS",
+      "section": "非IP·服务代理",
+      "extended_matching": true,
+      "no_resolve": false,
+      "kind": "domain"
+    },
+    {
+      "name": "Microsoft",
+      "policy": "Google-X-Meta-MS",
+      "section": "非IP·服务代理",
+      "extended_matching": true,
+      "no_resolve": false,
+      "kind": "domain"
+    },
+    {
+      "name": "AI",
+      "policy": "AI",
+      "section": "非IP·服务代理",
+      "extended_matching": true,
+      "no_resolve": false,
+      "kind": "domain"
+    },
+    {
+      "name": "Payment",
+      "policy": "Payment",
+      "section": "非IP·服务代理",
+      "extended_matching": true,
+      "no_resolve": false,
+      "kind": "domain"
+    },
+    {
+      "name": "Telegram",
+      "policy": "Telegram",
+      "section": "非IP·服务代理",
+      "extended_matching": true,
+      "no_resolve": false,
+      "kind": "domain"
+    },
+    {
+      "name": "TikTok",
+      "policy": "社交媒体",
+      "section": "非IP·服务代理",
+      "extended_matching": true,
+      "no_resolve": false,
+      "kind": "domain"
+    },
+    {
+      "name": "SocialOthers",
+      "policy": "社交媒体",
+      "section": "非IP·服务代理",
+      "extended_matching": true,
+      "no_resolve": false,
+      "kind": "domain"
+    },
+    {
+      "name": "Games",
+      "policy": "游戏",
+      "section": "非IP·服务代理",
+      "extended_matching": true,
+      "no_resolve": false,
+      "kind": "domain"
+    },
+    {
+      "name": "ProxyGFW",
+      "policy": "Proxy",
+      "section": "非IP·服务代理",
+      "extended_matching": true,
+      "no_resolve": false,
+      "kind": "domain"
+    },
+    {
+      "name": "Japan",
+      "policy": "🇯🇵日本",
+      "section": "非IP·地区",
+      "extended_matching": true,
+      "no_resolve": false,
+      "kind": "domain"
+    },
+    {
+      "name": "US",
+      "policy": "🇺🇸美国",
+      "section": "非IP·地区",
+      "extended_matching": true,
+      "no_resolve": false,
+      "kind": "domain"
+    },
+    {
+      "name": "UK",
+      "policy": "🇬🇧英国",
+      "section": "非IP·地区",
+      "extended_matching": true,
+      "no_resolve": false,
+      "kind": "domain"
+    },
+    {
+      "name": "Europe",
+      "policy": "🇪🇺欧洲",
+      "section": "非IP·地区",
+      "extended_matching": true,
+      "no_resolve": false,
+      "kind": "domain"
+    },
+    {
+      "name": "PrivateLAN",
+      "policy": "DIRECT",
+      "section": "非IP·直连",
+      "extended_matching": true,
+      "no_resolve": false,
+      "kind": "domain"
+    },
+    {
+      "name": "PKU",
+      "policy": "DIRECT",
+      "section": "非IP·直连",
+      "extended_matching": true,
+      "no_resolve": false,
+      "kind": "domain"
+    },
+    {
+      "name": "GameDownloadCN",
+      "policy": "DIRECT",
+      "section": "非IP·直连",
+      "extended_matching": true,
+      "no_resolve": false,
+      "kind": "domain"
+    },
+    {
+      "name": "MicrosoftCN",
+      "policy": "DIRECT",
+      "section": "非IP·直连",
+      "extended_matching": true,
+      "no_resolve": false,
+      "kind": "domain"
+    },
+    {
+      "name": "AppleCN",
+      "policy": "DIRECT",
+      "section": "非IP·直连",
+      "extended_matching": true,
+      "no_resolve": false,
+      "kind": "domain"
+    },
+    {
+      "name": "Domestic",
+      "policy": "DIRECT",
+      "section": "非IP·直连",
+      "extended_matching": true,
+      "no_resolve": false,
+      "kind": "domain"
+    },
+    {
+      "name": "ChinaMedia",
+      "policy": "DIRECT",
+      "section": "非IP·直连",
+      "extended_matching": true,
+      "no_resolve": false,
+      "kind": "domain"
+    },
+    {
+      "name": "TencentCN",
+      "policy": "DIRECT",
+      "section": "非IP·直连",
+      "extended_matching": true,
+      "no_resolve": false,
+      "kind": "domain"
+    },
+    {
+      "name": "AlibabaCN",
+      "policy": "DIRECT",
+      "section": "非IP·直连",
+      "extended_matching": true,
+      "no_resolve": false,
+      "kind": "domain"
+    },
+    {
+      "name": "ByteDanceCN",
+      "policy": "DIRECT",
+      "section": "非IP·直连",
+      "extended_matching": true,
+      "no_resolve": false,
+      "kind": "domain"
+    },
+    {
+      "name": "BaiduCN",
+      "policy": "DIRECT",
+      "section": "非IP·直连",
+      "extended_matching": true,
+      "no_resolve": false,
+      "kind": "domain"
+    },
+    {
+      "name": "NetEaseCN",
+      "policy": "DIRECT",
+      "section": "非IP·直连",
+      "extended_matching": true,
+      "no_resolve": false,
+      "kind": "domain"
+    },
+    {
+      "name": "ChinaDomain",
+      "policy": "DIRECT",
+      "section": "非IP·直连",
+      "extended_matching": true,
+      "no_resolve": false,
+      "kind": "domain"
+    },
+    {
+      "name": "ChinaTLD",
+      "policy": "DIRECT",
+      "section": "非IP·直连",
+      "extended_matching": true,
+      "no_resolve": false,
+      "kind": "domain"
+    },
+    {
+      "name": "RejectIP",
+      "policy": "REJECT",
+      "section": "IP·屏蔽",
+      "extended_matching": false,
+      "no_resolve": false,
+      "kind": "ip"
+    },
+    {
+      "name": "YouTubeIP",
+      "policy": "流媒体",
+      "section": "IP·服务代理",
+      "extended_matching": false,
+      "no_resolve": false,
+      "kind": "ip"
+    },
+    {
+      "name": "StreamingIP",
+      "policy": "流媒体",
+      "section": "IP·服务代理",
+      "extended_matching": false,
+      "no_resolve": false,
+      "kind": "ip"
+    },
+    {
+      "name": "GoogleIP",
+      "policy": "Google-X-Meta-MS",
+      "section": "IP·服务代理",
+      "extended_matching": false,
+      "no_resolve": false,
+      "kind": "ip"
+    },
+    {
+      "name": "TwitterIP",
+      "policy": "Google-X-Meta-MS",
+      "section": "IP·服务代理",
+      "extended_matching": false,
+      "no_resolve": false,
+      "kind": "ip"
+    },
+    {
+      "name": "MetaIP",
+      "policy": "Google-X-Meta-MS",
+      "section": "IP·服务代理",
+      "extended_matching": false,
+      "no_resolve": false,
+      "kind": "ip"
+    },
+    {
+      "name": "AIIP",
+      "policy": "AI",
+      "section": "IP·服务代理",
+      "extended_matching": false,
+      "no_resolve": false,
+      "kind": "ip"
+    },
+    {
+      "name": "TelegramIP",
+      "policy": "Telegram",
+      "section": "IP·服务代理",
+      "extended_matching": false,
+      "no_resolve": false,
+      "kind": "ip"
+    },
+    {
+      "name": "TikTokIP",
+      "policy": "社交媒体",
+      "section": "IP·服务代理",
+      "extended_matching": false,
+      "no_resolve": false,
+      "kind": "ip"
+    },
+    {
+      "name": "GamesIP",
+      "policy": "游戏",
+      "section": "IP·服务代理",
+      "extended_matching": false,
+      "no_resolve": false,
+      "kind": "ip"
+    },
+    {
+      "name": "JapanIP",
+      "policy": "🇯🇵日本",
+      "section": "IP·地区",
+      "extended_matching": false,
+      "no_resolve": false,
+      "exclude_rulesets": [
+        "PrivateLANIP",
+        "PKUIP",
+        "AppleCNIP",
+        "ChinaIP"
+      ],
+      "kind": "ip"
+    },
+    {
+      "name": "USIP",
+      "policy": "🇺🇸美国",
+      "section": "IP·地区",
+      "extended_matching": false,
+      "no_resolve": false,
+      "exclude_rulesets": [
+        "PrivateLANIP",
+        "PKUIP",
+        "AppleCNIP",
+        "ChinaIP"
+      ],
+      "kind": "ip"
+    },
+    {
+      "name": "UKIP",
+      "policy": "🇬🇧英国",
+      "section": "IP·地区",
+      "extended_matching": false,
+      "no_resolve": false,
+      "exclude_rulesets": [
+        "PrivateLANIP",
+        "PKUIP",
+        "AppleCNIP",
+        "ChinaIP"
+      ],
+      "kind": "ip"
+    },
+    {
+      "name": "EuropeIP",
+      "policy": "🇪🇺欧洲",
+      "section": "IP·地区",
+      "extended_matching": false,
+      "no_resolve": false,
+      "exclude_rulesets": [
+        "PrivateLANIP",
+        "PKUIP",
+        "AppleCNIP",
+        "ChinaIP"
+      ],
+      "kind": "ip"
+    },
+    {
+      "name": "PrivateLANIP",
+      "policy": "DIRECT",
+      "section": "IP·直连",
+      "extended_matching": false,
+      "no_resolve": false,
+      "kind": "ip"
+    },
+    {
+      "name": "PKUIP",
+      "policy": "DIRECT",
+      "section": "IP·直连",
+      "extended_matching": false,
+      "no_resolve": false,
+      "kind": "ip"
+    },
+    {
+      "name": "AppleCNIP",
+      "policy": "DIRECT",
+      "section": "IP·直连",
+      "extended_matching": false,
+      "no_resolve": false,
+      "kind": "ip"
+    },
+    {
+      "name": "ChinaIP",
+      "policy": "DIRECT",
+      "section": "IP·直连",
+      "extended_matching": false,
+      "no_resolve": false,
+      "kind": "ip"
+    }
+  ],
+  "system": {
+    "before": "PrivateLAN",
+    "policy": "DIRECT"
+  },
+  "final": {
+    "policy": "Final",
+    "dns_failed": true
+  }
 }

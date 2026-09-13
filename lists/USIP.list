@@ -1,0 +1,5 @@
+# USIP — maintained routing owner.
+# Topology and matching options: config/routing.json.
+# Sources and review decisions: SOURCES.md.
+
+GEOIP,US

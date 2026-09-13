@@ -9,8 +9,9 @@ REPO="yhyfhgs/surge-rules"
 REF="main"
 CDN_BASE="https://cdn.jsdelivr.net/gh/$REPO@$REF"
 PURGE_BASE="https://purge.jsdelivr.net/gh/$REPO@$REF"
+RELEASE_PROFILE="${SURGE_RELEASE_PROFILE:-../Surge.conf}"
 SURGE_APP_SUPPORT_ROOT="$(cd ../../.. && pwd)"
-if grep -Eq '^[[:space:]]*geoip-maxmind-url[[:space:]]*=' ../Surge.conf; then
+if grep -Eq '^[[:space:]]*geoip-maxmind-url[[:space:]]*=' "$RELEASE_PROFILE"; then
   SURGE_COUNTRY_DB_DEFAULT="$SURGE_APP_SUPPORT_ROOT/com.nssurge.surge-mac/GeoLite2-Country.mmdb"
 else
   SURGE_COUNTRY_DB_DEFAULT="/Applications/Surge.app/Contents/Resources/GeoLite2-Country.mmdb"
@@ -115,26 +116,39 @@ if ! python3 tools/collapse_cidr.py lists/ChinaIP.list --check; then
 fi
 
 echo "[pre-flight] canonical routing manifest/profile check…"
-if ! python3 tools/render_surge_rules.py --check ../Surge.conf; then
+if ! python3 tools/render_surge_rules.py --check "$RELEASE_PROFILE"; then
   echo "✗ Surge.conf [Rule] 与 config/routing.json 不一致，中止发布"; exit 1
 fi
 
 echo "[pre-flight] 规则静态审计 + 全场景断言…"
+if ! /Applications/Surge.app/Contents/Applications/surge-cli --check "$RELEASE_PROFILE"; then
+  echo "✗ Surge 原生语法校验失败，中止发布"; exit 1
+fi
+if ! python3 tests/routing_v2_test.py || ! python3 tests/expiry_safety_test.py; then
+  echo "✗ 新路由/过期安全自检失败，中止发布"; exit 1
+fi
+if ! SURGE_CONF="$RELEASE_PROFILE" SURGE_RULES_DIR="$PWD/lists" python3 tests/engine.py --selftest; then
+  echo "✗ 匹配引擎自检失败，中止发布"; exit 1
+fi
 if ! python3 tests/analyze_rules_selftest.py; then
   echo "✗ 关系分析算法自检失败，中止发布"; exit 1
 fi
 if [ ! -r "$SURGE_COUNTRY_DB_PATH" ] || [ ! -r "$SURGE_ASN_DB_PATH" ]; then
   echo "✗ 缺少 Surge GeoLite2 Country/ASN 数据库，无法完成 IP 关系分析，中止发布"; exit 1
 fi
-if ! python3 tools/analyze_rules.py --out "$RUN_TMP/rule-analysis" --fail-on-shadow \
+if ! python3 tools/analyze_rules.py --conf "$RELEASE_PROFILE" --rules lists --out "$RUN_TMP/rule-analysis" --fail-on-shadow \
     --country-db "$SURGE_COUNTRY_DB_PATH" --asn-db "$SURGE_ASN_DB_PATH"; then
   echo "✗ 全量关系分析发现遮蔽或解析失败，中止发布"; exit 1
 fi
-if ! python3 tests/audit.py --check all --fail-on P1; then echo "✗ 审计未过，中止发布"; exit 1; fi
-if ! python3 tests/runsuite.py; then echo "✗ 场景断言未过，中止发布"; exit 1; fi
+if ! python3 tests/audit.py --conf "$RELEASE_PROFILE" --rules lists --check all --fail-on P1; then echo "✗ 审计未过，中止发布"; exit 1; fi
+if ! python3 tests/runsuite.py --conf "$RELEASE_PROFILE" --rules lists; then echo "✗ 场景断言未过，中止发布"; exit 1; fi
 
 echo "[pre-flight] 重新生成 Clash 派生规则集 (clash/)…"
 if ! python3 tools/surge2clash.py; then echo "✗ Clash 转换失败，中止发布"; exit 1; fi
+
+if ! python3 tests/clash_contract.py --conf "$RELEASE_PROFILE"; then
+  echo "✗ Clash 同源/顺序契约失败，中止发布"; exit 1
+fi
 
 # ── 2. 发布基线 ─────────────────────────────────────────────────────────────
 # Refresh origin/main for the incremental diff. A failed fetch only widens the

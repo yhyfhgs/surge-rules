@@ -1,8 +1,9 @@
 # AUTO-GENERATED — Clash(Mihomo) classical 规则，由 ../lists/TencentCN.list 派生
 # 勿手工编辑；修改 Surge 源后运行 python3 tools/surge2clash.py 重新生成
 
-# TencentCN — 腾讯系国内域直连（上游 blackmatrix7 Tencent + WeChat）；纯域名表，不设 IP 区——原 14 条腾讯云海外 /24 已于 2026-08-31 (R1-17) 删除，全部被 ChinaIP.list 覆盖且同为 DIRECT
-# 排序：规则类型分区，区内字母序
+# TencentCN — maintained routing owner.
+# Topology and matching options: config/routing.json.
+# Sources and review decisions: SOURCES.md.
 
 DOMAIN,qcloud.com
 DOMAIN,slife.xy-asia.com

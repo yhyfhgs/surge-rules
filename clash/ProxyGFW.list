@@ -1,9 +1,10 @@
 # AUTO-GENERATED — Clash(Mihomo) classical 规则，由 ../lists/ProxyGFW.list 派生
 # 勿手工编辑；修改 Surge 源后运行 python3 tools/surge2clash.py 重新生成
 
-# ProxyGFW — 无专属分类且确认需要代理的残余域名
+# ProxyGFW — maintained routing owner.
+# Topology and matching options: config/routing.json.
+# Sources and review decisions: SOURCES.md.
 
-DOMAIN,1password.com
 DOMAIN,account.adobe.com
 DOMAIN,account.brave.com
 DOMAIN,addons.mozilla.org
@@ -12,7 +13,6 @@ DOMAIN,adobe.com
 DOMAIN,amazon.com
 DOMAIN,api.adguard.com
 DOMAIN,api.waqi.info
-DOMAIN,app.1password.com
 DOMAIN,assets.fonts.adobe.com
 DOMAIN,auth.adguard.com
 DOMAIN,auth.services.adobe.com
@@ -30,7 +30,6 @@ DOMAIN,jkforum.net
 DOMAIN,kb.adguard.com
 DOMAIN,mainnet.infura.io
 DOMAIN,mozilla.org
-DOMAIN,my.1password.com
 DOMAIN,my.adguard.com
 DOMAIN,openstreetmap.org
 DOMAIN,pcloud.com
@@ -39,11 +38,8 @@ DOMAIN,riseup.net
 DOMAIN,search.brave.com
 DOMAIN,sepolia.infura.io
 DOMAIN,sleazyfork.org
-DOMAIN,start.1password.com
 DOMAIN,static-assets.photoshop.adobe.com
 DOMAIN,stock.adobe.com
-DOMAIN,telemetry.1passwordservices.com
-DOMAIN,www.1password.com
 DOMAIN,www.adobe.com
 DOMAIN,www.amazon.com
 DOMAIN,www.brave.com
@@ -96,6 +92,13 @@ DOMAIN-SUFFIX,1eew.com
 DOMAIN-SUFFIX,1lib.sk
 DOMAIN-SUFFIX,1mobile.com
 DOMAIN-SUFFIX,1mobile.tw
+DOMAIN-SUFFIX,1password.ca
+DOMAIN-SUFFIX,1password.com
+DOMAIN-SUFFIX,1password.eu
+DOMAIN-SUFFIX,1passwordservices.com
+DOMAIN-SUFFIX,1passwordusercontent.ca
+DOMAIN-SUFFIX,1passwordusercontent.com
+DOMAIN-SUFFIX,1passwordusercontent.eu
 DOMAIN-SUFFIX,1point3acres.com
 DOMAIN-SUFFIX,1pondo.tv
 DOMAIN-SUFFIX,2-hand.info
@@ -653,6 +656,7 @@ DOMAIN-SUFFIX,botanwang.com
 DOMAIN-SUFFIX,bowenpress.com
 DOMAIN-SUFFIX,box.com
 DOMAIN-SUFFIX,box.net
+DOMAIN-SUFFIX,boxcloud.com
 DOMAIN-SUFFIX,boxpn.com
 DOMAIN-SUFFIX,boxun.com
 DOMAIN-SUFFIX,boxun.tv

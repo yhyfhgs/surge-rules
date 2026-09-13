@@ -1,0 +1,6 @@
+# TikTokIP — maintained routing owner.
+# Topology and matching options: config/routing.json.
+# Sources and review decisions: SOURCES.md.
+
+IP-ASN,11983
+IP-ASN,138699

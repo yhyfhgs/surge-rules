@@ -1,7 +1,13 @@
-# Bulk model/dataset endpoints precede AI; browsing and APIs remain with their service owner.
+# ModelDownloadCDN — maintained routing owner.
+# Topology and matching options: config/routing.json.
+# Sources and review decisions: SOURCES.md.
+
+DOMAIN,cas-server.xethub-eu.hf.co
+DOMAIN,transfer.xethub-eu.hf.co
 
 DOMAIN-SUFFIX,aws.cdn.hf.co
 DOMAIN-SUFFIX,cdn-lfs-eu-1.hf.co
 DOMAIN-SUFFIX,cdn-lfs-us-1.hf.co
 DOMAIN-SUFFIX,cdn-lfs.hf.co
+DOMAIN-SUFFIX,us.gcp.cdn.hf.co
 DOMAIN-SUFFIX,xethub.hf.co

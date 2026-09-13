@@ -25,8 +25,6 @@ Tests:
 """
 
 import asyncio
-import io
-import json
 import os
 import random
 import struct
@@ -252,8 +250,8 @@ class AdversarialDecisionMatrixTest(unittest.TestCase):
                 pdd.probe_tier4_http_parking = mock_t4_parked
 
                 v2 = await pdd.triangulate_domain("parked-domain.com")
-                self.assertTrue(v2.is_dead)
-                self.assertEqual(v2.verdict, "DEAD_PARKED")
+                self.assertFalse(v2.is_dead)
+                self.assertEqual(v2.verdict, "SUSPECT_PARKED")
 
                 # Mock case 3: Dead unregistered (DoH NXDOMAIN + TLD NOT_DELEGATED)
                 async def mock_t2_nx(dom, timeout):
@@ -273,8 +271,8 @@ class AdversarialDecisionMatrixTest(unittest.TestCase):
                 pdd.probe_tier3_authoritative_tld = mock_t3_lame
 
                 v4 = await pdd.triangulate_domain("lame-ns-domain.net")
-                self.assertTrue(v4.is_dead)
-                self.assertEqual(v4.verdict, "DEAD_LAME_DELEGATION")
+                self.assertFalse(v4.is_dead)
+                self.assertEqual(v4.verdict, "UNKNOWN_UNRESOLVED")
 
                 # Mock case 5: Inconclusive / Network error -> safely retained
                 async def mock_t2_err(dom, timeout):
@@ -307,7 +305,9 @@ class AdversarialTemporalHysteresisTest(unittest.TestCase):
         try:
             mgr = pdd.HysteresisManager(state_path=state_file, required_sweeps=3)
 
+            sweep = [0]
             def make_verdict(dom: str, is_dead: bool, verdict: str):
+                sweep[0] += 1
                 return pdd.TriangulationVerdict(
                     domain=dom,
                     tier1=pdd.Tier1Result(status="CN_NXDOMAIN" if is_dead else "CN_RESOLVED"),
@@ -317,6 +317,7 @@ class AdversarialTemporalHysteresisTest(unittest.TestCase):
                     verdict=verdict,
                     is_dead=is_dead,
                     reason="Test reason",
+                    timestamp=(pdd.datetime.datetime(2026, 1, 1, tzinfo=pdd.datetime.timezone.utc) + pdd.datetime.timedelta(days=sweep[0])).isoformat(),
                 )
 
             dom = "flaky-edge-test.org"

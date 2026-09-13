@@ -85,16 +85,16 @@
       {"host": "teams.microsoft.com"},
       {"host": "graph.microsoft.com"},
       {"host": "account.microsoft.com"},
-      {"host": "unknown.live.com"},
+      {"host": "unknown.live.com", "stage": "domain"},
       {"host": "unknown.live.net"},
       {"host": "unknown.microsoftonline.com"},
       {"host": "unknown.gfx.ms"},
-      {"host": "firestonedrivestore.com"},
-      {"host": "onedrive.live.com.example.org"},
-      {"host": "login.microsoftonline.com.example.org"},
-      {"host": "unknown.sfx.ms"},
-      {"host": "tenant-example.blob.core.windows.net"},
-      {"host": "tenant-example.accesscontrol.windows.net"}
+      {"host": "firestonedrivestore.com", "stage": "domain"},
+      {"host": "onedrive.live.com.example.org", "stage": "domain"},
+      {"host": "login.microsoftonline.com.example.org", "stage": "domain"},
+      {"host": "unknown.sfx.ms", "stage": "domain"},
+      {"host": "tenant-example.blob.core.windows.net", "stage": "domain"},
+      {"host": "tenant-example.accesscontrol.windows.net", "stage": "domain"}
     ],
     "assert": {
       "same_policy": true,
@@ -106,7 +106,8 @@
         {"host": "login.microsoftonline.com.example.org", "policy": "Final"},
         {"host": "unknown.sfx.ms", "policy": "Final"},
         {"host": "tenant-example.blob.core.windows.net", "policy": "Final"},
-        {"host": "tenant-example.accesscontrol.windows.net", "policy": "Final"}
+        {"host": "tenant-example.accesscontrol.windows.net", "policy": "Final"},
+        {"host": "unknown.live.com", "policy": "Final", "reason": "2026-09-13：收窄未明确归属的父域/IP，或用真实锁定MMDB替代旧GeoIP不匹配近似；不改变已确认服务正例。"}
       ]
     }
   }

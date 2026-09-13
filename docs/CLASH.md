@@ -10,12 +10,13 @@ run `python3 tools/surge2clash.py`; never edit generated files.
 Each manifest list has exactly one classical provider. All non-comment source
 rules are preserved, in order, with their modifiers. Unsupported types abort
 conversion instead of silently dropping rules. Provider order and policies
-come from the manifest. Every `RULE-SET` reference carries `no-resolve`, so mixed
-classical providers cannot resolve a hostname just to test an IP selector.
+come from the manifest. The v2 manifest has separate domain/IP providers. Modifiers are honored, and
+regional IP calls subtract the four DIRECT CIDR providers with AND/NOT. Unknown
+domains may resolve only after the complete domain stage.
 
 This is rule-content parity, not an assertion that the two runtimes are
-identical. Surge SYSTEM has no portable equivalent; the LAN approximation is
-`GEOIP,lan` at the same terminal position as Surge LAN. Global HTTP/TLS/QUIC
+identical. Surge SYSTEM has no portable equivalent; the explicit PrivateLAN and
+PrivateLANIP providers replace the mixed LAN tail. Global HTTP/TLS/QUIC
 sniffing approximates per-list `extended-matching`; encrypted or absent hostname
 metadata cannot be recovered reliably by either a suffix list or sniffing.
 
@@ -29,8 +30,9 @@ metadata cannot be recovered reliably by either a suffix list or sniffing.
 | Resolve a proxy server hostname | Separate direct DoH bootstrap |
 | Resolve a DNS server hostname | Encrypted default resolver; configured resolvers already use IP literals |
 
-No plaintext/system resolver, domestic `nameserver-policy`, or parallel fallback
-is configured for ordinary proxied domain queries. Failure of the selected
+The sole system-resolver exception is rule-set:PrivateLAN, also excluded from
+fake-IP allocation. DIRECT resolution follows that policy. Ordinary public
+proxied queries have no plaintext/system or parallel fallback. Failure of the selected
 proxy must fail resolution; never put DIRECT in that group's fallback chain.
 Direct service queries and proxy hostname bootstrap remain visible to their
 selected resolver. To avoid proxy-hostname bootstrap entirely, use IP-literal
@@ -64,6 +66,10 @@ replace their HTTP definitions with local `type: file`, `behavior: classical`,
 `format: text` definitions. Use neutral proxy placeholders. The contract test
 compares every source rule independently and checks first-match ownership,
 including nested subdomains, lookalike negative cases and existing exceptions.
+
+The public merge file refers to CDN `main` and uses a v2 cache directory. Private
+profiles prepared with an immutable revision use that same revision in both
+clients, and revision-specific Mihomo cache paths avoid old/new content mixing.
 
 The public merge file refers to CDN `main`. A local validation does not publish
 those bytes. Release the inspected routing batch before deploying HTTP providers

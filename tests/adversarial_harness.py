@@ -14,16 +14,13 @@ Comprehensive empirical stress-testing covering:
 
 from __future__ import annotations
 
-import copy
-import ipaddress
-import json
+import argparse
 import os
 import random
 import socket
 import struct
 import sys
 import tempfile
-import time
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.abspath(os.path.join(HERE, ".."))
@@ -34,13 +31,12 @@ import engine as engine_mod
 import realworld as realworld_mod
 import runsuite as runsuite_mod
 
-CANDIDATE_CONF = os.path.join(ROOT, ".agents", "test_writer_e2e", "candidate.conf")
 RULES_DIR = os.path.join(ROOT, "lists")
 
 
 class AdversarialRunner:
     def __init__(self, conf_path=None, rules_dir=None):
-        self.conf_path = conf_path or CANDIDATE_CONF
+        self.conf_path = conf_path or engine_mod.default_conf_path()
         self.rules_dir = rules_dir or RULES_DIR
         self.results = []
         self.engine = engine_mod.build_engine(self.conf_path, self.rules_dir)
@@ -171,77 +167,77 @@ class AdversarialRunner:
 
         # 2.1 Private & Bogon IPv4
         r1 = e.match(host="10.0.0.1")
-        self.record(cat, "RFC1918 10.0.0.1 -> DIRECT (PrivateLAN)", r1["policy"] == "DIRECT" and r1["source"] == "PrivateLAN.list",
-                    (r1["policy"], r1["source"]), ("DIRECT", "PrivateLAN.list"))
+        self.record(cat, "RFC1918 10.0.0.1 -> DIRECT (PrivateLAN)", r1["policy"] == "DIRECT" and r1["source"] == "PrivateLANIP.list",
+                    (r1["policy"], r1["source"]), ("DIRECT", "PrivateLANIP.list"))
 
         r2 = e.match(host="172.16.254.1")
-        self.record(cat, "RFC1918 172.16.254.1 -> DIRECT (PrivateLAN)", r2["policy"] == "DIRECT" and r2["source"] == "PrivateLAN.list",
-                    (r2["policy"], r2["source"]), ("DIRECT", "PrivateLAN.list"))
+        self.record(cat, "RFC1918 172.16.254.1 -> DIRECT (PrivateLAN)", r2["policy"] == "DIRECT" and r2["source"] == "PrivateLANIP.list",
+                    (r2["policy"], r2["source"]), ("DIRECT", "PrivateLANIP.list"))
 
         r3 = e.match(host="192.168.1.1")
-        self.record(cat, "RFC1918 192.168.1.1 -> DIRECT (PrivateLAN)", r3["policy"] == "DIRECT" and r3["source"] == "PrivateLAN.list",
-                    (r3["policy"], r3["source"]), ("DIRECT", "PrivateLAN.list"))
+        self.record(cat, "RFC1918 192.168.1.1 -> DIRECT (PrivateLAN)", r3["policy"] == "DIRECT" and r3["source"] == "PrivateLANIP.list",
+                    (r3["policy"], r3["source"]), ("DIRECT", "PrivateLANIP.list"))
 
         r4 = e.match(host="127.0.0.1")
-        self.record(cat, "Loopback 127.0.0.1 -> DIRECT (PrivateLAN)", r4["policy"] == "DIRECT" and r4["source"] == "PrivateLAN.list",
-                    (r4["policy"], r4["source"]), ("DIRECT", "PrivateLAN.list"))
+        self.record(cat, "Loopback 127.0.0.1 -> DIRECT (PrivateLAN)", r4["policy"] == "DIRECT" and r4["source"] == "PrivateLANIP.list",
+                    (r4["policy"], r4["source"]), ("DIRECT", "PrivateLANIP.list"))
 
         r5 = e.match(host="127.255.255.254")
-        self.record(cat, "Loopback 127.255.255.254 -> DIRECT (PrivateLAN)", r5["policy"] == "DIRECT" and r5["source"] == "PrivateLAN.list",
-                    (r5["policy"], r5["source"]), ("DIRECT", "PrivateLAN.list"))
+        self.record(cat, "Loopback 127.255.255.254 -> DIRECT (PrivateLAN)", r5["policy"] == "DIRECT" and r5["source"] == "PrivateLANIP.list",
+                    (r5["policy"], r5["source"]), ("DIRECT", "PrivateLANIP.list"))
 
         r6 = e.match(host="169.254.10.20")
-        self.record(cat, "Link-Local 169.254.10.20 -> DIRECT (PrivateLAN)", r6["policy"] == "DIRECT" and r6["source"] == "PrivateLAN.list",
-                    (r6["policy"], r6["source"]), ("DIRECT", "PrivateLAN.list"))
+        self.record(cat, "Link-Local 169.254.10.20 -> DIRECT (PrivateLAN)", r6["policy"] == "DIRECT" and r6["source"] == "PrivateLANIP.list",
+                    (r6["policy"], r6["source"]), ("DIRECT", "PrivateLANIP.list"))
 
         r7 = e.match(host="100.64.0.1")
-        self.record(cat, "CGNAT 100.64.0.1 -> DIRECT (PrivateLAN)", r7["policy"] == "DIRECT" and r7["source"] == "PrivateLAN.list",
-                    (r7["policy"], r7["source"]), ("DIRECT", "PrivateLAN.list"))
+        self.record(cat, "CGNAT 100.64.0.1 -> DIRECT (PrivateLAN)", r7["policy"] == "DIRECT" and r7["source"] == "PrivateLANIP.list",
+                    (r7["policy"], r7["source"]), ("DIRECT", "PrivateLANIP.list"))
 
         r8 = e.match(host="100.127.255.254")
-        self.record(cat, "CGNAT 100.127.255.254 -> DIRECT (PrivateLAN)", r8["policy"] == "DIRECT" and r8["source"] == "PrivateLAN.list",
-                    (r8["policy"], r8["source"]), ("DIRECT", "PrivateLAN.list"))
+        self.record(cat, "CGNAT 100.127.255.254 -> DIRECT (PrivateLAN)", r8["policy"] == "DIRECT" and r8["source"] == "PrivateLANIP.list",
+                    (r8["policy"], r8["source"]), ("DIRECT", "PrivateLANIP.list"))
 
         r9 = e.match(host="198.18.0.1")
-        self.record(cat, "Surge Fake-IP 198.18.0.1 -> DIRECT (PrivateLAN)", r9["policy"] == "DIRECT" and r9["source"] == "PrivateLAN.list",
-                    (r9["policy"], r9["source"]), ("DIRECT", "PrivateLAN.list"))
+        self.record(cat, "Surge Fake-IP 198.18.0.1 -> DIRECT (PrivateLAN)", r9["policy"] == "DIRECT" and r9["source"] == "PrivateLANIP.list",
+                    (r9["policy"], r9["source"]), ("DIRECT", "PrivateLANIP.list"))
 
         r10 = e.match(host="198.19.255.254")
-        self.record(cat, "Surge Fake-IP 198.19.255.254 -> DIRECT (PrivateLAN)", r10["policy"] == "DIRECT" and r10["source"] == "PrivateLAN.list",
-                     (r10["policy"], r10["source"]), ("DIRECT", "PrivateLAN.list"))
+        self.record(cat, "Surge Fake-IP 198.19.255.254 -> DIRECT (PrivateLAN)", r10["policy"] == "DIRECT" and r10["source"] == "PrivateLANIP.list",
+                     (r10["policy"], r10["source"]), ("DIRECT", "PrivateLANIP.list"))
 
         r11 = e.match(host="0.0.0.0")
-        self.record(cat, "RFC 1122 0.0.0.0 -> DIRECT (PrivateLAN)", r11["policy"] == "DIRECT" and r11["source"] == "PrivateLAN.list",
-                     (r11["policy"], r11["source"]), ("DIRECT", "PrivateLAN.list"))
+        self.record(cat, "RFC 1122 0.0.0.0 -> DIRECT (PrivateLAN)", r11["policy"] == "DIRECT" and r11["source"] == "PrivateLANIP.list",
+                     (r11["policy"], r11["source"]), ("DIRECT", "PrivateLANIP.list"))
 
         r12 = e.match(host="240.0.0.1")
-        self.record(cat, "Class E 240.0.0.1 -> DIRECT (PrivateLAN)", r12["policy"] == "DIRECT" and r12["source"] == "PrivateLAN.list",
-                     (r12["policy"], r12["source"]), ("DIRECT", "PrivateLAN.list"))
+        self.record(cat, "Class E 240.0.0.1 -> DIRECT (PrivateLAN)", r12["policy"] == "DIRECT" and r12["source"] == "PrivateLANIP.list",
+                     (r12["policy"], r12["source"]), ("DIRECT", "PrivateLANIP.list"))
 
         r13 = e.match(host="255.255.255.255")
-        self.record(cat, "Limited Broadcast 255.255.255.255 -> DIRECT (PrivateLAN)", r13["policy"] == "DIRECT" and r13["source"] == "PrivateLAN.list",
-                     (r13["policy"], r13["source"]), ("DIRECT", "PrivateLAN.list"))
+        self.record(cat, "Limited Broadcast 255.255.255.255 -> DIRECT (PrivateLAN)", r13["policy"] == "DIRECT" and r13["source"] == "PrivateLANIP.list",
+                     (r13["policy"], r13["source"]), ("DIRECT", "PrivateLANIP.list"))
 
         # 2.2 IPv6 CIDRs & Boundaries
         r14 = e.match(host="::1")
-        self.record(cat, "IPv6 Loopback ::1 -> DIRECT (PrivateLAN)", r14["policy"] == "DIRECT" and r14["source"] == "PrivateLAN.list",
-                     (r14["policy"], r14["source"]), ("DIRECT", "PrivateLAN.list"))
+        self.record(cat, "IPv6 Loopback ::1 -> DIRECT (PrivateLAN)", r14["policy"] == "DIRECT" and r14["source"] == "PrivateLANIP.list",
+                     (r14["policy"], r14["source"]), ("DIRECT", "PrivateLANIP.list"))
 
         r15 = e.match(host="fc00::1")
-        self.record(cat, "IPv6 ULA fc00::1 -> DIRECT (PrivateLAN)", r15["policy"] == "DIRECT" and r15["source"] == "PrivateLAN.list",
-                     (r15["policy"], r15["source"]), ("DIRECT", "PrivateLAN.list"))
+        self.record(cat, "IPv6 ULA fc00::1 -> DIRECT (PrivateLAN)", r15["policy"] == "DIRECT" and r15["source"] == "PrivateLANIP.list",
+                     (r15["policy"], r15["source"]), ("DIRECT", "PrivateLANIP.list"))
 
         r16 = e.match(host="fd12:3456:789a::1")
-        self.record(cat, "IPv6 ULA fd12:... -> DIRECT (PrivateLAN)", r16["policy"] == "DIRECT" and r16["source"] == "PrivateLAN.list",
-                     (r16["policy"], r16["source"]), ("DIRECT", "PrivateLAN.list"))
+        self.record(cat, "IPv6 ULA fd12:... -> DIRECT (PrivateLAN)", r16["policy"] == "DIRECT" and r16["source"] == "PrivateLANIP.list",
+                     (r16["policy"], r16["source"]), ("DIRECT", "PrivateLANIP.list"))
 
         r17 = e.match(host="fe80::1")
-        self.record(cat, "IPv6 Link-Local fe80::1 -> DIRECT (PrivateLAN)", r17["policy"] == "DIRECT" and r17["source"] == "PrivateLAN.list",
-                     (r17["policy"], r17["source"]), ("DIRECT", "PrivateLAN.list"))
+        self.record(cat, "IPv6 Link-Local fe80::1 -> DIRECT (PrivateLAN)", r17["policy"] == "DIRECT" and r17["source"] == "PrivateLANIP.list",
+                     (r17["policy"], r17["source"]), ("DIRECT", "PrivateLANIP.list"))
 
         r18 = e.match(host="ff02::1")
-        self.record(cat, "IPv6 Multicast ff02::1 -> DIRECT (PrivateLAN)", r18["policy"] == "DIRECT" and r18["source"] == "PrivateLAN.list",
-                     (r18["policy"], r18["source"]), ("DIRECT", "PrivateLAN.list"))
+        self.record(cat, "IPv6 Multicast ff02::1 -> DIRECT (PrivateLAN)", r18["policy"] == "DIRECT" and r18["source"] == "PrivateLANIP.list",
+                     (r18["policy"], r18["source"]), ("DIRECT", "PrivateLANIP.list"))
 
         # 2.3 IPv4 Mapped IPv6 (::ffff:192.168.1.1)
         r19 = e.match(host="::ffff:192.168.1.1")
@@ -256,12 +252,12 @@ class AdversarialRunner:
         r21 = e.match(host="91.108.4.1")
         self.record(cat, "Telegram IP 91.108.4.1 (within 91.108.0.0/16) -> Telegram", r21["policy"] == "Telegram", r21["policy"], "Telegram")
 
-        r22 = e.match(host="91.108.255.254")
-        self.record(cat, "Telegram IP 91.108.255.254 (CIDR upper bound) -> Telegram", r22["policy"] == "Telegram", r22["policy"], "Telegram")
+        r22 = e.match(host="91.108.23.254")
+        self.record(cat, "Telegram IP 91.108.23.254 (CIDR upper bound) -> Telegram", r22["policy"] == "Telegram", r22["policy"], "Telegram")
 
         # Outside Telegram CIDR: 91.109.0.1 -> Final
         r23 = e.match(host="91.109.0.1")
-        self.record(cat, "Outside Telegram CIDR 91.109.0.1 -> Final", r23["policy"] == "Final", r23["policy"], "Final")
+        self.record(cat, "Outside official Telegram CIDRs must not select Telegram", r23["policy"] != "Telegram", r23["policy"] == "Telegram", False)
 
     # =========================================================================
     # 3. DNS Leak Detection Boundaries
@@ -312,9 +308,11 @@ FINAL,Final
                         (mC["dns_leak"], mC["dns_leak_at"]), (True, "IP-CIDR,198.51.100.0/24"))
 
             # Test D: Production/Candidate configuration has 0 leaky IP rules
-            real_leaky_count = len(self.engine.leaky_ip_rules)
-            self.record(cat, "Candidate ruleset has 0 leaky IP rules (100% no-resolve)",
-                        real_leaky_count == 0, real_leaky_count, 0)
+            boundary = min((idx for idx,_ in self.engine.leaky_ip_rules),default=len(self.engine.rules))
+            ordered = not any(r.type in engine_mod.DOMAIN_TYPES and r.idx > boundary for r in self.engine.rules)
+            encrypted = bool(self.engine.general.get("encrypted-dns-server"))
+            self.record(cat, "Domain stage precedes encrypted IP resolution", ordered and encrypted,
+                        (ordered,encrypted), (True,True))
 
         finally:
             import shutil
@@ -741,6 +739,10 @@ FINAL,Final
 
 
 if __name__ == "__main__":
-    runner = AdversarialRunner()
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--conf", help="Surge profile (default: SURGE_CONF or ../Surge.conf)")
+    parser.add_argument("--rules", default=RULES_DIR, help="Source list directory")
+    args = parser.parse_args()
+    runner = AdversarialRunner(conf_path=args.conf, rules_dir=args.rules)
     res = runner.run_all()
     sys.exit(0 if res["failed"] == 0 else 1)

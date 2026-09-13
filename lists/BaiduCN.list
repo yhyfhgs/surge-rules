@@ -1,5 +1,6 @@
-# BaiduCN — 百度系国内域直连（上游 blackmatrix7 Baidu）
-# 排序：规则类型分区，区内字母序
+# BaiduCN — maintained routing owner.
+# Topology and matching options: config/routing.json.
+# Sources and review decisions: SOURCES.md.
 
 DOMAIN-SUFFIX,17swan.com
 DOMAIN-SUFFIX,37swan.com

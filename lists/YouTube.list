@@ -1,4 +1,6 @@
-# YouTube and YouTube Music; this specialized media list precedes Google.
+# YouTube — maintained routing owner.
+# Topology and matching options: config/routing.json.
+# Sources and review decisions: SOURCES.md.
 
 DOMAIN,jnn-pa.googleapis.com
 DOMAIN,yt3.ggpht.com
@@ -181,10 +183,3 @@ DOMAIN-SUFFIX,youtubekids.com
 DOMAIN-SUFFIX,youtubemobilesupport.com
 DOMAIN-SUFFIX,yt.be
 DOMAIN-SUFFIX,ytimg.com
-
-IP-CIDR,172.110.32.0/21,no-resolve
-IP-CIDR,216.73.80.0/20,no-resolve
-
-IP-CIDR6,2620:120:e000::/40,no-resolve
-
-IP-ASN,36040,no-resolve

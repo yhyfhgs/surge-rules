@@ -381,13 +381,24 @@ class Auditor(object):
     # -- A1 ---------------------------------------------------------------
 
     def check_a1(self):
-        bad = [r for r in self.e.rules if r.is_ip_class and not r.no_resolve]
-        for r in bad:
-            self._add("A1", "P1", "dns-leak", r.source, r.rule_str(),
-                      "%s:%d IP 类规则未带 no-resolve（conf RULE-SET 行也无行级修饰）"
-                      "——域名请求到此会先被本地 DNS 解析，泄漏访问意图" % (r.source, r.line),
-                      "在该行末尾追加 ,no-resolve，或在 conf 对应 RULE-SET 行加行级修饰")
-        return len(bad)
+        resolving = [r for r in self.e.rules if r.is_ip_class and not r.no_resolve]
+        if not resolving:
+            return 0  # Legacy no-lookup profiles remain valid.
+        count = 0
+        boundary = min(r.idx for r in resolving)
+        misplaced = [r for r in self.e.rules if r.type in ("DOMAIN", "DOMAIN-SUFFIX", "DOMAIN-WILDCARD", "DOMAIN-KEYWORD") and r.idx > boundary]
+        if misplaced:
+            count += 1
+            self._add("A1", "P1", "dns-order", misplaced[0].source, misplaced[0].rule_str(),
+                      "域名规则位于主动解析IP边界之后；域名归属必须先于IP分类", exemptable=False)
+        general = self.e.general
+        resolvers = [v.strip() for v in general.get("encrypted-dns-server", "").split(",") if v.strip()]
+        if (not resolvers or any(not v.startswith(("https://", "h3://", "tls://", "quic://")) for v in resolvers)
+                or general.get("encrypted-dns-skip-cert-verification", "false").lower() == "true"):
+            count += 1
+            self._add("A1", "P1", "dns-leak", resolving[0].source, resolving[0].rule_str(),
+                      "主动IP解析必须配置加密DNS并验证证书；纯语法检查不代替运行时出口验证", exemptable=False)
+        return count
 
     # -- A2 ---------------------------------------------------------------
 
@@ -656,9 +667,20 @@ class Auditor(object):
     def check_a8(self):
         """forbidden 模式命中即 P0 且不可豁免。直接扫源文件文本（含类型段大写归一
         后的四种候选串），确保 engine 不解析的类型也逃不掉。"""
+        quarantine_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "config", "ip-review-exclusions.json")
+        quarantined_hits = 0
+        if os.path.isfile(quarantine_path):
+            with open(quarantine_path, encoding="utf-8") as handle:
+                excluded = {(r["owner"] + ".list", r["rule"]): r["reason"] for r in json.load(handle)["excluded"]}
+            for line in self.source_lines():
+                reason = excluded.get((line.file, line.head))
+                if reason:
+                    quarantined_hits += 1
+                    self._add("A8", "P0", "quarantined-ip", line.file, line.head,
+                              "未完成重新审查的IP范围回流：" + reason, exemptable=False)
         forb = [e for e in self.al.forbidden if e.get("pattern")]
         if not forb:
-            return 0
+            return quarantined_hits
         exact, globs = defaultdict(list), []
         for entry in forb:
             if any(ch in entry["pattern"] for ch in "*?["):
@@ -666,7 +688,7 @@ class Auditor(object):
             else:
                 exact[entry["pattern"]].append(entry)
 
-        n = 0
+        n = quarantined_hits
         for sl in self.source_lines():
             cands = []
             for c in (sl.text, sl.body, sl.norm, sl.head):
@@ -1033,10 +1055,10 @@ def run_audit_selftest(verbose=True):
         stats = aud.run(list(ALL_CHECKS))
         F = aud.findings
 
-        check("S01 A1 命中缺 no-resolve 的 IP 规则", stats["A1"], 1)
-        check("S02 A1 定位到 Leak.list 且判 P1",
+        check("S01 A1 识别域名后置及未加密解析两个问题", stats["A1"], 2)
+        check("S02 A1 定位域名顺序和解析边界且判 P1",
               [(f["file"], f["severity"]) for f in pick(F, "A1")],
-              [("Leak.list", "P1")])
+              [("Direct.list", "P1"), ("Leak.list", "P1")])
         check("S03 A1 不误报 conf 行级 no-resolve 的 Safe.list",
               [f for f in pick(F, "A1") if f["file"] == "Safe.list"], [])
 

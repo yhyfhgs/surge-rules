@@ -4,7 +4,7 @@
     "desc": "Reject.list 的 DOMAIN-KEYWORD,adsyndication 正例与连字符近似负例。",
     "requests": [
       {"host": "adsyndication.com", "note": "正例：命中 DOMAIN-KEYWORD,adsyndication"},
-      {"host": "adsyndicat.com", "note": "负例：拼写近似但不含完整关键词"}
+      {"host": "adsyndicat.com", "note": "负例：拼写近似但不含完整关键词", "stage": "domain"}
     ],
     "assert": {
       "no_dns_leak": true,
@@ -19,7 +19,7 @@
     "desc": "Reject.list 的 DOMAIN-KEYWORD,adtarget. 正例与连字符近似负例。",
     "requests": [
       {"host": "adtarget.net", "note": "正例：命中 DOMAIN-KEYWORD,adtarget."},
-      {"host": "ad-target.net", "note": "负例：连字符分隔，不含完整关键词"}
+      {"host": "ad-target.net", "note": "负例：连字符分隔，不含完整关键词", "stage": "domain"}
     ],
     "assert": {
       "no_dns_leak": true,
@@ -34,7 +34,7 @@
     "desc": "Reject.list 的 DOMAIN-KEYWORD,advertmarket 正例与连字符近似负例。",
     "requests": [
       {"host": "advertmarket.org", "note": "正例：命中 DOMAIN-KEYWORD,advertmarket"},
-      {"host": "advert-market.org", "note": "负例：连字符分隔，不含完整关键词"}
+      {"host": "advert-market.org", "note": "负例：连字符分隔，不含完整关键词", "stage": "domain"}
     ],
     "assert": {
       "no_dns_leak": true,
@@ -49,7 +49,7 @@
     "desc": "Reject.list 的 DOMAIN-KEYWORD,nimiqpool 正例与连字符近似负例。",
     "requests": [
       {"host": "nimiqpool.com", "note": "正例：命中 DOMAIN-KEYWORD,nimiqpool"},
-      {"host": "nimiq-pool.com", "note": "负例：连字符分隔，不含完整关键词"}
+      {"host": "nimiq-pool.com", "note": "负例：连字符分隔，不含完整关键词", "stage": "domain"}
     ],
     "assert": {
       "no_dns_leak": true,
@@ -64,7 +64,7 @@
     "desc": "Reject.list 的 DOMAIN-KEYWORD,packetsdk 正例与连字符近似负例。",
     "requests": [
       {"host": "packetsdk.net", "note": "正例：命中 DOMAIN-KEYWORD,packetsdk"},
-      {"host": "packet-sdk.net", "note": "负例：连字符分隔，不含完整关键词"}
+      {"host": "packet-sdk.net", "note": "负例：连字符分隔，不含完整关键词", "stage": "domain"}
     ],
     "assert": {
       "no_dns_leak": true,
@@ -79,7 +79,7 @@
     "desc": "Reject.list 的 DOMAIN-KEYWORD,pangolin-sdk-toutiao 正例与拼写近似负例。",
     "requests": [
       {"host": "pangolin-sdk-toutiao.com", "note": "正例：命中 DOMAIN-KEYWORD,pangolin-sdk-toutiao"},
-      {"host": "pangolin-sdk-toutia.com", "note": "负例：拼写近似但不含完整关键词"}
+      {"host": "pangolin-sdk-toutia.com", "note": "负例：拼写近似但不含完整关键词", "stage": "domain"}
     ],
     "assert": {
       "no_dns_leak": true,
@@ -94,7 +94,7 @@
     "desc": "ProxyGFW.list 的 DOMAIN-KEYWORD,sci-hub 正例与连字符缺失负例。",
     "requests": [
       {"host": "sci-hub.se", "note": "正例：命中 DOMAIN-KEYWORD,sci-hub"},
-      {"host": "schi-hub.org", "note": "负例：拼写近似但不含完整关键词"}
+      {"host": "schi-hub.org", "note": "负例：拼写近似但不含完整关键词", "stage": "domain"}
     ],
     "assert": {
       "no_dns_leak": true,
@@ -112,8 +112,8 @@
       {"host": "support.apple.com.akadns.net", "note": "support 面 akadns 调度形态"},
       {"host": "apple-support.akadns.net", "note": "裸串本身，DOMAIN-SUFFIX 含 apex"},
       {"host": "www.icloud.com.akadns.net"},
-      {"host": "apple.com.akadns.net.phishing-cdn.com", "note": "负例：品牌串在中段的仿冒域"},
-      {"host": "apple.com.edgekey.net.globalredir.akadns.net", "note": "负例：右锚定后不再命中的 Akamai globalredir 链形态"}
+      {"host": "apple.com.akadns.net.phishing-cdn.com", "note": "负例：品牌串在中段的仿冒域", "stage": "domain"},
+      {"host": "apple.com.edgekey.net.globalredir.akadns.net", "note": "负例：右锚定后不再命中的 Akamai globalredir 链形态", "stage": "domain"}
     ],
     "assert": {
       "no_dns_leak": true,
@@ -133,8 +133,8 @@
     "requests": [
       {"host": "testflight.apple.com", "note": "上游 TestFlight 表两条精确域之一"},
       {"host": "beta.apple.com", "note": "上游 TestFlight 表两条精确域之二"},
-      {"host": "mytestflight.io", "note": "负例：第三方含品牌子串"},
-      {"host": "testflight-tracker.sample-analytics.com", "note": "负例：第三方追踪域含品牌子串"}
+      {"host": "mytestflight.io", "note": "负例：第三方含品牌子串", "stage": "domain"},
+      {"host": "testflight-tracker.sample-analytics.com", "note": "负例：第三方追踪域含品牌子串", "stage": "domain"}
     ],
     "assert": {
       "no_dns_leak": true,
@@ -157,8 +157,8 @@
       {"host": "onedrive.live.com", "note": "2026-09-12 用户修正：随 OneDrive 会话走 Microsoft 代理"},
       {"host": "skydrive.wns.windows.com", "note": "WNS 推送端点"},
       {"host": "files.1drv.com", "note": "2026-09-12 用户修正：随 OneDrive 会话走 Microsoft 代理"},
-      {"host": "firestonedrivestore.com", "note": "负例：上游 Global 表域，串中含 onedrive"},
-      {"host": "51drv.com", "note": "负例：上游 ChinaMax 表域，串中含 1drv"}
+      {"host": "firestonedrivestore.com", "note": "负例：上游 Global 表域，串中含 onedrive", "stage": "domain"},
+      {"host": "51drv.com", "note": "负例：上游 ChinaMax 表域，串中含 1drv", "stage": "domain"}
     ],
     "assert": {
       "no_dns_leak": true,
@@ -185,8 +185,8 @@
       {"host": "bilibilipay.com"},
       {"host": "hdslb.com", "note": "对照：非 keyword 覆盖面，本就有精确后缀"},
       {"host": "bilibili.tv", "note": "国际版，Streaming 前位认领"},
-      {"host": "blbilibili.com", "note": "负例：第三方站，串中含 bilibili"},
-      {"host": "bilibilihelper.com", "note": "负例：第三方工具站"}
+      {"host": "blbilibili.com", "note": "负例：第三方站，串中含 bilibili", "stage": "domain"},
+      {"host": "bilibilihelper.com", "note": "负例：第三方工具站", "stage": "domain"}
     ],
     "assert": {
       "no_dns_leak": true,
@@ -213,9 +213,9 @@
       {"host": "aiqiyicloud.com"},
       {"host": "intl.iqiyi.com", "note": "国际版，Streaming 前位认领"},
       {"host": "doh.iqiyi.com", "note": "对照：私有 DoH，Reject 全链最前"},
-      {"host": "qiyikeji.com", "note": "负例：无关国内企业域（企业科技）"},
-      {"host": "iqiyi.space", "note": "负例：上游 Advertising 表域"},
-      {"host": "xxiqiyiavxx.buzz", "note": "负例：上游 Global 表成人仿冒域"}
+      {"host": "qiyikeji.com", "note": "负例：无关国内企业域（企业科技）", "stage": "domain"},
+      {"host": "iqiyi.space", "note": "负例：上游 Advertising 表域", "stage": "domain"},
+      {"host": "xxiqiyiavxx.buzz", "note": "负例：上游 Global 表成人仿冒域", "stage": "domain"}
     ],
     "assert": {
       "no_dns_leak": true,
@@ -244,11 +244,11 @@
       {"host": "dl.dropboxusercontent.com"},
       {"host": "dropboxstatic.com", "note": "DownloadCDN 前位认领，不动"},
       {"host": "appledaily.com.hk"},
-      {"host": "beetalk.com", "note": "已移除的死域，回落 Final"},
+      {"host": "beetalk.com", "note": "已移除的死域，回落 Final", "stage": "domain"},
       {"host": "dlercloud.com"},
       {"host": "abema.tv", "note": "Abema 资产归 Streaming（前位），删 keyword 不影响"},
-      {"host": "dropbox-download.com", "note": "负例：上游 Advertising 表仿冒域"},
-      {"host": "a8.abemashopping.jp", "note": "负例：与 AbemaTV 无关的日本电商域"}
+      {"host": "dropbox-download.com", "note": "负例：上游 Advertising 表仿冒域", "stage": "domain"},
+      {"host": "a8.abemashopping.jp", "note": "负例：与 AbemaTV 无关的日本电商域", "stage": "domain"}
     ],
     "assert": {
       "no_dns_leak": true,
@@ -305,8 +305,8 @@
       {"host": "avtb.net", "note": "正例：显式后缀"},
       {"host": "www.avtb.com", "note": "正例：显式 avtb.com 后缀"},
       {"host": "foo.avtb.net", "note": "正例：显式 avtb.net 后缀"},
-      {"host": "eqoavtbu.com", "note": "负例：上游 KuaiShou/ChinaMax 域，串在中段"},
-      {"host": "dnavtbt.com", "note": "负例：上游 Advertising 域，串在中段"}
+      {"host": "eqoavtbu.com", "note": "负例：上游 KuaiShou/ChinaMax 域，串在中段", "stage": "domain"},
+      {"host": "dnavtbt.com", "note": "负例：上游 Advertising 域，串在中段", "stage": "domain"}
     ],
     "assert": {
       "no_dns_leak": true,
@@ -334,9 +334,9 @@
       {"host": "rr1---sn-abc.googlevideo.com", "note": "视频数据面（既有后缀）"},
       {"host": "i.ytimg.com", "note": "缩略图（既有后缀）"},
       {"host": "wide-youtube.l.google.com", "note": "YouTube 专属 LB 名，恢复后不再退化到 Google 组"},
-      {"host": "youtube-dubbing.com", "note": "负例：上游归国内表的第三方配音站"},
-      {"host": "ssyoutube.com", "note": "负例：第三方下载站"},
-      {"host": "youtubeconverter.io", "note": "负例：第三方转码站"},
+      {"host": "youtube-dubbing.com", "note": "负例：上游归国内表的第三方配音站", "stage": "domain"},
+      {"host": "ssyoutube.com", "note": "负例：第三方下载站", "stage": "domain"},
+      {"host": "youtubeconverter.io", "note": "负例：第三方转码站", "stage": "domain"},
       {"host": "youtubei.googleapis.com", "note": "App 主 API 端点，YouTube 专属 googleapis 子域"}
     ],
     "assert": {
@@ -371,10 +371,10 @@
       {"host": "blogspot.co.uk", "note": "ccTLD 后缀"},
       {"host": "www.recaptcha.net", "note": "reCAPTCHA 全球可达端点"},
       {"host": "recaptcha-cn.net", "note": "reCAPTCHA 中国可达端点；2026-08-31 起归 Domestic.list 直连（CMNET 120.253/16 落点，与 .cn 族同一张 GTS 证书）"},
-      {"host": "qingmail.com", "note": "负例：报告实证的 gmail 关键词误捕获"},
+      {"host": "qingmail.com", "note": "负例：报告实证的 gmail 关键词误捕获", "stage": "domain"},
       {"host": "suningmail.com", "note": "负例：报告实证的 gmail 关键词误捕获"},
-      {"host": "blogspotter.net", "note": "负例：含 blogspot 子串的第三方域"},
-      {"host": "recaptcha-solver.io", "note": "负例：含 recaptcha 子串的第三方域"}
+      {"host": "blogspotter.net", "note": "负例：含 blogspot 子串的第三方域", "stage": "domain"},
+      {"host": "recaptcha-solver.io", "note": "负例：含 recaptcha 子串的第三方域", "stage": "domain"}
     ],
     "assert": {
       "no_dns_leak": true,
@@ -404,8 +404,8 @@
       {"host": "twitterstat.us", "note": "状态页"},
       {"host": "x.com", "note": "既有后缀"},
       {"host": "pbs.twimg.com", "note": "媒体 CDN（既有后缀）"},
-      {"host": "twitterrific.com", "note": "负例：第三方客户端厂商站"},
-      {"host": "twitterdownloader.cc", "note": "负例：第三方下载站"}
+      {"host": "twitterrific.com", "note": "负例：第三方客户端厂商站", "stage": "domain"},
+      {"host": "twitterdownloader.cc", "note": "负例：第三方下载站", "stage": "domain"}
     ],
     "assert": {
       "no_dns_leak": true,
@@ -430,11 +430,11 @@
       {"host": "web.whatsapp.com"},
       {"host": "g.whatsapp.net", "note": "WhatsApp 消息数据面"},
       {"host": "static.xx.fbcdn.net", "note": "FB/IG 静态资源 CDN"},
-      {"host": "fbcdn-a.akamaihd.net", "note": "Akamai 前置的旧 fbcdn，2026-08-31 已从 Meta.list 删除（N 档死域）"},
-      {"host": "whatsapp-plus.net", "note": "负例：第三方魔改客户端"},
-      {"host": "theinstagramhack.com", "note": "负例：上游夹带的破解站"},
-      {"host": "onlineinstagram.com", "note": "负例：第三方 IG 浏览器"},
-      {"host": "instagramdownloader.tools", "note": "负例：第三方下载站"}
+      {"host": "fbcdn-a.akamaihd.net", "note": "Akamai 前置的旧 fbcdn，2026-08-31 已从 Meta.list 删除（N 档死域）", "stage": "domain"},
+      {"host": "whatsapp-plus.net", "note": "负例：第三方魔改客户端", "stage": "domain"},
+      {"host": "theinstagramhack.com", "note": "负例：上游夹带的破解站", "stage": "domain"},
+      {"host": "onlineinstagram.com", "note": "负例：第三方 IG 浏览器", "stage": "domain"},
+      {"host": "instagramdownloader.tools", "note": "负例：第三方下载站", "stage": "domain"}
     ],
     "assert": {
       "no_dns_leak": true,
@@ -462,9 +462,9 @@
       {"host": "t.me", "note": "既有后缀"},
       {"host": "telegra.ph", "note": "既有后缀"},
       {"host": "nicegram.app", "note": "第三方客户端（本表既有 swiftgram.app 等同类先例）"},
-      {"host": "telegramgroups.io", "note": "负例：第三方群组目录站"},
-      {"host": "telegram-cn.net", "note": "负例：含品牌子串的第三方域"},
-      {"host": "mytelegram-mirror.top", "note": "负例：第三方镜像形态"}
+      {"host": "telegramgroups.io", "note": "负例：第三方群组目录站", "stage": "domain"},
+      {"host": "telegram-cn.net", "note": "负例：含品牌子串的第三方域", "stage": "domain"},
+      {"host": "mytelegram-mirror.top", "note": "负例：第三方镜像形态", "stage": "domain"}
     ],
     "assert": {
       "no_dns_leak": true,
@@ -488,9 +488,9 @@
       {"host": "chatgpt-async-webps-prod-eastus-1.webpubsub.azure.com", "note": "ChatGPT 异步 WebPubSub"},
       {"host": "chatgpt-async-webps-prod-southcentralus-2.webpubsub.azure.com", "note": "换区域仍命中"},
       {"host": "openaicom-api-bdcpf8c6d2e9atf6.z01.azurefd.net", "note": "上游实证样本，Azure Front Door"},
-      {"host": "chatgpt-async-webps-prod.notazure.net", "note": "负例：前缀相同但不在 webpubsub.azure.com 下"},
-      {"host": "openaicom-api.mirror.top", "note": "负例：缺尾缀锚点且无 azurefd.net"},
-      {"host": "foo.webpubsub.azure.com", "note": "负例：同一 Azure 服务的他人实例，不属 OpenAI"}
+      {"host": "chatgpt-async-webps-prod.notazure.net", "note": "负例：前缀相同但不在 webpubsub.azure.com 下", "stage": "domain"},
+      {"host": "openaicom-api.mirror.top", "note": "负例：缺尾缀锚点且无 azurefd.net", "stage": "domain"},
+      {"host": "foo.webpubsub.azure.com", "note": "负例：同一 Azure 服务的他人实例，不属 OpenAI", "stage": "domain"}
     ],
     "assert": {
       "no_dns_leak": true,
@@ -514,8 +514,8 @@
       {"host": "spotify.map.fastly.net", "note": "Fastly CNAME 形态精确 host"},
       {"host": "scdn.co", "note": "既有专属 CDN，行为不变参照"},
       {"host": "tospotify.com"},
-      {"host": "myspotify-downloader.com", "note": "负例：品牌子串第三方"},
-      {"host": "spotify-mod-apk.net", "note": "负例：破解分发站"}
+      {"host": "myspotify-downloader.com", "note": "负例：品牌子串第三方", "stage": "domain"},
+      {"host": "spotify-mod-apk.net", "note": "负例：破解分发站", "stage": "domain"}
     ],
     "assert": {
       "no_dns_leak": true,
@@ -541,8 +541,8 @@
       {"host": "bbc.mp-pxcdn.com", "note": "Piksel 多租户 CDN 上的 BBC 专属租户前缀 —— 已迁 UK"},
       {"host": "vod-dash-ww-live.akamaized.net", "note": "留守参照：ww = worldwide，非属地锁面，仍走流媒体"},
       {"host": "bbcfmt.s.llnwi.net", "note": "留守参照：Limelight 租户前缀，同注册域另住 DAZN/HBO Max/Viki，整段处置须一致"},
-      {"host": "my-uk-live-tv.example.com", "note": "负例：含 uk-live 通用串的无关域"},
-      {"host": "sports-uk-live.example.net", "note": "负例：同上"}
+      {"host": "my-uk-live-tv.example.com", "note": "负例：含 uk-live 通用串的无关域", "stage": "domain"},
+      {"host": "sports-uk-live.example.net", "note": "负例：同上", "stage": "domain"}
     ],
     "assert": {
       "no_dns_leak": true,
@@ -570,8 +570,8 @@
       {"host": "netflixdnstest3.com", "note": "Netflix DNS 测试域"},
       {"host": "rthklive2-lh.akamaihd.net", "note": "RTHK 直播"},
       {"host": "dca-ll-voddazn-dznvodjp.s.llnwi.net", "note": "DAZN 日本点播"},
-      {"host": "hbogoasia-fanclub.example.com", "note": "负例：品牌子串第三方"},
-      {"host": "myttvnw-mirror.com", "note": "负例：品牌子串第三方"}
+      {"host": "hbogoasia-fanclub.example.com", "note": "负例：品牌子串第三方", "stage": "domain"},
+      {"host": "myttvnw-mirror.com", "note": "负例：品牌子串第三方", "stage": "domain"}
     ],
     "assert": {
       "no_dns_leak": true,
@@ -599,7 +599,7 @@
       {"host": "nivod.tv"},
       {"host": "nivodz.com"},
       {"host": "univod.cn", "note": "负例：腾讯持有域，被 nivod 子串误捕获"},
-      {"host": "univod.example.com", "note": "负例：同一子串形态的无关域"}
+      {"host": "univod.example.com", "note": "负例：同一子串形态的无关域", "stage": "domain"}
     ],
     "assert": {
       "no_dns_leak": true,
@@ -623,8 +623,8 @@
       {"host": "dualstack.ichnaea-web-1.elb.sa-east-1.amazonaws.com", "note": "Netflix ichnaea 遥测 ELB"},
       {"host": "avoddashs3ww-a.akamaihd.net", "note": "AVOD DASH 内容面（与既有 avodmp4s3ww-a 同族）"},
       {"host": "nowtv100.akamaized.net"},
-      {"host": "xnowtv1001.example.com", "note": "负例：无标签边界的子串扩展"},
-      {"host": "mynowtv100x.net", "note": "负例：同上"}
+      {"host": "xnowtv1001.example.com", "note": "负例：无标签边界的子串扩展", "stage": "domain"},
+      {"host": "mynowtv100x.net", "note": "负例：同上", "stage": "domain"}
     ],
     "assert": {
       "no_dns_leak": true,
@@ -643,13 +643,13 @@
     "name": "streaming_shared_components_unbound",
     "desc": "P1-03 确定级：Adobe DTM / Braze / Kochava / OneTrust·CookieLaw / Optimizely 是多租户共享组件，AWS 区域 execute-api 是云厂商通用网关后缀——都不代表流媒体身份，自 Streaming 移除；HBO GO Asia 的精确 API host 保留在流媒体",
     "requests": [
-      {"host": "assets.adobedtm.com", "note": "Adobe 标签管理器"},
-      {"host": "sdk.iad-01.braze.com", "note": "Braze 消息 SDK"},
-      {"host": "control.kochava.com", "note": "Kochava 归因"},
-      {"host": "cdn.cookielaw.org", "note": "OneTrust 同意横幅"},
-      {"host": "www.onetrust.com"},
-      {"host": "cdn.optimizely.com", "note": "Optimizely A/B"},
-      {"host": "abcd1234.execute-api.us-east-1.amazonaws.com", "note": "任意租户的 AWS API Gateway"},
+      {"host": "assets.adobedtm.com", "note": "Adobe 标签管理器", "stage": "domain"},
+      {"host": "sdk.iad-01.braze.com", "note": "Braze 消息 SDK", "stage": "domain"},
+      {"host": "control.kochava.com", "note": "Kochava 归因", "stage": "domain"},
+      {"host": "cdn.cookielaw.org", "note": "OneTrust 同意横幅", "stage": "domain"},
+      {"host": "www.onetrust.com", "stage": "domain"},
+      {"host": "cdn.optimizely.com", "note": "Optimizely A/B", "stage": "domain"},
+      {"host": "abcd1234.execute-api.us-east-1.amazonaws.com", "note": "任意租户的 AWS API Gateway", "stage": "domain"},
       {"host": "44wilhpljf.execute-api.ap-southeast-1.amazonaws.com", "note": "正例：HBO GO Asia 精确网关 host 保留"}
     ],
     "assert": {
@@ -675,7 +675,7 @@
       {"host": "lf16-gecko.tiktokcdn-eu.com", "note": "欧区资源面"},
       {"host": "p16-tiktokcdn-com.akamaized.net", "note": "上游精确 host"},
       {"host": "sf16-ttcdn-tos.ipstatp.com", "note": "正例：由 ipstatp.com 后缀继续承接"},
-      {"host": "ttcdn-tos.kkimg.cc", "note": "负例：上游 Direct 明确直连的第三方图床"},
+      {"host": "ttcdn-tos.kkimg.cc", "note": "负例：上游 Direct 明确直连的第三方图床", "stage": "domain"},
       {"host": "sf1-ttcdn-tos.pstatp.com", "note": "负例：字节国内广告 CDN，应归 ByteDanceCN 直连"}
     ],
     "assert": {
@@ -701,7 +701,7 @@
       {"host": "p16-sign-va.tiktokcdn.com.edgekey.net"},
       {"host": "mon-va.tiktokv.com.akamaized.net"},
       {"host": "pull-flv.ttlivecdn.com.edgesuite.net"},
-      {"host": "notmusical.lyrics.com", "note": "负例：无左标签边界的子串"},
+      {"host": "notmusical.lyrics.com", "note": "负例：无左标签边界的子串", "stage": "domain"},
       {"host": "mytiktokcdn.com.cn", "note": "负例：含 tiktokcdn.com. 子串的国内域"}
     ],
     "assert": {

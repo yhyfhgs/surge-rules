@@ -1,0 +1,11 @@
+# AUTO-GENERATED — Clash(Mihomo) classical 规则，由 ../lists/EuropeIP.list 派生
+# 勿手工编辑；修改 Surge 源后运行 python3 tools/surge2clash.py 重新生成
+
+# EuropeIP — maintained routing owner.
+# Topology and matching options: config/routing.json.
+# Sources and review decisions: SOURCES.md.
+
+GEOIP,CH
+GEOIP,DE
+GEOIP,FR
+GEOIP,NL

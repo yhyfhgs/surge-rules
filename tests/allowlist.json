@@ -241,18 +241,12 @@
       "reason": "B2/2026-08-30 裁决（AI 会话同出口优先于组件归属）：todesktop.com 是通用 Electron 应用打包/更新分发平台，但本机在用的 AI 桌面端（Cursor 等）用它做增量更新，与应用本体同出口更稳。刻意留在 AI 组。"
     },
     {
-      "check": "A3",
-      "file": "MicrosoftCN.list",
-      "rule": "DOMAIN,view.officeapps.live.com",
-      "by": "DOMAIN-SUFFIX,officeapps.live.com",
-      "reason": "保留已验证的 Office 预览端点文档锚点；同表 officeapps.live.com suffix 已覆盖，无额外分流效果。MicrosoftCN 前置，整棵 Office 子树直连。"
-    },
-    {
       "check": "A9",
       "file": "ChinaIP.list",
-      "by_file": "AppleCN.list",
+      "by_file": "AppleCNIP.list",
       "rule": "*",
-      "reason": "R2-1/A9 上线基线（144 条聚合）：AppleCN.list 的 17.0.0.0/8、144.178.0.0/19、2403:300::/32 三段在 conf 中先于 ChinaIP.list，把机器生成层里对应的 142+1+1 条更细网段完全包含。二者同为 DIRECT，无功能影响；ChinaIP.list 约定零手改，无法单独剔除，故长期聚合豁免。门禁只对**新增**的跨策略包含报警。"
+      "reason": "AppleCNIP 的已认可 DIRECT 前缀先于 ChinaIP，覆盖同为 DIRECT 的机器层子前缀。仅豁免同策略冗余；不同策略和逻辑减法仍由完整 MMDB 门禁校验。",
+      "kind": "redundant"
     },
     {
       "check": "A10",
@@ -1344,27 +1338,27 @@
     },
     {
       "pattern": "IP-CIDR,108.177.8.0/21",
-      "file": "Meta.list",
+      "file": "MetaIP.list",
       "reason": "WB/Wave-1 交付 §3.1（Meta IP 区口径：只收第一方段）：ARIN 108.177.0.0/17 = GOOGLE；上游 Facebook IP 表历史夹带，R1-06 已删。防上游再合并带回。"
     },
     {
       "pattern": "IP-CIDR,184.173.128.0/17",
-      "file": "Meta.list",
+      "file": "MetaIP.list",
       "reason": "WB/Wave-1 交付 §3.1（Meta IP 区口径：只收第一方段）：NETBLK-THEPLANET-BLK-17（SoftLayer/IBM），32,768 地址，本轮最大单条错误覆盖。防上游再合并带回。"
     },
     {
       "pattern": "IP-CIDR,119.235.224.0/24",
-      "file": "Meta.list",
+      "file": "MetaIP.list",
       "reason": "WB/Wave-1 交付 §3.1（Meta IP 区口径：只收第一方段）：YAHOO / LY Corporation（LINE），W1×W3 交叉印证。防上游再合并带回。"
     },
     {
       "pattern": "IP-CIDR,119.235.232.0/24",
-      "file": "Meta.list",
+      "file": "MetaIP.list",
       "reason": "WB/Wave-1 交付 §3.1（Meta IP 区口径：只收第一方段）：同上。防上游再合并带回。"
     },
     {
       "pattern": "IP-CIDR,119.235.236.0/23",
-      "file": "Meta.list",
+      "file": "MetaIP.list",
       "reason": "WB/Wave-1 交付 §3.1（Meta IP 区口径：只收第一方段）：同上。防上游再合并带回。"
     },
     {
@@ -1384,7 +1378,7 @@
     },
     {
       "pattern": "IP-ASN,36040",
-      "not_file": "YouTube.list",
+      "not_file": "YouTubeIP.list",
       "reason": "WB/Wave-1 交付 §3.2（唯一归属守卫）：R1-15/R1-16 把 AS36040（YOUTUBE，0% GCP，全是 ISP 内嵌 GGC 缓存段）从 Google.list 迁到 YouTube.list（裁决 306）。它回到 YouTube.list 之外的任何表即归属回退，YouTube 会话与视频面分裂到两个出口。"
     },
     {
@@ -1445,6 +1439,16 @@
     {
       "pattern": "DOMAIN-KEYWORD,smp-device",
       "reason": "WE/Wave-1 交付 §2.3（R1-19）：无边界关键词，任意第三方域含该子串即被判 Apple 直连。删后 AppleCN.list 已零 DOMAIN-KEYWORD，任何回流都是上游噪声。负例断言固化在 fix_domestic_v2.json::applecn_smp_device_keyword_removed_v2。"
+    },
+    {
+      "pattern": "DOMAIN-WILDCARD,cdn-*.microsoft.com",
+      "file": "DownloadCDN.list",
+      "reason": "2026-09-13：微软cdn前缀不证明独立下载用途。保留有依据的具体主机，禁止恢复跨任意微软业务子域的下载通配。"
+    },
+    {
+      "pattern": "DOMAIN-WILDCARD,cdn.*.microsoft.com",
+      "file": "DownloadCDN.list",
+      "reason": "2026-09-13：微软cdn前缀不证明独立下载用途。保留有依据的具体主机，禁止恢复跨任意微软业务子域的下载通配。"
     }
   ]
 }

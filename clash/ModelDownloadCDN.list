@@ -1,10 +1,16 @@
 # AUTO-GENERATED — Clash(Mihomo) classical 规则，由 ../lists/ModelDownloadCDN.list 派生
 # 勿手工编辑；修改 Surge 源后运行 python3 tools/surge2clash.py 重新生成
 
-# Bulk model/dataset endpoints precede AI; browsing and APIs remain with their service owner.
+# ModelDownloadCDN — maintained routing owner.
+# Topology and matching options: config/routing.json.
+# Sources and review decisions: SOURCES.md.
+
+DOMAIN,cas-server.xethub-eu.hf.co
+DOMAIN,transfer.xethub-eu.hf.co
 
 DOMAIN-SUFFIX,aws.cdn.hf.co
 DOMAIN-SUFFIX,cdn-lfs-eu-1.hf.co
 DOMAIN-SUFFIX,cdn-lfs-us-1.hf.co
 DOMAIN-SUFFIX,cdn-lfs.hf.co
+DOMAIN-SUFFIX,us.gcp.cdn.hf.co
 DOMAIN-SUFFIX,xethub.hf.co

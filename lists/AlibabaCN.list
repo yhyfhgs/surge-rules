@@ -1,5 +1,6 @@
-# AlibabaCN — 阿里系国内域直连（上游 blackmatrix7 Alibaba + AliPay）；国际站（qwen.ai 等）归 AI.list 走代理
-# 排序：规则类型分区，区内字母序
+# AlibabaCN — maintained routing owner.
+# Topology and matching options: config/routing.json.
+# Sources and review decisions: SOURCES.md.
 
 DOMAIN-SUFFIX,10029.com
 DOMAIN-SUFFIX,1688.com

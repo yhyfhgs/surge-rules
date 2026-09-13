@@ -1,4 +1,6 @@
-# Verified bulk-download endpoints; shared tenant platforms and ordinary site assets are excluded.
+# DownloadCDN — maintained routing owner.
+# Topology and matching options: config/routing.json.
+# Sources and review decisions: SOURCES.md.
 
 DOMAIN,afdshield-or.download.prss.microsoft.com
 DOMAIN,azurestackreleases.download.prss.microsoft.com
@@ -11,6 +13,7 @@ DOMAIN,clientpatch.aws.blue-protocol.com
 DOMAIN,clientpatch.blue-protocol.com
 DOMAIN,datastore-main.aws.blue-protocol.com
 DOMAIN,db.download.prss.microsoft.com
+DOMAIN,dl.gl-inet.com
 DOMAIN,flg-main.aws.blue-protocol.com
 DOMAIN,g-ahpatch-prod.blue-protocol.com
 DOMAIN,gog-cdn-lumen.secure2.footprint.net
@@ -41,9 +44,6 @@ DOMAIN-SUFFIX,0x0.st
 DOMAIN-SUFFIX,1a-1791.com
 DOMAIN-SUFFIX,1fichier.com
 DOMAIN-SUFFIX,1fichier.info
-DOMAIN-SUFFIX,1passwordusercontent.ca
-DOMAIN-SUFFIX,1passwordusercontent.com
-DOMAIN-SUFFIX,1passwordusercontent.eu
 DOMAIN-SUFFIX,2024cdn.sx
 DOMAIN-SUFFIX,2025cdn.sx
 DOMAIN-SUFFIX,2026cdn.sx
@@ -1259,7 +1259,6 @@ DOMAIN-SUFFIX,conf.config-security.com
 DOMAIN-SUFFIX,connect.getflowbox.com
 DOMAIN-SUFFIX,connect.nosto.com
 DOMAIN-SUFFIX,consent.fmm.io
-DOMAIN-SUFFIX,consent.formula1.com
 DOMAIN-SUFFIX,consentdeliveryfd.azurefd.net
 DOMAIN-SUFFIX,content-a.strava.com
 DOMAIN-SUFFIX,content-cdn.svc.ui.com
@@ -5045,11 +5044,9 @@ DOMAIN-WILDCARD,cdn*.porn87.com
 DOMAIN-WILDCARD,cdn*.pornhost.com
 DOMAIN-WILDCARD,cdn-*.comaps.app
 DOMAIN-WILDCARD,cdn-*.comaps.tech
-DOMAIN-WILDCARD,cdn-*.microsoft.com
 DOMAIN-WILDCARD,cdn-*.organicmaps.app
 DOMAIN-WILDCARD,cdn-msp?.jmcomic-zzz.one
 DOMAIN-WILDCARD,cdn-msp?.jmcomic.me
-DOMAIN-WILDCARD,cdn.*.microsoft.com
 DOMAIN-WILDCARD,cdn?.18girlssex.com
 DOMAIN-WILDCARD,cdn?.mikuclub.fun
 DOMAIN-WILDCARD,chunk-*.mux.com

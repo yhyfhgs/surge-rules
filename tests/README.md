@@ -1,208 +1,157 @@
-# Surge 分流测试套件
+# Surge 分流测试
 
-五个入口，从纯离线到真实客户端逐层加码。全部 python3 标准库实现；L4 另用系统自带的
-`curl / dig / netstat / scutil / ifconfig / lsof` 与 Surge 自带的 `surge-cli`。
+以下命令均在仓库根目录执行。完整分流验证与发布流程见
+[维护手册](../docs/MAINTENANCE.md#validate-a-change)；这里说明各测试的用途和边界。
 
-| 层 | 入口 | 联网 | 回答的问题 | 耗时 |
-| --- | --- | --- | --- | --- |
-| L0 | `engine.py` | 否 | 这个域名命中哪条规则、走哪个组、从哪个出口出去 | < 1 秒 |
-| L1 | `audit.py` | 否 | 规则表本身有没有毛病（泄漏面 / 重复 / 遮蔽 / 失联） | ~5 秒 |
-| L2 | `runsuite.py` | 否 | 场景断言全过吗 | ~10 秒 |
-| L3 | `live_check.py` | **是** | 真实网络里发生的与离线推演一致吗、出口 IP 对吗 | 1–5 分钟 |
-| L4 | `realworld.py` | 部分 | 真实客户端发出去会怎样、DNS/WebRTC/TUN 真的生效吗 | 3–5 分钟 |
+| 层 | 入口 | 网络要求 | 用途 |
+|---|---|---|---|
+| L0 | `engine.py` | 离线 | 首次命中、策略、出口推演与 DNS 泄漏路径 |
+| L1 | `audit.py` | 离线 | A1–A10 静态审计 |
+| L2 | `runsuite.py` | 离线 | 整组会话请求的分流断言 |
+| L3 | `live_check.py` | 运行中的 Surge HTTP API + 联网 | 实测策略、出口和 DNS 缓存 |
+| L4 | `realworld.py` | 运行中的 Surge / surge-cli，部分联网 | TUN、DNS、STUN、客户端画像及原生匹配 |
 
-**判定原则：在线为准。发布闸门只有 `audit.py` 与 `runsuite.py`**（纯离线、可复现）；
-L3/L4 随节点与站点可达性波动，刻意不挂闸门，是推送前手工跑一遍的确认步骤。
-报告不要写进 `rules/`（会被 jsDelivr 分发），用 `--out` / `--report` 指到别处。
+域名检查与基础探针使用标准库；IP 匹配、MMDB 分析及配置生成需要安装
+`requirements-analysis.txt`（maxminddb、PyYAML）。发布脚本还运行分析器、配置和派生层检查，并非只有 L1/L2。
+L3/L4 受网络与节点状态影响，按相关任务范围运行，不作离线发布闸门。
 
-**私有节点信息一律外置。** `tests/` 随公开仓库分发：真实策略组名、节点名、出口 IP、
-线路商与机房标识、自家 ASN 都不许进入任何入库文件，代码里只留中性占位默认值
-（`US-HOME-A` / `ISP-A` / ASN `64500`…），报告要外发再加 `--redact`。覆盖档由
-`engine.py` 与 `live_check.py` 共用，取第一个存在的文件：① 环境变量
-`LIVE_CHECK_LOCAL`；② `tests/live_check_local.json`（已 gitignore）。缺失不报错，
-全走中性默认值，出口画像断言自动跳过 / 退化到国旗兜底。schema：
+## 配置、数据与隐私
 
-```json
-{"exit_class_exact":    {"<策略组或叶子出口组名>": "<exit_class>"},
- "exit_class_keywords": [["<物理节点名关键字>", "<exit_class>"]],
- "asn_map":             {"<ASN>": "<注释>"},
- "residential_hints":   ["<RDAP 机构/网段名关键字>"],
- "datacenter_hints":    ["<RDAP 机构/网段名关键字>"]}
-```
+支持 `--conf` 的入口可指定候选配置。默认依次使用有效的 `SURGE_CONF` 和仓库
+相邻的 `../Surge.conf`；可用 `--rules` 或 `SURGE_RULES_DIR` 明确指定规则目录。
 
-数据面：`scenarios/`（场景数据集，9 个主题文件）、`allowlist.json`（豁免表 +
-forbidden 禁令段）、`realworld_targets.json`（L4 代表域 / 画像 / STUN / DNS 用例）、
-`data/`（A10 判据快照 PSL / IANA，说明见 `data/SNAPSHOTS.json`）、
-`analyze_rules_selftest.py`（分析器自检）。
-
-## L0 `engine.py`
-
-离线复刻 Surge 匹配语义：读 `Surge.conf` 的 `[Rule]`，把每条 `RULE-SET` 按文件名
-映射回本地 `lists/*.list` 内联展开，再按顺序首次命中匹配。只支持本仓库允许的规则面
-（8 种类型 + RULE-SET/FINAL + 内置 SYSTEM/LAN 近似），其余类型告警并跳过。
-
-```bash
-python3 engine.py match chatgpt.com [--json] [--ip 1.2.3.4]
-python3 engine.py match 1.1.1.1                          # 纯 IP 查询
-python3 engine.py dump-index [--file NAME]               # 导出展开后的全规则表
-python3 engine.py --selftest
-python3 engine.py match X --conf <conf> --rules <dir>    # 指定候选 conf / 规则目录
-```
-
-输出字段：`matched_rule` / `rule_index`（展开后位次，越小越优先）/ `source` /
-`policy` / `physical_exit`（递归解析组首项）/ `exit_class`（出口归类，映射由私有
-覆盖档提供）/ `dns_leak` / `dns_leak_at`（命中前是否途经缺 `no-resolve` 的 IP 规则）。
-
-两个前提：① 策略组一律按**成员首项**推演，手动切过节点则离线结论不适用；
-② `IP-ASN` / `GEOIP` 是离线近似（`GEOIP,CN` 用 `ChinaIP.list`，ASN 用内置小表），
-纯 IP 结论以在线为准。
-
-## L1 `audit.py`
-
-```bash
-python3 audit.py [--check A1,A4] [--fail-on P0] [--out DIR] [--selftest]
-python3 audit.py --conf <conf> --rules lists --check all --fail-on P1   # 闸门用法
-```
-
-| 编号 | 查什么 |
-| --- | --- |
-| A1 | IP 类规则缺 `no-resolve` —— 直接对应 DNS 泄漏，头号红线 |
-| A2 | 跨 list 精确重复 —— 后出现的那条是死条目 |
-| A3 | 同 list 内部覆盖 —— `DOMAIN` 被同表 `SUFFIX` 吃掉之类 |
-| A4 | 跨 list 遮蔽 —— 直连区条目被代理区抢跑 = P0 |
-| A5 | conf 引用完整性 —— 引用了不存在的表，或有表没人引用 |
-| A6 | `DOMAIN-KEYWORD` 清单 —— 只列出来给人复核，不判对错 |
-| A7 | 规则行格式 lint —— 无类型前缀的裸行会被静默忽略 = 死规则，P1 |
-| A8 | 禁止回流 —— `forbidden` 段登记的模式一出现即 P0，**不可豁免** |
-| A9 | IP 跨表包含 —— 按 conf 真实序只报「后位 CIDR 被前位吞掉」；同策略 P3，跨策略 P1 |
-| A10 | 单标签后缀与 PSL 注册边界 —— 用入库 PSL + IANA 快照判，离线不联网 |
-
-严重度：P0 功能损坏或明确错误分流 / P1 IP 一致性与 DNS 泄漏风险 / P2 冗余遮蔽但
-无直接伤害 / P3 风格建议。`--out` 写 findings.jsonl。
-
-`allowlist.json` 两段：`exemptions` 登记「允许存在的刻意设计」，按 `(check, file,
-rule)` 匹配，可选 `by` / `by_file` / `kind` 收窄豁免面，`preventive: true` 为防回归
-条目（未命中不算无用豁免）；`forbidden` 登记「必须持续不存在的规则模式」，由 A8
-强制，命中即 P0 不吃豁免，可带 `file`（只在该表内禁）或 `not_file`（该表之外禁）。
-每条都**必须**写 `reason`。签名要锚定注册域（写 `s3.*.amazonaws.com` 而非 `s3*`）。
+真实节点名、出口 IP/ASN/ISP 映射和凭据不得入库。`engine.py` 与
+`live_check.py` 优先读取 `LIVE_CHECK_LOCAL` 指定的私有 JSON，否则读取
+`tests/live_check_local.json`。缺失时使用中性占位值，出口画像断言跳过或退化。
+可用字段：
 
 ```json
-{"version": 1,
- "exemptions": [{"check": ["A2","A3","A4"], "file": "Google.list",
-                 "by_file": "YouTube.list", "preventive": true,
-                 "reason": "YouTube 专属资产由前位 YouTube.list 认领"}],
- "forbidden":  [{"pattern": "USER-AGENT,*", "reason": "裁决：全库零 USER-AGENT"}]}
+{"exit_class_exact": {"<策略组>": "<exit_class>"},
+ "exit_class_keywords": [["<节点关键字>", "<exit_class>"]],
+ "asn_map": {"<ASN>": "<说明>"},
+ "residential_hints": ["<机构关键字>"],
+ "datacenter_hints": ["<机构关键字>"]}
 ```
 
-## L2 `runsuite.py`
+提交前用 `git check-ignore tests/live_check_local.json` 确认隔离。报告通过
+`--out` / `--report` 写到仓库外，对外分享前使用支持的 `--redact`。
 
-场景 = 一次自然用户行为触发的整组域名（主站 + API + CDN + 登录风控）。判的不是
-「单个域名走哪」，而是「这一整套操作会不会被拆到不同出口上」。
+| 数据 | 用途 |
+|---|---|
+| `scenarios/*.json` | 会话场景与正负例；数量以运行输出为准 |
+| `allowlist.json` | 审计豁免与 forbidden 防回流规则 |
+| `realworld_targets.json` | L4 代表域、客户端画像、STUN 和 DNS 用例 |
+| `data/SNAPSHOTS.json` | PSL / IANA 快照哈希及刷新步骤 |
+
+## L0–L2：离线匹配、审计和场景
 
 ```bash
-python3 runsuite.py [--filter openai] [--json]
-python3 runsuite.py --conf <conf> --rules lists     # 闸门用法
+python3 tests/engine.py match example.com --conf /tmp/Surge.candidate.conf --json
+python3 tests/engine.py match 1.1.1.1
+python3 tests/engine.py dump-index --file Google.list
+python3 tests/audit.py --conf /tmp/Surge.candidate.conf --rules lists --check all --fail-on P1
+python3 tests/runsuite.py --conf /tmp/Surge.candidate.conf --rules lists
+python3 tests/runsuite.py --filter openai --json
 ```
 
+引擎按 `[Rule]` 顺序展开本地 RULE-SET，仅支持仓库允许的规则类型，其余告警
+并跳过。结果包括 `matched_rule`、`rule_index`、`source`、`policy`、
+`physical_exit`、`exit_class`、`dns_leak` 与 `dns_leak_at`。
+策略组按成员首项推演；GEOIP/ASN 使用真实 MMDB，SYSTEM/LAN 仍为声明过的
+近似。没有 DNS 观测时 `routing_complete=false`，不会伪造最终策略。
+`stage=domain` / CLI `--stage domain` 只验域名边界，阶段 Final 不代表连接最终
+落点。`dns_status=resolved/success/failed`、`resolved_ips`、`sni`、`http_host`
+可提供完整测试观测；IP 结果仍须与原生客户端验证。
+
+| 检查 | 内容 |
+|---|---|
+| A1 | 域名先于主动 IP 解析；加密 DNS 与证书检查 |
+| A2 / A3 / A4 | 跨表重复 / 同表覆盖 / 跨表遮蔽 |
+| A5 / A6 / A7 | 配置引用完整性 / 关键词清单 / 规则格式 |
+| A8 | forbidden 与 IP 隔离清单防回流，命中即 P0 |
+| A9 | 按实际列表顺序检查 IP 跨表包含 |
+| A10 | 单标签后缀与 PSL 注册边界 |
+
+P0 表示功能或分流错误，P1 表示 IP/DNS 风险，P2 表示冗余遮蔽，P3 为信息建议。
+豁免按 `(check, file, rule)` 匹配，可用 `by` / `by_file` / `kind` 收窄；
+`preventive: true` 表示防回归条目。forbidden 可用 `file` / `not_file` 限定范围。
+两类条目都必须有 `reason`，模式应锚定注册域。
+
 ```json
-{"name": "openai_chatgpt_web", "desc": "网页版 ChatGPT 登录并对话",
+{"name": "openai_chatgpt_web", "desc": "ChatGPT 登录并对话",
  "requests": [{"host": "chatgpt.com"}, {"host": "auth.openai.com"}],
  "assert": {"same_policy": true, "policy": "AI", "no_dns_leak": true}}
 ```
 
-断言字段：`same_policy`（会话内所有请求同组）、`policy` / `policy_in`（互斥）、
-`per_request`（给个别请求单独定期望，按 `(host, ip)` 精确对上）、`no_dns_leak`。
-请求项也可写 `{"ip": "8.8.8.8"}`。schema 在加载期严格校验（未知键、空场景、假绿的
-`same_policy` 都拒载）。当轮基线数字见 `CHANGELOG.md`，真值以本命令输出为准。
+场景支持 `same_policy`、互斥的 `policy` / `policy_in`、按 `(host, ip)` 匹配的
+`per_request`、`no_dns_leak`、`routing_complete`、`dns_resolution_count`；
+请求也可只写 `ip`。`no_dns_leak` 检查未经允许的明文查询，不再把任何本地
+加密解析都称为泄漏。相同 host/ip 的不同观测应拆成独立场景。未知键、空场景及只剩一个
+未覆盖请求的 `same_policy` 会拒载，不能以空测试得到通过。
 
-## L3 `live_check.py`
-
-```bash
-export SURGE_API_KEY=surgetest
-python3 live_check.py --check-api    # API 通不通；其它子命令都会先做这一步
-python3 live_check.py --policies     # 各组当前选中项 vs 引擎假设（成员首项）
-python3 live_check.py --scenario all # 场景实测（真发请求），也可 --hosts a.com,b.com
-python3 live_check.py --exit-map     # 出口画像：组 → 出口 IP → ASN → 住宅/机房
-python3 live_check.py --dns-leak     # flush 后访问代理域，读 /v1/dns 找实锤
-python3 live_check.py --full         # 全跑并生成 live_report.md
-```
-
-`--policies` 区分：`select` 组不一致 = 你手动切过节点（★ 告警），`smart` /
-`url-test` 不一致 = 动态择优、非问题。`--scenario` 状态 `PASS` / `FAIL` /
-`UNREACHABLE`（网络层没打通，不算断言失败）/ `NOT_FOUND`（连接复用）/ `SKIPPED`；
-一条都没判定成会直接退出 1。`--exit-map` 每组用一个本身就命中该组规则的探针域，
-并从配置推导一遍出口 IP，实测与推导并排能看出链路有没有降级；建
-`expected_asn.json`（建议 gitignore）才做 ASN 断言。
-
-**开启 HTTP API（只有 L3 需要，程序不会替你改配置）**：在 `Surge.conf` 的
-`[General]` 手工加 `http-api = surgetest@127.0.0.1:6171`，重载配置，再
-`export SURGE_API_KEY=surgetest`。监听地址务必写 `127.0.0.1`。
-
-## L4 `realworld.py`
-
-不需要 `http-api`；`surge-cli` 走本机控制通道。
+## 工具自检与 Clash 合同
 
 ```bash
-python3 realworld.py --tun        # 接管状态：utun / 默认路由 / 系统 DNS / hijack
-python3 realworld.py --dns        # hijack / fake-IP / canary / SVCB / DoH / 泄漏抽样
-python3 realworld.py --webrtc     # 最小 STUN 客户端取 srflx 公网 IP 比对
-python3 realworld.py --clients    # 真实客户端画像 × 各组代表域
-python3 realworld.py --crosscheck # surge-cli 实测语义 vs engine.py 离线推演，逐条对账
-python3 realworld.py --ua-routing # MITM/auto-quic-block 红线 + 零 UA 规则负向验证
-python3 realworld.py --offline    # 只跑 --tun --crosscheck --ua-routing
-python3 realworld.py --list-targets   # 只打印数据配置并复核归属，零外部请求
-```
-
-- `--tun` 硬断言三条：出站模式 `rule`、IPv4 默认路由指向 utun、系统 DNS 指向 Surge
-  响应器（macOS 是 `198.18.0.2`）。有一条不成立后面所有结论都不作数。
-- `--dns`：hijack 生效性（应答须落 fake-IP 池 `198.18.0.0/15`）、canary/SVCB 响应器
-  行为、DoH 可用性、本地泄漏 live 抽样（`dump dns` 前后快照只看新增，零写操作）。
-- `--webrtc` 不写死任何 IP：`baseline: true` 的 STUN 须落 DIRECT，其余组的 srflx
-  与它比；`udp-policy-not-supported-behaviour = REJECT` 时超时无应答 = 零泄漏。
-- `--crosscheck` 抓离线引擎与真实 Surge 的语义差异：域名类不一致 = 硬失败，纯 IP
-  不一致默认只提示（GEOIP 非 CN / IP-ASN 是显式声明的近似）、`--strict` 升为硬失败。
-- `--ua-routing` 断言两件事：`[MITM] hostname` 非空时 `auto-quic-block = true`
-  （profile 红线）；每个用例带 UA 与不带 UA 落点必须相同（全库已零 UA 规则，落点
-  变化 = 规则回流）。
-
-改测什么全在 `realworld_targets.json`；`groups[].hosts` 的选取标准只有一条：该域名
-本身必须命中该组的规则，程序每轮用 `surge-cli` 复核归属——这张表是自校验的。
-
-**L3 / L4 共同的安全边界**：不切策略、不改配置、不重载 profile；从不读取或打印
-psk / ca-p12；对外只发普通 HTTPS GET/HEAD，只访问场景与 targets 登记的端点，默认
-限速 3 req/s。L3 唯一的写操作是 `POST /v1/dns/flush`（`--no-flush` 可关），L4 全程
-零写（`surge-cli` 只用 `status` / `rule explain` / `http probe` / `dump dns` /
-`dns lookup`）。
-
-## 退出码与已知观察项
-
-退出码：`0` 通过、`1` 有失败项；`2` = 环境不可用（L2 场景/引擎、L3 HTTP API、
-L4 Surge/surge-cli/出站模式）；`3` = 用法错误或 Ctrl-C（仅 L3/L4）。所有入口都支持
-`--json`。
-
-这些不是 bug：组选中项与假设不一致 = 你切过节点（离线层永远按成员首项推演）；
-在线策略显示节点名而非组名（还原不出链路时退一步比 `exit_class`）；`UNREACHABLE` /
-`NOT_FOUND` 不算分流错，但大面积出现时程序会警告覆盖率不够；DNS 泄漏要 flush 之后
-立刻看（本地缓存全机共享）；ASN 列为空不代表异常（ARIN 对家宽网段常不返回 ASN）。
-刻意设计（审计和场景都别报）：YouTube 全量归流媒体组且排在 Google 之前；大厂自有
-AI 归各自生态（Gemini → Google、Grok → Twitter、Meta AI → Meta）；全库零
-`USER-AGENT` / `PROCESS-NAME` / `URL-REGEX`（A8 把守）；`AI.list` 带
-`extended-matching`。离线层的 IP 判定是近似的：`GEOIP,CN` 用 `ChinaIP.list`、
-`IP-ASN` 用内置小表、`RULE-SET,SYSTEM`/`LAN` 用内置近似（`--crosscheck` 发现漏项
-按在线为准补进 `BUILTIN_SYSTEM_DOMAINS`）；要 MMDB 展开用
-`tools/analyze_rules.py --country-db/--asn-db`。
-
-## Clash 一致性与 DNS 合同检查
-
-在装有 PyYAML 的 Python 环境运行：
-
-```bash
+python3 tests/engine.py --selftest
+python3 tests/audit.py --selftest
+python3 tests/analyze_rules_selftest.py
+python3 tests/routing_v2_test.py
+python3 tests/expiry_safety_test.py
+python3 tests/realworld.py --selftest
+python3 tools/sort_lists.py --selftest
+python3 tools/probe_dead_domains.py --selftest
+python3 tests/adversarial_harness.py --conf /tmp/Surge.candidate.conf --rules lists
+python3 tests/adversarial_analyze_rules_test.py
+python3 tests/adversarial_probe_dead_domains_test.py
 python3 tests/clash_contract.py --conf /tmp/Surge.candidate.conf
-python3 tests/adversarial_analyze_rules_test.py AdversarialClashSyncTest
 ```
 
-逐条比较源表和 Clash payload、manifest 顺序、所有 provider 的 no-resolve，
-验证 DNS 配置路径，以及厂商 suffix 的真实 owner（不能只看共用策略组）。
-Mihomo 原生加载与 DNS 隔离测试的本批次结果见
-[2026-09-07 证据](../docs/evidence/2026-09-07-clash-routing.md)。
-语法通过不代表规则集初始化完成；必须确认实际 provider 计数并备齐真实 ASN/Country 数据库。
+按改动范围运行已有自检。压力测试覆盖域名/IP 边界、会话一致性、DNS 泄漏、
+QUIC 模糊输入和 STUN 报文。Clash 合同逐条比较源规则与 payload、manifest
+顺序、IP 减法/匹配参数、DNS 路径及归属正负例。
+`tests/mihomo_dns_failure_test.py` 使用隔离 DNS 实例验证不可用代理返回 SERVFAIL；
+不启用 TUN、不改系统代理或用户配置。原生加载与系统 DNS 接管的验证边界见
+[Clash 部署说明](../docs/CLASH.md)，语法通过不等于 provider 已加载。
+
+## L3/L4：实测
+
+L3 使用仅监听 `127.0.0.1` 的已配置 HTTP API，密钥由 `SURGE_API_KEY` 提供；
+程序不代改配置。L4 使用本机 surge-cli，无需 HTTP API。
+
+```bash
+python3 tests/live_check.py --check-api
+python3 tests/live_check.py --policies
+python3 tests/live_check.py --scenario all
+python3 tests/live_check.py --exit-map
+python3 tests/live_check.py --dns-leak
+python3 tests/realworld.py --tun
+python3 tests/realworld.py --dns
+python3 tests/realworld.py --webrtc
+python3 tests/realworld.py --clients
+python3 tests/realworld.py --quic
+python3 tests/realworld.py --crosscheck
+python3 tests/realworld.py --ua-routing
+```
+
+L3 `--policies` 区分 select 手动选择与 smart/url-test 动态择优；`--exit-map`
+仅在提供私有 `expected_asn.json` 时断言 ASN。`UNREACHABLE` / `NOT_FOUND`
+不等于分流错误，但覆盖不足不能报全面成功，一条都未判定会失败。
+
+L4 `--tun` 检查规则模式、默认路由和 Surge DNS；`--dns` 检查 fake-IP、
+canary/SVCB/DoH 与缓存增量；`--webrtc` 比较 DIRECT 基线和代理 STUN 出口。
+`--crosscheck` 的域名差异硬失败，IP 近似差异默认提示，`--strict` 升为失败。
+`--ua-routing` 检查 MITM hostname 与 auto-quic-block 配对及零 UA 规则。
+`--offline` 仍依赖运行中的 Surge；真正无运行时依赖的是 `--selftest`。
+
+实测不切策略、不改配置、不重载 profile、不打印密钥或证书。L3 DNS flush 可用
+`--no-flush` 关闭；L4 只读本地控制接口，网络探针按 targets 定义限速运行。
+正常退出为 0，失败为 1；L2–L4 环境不可用为 2，L3/L4 用法错误或中断为 3。
+
+
+## 过期候选的证据边界
+
+`probe_dead_domains.py` 使用 curl 给 DoH 的 DNS/TLS/读取总时间设限，
+并将排队与网络超时分开；`--dns-only` 可不读取网站内容。只有至少两个干净
+解析器的 NXDOMAIN 共识和权威确认才能进入未注册候选；超时、NODATA、
+无 NS 回应和停放页线索均不能直接触发删除。死亡计数每隔至少24小时才递增。
+当前网络受代理/TUN影响时，CN DNS异常标签仅供调查，不能单独用于新增代理规则。

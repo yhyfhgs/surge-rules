@@ -9,6 +9,9 @@ import yaml
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / 'tests'))
 import engine
+sys.path.insert(0, str(ROOT / "tools"))
+from rule_syntax import parse_ruleset_call, render_call
+from routing_manifest import load_routing_manifest
 
 
 def rules(path):
@@ -20,7 +23,7 @@ def main():
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument('--conf', required=True)
     args = ap.parse_args()
-    manifest = json.loads((ROOT / 'config/routing.json').read_text())['rulesets']
+    manifest = load_routing_manifest(str(ROOT / 'config/routing.json'), str(ROOT / 'lists'))
     clash = yaml.safe_load((ROOT / 'clash/rule-providers.yaml').read_text())
     names = [r['name'] for r in manifest]
     assert list(clash['rule-providers']) == names
@@ -30,22 +33,47 @@ def main():
         source = rules(ROOT / 'lists' / (name + '.list'))
         assert source == rules(ROOT / 'clash' / (name + '.list')), name
         total += len(source)
-    assert clash['rules'] == [f"RULE-SET,{r['name']},{r['policy']},no-resolve" for r in manifest] + [
-        'GEOIP,lan,DIRECT,no-resolve', 'GEOIP,CN,DIRECT,no-resolve', 'MATCH,Final']
-    # Verify the actual conf's list order and policies, independently of its renderer.
-    from urllib.parse import urlparse
+    assert clash['rules'] == [render_call(r, lambda name: name, clash=True) for r in manifest] + ['MATCH,Final']
     actual = []
+    in_rules = False
     for line in Path(args.conf).read_text().splitlines():
-        parts = line.strip().split(',')
-        if parts[0] == 'RULE-SET' and parts[1] not in ('SYSTEM', 'LAN'):
-            actual.append((Path(urlparse(parts[1]).path).stem, parts[2]))
-    assert actual == [(r['name'], r['policy']) for r in manifest]
+        text = line.strip()
+        if text.startswith('[') and text.endswith(']'):
+            in_rules = text.lower() == '[rule]'
+            continue
+        if not in_rules or not text or text.startswith('#'):
+            continue
+        call = parse_ruleset_call(text)
+        if call and call[0] not in ('SYSTEM', 'LAN'):
+            actual.append((Path(call[0]).stem, call[1], tuple(Path(n).stem for n in call[3])))
+    assert actual == [(r['name'], r['policy'], tuple(r.get('exclude_rulesets', []))) for r in manifest]
+    # Managed DNS mappings must follow the same domain-owner order, including
+    # proxy exceptions before broad DIRECT parents such as ChinaTLD.
+    profile = Path(args.conf).read_text()
+    begin, end = '# BEGIN managed routing DNS', '# END managed routing DNS'
+    if begin in profile:
+        managed = profile.split(begin,1)[1].split(end,1)[0]
+        dns_owners = []
+        for line in managed.splitlines():
+            if line.startswith('RULE-SET:'):
+                reference, servers = line.split(' = server:',1)
+                owner = Path(reference.removeprefix('RULE-SET:')).stem
+                entry = next(r for r in manifest if r['name']==owner)
+                expected = ('system' if owner=='PrivateLAN' else
+                            'https://223.5.5.5/dns-query,https://120.53.53.53/dns-query' if entry['policy']=='DIRECT' else
+                            'https://8.8.8.8/dns-query,https://1.1.1.1/dns-query')
+                assert servers == expected, owner
+                dns_owners.append(owner)
+        assert dns_owners == [r['name'] for r in manifest if r['kind']=='domain']
     assert not any('Fallback' in name for name in names)
-    assert names.index('MicrosoftCN') < names.index('Microsoft')
+    assert names.index('Microsoft') < names.index('MicrosoftCN')
+    assert max(i for i,r in enumerate(manifest) if r['kind']=='domain') < min(i for i,r in enumerate(manifest) if r['kind']=='ip')
     dns = clash['dns']
     assert dns['enable'] and dns['enhanced-mode'] == 'fake-ip'
     assert not dns['use-system-hosts'] and not dns['use-hosts']
-    assert not dns['nameserver-policy'] and not dns['fallback']
+    assert dns['nameserver-policy'] == {'rule-set:PrivateLAN':'system'} and not dns['fallback']
+    assert dns['direct-nameserver-follow-policy']
+    assert 'rule-set:PrivateLAN' in dns['fake-ip-filter']
     assert not dns['proxy-server-nameserver-policy']
     for key in ['nameserver', 'default-nameserver', 'proxy-server-nameserver', 'direct-nameserver']:
         assert dns[key] and all(s.startswith('https://') for s in dns[key]), key
@@ -62,7 +90,7 @@ def main():
         'Meta': ['a.b.facebook.com', 'a.b.fbcdn.net', 'a.b.instagram.com',
                  'a.b.cdninstagram.com', 'a.b.whatsapp.net', 'a.b.meta.ai', 'a.b.threads.com'],
         'Twitter': ['a.b.x.com', 'a.b.twitter.com', 'a.b.twimg.com', 'a.b.t.co', 'a.b.x.ai', 'a.b.grok.com'],
-        'Microsoft': ['outlook.cloud.microsoft', 'a.b.usercontent.microsoft', 'a.b.microsoftonline.com', 'a.b.microsoft.com', 'a.b.live.com', 'a.b.office.com', 'a.b.msn.com',
+        'Microsoft': ['outlook.cloud.microsoft', 'a.b.usercontent.microsoft', 'a.b.microsoftonline.com', 'account.microsoft.com', 'graph.microsoft.com', 'teams.microsoft.com', 'storage.msn.com',
                       'office.live.com', 'g.live.com', 'files.1drv.com', 'a.b.files.1drv.com',
                       'skyapi.onedrive.live.com', 'a.b.storage.live.com', 'd.docs.live.net',
                       'login.live.com', 'device.login.microsoftonline.com', 'aadcdn.msauth.net',
@@ -91,7 +119,8 @@ def main():
             count += 1
     for host in ['notgoogle.com', 'google.com.example.org', 'notfacebook.com',
                  'facebook.com.example.org', 'notwitter.com', 'x.com.example.org',
-                 'notmicrosoft.com', 'microsoft.com.example.org', 'a.b.blob.core.windows.net']:
+                 'notmicrosoft.com', 'microsoft.com.example.org', 'a.b.blob.core.windows.net',
+                 'unknown.microsoft.com', 'unknown.live.com', 'unknown.office.com', 'unknown.msn.com']:
         result = eng.match(host=host)
         assert result['source'] not in {n + '.list' for n in witnesses}, (host, result)
         count += 1

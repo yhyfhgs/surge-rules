@@ -1,7 +1,9 @@
 # AUTO-GENERATED — Clash(Mihomo) classical 规则，由 ../lists/TikTok.list 派生
 # 勿手工编辑；修改 Surge 源后运行 python3 tools/surge2clash.py 重新生成
 
-# TikTok and ByteDance international services; bounded wildcards cover flattened CNAMEs.
+# TikTok — maintained routing owner.
+# Topology and matching options: config/routing.json.
+# Sources and review decisions: SOURCES.md.
 
 DOMAIN,lf16-campaign.ttlstatic.com
 DOMAIN,lf16-csp.oecstatic.com
@@ -20,6 +22,7 @@ DOMAIN,p26-tt.byteimg.com
 DOMAIN,p3-tt-ipv6.byteimg.com
 DOMAIN,p9-tt.byteimg.com
 
+DOMAIN-SUFFIX,bytedance.map.fastly.net
 DOMAIN-SUFFIX,bytedapm.com
 DOMAIN-SUFFIX,bytefcdn-oversea.com
 DOMAIN-SUFFIX,bytefcdn-ttpeu.com
@@ -46,6 +49,7 @@ DOMAIN-SUFFIX,larksuitecdn.com
 DOMAIN-SUFFIX,lemon8-app.com
 DOMAIN-SUFFIX,muscdn.com
 DOMAIN-SUFFIX,musical.ly
+DOMAIN-SUFFIX,musical.ly.edgekey.net
 DOMAIN-SUFFIX,sgpstatp.com
 DOMAIN-SUFFIX,sgsnssdk.com
 DOMAIN-SUFFIX,tik-tokapi.com
@@ -55,6 +59,9 @@ DOMAIN-SUFFIX,tiktok.in
 DOMAIN-SUFFIX,tiktokcdn-eu.com
 DOMAIN-SUFFIX,tiktokcdn-us.com
 DOMAIN-SUFFIX,tiktokcdn.com
+DOMAIN-SUFFIX,tiktokcdn.com.akamaized.net
+DOMAIN-SUFFIX,tiktokcdn.com.edgekey.net
+DOMAIN-SUFFIX,tiktokcdn.com.edgesuite.net
 DOMAIN-SUFFIX,tiktokcdn.net
 DOMAIN-SUFFIX,tiktokd.net
 DOMAIN-SUFFIX,tiktokd.org
@@ -64,6 +71,9 @@ DOMAIN-SUFFIX,tiktokmusic.app
 DOMAIN-SUFFIX,tiktokshop.com
 DOMAIN-SUFFIX,tiktokstaticb.com
 DOMAIN-SUFFIX,tiktokv.com
+DOMAIN-SUFFIX,tiktokv.com.akamaized.net
+DOMAIN-SUFFIX,tiktokv.com.edgekey.net
+DOMAIN-SUFFIX,tiktokv.com.edgesuite.net
 DOMAIN-SUFFIX,tiktokv.eu
 DOMAIN-SUFFIX,tiktokv.us
 DOMAIN-SUFFIX,tiktokw.us
@@ -75,22 +85,9 @@ DOMAIN-SUFFIX,ttadsmanager.com
 DOMAIN-SUFFIX,ttapis.com
 DOMAIN-SUFFIX,ttdns2.com
 DOMAIN-SUFFIX,ttlivecdn.com
+DOMAIN-SUFFIX,ttlivecdn.com.edgesuite.net
 DOMAIN-SUFFIX,ttoversea.net
 DOMAIN-SUFFIX,ttoverseaus.net
 DOMAIN-SUFFIX,ttwebview.com
 DOMAIN-SUFFIX,ttwstatic.com
 DOMAIN-SUFFIX,tzvbfs.com
-
-DOMAIN-WILDCARD,*.bytedance.map.*
-DOMAIN-WILDCARD,*.musical.ly.*
-DOMAIN-WILDCARD,*.tiktokcdn.com.*
-DOMAIN-WILDCARD,*.tiktokv.com.*
-DOMAIN-WILDCARD,*.ttlivecdn.com.*
-DOMAIN-WILDCARD,bytedance.map.*
-DOMAIN-WILDCARD,musical.ly.*
-DOMAIN-WILDCARD,tiktokcdn.com.*
-DOMAIN-WILDCARD,tiktokv.com.*
-DOMAIN-WILDCARD,ttlivecdn.com.*
-
-IP-ASN,11983,no-resolve
-IP-ASN,138699,no-resolve

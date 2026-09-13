@@ -1,4 +1,6 @@
-# SocialOthers — 其他国际社交平台
+# SocialOthers — maintained routing owner.
+# Topology and matching options: config/routing.json.
+# Sources and review decisions: SOURCES.md.
 
 DOMAIN,naver.com
 DOMAIN,www.naver.com

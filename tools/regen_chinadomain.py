@@ -511,7 +511,8 @@ def verdict(rec, cnset, asninfo, pinned):
 # ---------------------------------------------------------------- P9 落点复核
 
 def p9_recheck(names, engine_path, conf, rules_dir):
-    """Recheck each pending deletion with ``engine.py``; allowed policies are Final or Proxy.
+    """Recheck domain-stage ownership after deletion; allowed policies are Final or Proxy.
+    Full DNS/IP behavior is verified separately; no address answer is fabricated here.
 
     The result is ``{name: (policy, source)}``; legacy policy aliases may also
     be returned by the engine. An empty result means the engine was unavailable
@@ -521,7 +522,7 @@ def p9_recheck(names, engine_path, conf, rules_dir):
         return {}
     out = {}
     for n in names:
-        cmd = [sys.executable, engine_path, "match", n, "--json"]
+        cmd = [sys.executable, engine_path, "match", n, "--stage", "domain", "--json"]
         if conf:
             cmd += ["--conf", conf]
         if rules_dir:
@@ -565,6 +566,7 @@ def main(argv=None):
                    help="影子运行：算出会丢什么但一条都不丢，只写 state 与报告（第 1、2 轮）")
     g.add_argument("--apply", action="store_true",
                    help="正式：P7 迟滞满足的才真删并写表（第 3 轮起）")
+    ap.add_argument("--additions-only", action="store_true", help="只探测新增候选；仅接收KEEP结果，保留既有长尾和迟滞状态")
     a = ap.parse_args(argv)
 
     try:
@@ -599,7 +601,14 @@ def main(argv=None):
                      for d in DELETED_POISON_DOMAINS)]
     assert not leaked, "F1 漏网：17 条已删域回流 %s" % leaked
 
-    todo = rules
+    baseline = parse_rules(os.path.join(a.lists_dir, "ChinaDomain.list"))
+    baseline_keys = {(r["type"], r["value"]) for r in baseline}
+    todo = ([r for r in rules if (r["type"], r["value"]) not in baseline_keys]
+            if a.additions_only else rules)
+    if a.additions_only:
+        print("incremental new candidates: %d; existing %d preserved" % (len(todo), len(baseline)))
+    if a.sample and a.additions_only:
+        ap.error("--sample cannot certify --additions-only output")
     if a.sample:
         step = max(1, len(rules) // a.sample)
         todo = rules[::step][:a.sample]
@@ -615,6 +624,12 @@ def main(argv=None):
     rate = ok / max(len(recs), 1) * 100
     print("resolved %d/%d = %.1f%% in %.0fs" % (ok, len(recs), rate, time.time() - t0))
     if rate < a.min_resolve_rate:
+        if a.report:
+            with open(a.report, "w", encoding="utf-8") as handle:
+                json.dump({"status":"RESOLUTION_RATE_GATE_FAILED", "resolved":ok,
+                           "queried":len(recs), "minimum_percent":a.min_resolve_rate,
+                           "records":recs, "source_rows_preserved":len(baseline)},
+                          handle, ensure_ascii=False, indent=2)
         print("!! 解析成功率 %.1f%% < %.1f%% —— 判定不可信，中止" % (rate, a.min_resolve_rate))
         return 2
 
@@ -641,7 +656,9 @@ def main(argv=None):
         v, prot = verdict(rec, cnset, asninfo, pinned)
         counts[v] += 1
         streak = state.get(rec["name"], {}).get("streak", 0)
-        streak = streak + 1 if v.startswith("DROP") else 0
+        previous = state.get(rec["name"], {})
+        today = time.strftime("%Y-%m-%d")
+        streak = (streak + int(previous.get("ts") != today)) if v.startswith("DROP") else 0
         state[rec["name"]] = {"streak": streak, "last": v, "ts": time.strftime("%Y-%m-%d")}
         out_rows.append({"rule": rule["raw"], "name": rec["name"], "verdict": v,
                          "protections": prot, "streak": streak,
@@ -721,7 +738,27 @@ def main(argv=None):
 
     if a.apply and a.out:
         drop_names = {r["name"] for r in eff_drop}
-        kept = [r for r in rules if r["value"] not in drop_names]
+        accepted = {r["name"] for r in out_rows if r["verdict"].startswith("KEEP")}
+        if a.additions_only:
+            # The existing generated layer is retained. New rows require positive
+            # classification; UNKNOWN/NO_A/QUARANTINE never become new DIRECT rules.
+            base, _ = f0_type_filter(baseline)
+            base, _ = f1_forbidden(base, a.allowlist)
+            base, _ = f2_ownership(base, a.lists_dir, ownership_order, policies)
+            kept = base + [r for r in todo if r["value"] in accepted]
+        else:
+            kept = [r for r in rules if r["value"] not in drop_names and
+                    ((r["type"], r["value"]) in baseline_keys or r["value"] in accepted)]
+        # Same-owner exact entries need not duplicate a kept suffix.
+        suffixes = {r["value"] for r in kept if r["type"] == "DOMAIN-SUFFIX"}
+        unique = {}
+        for r in kept:
+            labels = r["value"].split(".")
+            start = 0 if r["type"] == "DOMAIN" else 1
+            if any(".".join(labels[i:]) in suffixes for i in range(start, len(labels))):
+                continue
+            unique[(r["type"], r["value"])] = r
+        kept = list(unique.values())
         with open(a.out, "w", encoding="utf-8") as f:
             f.write("# ChinaDomain — 整表机器刷新层，由 tools/regen_chinadomain.py 再生；勿手改单条\n")
             f.write("# 数据源与 pin 见 sources.lock.json；再生回路见 docs/MAINTENANCE.md\n")

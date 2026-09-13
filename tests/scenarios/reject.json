@@ -18,7 +18,10 @@
       {"host": "sdk.inmobi.com"},
       {"host": "api.vungle.com"}
     ],
-    "assert": {"same_policy": true, "policy": "REJECT"}
+    "assert": {
+      "same_policy": true,
+      "policy": "REJECT"
+    }
   },
   {
     "name": "ad_serving_cn_reject",
@@ -40,7 +43,10 @@
       {"host": "ads-partner.tiktok.com", "note": "DOMAIN-WILDCARD 命中"},
       {"host": "ads-normal.xhscdn.com", "note": "小红书广告素材"}
     ],
-    "assert": {"same_policy": true, "policy": "REJECT"}
+    "assert": {
+      "same_policy": true,
+      "policy": "REJECT"
+    }
   },
   {
     "name": "chumbox_content_farm_ads_reject",
@@ -53,7 +59,10 @@
       {"host": "c.mgid.com"},
       {"host": "trends.revcontent.com"}
     ],
-    "assert": {"same_policy": true, "policy": "REJECT"}
+    "assert": {
+      "same_policy": true,
+      "policy": "REJECT"
+    }
   },
   {
     "name": "httpdns_private_doh_reject",
@@ -74,7 +83,10 @@
       {"host": "httpdns.yunxinfw.com", "note": "2026-08-30 补录：网易云信；与已有 httpdns.yunxindns.com 是两套端点"},
       {"host": "yuyin-httpdns.gslb.yy.com", "note": "2026-08-30 补录：YY 语音"}
     ],
-    "assert": {"same_policy": true, "policy": "REJECT"}
+    "assert": {
+      "same_policy": true,
+      "policy": "REJECT"
+    }
   },
   {
     "name": "malware_hijacking_reject",
@@ -103,7 +115,10 @@
       {"host": "www.adsame.com", "note": "安沃 adsame 广告网络；ChinaDomain.list 亦收录同域为 DIRECT，本表前位抢占——须联动从 ChinaDomain 删除"},
       {"host": "www.yukhj.com", "note": "AlibabaCN.list 亦收录（上游抓取噪声），本表前位抢占——须联动从 AlibabaCN 删除"}
     ],
-    "assert": {"same_policy": true, "policy": "REJECT"}
+    "assert": {
+      "same_policy": true,
+      "policy": "REJECT"
+    }
   },
   {
     "name": "rogue_monetization_sdk_reject",
@@ -119,20 +134,23 @@
       {"host": "api.nimiqpool.com", "note": "DOMAIN-KEYWORD,nimiqpool"},
       {"host": "sdk.packetsdk.com", "note": "DOMAIN-KEYWORD,packetsdk —— 偷带宽 SDK"}
     ],
-    "assert": {"same_policy": true, "policy": "REJECT"}
+    "assert": {
+      "same_policy": true,
+      "policy": "REJECT"
+    }
   },
   {
     "name": "malware_layer_no_overcapture",
     "desc": "恶意层误伤面回归：183 条假冒官网/劫持后缀不得牵连被假冒的真官网，也不得越界到「拦广告不拦统计」的分界之外",
     "requests": [
-      {"host": "www.mindmanager.com", "note": "真 MindManager；表内只收 mindmanager.cn（mindmanager.cc 已随 W3-07 A 组删除）"},
-      {"host": "www.anydesk.com", "note": "真 AnyDesk；表内只收 anydeskchina.cn"},
-      {"host": "www.mathtype.com", "note": "真 MathType；表内只收 mathtype.cn"},
+      {"host": "www.mindmanager.com", "note": "真 MindManager；表内只收 mindmanager.cn（mindmanager.cc 已随 W3-07 A 组删除）", "stage": "domain"},
+      {"host": "www.anydesk.com", "note": "真 AnyDesk；表内只收 anydeskchina.cn", "stage": "domain"},
+      {"host": "www.mathtype.com", "note": "真 MathType；表内只收 mathtype.cn", "stage": "domain"},
       {"host": "www.adobe.com", "note": "Adobe 主站"},
       {"host": "geo2.adobe.com", "note": "上游 Hijacking.list 唯一 DOMAIN 条目，刻意未收——它是 Adobe 地理重定向端点，属功能规避而非恶意基础设施"},
       {"host": "www.flashcn.cn", "note": "flash.cn 是后缀，不得误伤同名不同域"},
-      {"host": "www.topitme.com", "note": "刻意未收：图片社区真实站点名，恶意判定置信不足"},
-      {"host": "newapi.com", "note": "刻意未收：与开源 LLM 网关 New API 生态命名撞车"},
+      {"host": "www.topitme.com", "note": "刻意未收：图片社区真实站点名，恶意判定置信不足", "stage": "domain"},
+      {"host": "newapi.com", "note": "刻意未收：与开源 LLM 网关 New API 生态命名撞车", "stage": "domain"},
       {"host": "googletagmanager.com", "note": "GTM 是标签/统计容器，非投放面——按原则③放行"}
     ],
     "assert": {
@@ -160,7 +178,10 @@
       {"host": "182.254.116.117"},
       {"host": "180.76.76.200", "note": "百度 HTTPDNS"}
     ],
-    "assert": {"same_policy": true, "policy": "REJECT"}
+    "assert": {
+      "same_policy": true,
+      "policy": "REJECT"
+    }
   },
   {
     "name": "product_analytics_never_rejected",
@@ -171,11 +192,11 @@
       {"host": "cn.umeng.com", "note": "友盟"},
       {"host": "alog.umeng.com"},
       {"host": "api.mixpanel.com"},
-      {"host": "api2.amplitude.com"},
-      {"host": "sdk.growingio.com"},
+      {"host": "api2.amplitude.com", "stage": "domain"},
+      {"host": "sdk.growingio.com", "stage": "domain"},
       {"host": "datasink.sensorsdata.cn", "note": "神策"},
-      {"host": "sdk.talkingdata.com"},
-      {"host": "api.segment.io"},
+      {"host": "sdk.talkingdata.com", "stage": "domain"},
+      {"host": "api.segment.io", "stage": "domain"},
       {"host": "app-measurement.com", "note": "Firebase Analytics"},
       {"host": "log.mmstat.com", "note": "阿里一方行为日志"},
       {"host": "cnzz.mmstat.com", "note": "CNZZ 站长统计"}
@@ -203,11 +224,11 @@
     "name": "attribution_push_apm_never_rejected",
     "desc": "归因 / 推送 / 崩溃与 APM：重构必须放行的第二类",
     "requests": [
-      {"host": "api.appsflyer.com", "note": "归因"},
-      {"host": "app.adjust.com"},
-      {"host": "api2.branch.io"},
+      {"host": "api.appsflyer.com", "note": "归因", "stage": "domain"},
+      {"host": "app.adjust.com", "stage": "domain"},
+      {"host": "api2.branch.io", "stage": "domain"},
       {"host": "api.jpush.cn", "note": "极光推送"},
-      {"host": "sdk.open.inapi.getui.com", "note": "个推"},
+      {"host": "sdk.open.inapi.getui.com", "note": "个推", "stage": "domain"},
       {"host": "resolver.msg.xiaomi.net", "note": "对照组：小米 push 通道解析器属 HTTPDNS，仍应 REJECT"},
       {"host": "android.bugly.qq.com", "note": "腾讯 Bugly"},
       {"host": "o1.ingest.sentry.io"},
@@ -232,12 +253,12 @@
     "name": "third_party_measurement_never_rejected",
     "desc": "第三方广告效果监测：测量不是投放，为求精简一律放行（秒针/AdMaster/comScore/DoubleVerify/Moat/IAS）",
     "requests": [
-      {"host": "g.cn.miaozhen.com", "note": "秒针"},
+      {"host": "g.cn.miaozhen.com", "note": "秒针", "stage": "domain"},
       {"host": "track.admaster.com.cn", "note": "AdMaster；旧表 DOMAIN-KEYWORD,admaster 已删"},
-      {"host": "sb.scorecardresearch.com", "note": "comScore；旧表 DOMAIN-SUFFIX,scorecardresearch.com 已删"},
-      {"host": "cs.doubleverify.com"},
-      {"host": "px.moatads.com"},
-      {"host": "static.adsafeprotected.com"}
+      {"host": "sb.scorecardresearch.com", "note": "comScore；旧表 DOMAIN-SUFFIX,scorecardresearch.com 已删", "stage": "domain"},
+      {"host": "cs.doubleverify.com", "stage": "domain"},
+      {"host": "px.moatads.com", "stage": "domain"},
+      {"host": "static.adsafeprotected.com", "stage": "domain"}
     ],
     "assert": {
       "same_policy": false,
@@ -286,13 +307,13 @@
     "requests": [
       {"host": "juejin.cn", "note": "掘金；旧表 DOMAIN-SUFFIX,juejin.cn 直接屏蔽整站"},
       {"host": "deadspacegame.com", "note": "旧 DOMAIN-KEYWORD,adspace 命中 de-adspace-game"},
-      {"host": "downloadserver.example.com", "note": "旧 DOMAIN-KEYWORD,adserver 命中 downlo-adserver"},
-      {"host": "downloadsdk.example.com", "note": "旧 DOMAIN-KEYWORD,adsdk 命中 downlo-adsdk"},
+      {"host": "downloadserver.example.com", "note": "旧 DOMAIN-KEYWORD,adserver 命中 downlo-adserver", "stage": "domain"},
+      {"host": "downloadsdk.example.com", "note": "旧 DOMAIN-KEYWORD,adsdk 命中 downlo-adsdk", "stage": "domain"},
       {"host": "17admob.com", "note": "旧 DOMAIN-KEYWORD,admob 命中，现改窄后缀 admob.com"},
-      {"host": "www.zooplus.de", "note": "旧 DOMAIN-KEYWORD,.zooplus. 屏蔽整站"},
-      {"host": "www.footlocker.com", "note": "旧 DOMAIN-KEYWORD,.footlocker. 屏蔽整站"},
+      {"host": "www.zooplus.de", "note": "旧 DOMAIN-KEYWORD,.zooplus. 屏蔽整站", "stage": "domain"},
+      {"host": "www.footlocker.com", "note": "旧 DOMAIN-KEYWORD,.footlocker. 屏蔽整站", "stage": "domain"},
       {"host": "adwords.google.com", "note": "旧 DOMAIN-KEYWORD,adwords 命中广告主后台"},
-      {"host": "myhostingcloud.com", "note": "W3-09 反例：*.hostingcloud.* 的首个 * 必须吃掉一个标签边界的点，不得回退成无边界子串（旧 DOMAIN-KEYWORD,hostingcloud 会命中此域）"}
+      {"host": "myhostingcloud.com", "note": "W3-09 反例：*.hostingcloud.* 的首个 * 必须吃掉一个标签边界的点，不得回退成无边界子串（旧 DOMAIN-KEYWORD,hostingcloud 会命中此域）", "stage": "domain"}
     ],
     "assert": {
       "same_policy": false,
@@ -321,6 +342,9 @@
       {"host": "upos-sz-mirrorcos.bilivideo.com"},
       {"host": "wxsnsdythumb.wxs.qq.com", "note": "旧 DOMAIN-KEYWORD,wxsnsdy 命中朋友圈资源域"}
     ],
-    "assert": {"same_policy": true, "policy": "DIRECT"}
+    "assert": {
+      "same_policy": true,
+      "policy": "DIRECT"
+    }
   }
 ]

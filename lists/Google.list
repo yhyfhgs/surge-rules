@@ -1,4 +1,6 @@
-# Google international ecosystem; YouTube precedes this list and verified CN mirrors are in Domestic.
+# Google — maintained routing owner.
+# Topology and matching options: config/routing.json.
+# Sources and review decisions: SOURCES.md.
 
 DOMAIN-SUFFIX,0emm.com
 DOMAIN-SUFFIX,1e100.net
@@ -671,13 +673,3 @@ DOMAIN-SUFFIX,xn--p8j9a0d9c9a.xn--q9jyb4c
 DOMAIN-SUFFIX,xplr.co
 DOMAIN-SUFFIX,zukunftswerkstatt.de
 DOMAIN-SUFFIX,zynamics.com
-
-IP-CIDR,8.8.4.4/32,no-resolve
-IP-CIDR,8.8.8.8/32,no-resolve
-IP-CIDR,74.125.0.0/16,no-resolve
-IP-CIDR,173.194.0.0/16,no-resolve
-
-IP-CIDR6,2001:4860:4860::8844/128,no-resolve
-IP-CIDR6,2001:4860:4860::8888/128,no-resolve
-
-IP-ASN,15169,no-resolve

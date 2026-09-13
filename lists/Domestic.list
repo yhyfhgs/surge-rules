@@ -1,4 +1,6 @@
-# Verified domestic services, CN mirrors, certificate endpoints, and network probes.
+# Domestic — maintained routing owner.
+# Topology and matching options: config/routing.json.
+# Sources and review decisions: SOURCES.md.
 
 DOMAIN,cn.download.nvidia.com
 DOMAIN,config.ubnt.com
