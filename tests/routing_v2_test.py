@@ -17,6 +17,8 @@ from rule_syntax import parse_ruleset_call, render_call
 from routing_manifest import load_routing_manifest
 from analyze_rules import merge_networks, subtract_intervals
 from rebuild import op_include_cidr, RebuildError
+from analyze_rules import PSL
+from regen_chinadomain import additions_admissible
 import collapse_cidr
 
 
@@ -176,6 +178,23 @@ class RoutingFormatTests(unittest.TestCase):
             with contextlib.redirect_stdout(io.StringIO()):
                 self.assertEqual(collapse_cidr.main([str(path),'--check']), 1)
             self.assertEqual(path.read_text(), text)
+
+    def test_chinadomain_additions_need_positive_evidence(self):
+        psl = PSL(ROOT / 'tests/data/public_suffix_list.dat')
+        row = lambda rule, verdict, protections: {
+            'rule': rule, 'name': rule.split(',', 1)[1],
+            'verdict': verdict, 'protections': protections}
+        rows = [
+            row('DOMAIN-SUFFIX,in.th', 'KEEP_PROTECTED', ['P10-pinned:bx.in.th']),
+            row('DOMAIN-SUFFIX,carrier.example', 'KEEP_PROTECTED', ['P10-pinned:a.carrier.example']),
+            row('DOMAIN-SUFFIX,com.cn', 'KEEP_CN', ['P1-quorum-cn-hit']),
+            row('DOMAIN-SUFFIX,cn-hit.example', 'KEEP_CN', ['P1-quorum-cn-hit']),
+            row('DOMAIN-SUFFIX,cdn-hit.example', 'KEEP_PROTECTED', ['P3-cdn-cname:x.cdngslb.com']),
+            row('DOMAIN,exact.example', 'KEEP_CN', ['P1-quorum-cn-hit']),
+            row('DOMAIN-SUFFIX,unknown.example', 'NO_A', ['P-noans-keep-by-default']),
+        ]
+        self.assertEqual(additions_admissible(rows, psl),
+                         {'cn-hit.example', 'cdn-hit.example', 'exact.example'})
 
 
 if __name__ == '__main__':

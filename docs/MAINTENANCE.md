@@ -40,7 +40,8 @@ domain or specifically owned service.
 - **ChinaDomain:** use `tools/regen_chinadomain.py --help` and its shadow workflow.
   Preserve DNS, blast-radius, pin, post-removal routing and hysteresis gates;
   retain probe state between runs. `--additions-only` probes new candidates and
-  admits only KEEP results while retaining the existing layer. Same-day retries
+  admits only positive KEEP results while retaining the existing layer; a P10
+  pin or a PSL-boundary suffix never admits a new row. Same-day retries
   cannot advance deletion hysteresis. A failed resolution-rate gate leaves the
   source unchanged; never lower the gate just to obtain output.
 - **ChinaIP:** run `python3 tools/collapse_cidr.py lists/ChinaIP.list --check` and

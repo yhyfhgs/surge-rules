@@ -6,10 +6,13 @@
 # Sources and review decisions: SOURCES.md.
 
 DOMAIN,afdshield-or.download.prss.microsoft.com
+DOMAIN,assets.byokey.io
 DOMAIN,azurestackreleases.download.prss.microsoft.com
 DOMAIN,cdn-msp.jmcomic-zzz.one
 DOMAIN,cdn-msp.jmcomic.me
 DOMAIN,cdn.adultempire.com
+DOMAIN,cdn.infrawire.net
+DOMAIN,cdn1.singteldigital.com
 DOMAIN,client-patch.gundamevogame.com
 DOMAIN,client.hikarifield.co.jp
 DOMAIN,clientpatch.aws.blue-protocol.com
@@ -21,10 +24,13 @@ DOMAIN,flg-main.aws.blue-protocol.com
 DOMAIN,g-ahpatch-prod.blue-protocol.com
 DOMAIN,gog-cdn-lumen.secure2.footprint.net
 DOMAIN,h-cdn.com
+DOMAIN,image-tc.galaxy.tf
+DOMAIN,images.hibob.com
 DOMAIN,imgix.net
 DOMAIN,jwpsrv.com
 DOMAIN,masterdata-main.aws.blue-protocol.com
 DOMAIN,mbsuat.download.prss.microsoft.com
+DOMAIN,media-process.hibob.com
 DOMAIN,msconnect.download.prss.microsoft.com
 DOMAIN,msproductuat.download.prss.microsoft.com
 DOMAIN,myvsuat.download.prss.microsoft.com
@@ -33,10 +39,17 @@ DOMAIN,object-bnolauncher-pf.bandainamco-ol.jp
 DOMAIN,object-web.blue-protocol.com
 DOMAIN,object-web.gundamevolution.jp
 DOMAIN,object.gundamevolution.jp
+DOMAIN,photos.flightaware.com
 DOMAIN,playwright-akamai.azureedge.net
 DOMAIN,playwright.azureedge.net
+DOMAIN,repo.xtom.com
 DOMAIN,rsmuat.download.prss.microsoft.com
 DOMAIN,software-static.download.prss.microsoft.com
+DOMAIN,static.jup.ag
+DOMAIN,static.okou.io
+DOMAIN,thumbnails.padre.gg
+DOMAIN,tiles.flightaware.com
+DOMAIN,tileserver.b10s.net
 DOMAIN,trekcdnprod.azureedge.net
 DOMAIN,typescript.azureedge.net
 DOMAIN,visualstudio.download.prss.microsoft.com
@@ -368,7 +381,6 @@ DOMAIN-SUFFIX,assets.slater.app
 DOMAIN-SUFFIX,assets.sololearn.com
 DOMAIN-SUFFIX,assets.speedvitals.com
 DOMAIN-SUFFIX,assets.squarewebsites.org
-DOMAIN-SUFFIX,assets.st-note.com
 DOMAIN-SUFFIX,assets.stash.com
 DOMAIN-SUFFIX,assets.static-upwork.com
 DOMAIN-SUFFIX,assets.stickpng.com
@@ -435,6 +447,7 @@ DOMAIN-SUFFIX,aweber-static.com
 DOMAIN-SUFFIX,awxcdn.com
 DOMAIN-SUFFIX,ax1x.com
 DOMAIN-SUFFIX,axiecdn.axieinfinity.com
+DOMAIN-SUFFIX,axiom-cdn.io
 DOMAIN-SUFFIX,axis-cdn.net
 DOMAIN-SUFFIX,az700632.vo.msecnd.net
 DOMAIN-SUFFIX,az764295.vo.msecnd.net
@@ -989,7 +1002,6 @@ DOMAIN-SUFFIX,cdn.softswiss.net
 DOMAIN-SUFFIX,cdn.sphlabs.com
 DOMAIN-SUFFIX,cdn.sprig.com
 DOMAIN-SUFFIX,cdn.sso.mozilla.com
-DOMAIN-SUFFIX,cdn.st-note.com
 DOMAIN-SUFFIX,cdn.stackoverflow.co
 DOMAIN-SUFFIX,cdn.starapps.studio
 DOMAIN-SUFFIX,cdn.stash.com
@@ -4093,6 +4105,7 @@ DOMAIN-SUFFIX,secure.fanboy.co.nz
 DOMAIN-SUFFIX,security.debian.org
 DOMAIN-SUFFIX,security.ubuntu.com
 DOMAIN-SUFFIX,seecdn.com
+DOMAIN-SUFFIX,seecdn.net
 DOMAIN-SUFFIX,seeusercontent.com
 DOMAIN-SUFFIX,segapi.clerk.com
 DOMAIN-SUFFIX,sellon.shiprocket.in
@@ -4667,7 +4680,6 @@ DOMAIN-SUFFIX,trackerslist.com
 DOMAIN-SUFFIX,tracking.inflection.io
 DOMAIN-SUFFIX,trafficdeposit.com
 DOMAIN-SUFFIX,transcend-cdn.com
-DOMAIN-SUFFIX,tripcdn.com
 DOMAIN-SUFFIX,trustless-gateway.link
 DOMAIN-SUFFIX,ttcache.com
 DOMAIN-SUFFIX,ttl.sh

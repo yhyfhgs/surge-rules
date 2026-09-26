@@ -45,11 +45,14 @@ import time
 from bisect import bisect_right
 from collections import Counter
 from concurrent.futures import ThreadPoolExecutor
+from pathlib import Path
 
+from analyze_rules import PSL
 from routing_manifest import load_routing_manifest
 
 REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 ROUTING_MANIFEST = os.path.join(REPO_ROOT, "config", "routing.json")
+PSL_PATH = os.path.join(REPO_ROOT, "tests", "data", "public_suffix_list.dat")
 
 # ---------------------------------------------------------------- 配置常量
 
@@ -508,6 +511,28 @@ def verdict(rec, cnset, asninfo, pinned):
     return "DROP_OFFSHORE", prot + ["cc=%s asn=%s" % (sorted(ccs), sorted(asns))]
 
 
+def additions_admissible(rows, psl):
+    """Return names that --additions-only may add as new DIRECT rules.
+
+    Admission requires positive China evidence. A P10 pin only protects an
+    existing carrier parent from deletion, and a PSL boundary suffix would
+    claim every registrant below it, so neither can admit a new row.
+    """
+    accepted = set()
+    for row in rows:
+        if not row["verdict"].startswith("KEEP"):
+            continue
+        protections = row.get("protections") or []
+        if protections and all(p.startswith("P10-") for p in protections):
+            continue
+        if row["rule"].split(",", 1)[0] == "DOMAIN-SUFFIX" and (
+                psl.registrable(row["name"]) is None
+                or row["name"] in psl.boundary_ancestors):
+            continue
+        accepted.add(row["name"])
+    return accepted
+
+
 # ---------------------------------------------------------------- P9 落点复核
 
 def p9_recheck(names, engine_path, conf, rules_dir):
@@ -672,6 +697,14 @@ def main(argv=None):
     for k, v in counts.most_common():
         print("   %-20s %6d  %5.2f%%" % (k, v, v / len(recs) * 100))
 
+    admitted = set()
+    if a.additions_only:
+        admitted = additions_admissible(out_rows, PSL(Path(PSL_PATH)))
+        withheld = sorted(r["rule"] for r in out_rows
+                          if r["verdict"].startswith("KEEP") and r["name"] not in admitted)
+        print("additions admissible: %d; withheld pin-only/PSL boundary: %d %s"
+              % (len(admitted), len(withheld), withheld))
+
     # P7 迟滞 + P8 爆炸半径
     eff_drop = [r for r in out_rows
                 if r["verdict"].startswith("DROP") and r["streak"] >= a.hysteresis]
@@ -742,6 +775,7 @@ def main(argv=None):
         if a.additions_only:
             # The existing generated layer is retained. New rows require positive
             # classification; UNKNOWN/NO_A/QUARANTINE never become new DIRECT rules.
+            accepted = admitted
             base, _ = f0_type_filter(baseline)
             base, _ = f1_forbidden(base, a.allowlist)
             base, _ = f2_ownership(base, a.lists_dir, ownership_order, policies)
@@ -759,10 +793,19 @@ def main(argv=None):
                 continue
             unique[(r["type"], r["value"])] = r
         kept = list(unique.values())
+        # Keep the repository's current header comment, as rebuild.py does.
+        header = ["# Machine-managed mainland long-tail fallback; regenerate with "
+                  "tools/regen_chinadomain.py and put manual rules in Domestic."]
+        if os.path.isfile(a.out):
+            existing = []
+            with open(a.out, encoding="utf-8") as f:
+                for line in f:
+                    if not line.startswith("#"):
+                        break
+                    existing.append(line.rstrip("\n"))
+            header = existing or header
         with open(a.out, "w", encoding="utf-8") as f:
-            f.write("# ChinaDomain — 整表机器刷新层，由 tools/regen_chinadomain.py 再生；勿手改单条\n")
-            f.write("# 数据源与 pin 见 sources.lock.json；再生回路见 docs/MAINTENANCE.md\n")
-            f.write("# 排序：规则类型分区，区内字母序\n\n")
+            f.write("\n".join(header) + "\n\n")
             for r in sorted(kept, key=lambda x: (x["type"] != "DOMAIN", x["value"])):
                 f.write(r["raw"] + "\n")
         print("wrote %s (%d 条)" % (a.out, len(kept)))

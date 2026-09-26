@@ -1178,5 +1178,28 @@
         {"host": "applicationinsights.azure.com", "policy": "下载", "reason": "既有 DownloadCDN 条目不受影响"}
       ]
     }
+  },
+  {
+    "name": "upstream_refresh_20260926_google_meta_families",
+    "desc": "2026-09-26 上游复核：v2fly/MetaCubeX 新增的第一方域并入既有厂商表。tfbnw.net 的 RDAP 注册人为 Meta Platforms、NS 为 facebook.com；firebase.dev 的注册人为 Google 旗下 Charleston Road Registry，Firebase 既有三域已在 Google。",
+    "requests": [
+      {"host": "facebook.com", "note": "既有 Meta 正例"},
+      {"host": "tfbnw.net", "note": "Meta 基础设施域"},
+      {"host": "firebase.google.com", "note": "既有 Google 正例"},
+      {"host": "firebaseio.com", "note": "既有 Firebase 域"},
+      {"host": "firebase.dev", "note": "v2fly b4a85babe 新增"}
+    ],
+    "assert": {"same_policy": true, "policy": "Google-X-Meta-MS", "no_dns_leak": true}
+  },
+  {
+    "name": "upstream_refresh_20260926_stripe_family",
+    "desc": "2026-09-26 上游复核：v2fly 6fe541679 为 stripe 新增三域。三者与 stripe.com、stripe.network 使用同一组 Route53 NS，stripe.global 直接跳转 stripe.com，随既有 Stripe 后缀进 Payment。",
+    "requests": [
+      {"host": "stripe.com", "note": "既有 Payment 正例"},
+      {"host": "stripe.dev", "note": "开发者站"},
+      {"host": "stripe.events", "note": "活动站"},
+      {"host": "stripe.global", "note": "跳转 stripe.com"}
+    ],
+    "assert": {"same_policy": true, "policy": "Payment", "no_dns_leak": true}
   }
 ]

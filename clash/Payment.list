@@ -60,6 +60,9 @@ DOMAIN-SUFFIX,skrill.com
 DOMAIN-SUFFIX,squarecdn.com
 DOMAIN-SUFFIX,squareup.com
 DOMAIN-SUFFIX,stripe.com
+DOMAIN-SUFFIX,stripe.dev
+DOMAIN-SUFFIX,stripe.events
+DOMAIN-SUFFIX,stripe.global
 DOMAIN-SUFFIX,stripe.network
 DOMAIN-SUFFIX,stripeassets.com
 DOMAIN-SUFFIX,stripecdn.com

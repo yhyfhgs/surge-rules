@@ -802,5 +802,14 @@
         {"host": "download.blizzard.com", "policy": "DIRECT"}
       ]
     }
+  },
+  {
+    "name": "upstream_refresh_20260926_gfw_additions",
+    "desc": "2026-09-26 上游复核：gfwlist 75a147d85 与 74b55d25e 新增、blackmatrix7 Proxy_All 同步的两个无专属归属站点进 ProxyGFW。chineseposters.net 的国内解析返回已知污染地址；note.com 另归 Japan。",
+    "requests": [
+      {"host": "chineseposters.net"},
+      {"host": "quakemachinex.com"}
+    ],
+    "assert": {"same_policy": true, "policy": "Proxy", "no_dns_leak": true}
   }
 ]

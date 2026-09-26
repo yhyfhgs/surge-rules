@@ -828,5 +828,29 @@
       "policy": "Final",
       "no_dns_leak": true
     }
+  },
+  {
+    "name": "upstream_refresh_20260926_freebuff",
+    "desc": "2026-09-26 上游复核：v2fly data/freebuff 注明来源 CodebuffAI/freebuff；原 CodebuffAI/codebuff 仓库已更名并以 freebuff.com 为主页，同一厂商随既有 codebuff.com 进 AI。",
+    "requests": [
+      {"host": "codebuff.com", "note": "既有 AI 正例"},
+      {"host": "freebuff.com", "note": "更名后的主站"}
+    ],
+    "assert": {"same_policy": true, "policy": "AI", "no_dns_leak": true}
+  },
+  {
+    "name": "upstream_refresh_20260926_llama_weight_downloads",
+    "desc": "2026-09-26 上游复核：VPSDance meta-ai 新增 llamameta.net。meta-llama/llama-models 的 sku_list.py 注明模型从 llamameta.net 下载，RDAP 注册人为 Meta Platforms；权重分发属已证实的模型批量下载面，按 Hugging Face Xet/LFS 先例归 ModelDownloadCDN，Llama API 与入口仍随 Meta 生态。",
+    "requests": [
+      {"host": "download.llamameta.net", "note": "签名 URL 权重下载"},
+      {"host": "llama3-1.llamameta.net", "note": "同一下载命名空间"},
+      {"host": "llama.developer.meta.com", "note": "Llama API，Meta 生态"}
+    ],
+    "assert": {
+      "same_policy": true, "policy": "下载", "no_dns_leak": true,
+      "per_request": [
+        {"host": "llama.developer.meta.com", "policy": "Google-X-Meta-MS", "reason": "大厂 AI 随生态，只拆出下载面"}
+      ]
+    }
   }
 ]

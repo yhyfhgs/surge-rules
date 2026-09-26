@@ -229,5 +229,14 @@
       "policy": "Final",
       "no_dns_leak": true
     }
+  },
+  {
+    "name": "upstream_refresh_20260926_firefox_portal_detection",
+    "desc": "2026-09-26 上游复核：v2fly 5ab6d483a 把 firefox-portal-detection.com 列入 connectivity-check。RDAP 注册人为 Mozilla Corporation；强制门户探测随既有 detectportal.firefox.com 直连。",
+    "requests": [
+      {"host": "detectportal.firefox.com", "note": "既有 Domestic"},
+      {"host": "firefox-portal-detection.com", "note": "新探测域"}
+    ],
+    "assert": {"same_policy": true, "policy": "DIRECT", "no_dns_leak": true}
   }
 ]

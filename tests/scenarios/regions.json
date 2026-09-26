@@ -349,5 +349,16 @@
         {"host": "cgst.edu", "policy": "Proxy", "reason": "非美国 .edu 不迁 US"}
       ]
     }
+  },
+  {
+    "name": "upstream_refresh_20260926_note_japan",
+    "desc": "2026-09-26 上游复核：gfwlist 61652e3c6 新增 note.com，国内解析返回污染地址。note 是日本内容平台，与 hatena/livedoor 同属 Japan 地区表而非 ProxyGFW；首页 149 处静态资源来自 st-note.com，按 R1-23 由地区表承接，DownloadCDN 不再持有其 assets./cdn. 子域。",
+    "requests": [
+      {"host": "note.com", "note": "主站"},
+      {"host": "frontend.st-note.com", "note": "前端 JS/CSS"},
+      {"host": "assets.st-note.com", "note": "图片资源，原 DownloadCDN"},
+      {"host": "cdn.st-note.com", "note": "原 DownloadCDN"}
+    ],
+    "assert": {"same_policy": true, "policy": "🇯🇵日本", "no_dns_leak": true}
   }
 ]

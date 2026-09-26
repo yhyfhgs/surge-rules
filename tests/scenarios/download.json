@@ -652,5 +652,28 @@
         {"host": "lingyiwanwu.com", "policy": "DIRECT"}
       ]
     }
+  },
+  {
+    "name": "upstream_refresh_20260926_sukka_cdn_hosts",
+    "desc": "2026-09-26 上游复核：Sukka cdn.conf/download.conf 自 ce53726 起新增的精确 CDN/镜像主机进 DownloadCDN。已有具体归属的主机（linktr.ee、coingecko.com、arcgis.com、radio-canada.ca 等）保持原 owner；嵌入式无障碍组件 cdn.eye-able.com 按 R1-14 不入下载组；只收精确主机，不认领站点顶域。",
+    "requests": [
+      {"host": "tiles.flightaware.com"},
+      {"host": "photos.flightaware.com"},
+      {"host": "images.hibob.com"},
+      {"host": "media-process.hibob.com"},
+      {"host": "static.jup.ag"},
+      {"host": "img.axiom-cdn.io", "note": "axiom-cdn.io 后缀"},
+      {"host": "static.seecdn.net", "note": "seecdn.net 后缀，替代 acgmn.seeusercontent.com"},
+      {"host": "repo.xtom.com", "note": "download.conf 软件源镜像"},
+      {"host": "flightaware.com", "note": "负例：站点顶域", "stage": "domain"},
+      {"host": "cdn.eye-able.com", "note": "负例：SaaS 组件", "stage": "domain"}
+    ],
+    "assert": {
+      "same_policy": true, "policy": "下载", "no_dns_leak": true,
+      "per_request": [
+        {"host": "flightaware.com", "policy": "Final", "reason": "只收 CDN 主机，站点顶域不认领"},
+        {"host": "cdn.eye-able.com", "policy": "Final", "reason": "嵌入式 SaaS 组件不是下载面"}
+      ]
+    }
   }
 ]

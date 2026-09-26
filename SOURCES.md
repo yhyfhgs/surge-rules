@@ -10,12 +10,13 @@ development references remain in Git history.
 | Source | Recorded revision | Recorded license | Use |
 |---|---|---|---|
 | [blackmatrix7/ios_rule_script](https://github.com/blackmatrix7/ios_rule_script) | Initial material `65e8adf` (2026-08-28); current ChinaIP pin in `sources.lock.json` | GPL-2.0; upstream README also restricts public-account/self-media reposting | ChinaMaxNoIP → ChinaDomain; ChinaIPs IPv4/IPv6 → ChinaIP. Curated LAN, Apple, games/downloads, proxy, Telegram, TikTok, domestic vendor/media and Reject layers. Service lists supplied comparison evidence. |
-| [SukkaW/Surge](https://github.com/SukkaW/Surge) / [ruleset.skk.moe](https://ruleset.skk.moe/) | Early URL imports were not revision-pinned | AGPL-3.0 | Initial Domestic, DownloadCDN, Streaming, AI, AppleCN, MicrosoftCN and ChinaIP material; advertising entries curated into Reject. |
+| [SukkaW/Surge](https://github.com/SukkaW/Surge) / [ruleset.skk.moe](https://ruleset.skk.moe/) | Early URL imports were not revision-pinned; review inputs in `routing_review` | AGPL-3.0 | Initial Domestic, DownloadCDN, Streaming, AI, AppleCN, MicrosoftCN and ChinaIP material; advertising entries curated into Reject. Later CDN/download host additions are difference-based. |
 | [Repcz/Tool](https://github.com/Repcz/Tool) | Branch `X`; early URL imports were not revision-pinned | MIT | Initial service/download lists, later merged into YouTube, Twitter, TikTok, Streaming, MicrosoftCN and DownloadCDN. Subsequent OneDrive ownership follows the evidence below. |
 | [Loyalsoldier/surge-rules](https://github.com/Loyalsoldier/surge-rules) | Branch `release`; early URL imports were not revision-pinned | GPL-3.0 | `private.txt` and `icloud.txt` contributed to PrivateLAN and AppleCN. |
 | [VPSDance/ai-proxy-rules](https://github.com/VPSDance/ai-proxy-rules) | Early imports unpinned; later review inputs in `ai_review` | MIT | Initial AI material and later provider review. |
 | [VirgilClyne/GetSomeFries](https://github.com/VirgilClyne/GetSomeFries) | `b4aa767` (commit 2026-05-06; reviewed 2026-09-13) | GPL-3.0 | Difference-based additions from `ruleset/HTTPDNS.Block.list` to Reject's HTTPDNS/private DoH layer. |
 | [Semporia/TikTok-Unlock](https://github.com/Semporia/TikTok-Unlock) | `557dc2b` (2026-08-29) | No license recorded | TikTok list comparison only; no whole-table import. |
+| [v2fly/domain-list-community](https://github.com/v2fly/domain-list-community) | `bcea254` (commit 2026-09-25; reviewed 2026-09-26) | MIT | Difference-based vendor additions to Meta, Payment, Google, AI and Domestic after registration or NS checks; no whole-category import. |
 
 Old ignored clones under `reference/` were removed on 2026-09-01. The recorded
 revisions identify the reviewed material; the clones are not build inputs.
@@ -42,8 +43,9 @@ observations; missing observations are incomplete results, not invented matches.
 [sources.lock.json](sources.lock.json) and the locked fetch/rebuild tools define
 reproducibility. The `blackmatrix7_china_ip` lock entry is authoritative for the
 current revision, input SHA-256, transforms, exclusions and expected address-set
-digests. ChinaDomain's recorded 2026-09-02 additive refresh remains `observed`;
-its guarded shadow workflow has not established a complete rebuild. Other
+digests. ChinaDomain's additive refreshes (2026-09-02, and 2026-09-26 from
+blackmatrix7 `9ff3629c`) remain `observed`; its guarded shadow workflow has not
+established a complete rebuild. Other
 curated lists are `unpinned`. This register does not promise byte-for-byte
 reconstruction of every distribution file.
 
@@ -71,9 +73,9 @@ reconstruction of every distribution file.
 
 ## 2026-09-13 domain/IP v2 review
 
-`sources.lock.json:routing_review.inputs` contains 371 accessible immutable
-review inputs. Forty-one unavailable historical Sukka distribution inputs are
-recorded separately, never counted as refreshed. Changed active bytes were
+The review used 371 accessible immutable inputs. Forty-one Sukka distribution
+inputs were unavailable and were not counted as refreshed; the 2026-09-26
+refresh below re-pinned them. Changed active bytes were
 re-fetched with `fetch_locked.py`; upstream metadata and operational rule changes
 are distinguished in the [current IP decisions](docs/DECISIONS.md#ip-ownership-and-guarded-admission)
 and the linked immutable v2 evidence.
@@ -90,3 +92,33 @@ identifies AS2906/40027/55095. Fresh ARIN/RIPE/APNIC network records support the
 specific retained/narrowed first-party scopes in `config/ip-review-exclusions.json`;
 RDAP entity ranges are never extrapolated to an entire legacy prefix. Quarantine
 is not a claim of expiry. No source list contains private proxy exit mappings.
+
+## 2026-09-26 upstream refresh
+
+Thirteen branch heads across eleven repositories were compared with the 412
+earlier inputs: 339 were byte-identical, 66 changed and 7 had no new revision.
+The SukkaLab distribution inputs are available again, and Sukka's new
+`domestic_cdn` source files were added. `routing_review.inputs` now pins all 415
+reviewed files at those heads; `fetch_locked.py --network` verified every SHA-256.
+Changed files were compared at rule level before any list edit.
+
+- **ChinaIP:** blackmatrix7 `9ff3629c` is the locked input. Its four removed
+  ranges carry foreign RDAP registrations. Two new ranges registered to
+  Uniregistry/Tucows (US/CA) are held back in the lock's review holdback step.
+- **ChinaDomain:** the additions-only workflow used the same revision. Only
+  positive KEEP verdicts were admitted; a P10 carrier pin and a PSL boundary are
+  not admission evidence.
+- **Vendors and services:** v2fly `6fe5416`, `b4a85ba`, `e5c669c`, `12b6e93`
+  and `5ab6d48` added first-party domains that the lists absorb after RDAP or
+  shared-NS checks. VPSDance `4188a51` added `llamameta.net`; meta-llama's
+  `llama-models` identifies it as the model-weight download host.
+- **Blocking and regions:** gfwlist `61652e3`, `75a147d` and `74b55d2`, mirrored
+  by blackmatrix7 `Proxy_All` and Loyalsoldier `gfw.txt`, supplied three
+  additions. `note.com` belongs to the Japan owner instead of ProxyGFW.
+- **CDN and download:** Sukka's new exact CDN/download hosts enter DownloadCDN
+  unless an existing owner covers them or they are embeddable SaaS components.
+  Sukka `0e4b52b` removed `tripcdn.com` from its global CDN set; its GSLB returns
+  China Mobile addresses to domestic resolvers.
+- **Evidence only:** Loyalsoldier, hagezi and Sukka aggregate reject deltas,
+  v2fly/MetaCubeX `geolocation-cn` changes and Sukka's `domestic_cdn` split
+  changed no list. Official Telegram CIDRs still equal TelegramIP.

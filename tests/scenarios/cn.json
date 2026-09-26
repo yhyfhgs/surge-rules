@@ -481,5 +481,54 @@
         {"host": "4336wang.cn", "policy": "REJECT", "reason": "Reject 先于全部路由表"}
       ]
     }
+  },
+  {
+    "name": "upstream_refresh_20260926_trip_family_direct",
+    "desc": "2026-09-26 上游复核：Sukka 0e4b52b1f 从全局 CDN 移除 .tripcdn.com。国内解析经 ctripgslb.net 返回中国移动地址，tripcdn.com 由 DownloadCDN 移入 Domestic，与 ctrip.com、trip.com 同直连。",
+    "requests": [
+      {"host": "ak-d.tripcdn.com"},
+      {"host": "dimg04.tripcdn.com"},
+      {"host": "ctrip.com", "note": "既有 Domestic"},
+      {"host": "trip.com", "note": "既有 ChinaDomain"}
+    ],
+    "assert": {"same_policy": true, "policy": "DIRECT", "no_dns_leak": true}
+  },
+  {
+    "name": "upstream_refresh_20260926_chinadomain_additions",
+    "desc": "2026-09-26 ChinaDomain 按 blackmatrix7 9ff3629c 只增不删补录 371 条正向 KEEP。DOMAIN-SUFFIX,in.th 只因 P10 承载集保护命中且是 PSL 公共后缀，不作为新增依据。",
+    "requests": [
+      {"host": "longcat.chat"},
+      {"host": "mineru.net"},
+      {"host": "lilithtech.com"},
+      {"host": "poco.net"},
+      {"host": "shop.in.th", "note": "负例：泰国公共后缀下的任意注册域", "stage": "domain"}
+    ],
+    "assert": {
+      "same_policy": true, "policy": "DIRECT", "no_dns_leak": true,
+      "per_request": [
+        {"host": "shop.in.th", "policy": "Final", "reason": "in.th 未进入 ChinaDomain"}
+      ]
+    }
+  },
+  {
+    "name": "upstream_refresh_20260926_chinaip_foreign_ranges",
+    "desc": "2026-09-26 ChinaIP 锁定重建到 blackmatrix7 9ff3629c：接受上游删除的 Cloud Innovation（RDAP 国家 US）与 China Telecom South Africa（ZA）段；上游新增的 64.96.5.0/24、2620:57:4004::/47 经 ARIN RDAP 为 Uniregistry/Tucows（US/CA），暂扣。离线引擎无 MMDB 时判 Final，真实 Surge 可由地区 GEOIP 承接。",
+    "requests": [
+      {"ip": "154.197.128.10", "note": "上游删除"},
+      {"ip": "156.224.128.10", "note": "上游删除"},
+      {"ip": "2c0f:f7a8:9020::10", "note": "上游删除"},
+      {"ip": "64.96.5.10", "note": "新增暂扣"},
+      {"ip": "2620:57:4004::10", "note": "新增暂扣"}
+    ],
+    "assert": {
+      "no_dns_leak": true,
+      "per_request": [
+        {"ip": "154.197.128.10", "policy_in": ["Final", "🇺🇸美国"], "reason": "不再直连"},
+        {"ip": "156.224.128.10", "policy_in": ["Final", "🇺🇸美国"], "reason": "不再直连"},
+        {"ip": "2c0f:f7a8:9020::10", "policy": "Final", "reason": "ZA 无地区表"},
+        {"ip": "64.96.5.10", "policy_in": ["Final", "🇺🇸美国"], "reason": "暂扣，不直连"},
+        {"ip": "2620:57:4004::10", "policy_in": ["Final", "🇺🇸美国"], "reason": "暂扣，不直连"}
+      ]
+    }
   }
 ]

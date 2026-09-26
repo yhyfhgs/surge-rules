@@ -1,6 +1,7 @@
 # Current routing decisions
 
-Consolidated on 2026-09-13 against the v2 sources. This document retains the
+Consolidated on 2026-09-13 against the v2 sources and updated for the
+2026-09-26 upstream refresh. This document retains the
 decisions and unresolved evidence that still affect maintenance. List content,
 order and modifiers remain in `lists/` and `config/routing.json`; operating
 procedures belong in [Maintenance](MAINTENANCE.md). Historical measurements below
@@ -45,6 +46,13 @@ Streaming. Explicit firmware/model-transfer downloads may retain independent
 download ownership. Redirects, login, API and authenticated resources otherwise
 remain one session family.
 
+When a regional owner holds a site, its static asset hosts follow that owner
+instead of DownloadCDN. `note.com` and its asset domain `st-note.com` therefore
+use Japan; ProxyGFW does not take a site that has a regional owner. Trip.com's
+`tripcdn.com` uses Domestic with `ctrip.com`, because its GSLB returns mainland
+addresses to domestic resolvers. DownloadCDN excludes embeddable SaaS widgets
+such as accessibility, support or identity components.
+
 ## AI ownership and regional exceptions
 
 Independent international AI uses AI. Google/Microsoft/Meta/X products retain
@@ -62,6 +70,7 @@ does not establish an endpoint's region.
 | `lingyiwanwu.com` | Domestic; its Chinese website is distinct from the international `01.ai` entry. |
 | OpenAI Azure Blob / Cloudflare asset hosts | Exact owned hosts only; no shared tenant-parent expansion. |
 | Hugging Face browsing/API and bulk transfers | Browsing/API uses AI; Xet/LFS and evidenced bulk model/dataset delivery use the earlier ModelDownloadCDN owner. |
+| Meta Llama API and weight downloads | The API stays with Meta. `llamameta.net`, which `meta-llama/llama-models` names as the weight download host, uses ModelDownloadCDN. |
 
 The 18 review inputs are pinned in `sources.lock.json:ai_review.inputs`; full
 accepted endpoint details and original official references remain in the
@@ -102,9 +111,16 @@ Country/ASN MMDB intervals establish the effective sets.
 - `config/ip-review-exclusions.json` is the anti-reentry registry. Quarantine
   does not mean an address is dead. ChinaIP's lock entry preserves exclusion,
   retention and address-set guards; uncertain ranges require fresh evidence.
+- The 2026-09-26 ChinaIP refresh accepted four upstream removals whose RDAP
+  registrations are foreign (Cloud Innovation US ranges and China Telecom South
+  Africa). It held back the new `64.96.5.0/24` and `2620:57:4004::/47` ranges,
+  registered to Uniregistry/Tucows (US/CA), in the lock's review holdback.
 
-The ChinaDomain additions-only review failed the existing 70% resolution gate
-on both attempts, so no candidates were admitted and the threshold was retained.
+The 2026-09-13 ChinaDomain additions-only review failed the 70% resolution gate
+twice and admitted nothing. On 2026-09-26 the same gate passed at 78.3%, and 371
+positive KEEP rows were admitted without lowering the threshold. P10 carrier pins
+only protect existing rows from deletion; they never justify a new row, so the
+public suffix `in.th` was withheld.
 The corrected 21,906-value manual-domain sweep established no confirmed expiry:
 timeouts, NODATA, parking hints and isolated NXDOMAIN answers were insufficient.
 Use the current [expiry workflow](MAINTENANCE.md#generated-layers-and-upstreams).

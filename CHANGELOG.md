@@ -3,6 +3,17 @@
 当前约定见 [现行决策](docs/DECISIONS.md)，操作流程见 [维护手册](docs/MAINTENANCE.md)。
 历史数字只代表对应批次，当前数量以检查输出为准。
 
+## [2026-09-26·上游复核] 固定输入重锁、ChinaIP/ChinaDomain 刷新与厂商补录
+
+- 检查 11 个上游仓库 13 个分支头。原 412 份固定输入中 339 份字节未变、66 份有变化、7 份版本未动；9/13 无法访问的 41 份 SukkaLab 分发文件现已可取。连同 Sukka 新增的 `domestic_cdn` 3 份，共 415 份复核输入重锁到当前版本，经 `fetch_locked.py` 逐份 SHA-256 校验通过。
+- ChinaIP 按 blackmatrix7 `9ff3629c` 锁定重建：接受上游删除的 4 段（Cloud Innovation 的 US 段、China Telecom South Africa 的 ZA 段）；上游新增的 `64.96.5.0/24`、`2620:57:4004::/47` 经 ARIN RDAP 为 Uniregistry/Tucows（US/CA），列入复核暂扣。11,067 → 11,063，重建 diff 为 0。
+- ChinaDomain 按同一版本只增不删：761 个新候选解析成功率 78.3%（门槛 70% 未调整），写入 371 条正向 KEEP，106,962 → 107,333。修正生成器：P10 承载集保护只防删除，不能作为新增依据；PSL 公共后缀不得新增，因此拦下 `DOMAIN-SUFFIX,in.th`；同时保留现有表头。新增 1 条回归测试。
+- 厂商与服务补录（均有注册或 NS 证据）：Meta 收 `tfbnw.net`；Payment 收 `stripe.dev/.events/.global`；Google 收 `firebase.dev`；AI 收 `freebuff.com`（Codebuff 更名）；Meta 的 Llama 权重下载域 `llamameta.net` 归 ModelDownloadCDN。
+- 地区与直连：gfwlist 新增的 `note.com` 属日本内容平台，连同其静态资源域 `st-note.com` 归 Japan，DownloadCDN 交还 `assets./cdn.st-note.com`；`chineseposters.net`、`quakemachinex.com` 进 ProxyGFW。Sukka 已从全局 CDN 移除 `tripcdn.com`，国内解析返回中国移动地址，改归 Domestic；Firefox 新门户探测域进 Domestic。
+- DownloadCDN 收 Sukka 新增的 15 条 CDN/镜像主机，已有具体归属的主机保持原 owner；嵌入式无障碍组件 `cdn.eye-able.com` 不入下载组。手工表净增 25 条，全库 140,282 → 140,674。
+- 未采用：Loyalsoldier/hagezi/Sukka 聚合拒绝列表的增量、`rs.lovable.dev`（缺用途证据）、v2fly/MetaCubeX 的 geolocation-cn 增量、作业帮从百度拆分（两者都直连，blackmatrix7 仍列在百度）、gfwlist 9/26 新增（镜像尚未同步）。TelegramIP 与官方 CIDR 完全一致，无需改动。
+- 验证：52 张表形态规范；原生语法通过；真实 MMDB 全量关系分析无遮蔽、无顺序不安全拆分；静态审计无 P0/P1/P2，仅 3 个既有 P3，豁免无失效；364 场景 / 2,464 请求 / 4,852 断言通过，其中 DNS 断言 2,135 条；Clash 52 个 provider 与 140,674 条规则逐条一致，86 个归属见证通过；引擎自检 55/55、v2 回归 20/20、过期安全自检通过。
+
 ## [2026-09-13·文档与目录清理] 保留现行说明，归档重复资料
 
 - 六份分散的历史证据归并为一份现行决策，保留 OneDrive、Google、AI 和 IP 归属及未完成的实测边界；完整旧记录使用固定 Git 版本链接。
