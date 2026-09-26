@@ -133,10 +133,17 @@ unauthenticated roots responded through both tested paths.
 
 ## Latest recorded release and open verification
 
-Routing commit `8c92cbbd70dd082df48f696751c5a30e120183f2` was recorded as
-**PUBLISHED_AND_VERIFIED** on 2026-09-13. It contained 52 lists and 140,282 source
-rules; 4,750 scenario assertions and 84 adversarial assertions passed. The
-full MMDB/static gates reported no P0/P1/P2 findings and three existing P3 notices.
+Routing commit `4632936d8ff6dab58f9b1f86279ab799d3ccba23` was recorded as
+**PUBLISHED_AND_VERIFIED** on 2026-09-26. It contained 52 lists and 140,674 source
+rules; 4,852 scenario assertions passed, including 2,135 DNS assertions. The
+full MMDB/static gates reported no P0/P1/P2 findings and three existing P3
+notices. A separate SHA-256 check matched 105/105 distribution files at both
+`@main` and the immutable commit. Both private profiles already use `@main` and
+needed no change. Clients load the lists at their next external-resource
+refresh; this release did not reload Surge or check a production Clash client.
+
+The previous routing release, `8c92cbbd70dd082df48f696751c5a30e120183f2`
+(2026-09-13, 140,282 rules), also passed 84 adversarial assertions.
 
 After the coordinated immutable-revision rollout, the user's final choice was
 official production `@main` URLs for both private clients, including Surge Host
