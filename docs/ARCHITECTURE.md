@@ -35,8 +35,9 @@ is the only terminal rule. No mixed LAN or unconditional GEOIP,CN tail is emitte
 - ProxyGFW precedes domestic and regional domain owners. ChinaTLD closes the
   domain stage, preserving prior proxy/Reject/regional .cn exceptions.
 - Academic follows PKU in the DIRECT block so campus IP access reaches
-  institutional subscriptions. Earlier proxy and regional owners keep their
-  academic domains until they are explicitly moved.
+  institutional subscriptions. It owns academic publishers and search sites
+  that route DIRECT; regional lists keep their universities, and a publisher
+  that fails direct access stays with its proxy owner.
 - Regional IP calls use AND/NOT to subtract PrivateLANIP, PKUIP, AppleCNIP and
   ChinaIP. This is a boolean exclusion, not an early DIRECT rule. Japan's
   verified LINE/LY prefixes still precede the other regions.

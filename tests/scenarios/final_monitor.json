@@ -86,7 +86,7 @@
   },
   {
     "name": "final_monitor_academic_direct",
-    "desc": "2026-09-26 用户裁决：FINAL 中观测到的学术站点新建 Academic 表走 DIRECT，以北大校园网 IP 访问机构订阅。ProxyGFW 中既有出版/检索域与地区表中的高校本批未迁移，作为负例固定当前边界。",
+    "desc": "2026-09-26 用户裁决：FINAL 中观测到的学术站点新建 Academic 表走 DIRECT，以北大校园网 IP 访问机构订阅。同日 ProxyGFW 中的学术出版/检索域也迁入（见 academic_publishers_direct）；地区表中的高校保持原归属，作为负例固定边界。",
     "requests": [
       {"host": "doi.org"},
       {"host": "proceedings.mlr.press"},
@@ -109,17 +109,44 @@
       {"host": "www.cs.toronto.edu"},
       {"host": "research.rug.nl"},
       {"host": "research.tilburguniversity.edu"},
-      {"host": "arxiv.org", "note": "既有 ProxyGFW 归属，本批未迁移"},
-      {"host": "www.sciencedirect.com", "note": "既有 ProxyGFW 归属，本批未迁移"},
+      {"host": "arxiv.org", "note": "2026-09-26 自 ProxyGFW 迁入"},
+      {"host": "www.sciencedirect.com", "note": "2026-09-26 自 ProxyGFW 迁入"},
       {"host": "mit.edu", "note": "既有美国地区归属"}
     ],
     "assert": {
       "policy": "DIRECT",
       "no_dns_leak": true,
       "per_request": [
-        {"host": "arxiv.org", "policy": "Proxy", "reason": "学术直连只覆盖本批观测域；既有归属变更须另行决定"},
-        {"host": "www.sciencedirect.com", "policy": "Proxy", "reason": "同上"},
         {"host": "mit.edu", "policy": "🇺🇸美国", "reason": "地区表先于直连区，既有高校归属不变"}
+      ]
+    }
+  },
+  {
+    "name": "academic_publishers_direct",
+    "desc": "2026-09-26 用户裁决：ProxyGFW 中的学术出版与检索域（arXiv、OpenReview、Semantic Scholar、Elsevier/ScienceDirect、Springer、Nature、IEEE、ACM、Science）和 DownloadCDN 中的 Elsevier 内容 CDN 迁入 Academic 直连，并补 Springer Nature 资源域。迁前均经 DIRECT 实测可达，国内 DoH 解析为合法端点。paperswithcode.com 直连被重置，留在 ProxyGFW；ChinaDomain 中的出版商本就直连，不重复收录。",
+    "requests": [
+      {"host": "export.arxiv.org"},
+      {"host": "openreview.net"},
+      {"host": "api.semanticscholar.org"},
+      {"host": "www.elsevier.com"},
+      {"host": "pdf.sciencedirectassets.com", "note": "原 DownloadCDN"},
+      {"host": "ars.els-cdn.com", "note": "原 DownloadCDN"},
+      {"host": "link.springer.com"},
+      {"host": "www.nature.com"},
+      {"host": "media.springernature.com", "note": "新增资源域"},
+      {"host": "ieeexplore.ieee.org"},
+      {"host": "dl.acm.org"},
+      {"host": "www.science.org"},
+      {"host": "www.sciencemag.org"},
+      {"host": "onlinelibrary.wiley.com", "note": "ChinaDomain 既有直连"},
+      {"host": "www.jstor.org", "note": "ChinaDomain 既有直连"},
+      {"host": "paperswithcode.com", "note": "直连被重置，保留代理"}
+    ],
+    "assert": {
+      "policy": "DIRECT",
+      "no_dns_leak": true,
+      "per_request": [
+        {"host": "paperswithcode.com", "policy": "Proxy", "reason": "2026-09-26 DIRECT 探测连接被对端关闭"}
       ]
     }
   },

@@ -151,11 +151,22 @@ monitor. The accepted user decisions are:
   1Password content domains. Hosting and proxy-provider sites were withheld from
   the public lists because they would disclose private infrastructure.
 - **Academic:** a new DIRECT list after PKU holds the academic sites seen in
-  FINAL, so campus IP access reaches institutional subscriptions. Existing
-  academic owners were not moved: `arxiv.org`, `openreview.net`,
-  `semanticscholar.org` and several publishers remain in ProxyGFW, others in
-  ChinaDomain, and universities stay in the regional lists. Moving them needs a
-  separate decision.
+  FINAL, so campus IP access reaches institutional subscriptions. A second user
+  decision on the same day moved the academic publishers and search sites out
+  of ProxyGFW: arXiv, OpenReview, Semantic Scholar, Elsevier/ScienceDirect,
+  Springer, Nature, IEEE, ACM and Science. Elsevier's content CDNs
+  (`sciencedirectassets.com`, `els-cdn.com`) left DownloadCDN, and
+  `springernature.com` was added for Springer Nature's shared assets.
+  Before the move, every host answered a DIRECT request through Surge. A
+  direct connection that bypassed Surge also succeeded for each domestic-DoH
+  answer with a valid certificate. For `link.springer.com` and
+  `www.nature.com`, domestic DoH returns a Google Cloud entry that presents a
+  valid `*.nature.com` certificate. `paperswithcode.com` was reset on every
+  direct attempt and stays in ProxyGFW. Publishers already in ChinaDomain
+  (Wiley, Taylor & Francis, SAGE, OUP, Cambridge, JSTOR, APS, ACS, IOP, PNAS,
+  Scopus and others) route DIRECT and were not duplicated. Universities keep
+  their regional owners. Institutional access applies only on the campus
+  network; elsewhere DIRECT uses the local ISP address.
 - **Reject:** only ad delivery and bidding endpoints were added (DSP/SSP,
   cookie sync, native/video ads, the Freestar bidding stack, Naver ads). Under
   the existing "block ads, not analytics" rule, measurement (Comscore, Nielsen,

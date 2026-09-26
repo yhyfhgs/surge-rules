@@ -3,6 +3,14 @@
 当前约定见 [现行决策](docs/DECISIONS.md)，操作流程见 [维护手册](docs/MAINTENANCE.md)。
 历史数字只代表对应批次，当前数量以检查输出为准。
 
+## [2026-09-26·学术出版商直连] ProxyGFW 与 DownloadCDN 的学术出版/检索域迁入 Academic
+
+- 用户裁决：学术出版商统一走 Academic 直连。自 ProxyGFW 迁入 11 个：arXiv、OpenReview、Semantic Scholar、Elsevier、ScienceDirect、Springer、Nature、IEEE、ACM、Science 与 sciencemag.org；自 DownloadCDN 迁入 Elsevier 内容 CDN 2 个（sciencedirectassets.com、els-cdn.com）；新增 Springer Nature 资源域 springernature.com。
+- 迁前实测：18 个代表主机经 Surge 的 DIRECT 策略全部可达。用国内 DoH（迁移后的解析路径）的结果绕过 Surge 直连，TLS 校验全部通过；link.springer.com 与 www.nature.com 的国内解析为 Google Cloud 入口，证书为 `*.nature.com`，不是污染。paperswithcode.com 直连 4 次均被对端关闭，保留在 ProxyGFW。
+- ChinaDomain 中的出版商（Wiley、T&F、SAGE、OUP、Cambridge、JSTOR、APS、ACS、IOP、PNAS、Scopus 等）本就直连，不重复收录；地区表中的高校保持原归属。机构订阅只在校园网内生效，校外直连使用本地运营商地址。
+- 验证：规则 140,748 → 140,749（+14/−13）；真实 MMDB 关系分析无遮蔽和顺序不安全拆分；静态审计无 P0/P1/P2（3 个既有 P3）；场景 5,090 条（新增 32 条）和其中 2,232 条 DNS 断言全过；对抗测试 84/84；Clash 53 表 140,749 条，合同检查通过。学术场景放到迁移前的规则上有 15 条失败，说明断言覆盖了本次迁移。
+- 同批按用户要求发布仓库指令文件统一：删除只含 `@AGENTS.md` 一行的 CLAUDE.md，AGENTS.md 去掉对它的引用。
+
 ## [2026-09-26·FINAL 监控归类] 按 12 天 FINAL 实测归属 99 个目的地
 
 - 私有 FINAL 监控在 2026-09-15～26 记录 6,766 次连接、287 个目的地（已排除 16 次受控探测），在本批之前已发布的规则下（含同日上游复核）全部仍落 FINAL。本批归属其中 99 个，覆盖 5,354 次（79.1%）。Obsidian 同步、Cloudflare MCP、Writefull 和 Gemini API 文档 MCP 等高频项都有了明确归属；逐主机用量只留在私有监控里。

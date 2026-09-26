@@ -10,8 +10,7 @@ regenerate it wholesale, or touch backups. Before nontrivial routing work read
 
 - Load `~/.agents/skills/surge/SKILL.md`, falling back to
   `/Applications/Surge.app/Contents/Resources/Skills/surge/SKILL.md`.
-  [Surge CLI setup](docs/SURGE-CLI.md) covers installation and upgrades;
-  `CLAUDE.md` imports this file.
+  [Surge CLI setup](docs/SURGE-CLI.md) covers installation and upgrades.
 - Resolve `surge-cli` from PATH, then
   `/Applications/Surge.app/Contents/Applications/surge-cli`. Read command-specific
   help before unfamiliar syntax; prefer rendered output, using `--raw` only for

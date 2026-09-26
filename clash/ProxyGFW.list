@@ -221,7 +221,6 @@ DOMAIN-SUFFIX,acg.rip
 DOMAIN-SUFFIX,acgbox.org
 DOMAIN-SUFFIX,acgkj.com
 DOMAIN-SUFFIX,acgnx.se
-DOMAIN-SUFFIX,acm.org
 DOMAIN-SUFFIX,acmetoy.com
 DOMAIN-SUFFIX,acnw.com.au
 DOMAIN-SUFFIX,actimes.com.au
@@ -405,7 +404,6 @@ DOMAIN-SUFFIX,artsy.net
 DOMAIN-SUFFIX,arunachalforests.gov.in
 DOMAIN-SUFFIX,arvanstorage.ir
 DOMAIN-SUFFIX,arweave.org
-DOMAIN-SUFFIX,arxiv.org
 DOMAIN-SUFFIX,arxivb.org
 DOMAIN-SUFFIX,as.mr
 DOMAIN-SUFFIX,asacp.org
@@ -1375,7 +1373,6 @@ DOMAIN-SUFFIX,elconfidencial.com
 DOMAIN-SUFFIX,electionsmeter.com
 DOMAIN-SUFFIX,electrek.co
 DOMAIN-SUFFIX,elgoog.im
-DOMAIN-SUFFIX,elsevier.com
 DOMAIN-SUFFIX,eltondisney.com
 DOMAIN-SUFFIX,emaga.com
 DOMAIN-SUFFIX,emanna.com
@@ -2257,7 +2254,6 @@ DOMAIN-SUFFIX,idlcoyote.com
 DOMAIN-SUFFIX,idouga.com
 DOMAIN-SUFFIX,idreamx.com
 DOMAIN-SUFFIX,idsam.com
-DOMAIN-SUFFIX,ieee.org
 DOMAIN-SUFFIX,ienergy1.com
 DOMAIN-SUFFIX,ifanqiang.com
 DOMAIN-SUFFIX,ifcss.org
@@ -3080,7 +3076,6 @@ DOMAIN-SUFFIX,nationalinterest.org
 DOMAIN-SUFFIX,nationalreview.com
 DOMAIN-SUFFIX,nationsonline.org
 DOMAIN-SUFFIX,nationwide.com
-DOMAIN-SUFFIX,nature.com
 DOMAIN-SUFFIX,naughtyamerica.com
 DOMAIN-SUFFIX,navy.mil
 DOMAIN-SUFFIX,naweeklytimes.com
@@ -3318,7 +3313,6 @@ DOMAIN-SUFFIX,opencritic.com
 DOMAIN-SUFFIX,opendemocracy.net
 DOMAIN-SUFFIX,openid.net
 DOMAIN-SUFFIX,openleaks.org
-DOMAIN-SUFFIX,openreview.net
 DOMAIN-SUFFIX,opensea.io
 DOMAIN-SUFFIX,opensource.guide
 DOMAIN-SUFFIX,opentech.fund
@@ -3808,10 +3802,7 @@ DOMAIN-SUFFIX,sbs.com.au
 DOMAIN-SUFFIX,sbti.unun.dev
 DOMAIN-SUFFIX,scasino.com
 DOMAIN-SUFFIX,schwab.com.hk
-DOMAIN-SUFFIX,science.org
 DOMAIN-SUFFIX,sciencedaily.com
-DOMAIN-SUFFIX,sciencedirect.com
-DOMAIN-SUFFIX,sciencemag.org
 DOMAIN-SUFFIX,sciencenets.com
 DOMAIN-SUFFIX,scieron.com
 DOMAIN-SUFFIX,scmp.com
@@ -3842,7 +3833,6 @@ DOMAIN-SUFFIX,sehuatang.net
 DOMAIN-SUFFIX,sehuatang.org
 DOMAIN-SUFFIX,sejie.com
 DOMAIN-SUFFIX,sellclassics.com
-DOMAIN-SUFFIX,semanticscholar.org
 DOMAIN-SUFFIX,sendsmtp.com
 DOMAIN-SUFFIX,sensortower.com
 DOMAIN-SUFFIX,seraph.me
@@ -4070,7 +4060,6 @@ DOMAIN-SUFFIX,spring.io
 DOMAIN-SUFFIX,spring.net
 DOMAIN-SUFFIX,spring4u.info
 DOMAIN-SUFFIX,springboardplatform.com
-DOMAIN-SUFFIX,springer.com
 DOMAIN-SUFFIX,springwood.me
 DOMAIN-SUFFIX,sprite.org
 DOMAIN-SUFFIX,sproutcore.com
