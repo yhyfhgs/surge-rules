@@ -13,7 +13,8 @@ Mihomo: https://cdn.jsdelivr.net/gh/yhyfhgs/surge-rules@main/clash/<Name>.list
 
 This is the domain/IP-separated v2 layout. Upgrade the rule sequence and list
 files together; old mixed-list configurations should remain on their previous
-commit. Use immutable commit URLs for a coherent rollout.
+commit until their coordinated upgrade. Production profiles use `@main`;
+immutable URLs support coherent upgrades and verification.
 
 Mihomo users can merge [clash/rule-providers.yaml](clash/rule-providers.yaml)
 and supply their own policy groups. Follow the [Clash deployment contract](docs/CLASH.md)
@@ -41,9 +42,13 @@ python3 tools/surge2clash.py --check
 |---|---|
 | [Architecture](docs/ARCHITECTURE.md) | Ownership, ordering, DNS invariants and analyzer output |
 | [Maintenance](docs/MAINTENANCE.md) | Edit, regenerate, validate, debug and release |
+| [Surge skill and CLI](docs/SURGE-CLI.md) | Global agent setup, CLI discovery, diagnostics and upgrade checks |
+| [Current decisions](docs/DECISIONS.md) | Retained ownership decisions, evidence and unresolved verification |
 | [Tests](tests/README.md) | Offline and live test entry points, data and limits |
 | [Sources](SOURCES.md) / [lock](sources.lock.json) | Upstream provenance and reproducible inputs |
 | [Changelog](CHANGELOG.md) | Batch decisions, validation and historical records |
 
-Current rule and test counts come from tool output. Dated evidence is linked
-from the changelog and source register; obsolete reports remain in Git history.
+Current rule and test counts come from tool output. Keep one current document
+per subject; historical plans, superseded evidence and detailed old logs remain
+in Git history, linked from the decision record and changelog. Put private
+operating notes and diagnostics outside this repository.

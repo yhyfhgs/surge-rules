@@ -5,6 +5,11 @@ defines ordering and DNS invariants; `config/routing.json` alone defines list
 order and policy. Keep private profiles, credentials and diagnostic output
 outside this public repository. Never touch `../Backup/`.
 
+For agent skill installation, CLI discovery and runtime command selection, see
+[Surge skill and CLI](SURGE-CLI.md). Load the `surge` skill for Surge tasks;
+the validation and publication workflow below remains authoritative for this
+repository's generated routing.
+
 ## Edit rules
 
 1. Find the current owner with `rg -n 'example\.com' lists`.
@@ -76,8 +81,10 @@ PYLOCK
 python3 tools/fetch_locked.py --lock /tmp/ai-review.lock.json --network --out /tmp/ai-review-inputs
 ```
 
-Keep accepted moves, omissions, regional evidence and actual validation in a
-dated evidence record. Do not classify endpoints from vendor nationality,
+Update [Current decisions](DECISIONS.md) with retained ownership, omissions and
+unresolved evidence; record batch validation in [CHANGELOG.md](../CHANGELOG.md).
+Link superseded detail to an immutable Git revision instead of keeping parallel
+plans and reports in the working tree. Do not classify endpoints from vendor nationality,
 `.com`/`.ai`, or an upstream `scope: cn` flag alone.
 
 ## Validate a change
@@ -97,17 +104,11 @@ python3 tools/surge2clash.py --check
 ```
 
 Regenerate Clash before its check if sources changed. Filtered regional selectors
-require MMDB expansion; a syntax-only run cannot evaluate their address sets. For IP/GEOIP/ASN changes,
-install `requirements-analysis.txt` and also expand against the Country/ASN
-MMDB files used by the active profile. A profile with `geoip-maxmind-url` uses
-Surge's downloaded Country database; otherwise use its bundled Country file:
-
-```bash
-python3 tools/analyze_rules.py --conf /tmp/Surge.candidate.conf --rules lists \
-  --country-db "$HOME/Library/Application Support/com.nssurge.surge-mac/GeoLite2-Country.mmdb" \
-  --asn-db /Applications/Surge.app/Contents/Resources/GeoLite2-ASN.mmdb \
-  --out /tmp/rule-analysis-mmdb --fail-on-shadow
-```
+require MMDB expansion; a syntax-only run cannot evaluate their address sets.
+Install `requirements-analysis.txt` and supply the actual Country/ASN databases
+to the analyzer above. For IP/GEOIP/ASN changes, inspect its exact interval
+results before accepting the change. A profile with `geoip-maxmind-url` uses
+Surge's downloaded Country database; otherwise use its bundled Country file.
 
 Review relationships, split records and topology before accepting broad parents
 or list reordering. Every non-security split must be ordered-safe; all
@@ -118,7 +119,7 @@ and diff checks; run affected existing tests for tool changes.
 ## Active profile and publication
 
 For rule-only changes, review and replace the generated `[Rule]` section. For
-this v2 migration, prepare both clients with `tools/prepare_profiles.py`: it
+explicitly scoped DNS/group migrations, prepare both clients with `tools/prepare_profiles.py`: it
 updates generated routing and ordered DNS mappings, removes DIRECT from proxy
 policy groups, and checks proxy definitions and MITM material remain intact.
 Candidates must pass validation before installation. Re-render managed DNS
@@ -175,10 +176,19 @@ without new distribution changes performs the full CDN recheck.
 
 ## Debugging
 
+Start with the passive `surge-cli status` / `surge-cli dump summary` when
+investigating a running client. Keep their private output outside the repository.
+The [CLI guide](SURGE-CLI.md#diagnostic-workflow) distinguishes runtime inspection,
+active probes and state changes.
+
 ```bash
 python3 tests/engine.py match example.com --conf /tmp/Surge.candidate.conf --json
 surge-cli rule explain example.com
 ```
+
+The Python command above evaluates the candidate; `surge-cli rule explain`
+evaluates the active profile and cannot prove that an uninstalled candidate is
+in use. Neither a rule explanation nor `--check` establishes connectivity.
 
 Missing address observations return `routing_complete=false`; use `--stage domain`
 for a domain-only boundary check, or supply `--dns-status` and `--resolved-ip`
@@ -194,31 +204,11 @@ change configuration or policy selections.
 
 ## Current decisions
 
-- **Microsoft / OneDrive:** v2 places Microsoft before the later DIRECT block.
-  Its `microsoft.com`, `live.com`, `office.com`, `msn.com` parents are narrowed
-  to service scopes so MicrosoftCN exceptions remain effective. The 2026-09-12 decision routes OneDrive sync/storage/shared sign-in
-  and `office.live.com` through Microsoft after direct access failed. This also
-  supersedes the former DIRECT exception for `files.1drv.com`. Other approved
-  MicrosoftCN update/CDN/preview endpoints retain DIRECT. Do not reintroduce
-  OneDrive direct exceptions on refresh. See [proxy restoration](evidence/2026-09-12-onedrive-proxy.md)
-  and the superseded [direct trial](evidence/2026-09-12-onedrive-direct.md).
-- **Google:** Google owns `google.com`, `googleapis.com`, `googleusercontent.com`
-  and `ggpht.com` after YouTube/download exceptions. The user explicitly included
-  Google API tenant traffic; see [the decision](evidence/2026-09-07-clash-routing.md).
-- **Regional AI:** International DashScope/Coding Plan and documented overseas
-  `<region>.maas.aliyuncs.com` precede AlibabaCN; Beijing APIs, account/login and
-  consoles retain AlibabaCN. TRAE's observed `trae-api-cn.mchost.guru` belongs to
-  ByteDanceCN and `trae-api-sg.mchost.guru` to AI. Do not restore blanket
-  `mchost.guru`, `aliyuncs.com` or shared ByteDance CDN ownership in AI.
-  See [reviewed endpoints and omissions](evidence/2026-09-07-ai-upstream.md).
-
-The v2 evidence record distinguishes IP readmission, quarantine and native
-connection witnesses. Unknown historical Streaming ranges remain quarantined;
-expanding that set requires real capture and a shadow-routing comparison.
-OneDrive synchronization still needs a real authenticated client sync. Rule matches and unauthenticated HTTP responses
-establish neither. Broad compatibility entries in vendor documentation do not
-make shared cloud namespaces OneDrive owners.
-
+Consult [Current decisions](DECISIONS.md) before changing OneDrive, Google tenant
+coverage, regional AI or reviewed IP ownership. It is the single current record
+of accepted choices, rejected expansions and unresolved traffic questions.
+Authenticated application tests and real capture are required where that record
+identifies gaps; routing matches and anonymous probes do not close them.
 
 ## Coordinated v2 rollout
 
@@ -227,7 +217,9 @@ old rule sequence. Keep the active old profile on its prior immutable revision
 while publishing the new distribution. After all new files are verified, prepare
 both private profiles with the same new immutable `--rules-base` URL. The helper
 uses that revision for Clash URLs and cache paths too. Validate and install the
-candidates, then verify native matching. Do not claim an isolated Mihomo test
+candidates, then verify native matching. After the coordinated upgrade, return
+production references to `@main` unless the user requests a fixed version.
+Do not claim an isolated Mihomo test
 means the user's separate Clash client has reloaded.
 
 Keep rollback material outside the repository and outside `../Backup/`: original

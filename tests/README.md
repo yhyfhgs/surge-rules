@@ -2,6 +2,9 @@
 
 以下命令均在仓库根目录执行。完整分流验证与发布流程见
 [维护手册](../docs/MAINTENANCE.md#validate-a-change)；这里说明各测试的用途和边界。
+全局 skill、CLI 安装与命令选择见 [Surge skill 与 CLI](../docs/SURGE-CLI.md)。
+`surge-cli --check <路径>` 只做文件语法校验；`rule match` / `rule explain`
+检查运行中的规则，不会改为读取测试传入的候选配置，也不代表真实连接成功。
 
 | 层 | 入口 | 网络要求 | 用途 |
 |---|---|---|---|

@@ -33,36 +33,38 @@ license of its own.
 
 PSL and IANA snapshots belong only to tests, never to `lists/`. Their refresh
 procedure and byte hashes are in [SNAPSHOTS.json](tests/data/SNAPSHOTS.json).
-Analyze the Country/ASN databases actually used by Surge; the offline engine
-approximates `GEOIP,CN` with ChinaIP and ASN with a small built-in sample.
+Analyze the Country/ASN databases actually used by Surge. The offline engine
+uses real MMDB records for GEOIP/ASN and requires explicit address/DNS
+observations; missing observations are incomplete results, not invented matches.
 
 ## Reproducibility
 
 [sources.lock.json](sources.lock.json) and the locked fetch/rebuild tools define
-reproducibility. ChinaIP is pinned to `e1ae9f9ca4de99065ee80174094f238fb47267bc`
-with input SHA-256, transforms, exclusions and expected address-set digests.
-ChinaDomain received an additive refresh from that revision on 2026-09-02 but
-remains `observed`; its guarded shadow workflow has not established a complete
-rebuild. Other curated lists are `unpinned`. This register does not promise
-byte-for-byte reconstruction of every distribution file.
+reproducibility. The `blackmatrix7_china_ip` lock entry is authoritative for the
+current revision, input SHA-256, transforms, exclusions and expected address-set
+digests. ChinaDomain's recorded 2026-09-02 additive refresh remains `observed`;
+its guarded shadow workflow has not established a complete rebuild. Other
+curated lists are `unpinned`. This register does not promise byte-for-byte
+reconstruction of every distribution file.
 
-## Dated decisions and reviews
+## Decision evidence and review inputs
 
 - **2026-09-07, suffix ownership:** Google API tenant coverage was an explicit
   user decision; Microsoft suffix coverage used official endpoint guidance.
-  [Evidence](docs/evidence/2026-09-07-clash-routing.md) and the subsequent
-  [Microsoft list merge](docs/evidence/2026-09-07-microsoft-merge.md) record the
-  scope and priority exceptions. These were not upstream/IP refreshes.
+  The [current decisions](docs/DECISIONS.md#google-and-session-ownership) retain
+  this scope and link the historical records. Microsoft's current priority and
+  narrowed service parents follow v2, not the earlier fallback-list design.
 - **2026-09-07, AI review:** VPSDance `cc1d596`, blackmatrix7 `5f06cac` and SukkaW
   `81632eb` supplied 18 revision-addressed files verified by the locked fetcher.
   `ai_review.inputs` holds full revisions, SHA-256 and sizes. The inputs are
   pinned; the destination lists remain curated. Official Alibaba regional API
-  and TRAE endpoint evidence informed the splits. [Accepted entries and omissions](docs/evidence/2026-09-07-ai-upstream.md).
+  and TRAE endpoint evidence informed the splits. See the retained
+  [AI decisions and omissions](docs/DECISIONS.md#ai-ownership-and-regional-exceptions).
 - **2026-09-12, OneDrive:** Microsoft's [consumer endpoints](https://learn.microsoft.com/en-us/sharepoint/required-urls-and-ports)
   and [Microsoft 365 endpoints](https://learn.microsoft.com/en-us/microsoft-365/enterprise/urls-and-ip-address-ranges?view=o365-worldwide)
   informed ownership. `onedrive_review` records retrieval dates and observed
-  HTML hashes, not immutable rule inputs. The [direct trial](docs/evidence/2026-09-12-onedrive-direct.md)
-  failed and was superseded by [Microsoft proxy routing](docs/evidence/2026-09-12-onedrive-proxy.md).
+  HTML hashes, not immutable rule inputs. The direct trial failed and was
+  superseded by [Microsoft proxy routing](docs/DECISIONS.md#microsoft-and-onedrive).
   Connectivity evidence is separate from routing-policy validation; no upstream
   rules or IP allocation data changed.
 
@@ -73,7 +75,8 @@ byte-for-byte reconstruction of every distribution file.
 review inputs. Forty-one unavailable historical Sukka distribution inputs are
 recorded separately, never counted as refreshed. Changed active bytes were
 re-fetched with `fetch_locked.py`; upstream metadata and operational rule changes
-are distinguished in the [v2 evidence](docs/evidence/2026-09-13-domain-ip-v2.md).
+are distinguished in the [current IP decisions](docs/DECISIONS.md#ip-ownership-and-guarded-admission)
+and the linked immutable v2 evidence.
 
 The latest selected Sukka source adds `boxcloud.com`, `dl.gl-inet.com` and
 `thumb.wikimedia.org`. Box's existing service owner receives its file namespace;

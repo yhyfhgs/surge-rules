@@ -27,8 +27,8 @@ proxy, region, then DIRECT lists. YouTube/Streaming are adjacent; Telegram
 precedes the other social lists. SYSTEM sits in the DIRECT non-IP block; FINAL
 is the only terminal rule. No mixed LAN or unconditional GEOIP,CN tail is emitted.
 
-- Before moving MicrosoftCN behind Microsoft, Microsoft's four broad parents
-  are narrowed to explicit service scopes. OneDrive storage/authentication and
+- Microsoft precedes MicrosoftCN with four broad parents narrowed to explicit
+  service scopes. OneDrive storage/authentication and
   the approved DIRECT exceptions remain protected by independent witnesses.
 - Download exceptions precede service owners. Games uses explicit Blizzard
   scopes so the later DIRECT download.blizzard.com remains effective.
@@ -126,5 +126,6 @@ The [maintenance workflow](MAINTENANCE.md#validate-a-change) combines shape,
 relationship, static, behavioral, native syntax and derived-output checks.
 Release analysis requires readable Country/ASN MMDB files and `maxminddb`.
 Live tests establish runtime behavior; even exact static address-set proofs
-cannot replace authenticated application testing. Current service decisions and unresolved traffic questions live in
-[Maintenance](MAINTENANCE.md#current-decisions), with dated evidence links.
+cannot replace authenticated application testing. Current service decisions and
+unresolved traffic questions live in [Current decisions](DECISIONS.md), with
+immutable links to historical evidence.

@@ -1,0 +1,150 @@
+# Current routing decisions
+
+Consolidated on 2026-09-13 against the v2 sources. This document retains the
+decisions and unresolved evidence that still affect maintenance. List content,
+order and modifiers remain in `lists/` and `config/routing.json`; operating
+procedures belong in [Maintenance](MAINTENANCE.md). Historical measurements below
+describe their recorded batch, not a new runtime check.
+
+## Microsoft and OneDrive
+
+OneDrive storage, synchronization, SharePoint-backed files, shared sign-in,
+authentication assets, MFA, `office.live.com` and `g.live.com` use Microsoft.
+The user reversed the DIRECT trial on 2026-09-12 after OneDrive failed to open.
+At that time, direct probes to `onedrive.live.com` and `skyapi.onedrive.live.com`
+timed out; local DNS returned Meta-owned addresses while encrypted DNS returned
+different Microsoft service answers. No fixed IP or DNS override was adopted.
+
+The v2 manifest places Microsoft before the later DIRECT block. Its four broad
+parents (`microsoft.com`, `live.com`, `office.com`, `msn.com`) were narrowed to
+service scopes to preserve MicrosoftCN update/CDN/preview exceptions. The former
+DIRECT choice for `files.1drv.com` is superseded. Do not restore OneDrive DIRECT
+exceptions, the old MicrosoftCN-first ordering, or MicrosoftFallback on refresh.
+
+The existing OneDrive scenario protects 67 session endpoints and separate
+boundary witnesses. Seven proposed Office resource DIRECT changes were withheld
+because a broad vendor parent did not establish an authenticated resource's
+independence. Existing DownloadCDN decisions remain. Shared cloud namespaces and
+compatibility entries in vendor documentation are not blanket OneDrive owners.
+
+Official consumer and Microsoft 365 documentation is recorded as observed HTML
+in `sources.lock.json:onedrive_review`, not as imported rule lists. Native
+matching and unauthenticated HTTP responses do not establish successful account
+sign-in or file synchronization; a real authenticated sync remains unverified.
+
+## Google and session ownership
+
+Google owns `google.com`, `googleapis.com`, `googleusercontent.com` and
+`ggpht.com` after the earlier YouTube/download exceptions. The user explicitly
+included Google API tenant traffic in that decision. This does not authorize
+generalizing unrelated shared-cloud namespaces into service rules.
+
+Box's `boxcloud.com` file namespace follows its existing account/session owner.
+1Password account content stays with its proxy family; F1 consent follows
+Streaming. Explicit firmware/model-transfer downloads may retain independent
+download ownership. Redirects, login, API and authenticated resources otherwise
+remain one session family.
+
+## AI ownership and regional exceptions
+
+Independent international AI uses AI. Google/Microsoft/Meta/X products retain
+their ecosystem owner; domestic products use Domestic or the appropriate CN
+vendor. Nationality, a `.com`/`.ai` suffix or an upstream `scope: cn` flag alone
+does not establish an endpoint's region.
+
+| Surface | Retained decision |
+|---|---|
+| DashScope international/US, Hong Kong DashScope and international Coding Plan | Exact AI endpoints precede AlibabaCN's parent; Beijing APIs, account/login and consoles retain AlibabaCN. |
+| `maas.aliyuncs.com` regions `ap-southeast-1`, `us-east-1`, `eu-central-1`, `ap-northeast-1`, `cn-hongkong` | The five documented serving suffixes use AI; do not infer additional regions. |
+| `traeapi.us`, `trae-api-sg.mchost.guru` | AI. The observed `trae-api-cn.mchost.guru` exact host belongs to ByteDanceCN. |
+| Other `mchost.guru` hosts | No blanket AI or DIRECT suffix; only evidenced regional endpoints receive those owners. |
+| `modelscope.cn`, `qianwen.com`, `qoder.cn`, `tongyi.com`; domestic Coze family | AlibabaCN and ByteDanceCN respectively. Their international products retain separate AI ownership. |
+| `lingyiwanwu.com` | Domestic; its Chinese website is distinct from the international `01.ai` entry. |
+| OpenAI Azure Blob / Cloudflare asset hosts | Exact owned hosts only; no shared tenant-parent expansion. |
+| Hugging Face browsing/API and bulk transfers | Browsing/API uses AI; Xet/LFS and evidenced bulk model/dataset delivery use the earlier ModelDownloadCDN owner. |
+
+The 18 review inputs are pinned in `sources.lock.json:ai_review.inputs`; full
+accepted endpoint details and original official references remain in the
+[AI review](https://github.com/yhyfhgs/surge-rules/blob/caf887f791185f46c371d482788af690677c4573/docs/evidence/2026-09-07-ai-upstream.md).
+These pins reproduce review evidence, not every curated destination list.
+
+Keep these omissions and limits when refreshing:
+
+- Do not import process rules, URL regexes, broad brand/telemetry keywords,
+  shared cloud/CDN parents or DigitalOcean's ASN merely from an AI aggregate.
+- `hf.space`, `repl.co`, `replit.app`, `replit.dev` and `windsurf.build` are
+  tenant-hosting boundaries, not whole-service model API rules.
+- `anthropic.com.cn` and `chatbotclaude.com` lacked sufficient first-party active
+  service evidence in the review; they were neither admitted nor declared dead.
+  An unauthenticated Auth0 redirect did not justify changing `anthropic.auth0.com`.
+- `mcbaas.work`, `mcdemo.show`, `tcwqqdy.guru` and `trae.guru` retain their existing
+  AI ownership pending endpoint/traffic evidence; their complete regional scope
+  was not established. Generic Alibaba accounts and ByteDance telemetry/CDNs
+  retain their existing owners.
+
+## IP ownership and guarded admission
+
+The v2 review kept 35 existing list names and split out 17 IP lists. Domain
+ownership completes before reviewed IP sets may initiate encrypted resolution.
+Regional IP calls subtract PrivateLANIP, PKUIP, AppleCNIP and ChinaIP; actual
+Country/ASN MMDB intervals establish the effective sets.
+
+- StreamingIP retains verified or narrowly bounded Netflix scope. Official
+  network guidance identifies AS2906/40027/55095; fresh RDAP responses support
+  only their returned ranges. Unknown historical cloud/ISP cache ranges remain
+  quarantined. Expansion needs real traffic capture and a shadow comparison.
+- Fresh registered ownership supported AI/Meta/X readmissions where the ASN
+  database alone was incomplete. A missing ASN record does not prove reassignment.
+- TelegramIP follows the exact official CIDR set with equivalent collapse.
+  GamesIP keeps directly allocated Blizzard addresses; old cloud/ISP probes
+  without a dedicated binding remain excluded. JapanIP retains reviewed LINE/LY
+  ranges and JP fallback, without the five removed whole-operator ASNs.
+- `config/ip-review-exclusions.json` is the anti-reentry registry. Quarantine
+  does not mean an address is dead. ChinaIP's lock entry preserves exclusion,
+  retention and address-set guards; uncertain ranges require fresh evidence.
+
+The ChinaDomain additions-only review failed the existing 70% resolution gate
+on both attempts, so no candidates were admitted and the threshold was retained.
+The corrected 21,906-value manual-domain sweep established no confirmed expiry:
+timeouts, NODATA, parking hints and isolated NXDOMAIN answers were insufficient.
+Use the current [expiry workflow](MAINTENANCE.md#generated-layers-and-upstreams).
+
+The synthetic `battle.blizzard.com` candidate was rejected after NXDOMAIN and
+replaced with verified service scope; it was not added to the expiry denylist.
+Figma/Obsidian/Cloudflare control-plane additions to ProxyGFW were withheld:
+first-party ownership alone did not establish blocking. Figma and Obsidian
+unauthenticated roots responded through both tested paths.
+
+## Latest recorded release and open verification
+
+Routing commit `8c92cbbd70dd082df48f696751c5a30e120183f2` was recorded as
+**PUBLISHED_AND_VERIFIED** on 2026-09-13. It contained 52 lists and 140,282 source
+rules; 4,750 scenario assertions and 84 adversarial assertions passed. The
+full MMDB/static gates reported no P0/P1/P2 findings and three existing P3 notices.
+
+After the coordinated immutable-revision rollout, the user's final choice was
+official production `@main` URLs for both private clients, including Surge Host
+DNS mappings and Clash's v2 provider cache. The recorded follow-up verified
+105/105 CDN files, 52/52 ready Surge resources and 90/90 native routing witnesses
+(including 67/67 OneDrive endpoints). This is the retained deployment convention.
+
+No production Clash process was running during that release. An isolated
+TUN-disabled Mihomo instance loaded all 52 CDN providers and passed dual-stack
+DNS plus 8/8 connection-policy witnesses, then stopped. It did not establish
+production-client reload or OS-wide DNS interception. Real authenticated
+login/sync/payment/playback and a daily FINAL-rate improvement remain outside
+those observations. See the [Clash contract](CLASH.md).
+
+## Historical evidence
+
+Superseded designs and full batch measurements remain at this immutable Git
+revision; they are evidence, not current routing instructions.
+
+| Record | Retained purpose |
+|---|---|
+| [Domain/IP v2](https://github.com/yhyfhgs/surge-rules/blob/caf887f791185f46c371d482788af690677c4573/docs/evidence/2026-09-13-domain-ip-v2.md) | Source review, readmissions, per-list deltas, publication and final `@main` activation. |
+| [OneDrive proxy restoration](https://github.com/yhyfhgs/surge-rules/blob/caf887f791185f46c371d482788af690677c4573/docs/evidence/2026-09-12-onedrive-proxy.md) | Current proxy decision and its connectivity limits. |
+| [OneDrive DIRECT trial](https://github.com/yhyfhgs/surge-rules/blob/caf887f791185f46c371d482788af690677c4573/docs/evidence/2026-09-12-onedrive-direct.md) | Failed trial and DNS observations; routing superseded. |
+| [AI review](https://github.com/yhyfhgs/surge-rules/blob/caf887f791185f46c371d482788af690677c4573/docs/evidence/2026-09-07-ai-upstream.md) | Pinned inputs, exact accepted endpoints, omissions and source links. |
+| [Google/Microsoft suffix review](https://github.com/yhyfhgs/surge-rules/blob/caf887f791185f46c371d482788af690677c4573/docs/evidence/2026-09-07-clash-routing.md) | Google tenant scope; old MicrosoftFallback design superseded. |
+| [Microsoft list merge](https://github.com/yhyfhgs/surge-rules/blob/caf887f791185f46c371d482788af690677c4573/docs/evidence/2026-09-07-microsoft-merge.md) | Retired fallback list; old ordering/DIRECT choices superseded. |
