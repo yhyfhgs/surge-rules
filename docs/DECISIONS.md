@@ -104,8 +104,9 @@ Country/ASN MMDB intervals establish the effective sets.
   quarantined. Expansion needs real traffic capture and a shadow comparison.
 - Fresh registered ownership supported AI/Meta/X readmissions where the ASN
   database alone was incomplete. A missing ASN record does not prove reassignment.
-- TelegramIP follows the exact official CIDR set with equivalent collapse.
-  GamesIP keeps directly allocated Blizzard addresses; old cloud/ISP probes
+- TelegramIP follows the exact official CIDR set with equivalent collapse,
+  plus `95.161.64.0/20`, readmitted on 2026-09-26 from observed client traffic
+  and its RIPE registration (see [FINAL review](#final-monitor-review)). GamesIP keeps directly allocated Blizzard addresses; old cloud/ISP probes
   without a dedicated binding remain excluded. JapanIP retains reviewed LINE/LY
   ranges and JP fallback, without the five removed whole-operator ASNs.
 - `config/ip-review-exclusions.json` is the anti-reentry registry. Quarantine
@@ -129,7 +130,62 @@ The synthetic `battle.blizzard.com` candidate was rejected after NXDOMAIN and
 replaced with verified service scope; it was not added to the expiry denylist.
 Figma/Obsidian/Cloudflare control-plane additions to ProxyGFW were withheld:
 first-party ownership alone did not establish blocking. Figma and Obsidian
-unauthenticated roots responded through both tested paths.
+unauthenticated roots responded through both tested paths. The 2026-09-26 user
+decision below superseded this for Obsidian; Figma and the Cloudflare control
+plane remain unowned.
+
+## FINAL monitor review
+
+The private FINAL monitor recorded 6,766 connections to 287 destinations from
+2026-09-15 to 2026-09-26 (16 controlled probe connections excluded). Every
+destination still reached FINAL under the rules published before this batch.
+The 2026-09-26 batch assigned 99 of them, which carried 5,354 connections
+(79.1%). Classification uses observed hosts and processes plus RDAP, registry,
+application metadata or page-title checks. Per-host usage stays in the private
+monitor. The accepted user decisions are:
+
+- **ProxyGFW:** identified overseas first-party services that lack a specific
+  owner may enter without blocking evidence. This covers applications and sites
+  used directly, such as Obsidian, Zotero, Tailscale, Typora, NodeSeek and
+  finance/data sites. The Overleaf compile host joins `overleaf.com`, like the
+  1Password content domains. Hosting and proxy-provider sites were withheld from
+  the public lists because they would disclose private infrastructure.
+- **Academic:** a new DIRECT list after PKU holds the academic sites seen in
+  FINAL, so campus IP access reaches institutional subscriptions. Existing
+  academic owners were not moved: `arxiv.org`, `openreview.net`,
+  `semanticscholar.org` and several publishers remain in ProxyGFW, others in
+  ChinaDomain, and universities stay in the regional lists. Moving them needs a
+  separate decision.
+- **Reject:** only ad delivery and bidding endpoints were added (DSP/SSP,
+  cookie sync, native/video ads, the Freestar bidding stack, Naver ads). Under
+  the existing "block ads, not analytics" rule, measurement (Comscore, Nielsen,
+  DoubleVerify, IAS), identity graphs, ABM intent/visitor identification and
+  attribution pixels are not rejected.
+- **Ecosystem and service owners:** the Gemini API docs MCP and Colab runtimes
+  join Google; Microsoft Clarity joins Microsoft, as Google Analytics joins
+  Google. Cloudflare's MCP server and STUN host, observed from AI clients, join
+  AI as exact hosts. Writefull and AI-detection services join AI. A Tencent
+  Cloud IM login endpoint failed repeatedly through the proxy, so TencentCN now
+  owns `qcloud.com` as a suffix. The earlier-listed ProxyGFW exception
+  `shortconn.im.qcloud.com` is an ordered-safe child in v2.
+- **TelegramIP:** Telegram client traffic to `95.161.76.100` (ports 80, 443
+  and 5222) was observed on seven days. RIPE registers `95.161.64.0/20` as TM-SUBNETS, with Telegram
+  Messenger Inc as abuse contact and MNT-TELEGRAM as maintainer. The range left
+  the quarantine registry with that evidence.
+
+The remaining FINAL traffic is intentional:
+
+- Third-party SaaS components stay on the neutral exit under the 2026-08-31
+  audit ruling. This includes Customer.io/Gist, Segment, HubSpot, Hotjar,
+  Optimizely, consent managers, support widgets and site builders.
+- Bot-defense, CAPTCHA, fingerprinting and IP-geolocation components share the
+  calling page's exit. This includes AWS WAF, PerimeterX, DataDome,
+  FingerprintJS and ipapi.co.
+- The rest are tenant boundaries (`github.io`, `cloudfront.net`,
+  `supabase.co`), raw IPs, unidentified domains and personal sites.
+- Raw IPs include Tencent Cloud and Azure addresses contacted without a
+  hostname. Shared-cloud CIDRs cannot own a service, and process rules are
+  forbidden.
 
 ## Latest recorded release and open verification
 

@@ -3,6 +3,15 @@
 当前约定见 [现行决策](docs/DECISIONS.md)，操作流程见 [维护手册](docs/MAINTENANCE.md)。
 历史数字只代表对应批次，当前数量以检查输出为准。
 
+## [2026-09-26·FINAL 监控归类] 按 12 天 FINAL 实测归属 99 个目的地
+
+- 私有 FINAL 监控在 2026-09-15～26 记录 6,766 次连接、287 个目的地（已排除 16 次受控探测），在本批之前已发布的规则下（含同日上游复核）全部仍落 FINAL。本批归属其中 99 个，覆盖 5,354 次（79.1%）。Obsidian 同步、Cloudflare MCP、Writefull 和 Gemini API 文档 MCP 等高频项都有了明确归属；逐主机用量只留在私有监控里。
+- 用户裁决三项：①境外、未证实被墙、没有专属归属的第一方服务并入 ProxyGFW（15 条，含 Obsidian、Overleaf 编译产物、Zotero、Tailscale、Typora、NodeSeek 和资讯站；主机商与代理服务商站点会暴露私有基础设施，未写入公开列表）；②新建 Academic 直连表（21 条，位于 PKU 之后），用校园网 IP 访问机构订阅；③Reject 只收投放与竞价面（12 条）。测量、身份图谱、ABM 与归因类按「拦广告不拦统计」继续放行。
+- 服务归属：Google +3（Gemini 文档 MCP、Colab 运行时、安全浏览 OHTTP 中继）；Microsoft +1（Clarity）；AI +13（Writefull、GPTZero 等，以及 Cloudflare MCP 与 STUN 两个精确主机）；Payment +3、SocialOthers +2、Streaming +1；DownloadCDN +2（Tectonic 宏包、Surge 更新源）。TencentCN 把 `qcloud.com` 从精确顶点升级为后缀，依据是腾讯云 IM 登录端点经代理反复失败。TelegramIP 依据客户端流量和 RIPE 登记再准入 `95.161.64.0/20`。
+- 约 1,412 次连接留在 FINAL，依据既有裁决或上述隐私考虑：通用 SaaS 组件；反爬、验证码、指纹与 IP 定位组件；租户边界；裸 IP；未识别域。
+- 规则 140,674 → 140,748（+75/−1），表 52 → 53，有序安全拆分父域 28 → 33（均为子项在前）。
+- 验证全部通过：原生语法、渲染一致性、引擎自检 54/54；真实 MMDB 关系分析无遮蔽和顺序不安全拆分；静态审计无 P0/P1/P2（3 个既有 P3）；场景 5,058 条（新增 212 条，qcloud 的 6 条断言迁入新场景）和其中 2,216 条 DNS 断言；对抗测试 84/84；Clash 53 表 140,748 条，合同检查通过。新增场景放到旧规则上有 83 条失败，说明断言确实覆盖了本批改动。
+
 ## [2026-09-26·上游复核] 固定输入重锁、ChinaIP/ChinaDomain 刷新与厂商补录
 
 - 检查 11 个上游仓库 13 个分支头。原 412 份固定输入中 339 份字节未变、66 份有变化、7 份版本未动；9/13 无法访问的 41 份 SukkaLab 分发文件现已可取。连同 Sukka 新增的 `domestic_cdn` 3 份，共 415 份复核输入重锁到当前版本，经 `fetch_locked.py` 逐份 SHA-256 校验通过。

@@ -5,6 +5,8 @@
 # Topology and matching options: config/routing.json.
 # Sources and review decisions: SOURCES.md.
 
+DOMAIN,stripe-camo.global.ssl.fastly.net
+
 DOMAIN-SUFFIX,2checkout.com
 DOMAIN-SUFFIX,2co.com
 DOMAIN-SUFFIX,adyen.com
@@ -27,10 +29,12 @@ DOMAIN-SUFFIX,code.buywithprime.amazon.com
 DOMAIN-SUFFIX,discover.com
 DOMAIN-SUFFIX,discovercard.com
 DOMAIN-SUFFIX,discoverglobalnetwork.com
+DOMAIN-SUFFIX,duitku.com
 DOMAIN-SUFFIX,fastspring.com
 DOMAIN-SUFFIX,global.jcb
 DOMAIN-SUFFIX,gocardless.com
 DOMAIN-SUFFIX,gumroad.com
+DOMAIN-SUFFIX,infini.money
 DOMAIN-SUFFIX,jcb.co.jp
 DOMAIN-SUFFIX,jcbusa.com
 DOMAIN-SUFFIX,klarna.com

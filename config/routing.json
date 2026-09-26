@@ -178,6 +178,14 @@
       "kind": "domain"
     },
     {
+      "name": "Academic",
+      "policy": "DIRECT",
+      "section": "非IP·直连",
+      "extended_matching": true,
+      "no_resolve": false,
+      "kind": "domain"
+    },
+    {
       "name": "GameDownloadCN",
       "policy": "DIRECT",
       "section": "非IP·直连",

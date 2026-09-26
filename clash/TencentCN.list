@@ -5,7 +5,6 @@
 # Topology and matching options: config/routing.json.
 # Sources and review decisions: SOURCES.md.
 
-DOMAIN,qcloud.com
 DOMAIN,slife.xy-asia.com
 
 DOMAIN-SUFFIX,001dl.cn
@@ -857,6 +856,7 @@ DOMAIN-SUFFIX,qcdntest.net
 DOMAIN-SUFFIX,qclivecdn.cn
 DOMAIN-SUFFIX,qclivecdn.com
 DOMAIN-SUFFIX,qcloud-edumall.com
+DOMAIN-SUFFIX,qcloud.com
 DOMAIN-SUFFIX,qcloud.la
 DOMAIN-SUFFIX,qcloudapps.com
 DOMAIN-SUFFIX,qcloudcdn.cn

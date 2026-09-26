@@ -215,6 +215,13 @@ rule-providers:
     url: https://cdn.jsdelivr.net/gh/yhyfhgs/surge-rules@main/clash/PKU.list
     path: ./rule-sets/surge-rules/v2/PKU.list
     interval: 86400
+  Academic:
+    type: http
+    behavior: classical
+    format: text
+    url: https://cdn.jsdelivr.net/gh/yhyfhgs/surge-rules@main/clash/Academic.list
+    path: ./rule-sets/surge-rules/v2/Academic.list
+    interval: 86400
   GameDownloadCN:
     type: http
     behavior: classical
@@ -449,6 +456,7 @@ rules:
   - RULE-SET,Europe,🇪🇺欧洲
   - RULE-SET,PrivateLAN,DIRECT
   - RULE-SET,PKU,DIRECT
+  - RULE-SET,Academic,DIRECT
   - RULE-SET,GameDownloadCN,DIRECT
   - RULE-SET,MicrosoftCN,DIRECT
   - RULE-SET,AppleCN,DIRECT

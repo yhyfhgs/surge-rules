@@ -285,7 +285,7 @@
   },
   {
     "name": "funnel_tencent_apex_restored",
-    "desc": "R4b/R4c 一线：TencentCN 恢复 myqcloud.com、smtcdns.com、wechat.com 三个后缀。前置占位为 DownloadCDN 的海外 cos.* 区、GameDownloadCN 的 Epic 分发桶、Reject 的 dns.wechat.com 与 Streaming 的 v.smtcdns.com。qcloud.com 未升级（ProxyGFW 持有后置的 shortconn.im.qcloud.com），单列在 funnel_deferred_apexes。",
+    "desc": "R4b/R4c 一线：TencentCN 恢复 myqcloud.com、smtcdns.com、wechat.com 三个后缀。前置占位为 DownloadCDN 的海外 cos.* 区、GameDownloadCN 的 Epic 分发桶、Reject 的 dns.wechat.com 与 Streaming 的 v.smtcdns.com。qcloud.com 于 2026-09-26 升级为后缀（v2 中 ProxyGFW 前置，shortconn.im.qcloud.com 成为有序安全例外），断言见 final_monitor_tencent_qcloud_suffix。",
     "requests": [
       {"host": "myqcloud.com"},
       {"host": "cos.ap-guangzhou.myqcloud.com", "note": "原落 FINAL"},
@@ -720,9 +720,6 @@
     "name": "funnel_deferred_apexes_unchanged",
     "desc": "2026-09-07 更新：厂商 suffix 接住未列名子域；既有国内/下载/YouTube 例外保持原落点。",
     "requests": [
-      {"host": "qcloud.com"},
-      {"host": "unknown.qcloud.com", "stage": "domain"},
-      {"host": "shortconn.im.qcloud.com"},
       {"host": "mi.com"},
       {"host": "unknown.mi.com", "stage": "domain"},
       {"host": "c.mi.com"},
@@ -745,9 +742,6 @@
     "assert": {
       "no_dns_leak": true,
       "per_request": [
-        {"host": "qcloud.com", "policy": "DIRECT", "reason": "精确顶点形态不变"},
-        {"host": "unknown.qcloud.com", "policy": "Final", "reason": "未升级，未知子域仍走 FINAL"},
-        {"host": "shortconn.im.qcloud.com", "policy": "Proxy", "reason": "ProxyGFW 后置异策略子项，正是不升级的原因"},
         {"host": "mi.com", "policy": "DIRECT", "reason": "精确顶点形态不变"},
         {"host": "unknown.mi.com", "policy": "Final", "reason": "未升级，未知子域仍走 FINAL"},
         {"host": "c.mi.com", "policy": "Proxy", "reason": "ProxyGFW 后置异策略子项，正是不升级的原因"},

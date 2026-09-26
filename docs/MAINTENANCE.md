@@ -13,10 +13,11 @@ repository's generated routing.
 ## Edit rules
 
 1. Find the current owner with `rg -n 'example\.com' lists`.
-2. Use local/campus or Reject ownership first, then evidenced bulk-download
-   exceptions, service owners, domestic owners, regions, or residual ProxyGFW.
-   Google/Microsoft/Meta/X AI stays with its ecosystem. Independent international
-   AI uses AI; domestic products use Domestic or their CN vendor owner.
+2. Use local/campus (PKU, Academic) or Reject ownership first, then evidenced
+   bulk-download exceptions, service owners, domestic owners, regions, or
+   residual ProxyGFW. Google/Microsoft/Meta/X AI stays with its ecosystem.
+   Independent international AI uses AI; domestic products use Domestic or their
+   CN vendor owner.
 3. Move rules instead of duplicating them. Keep redirects, login, API and CDN
    endpoints in one session family; split only evidenced download/regional
    surfaces. A broad parent must follow every different-policy child.
@@ -28,6 +29,13 @@ repository's generated routing.
    after the domain stage. USER-AGENT, PROCESS-NAME and URL-REGEX source rules
    remain forbidden. Every allowlist exemption needs a reason.
 6. Add behavioral assertions and run `python3 tools/sort_lists.py --write`.
+
+FINAL-traffic reviews use the same order. Assign owners from observed hosts and
+processes plus registration or first-party evidence. Leave these on FINAL:
+shared SaaS components; bot-defense, CAPTCHA, fingerprinting and IP-geolocation
+components; tenant boundaries; raw shared-cloud IPs. Record each batch's
+positive and negative witnesses in `tests/scenarios/final_monitor.json`. The
+accepted criteria are in [Current decisions](DECISIONS.md#final-monitor-review).
    The sorter preserves rule modifiers and trailing comments.
 
 Never hand-add to ChinaDomain. Unowned `.cn` / CNNIC IDN hosts already match

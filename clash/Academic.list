@@ -1,0 +1,28 @@
+# AUTO-GENERATED — Clash(Mihomo) classical 规则，由 ../lists/Academic.list 派生
+# 勿手工编辑；修改 Surge 源后运行 python3 tools/surge2clash.py 重新生成
+
+# Academic — maintained routing owner.
+# Topology and matching options: config/routing.json.
+# Sources and review decisions: SOURCES.md.
+
+DOMAIN-SUFFIX,altmetric.com
+DOMAIN-SUFFIX,biomedcentral.com
+DOMAIN-SUFFIX,colmweb.org
+DOMAIN-SUFFIX,crossref.org
+DOMAIN-SUFFIX,datacite.org
+DOMAIN-SUFFIX,dimensions.ai
+DOMAIN-SUFFIX,doi.org
+DOMAIN-SUFFIX,figshare.com
+DOMAIN-SUFFIX,figstatic.com
+DOMAIN-SUFFIX,jmlr.org
+DOMAIN-SUFFIX,mlanthology.org
+DOMAIN-SUFFIX,mlr.press
+DOMAIN-SUFFIX,philarchive.org
+DOMAIN-SUFFIX,philpapers.org
+DOMAIN-SUFFIX,plos.org
+DOMAIN-SUFFIX,researchgate.net
+DOMAIN-SUFFIX,rug.nl
+DOMAIN-SUFFIX,seamlessaccess.org
+DOMAIN-SUFFIX,ssrn.com
+DOMAIN-SUFFIX,tilburguniversity.edu
+DOMAIN-SUFFIX,toronto.edu

@@ -87,7 +87,8 @@ already covers the image host. New Loyalsoldier reject candidates do not enter
 Reject merely because an aggregate source lists them.
 
 Current [Telegram CIDRs](https://core.telegram.org/resources/cidr.txt) define
-TelegramIP's exact address set. Netflix's [network documentation](https://openconnect.zendesk.com/hc/en-us/articles/360035533071-Network-configuration)
+TelegramIP's exact address set, plus one RDAP-verified range readmitted on
+2026-09-26 (below). Netflix's [network documentation](https://openconnect.zendesk.com/hc/en-us/articles/360035533071-Network-configuration)
 identifies AS2906/40027/55095. Fresh ARIN/RIPE/APNIC network records support the
 specific retained/narrowed first-party scopes in `config/ip-review-exclusions.json`;
 RDAP entity ranges are never extrapolated to an entire legacy prefix. Quarantine
@@ -122,3 +123,13 @@ Changed files were compared at rule level before any list edit.
 - **Evidence only:** Loyalsoldier, hagezi and Sukka aggregate reject deltas,
   v2fly/MetaCubeX `geolocation-cn` changes and Sukka's `domestic_cdn` split
   changed no list. Official Telegram CIDRs still equal TelegramIP.
+
+## 2026-09-26 FINAL monitor review
+
+Candidates came from private connection metadata recorded outside this
+repository; no upstream rule list was imported. Ownership evidence consisted of
+RDAP registrar and nameserver records, the RIPE record for `95.161.64.0/20`,
+the Surge application's Sparkle feed URL (`sgupd.com`) and page titles.
+TelegramIP now extends the official CIDR set by that one range. Accepted
+scope and exclusions are in the
+[FINAL monitor review](docs/DECISIONS.md#final-monitor-review).

@@ -1,0 +1,259 @@
+[
+  {
+    "name": "final_monitor_google_family",
+    "desc": "2026-09-26 FINAL 监控归类：Antigravity 调用的 Gemini API 文档 MCP、Colab 运行时与 Chrome 安全浏览 OHTTP 中继归 Google 生态组（前两者 RDAP 为 MarkMonitor + Google Domains NS）。",
+    "requests": [
+      {"host": "gemini-api-docs-mcp.dev"},
+      {"host": "ping.prod.colab.dev"},
+      {"host": "8080-gpu-example.us-west4-1.prod.colab.dev", "note": "Colab 运行时（占位实例名）"},
+      {"host": "ohttp-relay-safebrowsing-chrome.google.fastly-edge.com", "note": "只收精确主机，fastly-edge.com 是租户边界"},
+      {"host": "google-ohttp-relay-safebrowsing.fastly-edge.com", "note": "既有同族主机"}
+    ],
+    "assert": {"same_policy": true, "policy": "Google-X-Meta-MS", "no_dns_leak": true}
+  },
+  {
+    "name": "final_monitor_ai_family",
+    "desc": "2026-09-26 FINAL 监控归类：Writefull、GPTZero、Pangram、PapeReview 等 AI 服务，AI 客户端使用的 Cloudflare MCP 与 STUN 两个精确主机归 AI；Cloudflare 只收这两个精确主机，控制台与 Web Analytics 仍不归 AI。kapa.ai 的前置下载子项保持原落点。",
+    "requests": [
+      {"host": "auth.writefull.ai"},
+      {"host": "nlp.writefull.ai"},
+      {"host": "my.writefull.com"},
+      {"host": "mcp.cloudflare.com"},
+      {"host": "stun.cloudflare.com"},
+      {"host": "app.gptzero.me"},
+      {"host": "iclr.pangram.com"},
+      {"host": "proxy.kapa.ai"},
+      {"host": "api.papereview.com"},
+      {"host": "humanlaya.com"},
+      {"host": "benchmark.meowllm.top"},
+      {"host": "megagon.ai"},
+      {"host": "lacuna.tiptreesystems.com"},
+      {"host": "www.datadoghq-browser-agent.com", "note": "Datadog 唯一归属守卫要求在 AI"},
+      {"host": "widget.kapa.ai", "note": "前置 DownloadCDN 子项"},
+      {"host": "dash.cloudflare.com", "stage": "domain", "note": "Cloudflare 控制台不随 MCP 入 AI"},
+      {"host": "static.cloudflareinsights.com", "stage": "domain", "note": "通用遥测保持中性出口"}
+    ],
+    "assert": {
+      "policy": "AI",
+      "no_dns_leak": true,
+      "per_request": [
+        {"host": "widget.kapa.ai", "policy": "下载", "reason": "DownloadCDN 前置子项，有序安全拆分"},
+        {"host": "dash.cloudflare.com", "policy": "Final", "reason": "只收 MCP 与 STUN 两个精确主机"},
+        {"host": "static.cloudflareinsights.com", "policy": "Final", "reason": "2026-08-31 裁决：通用 RUM 组件落 FINAL"}
+      ]
+    }
+  },
+  {
+    "name": "final_monitor_overseas_services_proxygfw",
+    "desc": "2026-09-26 用户裁决：境外、未证实被墙、又没有专属服务表的第一方服务并入 ProxyGFW（Obsidian 同步、Overleaf 编译产物、Zotero、Tailscale 控制台、Typora、NodeSeek 及其安全检查域与常用资讯站）。各自的前置下载子项保持下载出口。",
+    "requests": [
+      {"host": "sync-46.obsidian.md"},
+      {"host": "api.obsidian.md"},
+      {"host": "compiles.overleafusercontent.com", "note": "overleaf.com 会话族"},
+      {"host": "overleaf.com"},
+      {"host": "www.zotero.org"},
+      {"host": "login.tailscale.com"},
+      {"host": "console.tailscale.com"},
+      {"host": "typora.io"},
+      {"host": "dap.pat-issuer.cloudflare.com", "note": "Private Access Token 签发"},
+      {"host": "stat.nodeseek.org"},
+      {"host": "fog.22112211.xyz", "note": "页面标题 NodeSeek | security check，与 nodeseek.com 同出口"},
+      {"host": "www.nodeseek.com"},
+      {"host": "www.macromicro.me"},
+      {"host": "www.babypips.com"},
+      {"host": "www.ceicdata.com"},
+      {"host": "sg-imgs.dealroom.co"},
+      {"host": "api-comms.iherb.com"},
+      {"host": "arxivb.org"},
+      {"host": "akshare.akfamily.xyz"},
+      {"host": "releases.obsidian.md", "note": "前置 DownloadCDN 子项"},
+      {"host": "dl.tailscale.com", "note": "前置 DownloadCDN 子项"},
+      {"host": "pkgs.tailscale.com", "note": "前置 DownloadCDN 子项"},
+      {"host": "download.typora.io", "note": "前置 DownloadCDN 子项"},
+      {"host": "images-iherb.com", "note": "既有 DownloadCDN 图床"}
+    ],
+    "assert": {
+      "policy": "Proxy",
+      "no_dns_leak": true,
+      "per_request": [
+        {"host": "releases.obsidian.md", "policy": "下载", "reason": "DownloadCDN 前置子项，有序安全拆分"},
+        {"host": "dl.tailscale.com", "policy": "下载", "reason": "DownloadCDN 前置子项"},
+        {"host": "pkgs.tailscale.com", "policy": "下载", "reason": "DownloadCDN 前置子项"},
+        {"host": "download.typora.io", "policy": "下载", "reason": "DownloadCDN 前置子项"},
+        {"host": "images-iherb.com", "policy": "下载", "reason": "独立注册域，保持原下载归属"}
+      ]
+    }
+  },
+  {
+    "name": "final_monitor_academic_direct",
+    "desc": "2026-09-26 用户裁决：FINAL 中观测到的学术站点新建 Academic 表走 DIRECT，以北大校园网 IP 访问机构订阅。ProxyGFW 中既有出版/检索域与地区表中的高校本批未迁移，作为负例固定当前边界。",
+    "requests": [
+      {"host": "doi.org"},
+      {"host": "proceedings.mlr.press"},
+      {"host": "jmlr.org"},
+      {"host": "journals.plos.org"},
+      {"host": "crossmark-cdn.crossref.org"},
+      {"host": "api.datacite.org"},
+      {"host": "papers.ssrn.com"},
+      {"host": "www.researchgate.net"},
+      {"host": "philpapers.org"},
+      {"host": "philarchive.org"},
+      {"host": "bmcmedresmethodol.biomedcentral.com"},
+      {"host": "widgets.figshare.com"},
+      {"host": "ndownloader.figstatic.com"},
+      {"host": "api.altmetric.com"},
+      {"host": "metrics-api.dimensions.ai"},
+      {"host": "service.seamlessaccess.org", "note": "出版商机构登录发现服务"},
+      {"host": "colmweb.org"},
+      {"host": "mlanthology.org"},
+      {"host": "www.cs.toronto.edu"},
+      {"host": "research.rug.nl"},
+      {"host": "research.tilburguniversity.edu"},
+      {"host": "arxiv.org", "note": "既有 ProxyGFW 归属，本批未迁移"},
+      {"host": "www.sciencedirect.com", "note": "既有 ProxyGFW 归属，本批未迁移"},
+      {"host": "mit.edu", "note": "既有美国地区归属"}
+    ],
+    "assert": {
+      "policy": "DIRECT",
+      "no_dns_leak": true,
+      "per_request": [
+        {"host": "arxiv.org", "policy": "Proxy", "reason": "学术直连只覆盖本批观测域；既有归属变更须另行决定"},
+        {"host": "www.sciencedirect.com", "policy": "Proxy", "reason": "同上"},
+        {"host": "mit.edu", "policy": "🇺🇸美国", "reason": "地区表先于直连区，既有高校归属不变"}
+      ]
+    }
+  },
+  {
+    "name": "final_monitor_ad_delivery_reject",
+    "desc": "2026-09-26 FINAL 监控：只拒绝广告投放/竞价面（DSP/SSP/Cookie 同步/原生与视频广告/Freestar 竞价栈/Naver 广告）。按「拦广告不拦统计」，效果测量、身份图谱、ABM 意图与访客识别、归因像素继续放行并落中性出口。",
+    "requests": [
+      {"host": "d.turn.com"},
+      {"host": "pixel-sync.sitescout.com"},
+      {"host": "cm.everesttech.net"},
+      {"host": "match.360yield.com"},
+      {"host": "eb2.3lift.com"},
+      {"host": "a.pub.network"},
+      {"host": "api.floors.dev"},
+      {"host": "www.dianomi.com"},
+      {"host": "live.primis.tech"},
+      {"host": "map.go.affec.tv"},
+      {"host": "t.influ2.com"},
+      {"host": "nam.veta.naver.com"},
+      {"host": "sb.scorecardresearch.com", "stage": "domain", "note": "测量"},
+      {"host": "pub.doubleverify.com", "stage": "domain", "note": "测量"},
+      {"host": "static.adsafeprotected.com", "stage": "domain", "note": "测量"},
+      {"host": "secure-us.imrworldwide.com", "stage": "domain", "note": "测量"},
+      {"host": "pixel.tapad.com", "stage": "domain", "note": "身份图谱"},
+      {"host": "b.6sc.co", "stage": "domain", "note": "ABM 访客识别"},
+      {"host": "analytics.propensity-abm.com", "stage": "domain", "note": "ABM 分析"},
+      {"host": "js.hsadspixel.net", "stage": "domain", "note": "归因像素"},
+      {"host": "edge.cdn-vitals.com", "stage": "domain", "note": "用途未证实为投放"},
+      {"host": "api.permutive.com", "stage": "domain", "note": "受众数据"},
+      {"host": "cdn.permutive.com", "note": "既有 DownloadCDN 归属"},
+      {"host": "wcs.naver.com", "note": "Naver 统计与被拒的 veta.naver.com 是兄弟边界"}
+    ],
+    "assert": {
+      "policy": "REJECT",
+      "per_request": [
+        {"host": "sb.scorecardresearch.com", "policy": "Final", "reason": "测量不是投放"},
+        {"host": "pub.doubleverify.com", "policy": "Final", "reason": "测量不是投放"},
+        {"host": "static.adsafeprotected.com", "policy": "Final", "reason": "测量不是投放"},
+        {"host": "secure-us.imrworldwide.com", "policy": "Final", "reason": "测量不是投放"},
+        {"host": "pixel.tapad.com", "policy": "Final", "reason": "身份/数据类不属于投放面"},
+        {"host": "b.6sc.co", "policy": "Final", "reason": "访客识别不属于投放面"},
+        {"host": "analytics.propensity-abm.com", "policy": "Final", "reason": "分析不属于投放面"},
+        {"host": "js.hsadspixel.net", "policy": "Final", "reason": "归因不属于投放面"},
+        {"host": "edge.cdn-vitals.com", "policy": "Final", "reason": "未证实为投放面"},
+        {"host": "api.permutive.com", "policy": "Final", "reason": "受众数据不属于投放面"},
+        {"host": "cdn.permutive.com", "policy": "下载", "reason": "既有归属不变"},
+        {"host": "wcs.naver.com", "policy": "社交媒体", "reason": "Naver 第一方统计随 Naver 服务组"}
+      ]
+    }
+  },
+  {
+    "name": "final_monitor_shared_components_stay_neutral",
+    "desc": "2026-09-26 FINAL 监控复核：第三方通用 SaaS 组件（CDP/分析/A/B/同意管理/客服/营销自动化/站点搭建平台）按 2026-08-31 裁决落 FINAL 中性出口；反爬、验证码、设备指纹与 IP 定位组件与调用页面共用出口，同样不归任何表。",
+    "requests": [
+      {"host": "cdp.customer.io", "stage": "domain"},
+      {"host": "realtime.cloud.gist.build", "stage": "domain"},
+      {"host": "api.segment.io", "stage": "domain"},
+      {"host": "script.hotjar.com", "stage": "domain"},
+      {"host": "cdn.cookielaw.org", "stage": "domain"},
+      {"host": "app.qualified.com", "stage": "domain"},
+      {"host": "widget-mediator.zopim.com", "stage": "domain"},
+      {"host": "track.hubspot.com", "stage": "domain"},
+      {"host": "framer.com", "stage": "domain"},
+      {"host": "tenant-example.edge.sdk.awswaf.com", "stage": "domain", "note": "AWS WAF 挑战 SDK（占位租户）"},
+      {"host": "collector-pxexample.protechts.net", "stage": "domain", "note": "PerimeterX/HUMAN（占位租户）"},
+      {"host": "use1-turn.fpjs.io", "stage": "domain", "note": "FingerprintJS"},
+      {"host": "ipapi.co", "stage": "domain", "note": "IP 定位"}
+    ],
+    "assert": {"same_policy": true, "policy": "Final"}
+  },
+  {
+    "name": "final_monitor_service_owners",
+    "desc": "2026-09-26 FINAL 监控归类：Microsoft Clarity 随 Microsoft 生态（同 Google Analytics 先例）；Reddit 聊天 Matrix 域随 Reddit；Brightcove 播放器统计随既有播放器主机；Stripe 图片代理、Duitku、Infini 归 Payment；Tectonic TeX 包与 Surge 的 Sparkle 更新源（Info.plist SUFeedURL）归下载。",
+    "requests": [
+      {"host": "www.clarity.ms"},
+      {"host": "matrix.redditspace.com"},
+      {"host": "metrics.brightcove.com"},
+      {"host": "stripe-camo.global.ssl.fastly.net"},
+      {"host": "app.duitku.com"},
+      {"host": "business.infini.money"},
+      {"host": "data1b.fullyjustified.net"},
+      {"host": "sgupd.com"}
+    ],
+    "assert": {
+      "no_dns_leak": true,
+      "per_request": [
+        {"host": "www.clarity.ms", "policy": "Google-X-Meta-MS"},
+        {"host": "matrix.redditspace.com", "policy": "社交媒体"},
+        {"host": "metrics.brightcove.com", "policy": "流媒体"},
+        {"host": "stripe-camo.global.ssl.fastly.net", "policy": "Payment"},
+        {"host": "app.duitku.com", "policy": "Payment"},
+        {"host": "business.infini.money", "policy": "Payment"},
+        {"host": "data1b.fullyjustified.net", "policy": "下载"},
+        {"host": "sgupd.com", "policy": "下载"}
+      ]
+    }
+  },
+  {
+    "name": "final_monitor_telegram_backup_range",
+    "desc": "2026-09-26 TelegramIP 再准入 95.161.64.0/20：观测到 Telegram 客户端连接 95.161.76.100（80/443/5222），RIPE RDAP 为 TM-SUBNETS、滥用联系人 Telegram Messenger Inc、维护者 MNT-TELEGRAM。只收登记范围，边界外相邻地址不受影响。",
+    "requests": [
+      {"ip": "95.161.76.100"},
+      {"ip": "95.161.64.0"},
+      {"ip": "95.161.79.255"},
+      {"ip": "95.161.63.255", "note": "范围下界外"},
+      {"ip": "95.161.80.1", "note": "范围上界外"}
+    ],
+    "assert": {
+      "policy": "Telegram",
+      "per_request": [
+        {"ip": "95.161.63.255", "policy": "Final", "reason": "登记范围之外"},
+        {"ip": "95.161.80.1", "policy": "Final", "reason": "登记范围之外"}
+      ]
+    }
+  },
+  {
+    "name": "final_monitor_tencent_qcloud_suffix",
+    "desc": "2026-09-26 TencentCN 将 qcloud.com 由精确顶点升级为后缀：腾讯云 IM 登录 login.im.qcloud.com 经代理反复失败。旧的延期理由是 ProxyGFW 持有后置的 shortconn.im.qcloud.com；v2 中 ProxyGFW 先于直连区，它成为前置有序安全例外。",
+    "requests": [
+      {"host": "login.im.qcloud.com", "note": "腾讯云 IM 登录"},
+      {"host": "qcloud.com"},
+      {"host": "unknown.qcloud.com", "stage": "domain"},
+      {"host": "shortconn.im.qcloud.com", "note": "前置 ProxyGFW 例外"},
+      {"host": "bugly.qcloud.com", "note": "前置 DownloadCDN 例外"},
+      {"host": "httpdns.qcloud.com", "note": "前置 Reject 例外"}
+    ],
+    "assert": {
+      "policy": "DIRECT",
+      "no_dns_leak": true,
+      "per_request": [
+        {"host": "shortconn.im.qcloud.com", "policy": "Proxy", "reason": "ProxyGFW 前置异策略子项"},
+        {"host": "bugly.qcloud.com", "policy": "下载", "reason": "DownloadCDN 前置异策略子项"},
+        {"host": "httpdns.qcloud.com", "policy": "REJECT", "reason": "HTTPDNS 拦截在最前"}
+      ]
+    }
+  }
+]

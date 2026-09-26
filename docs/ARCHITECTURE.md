@@ -34,6 +34,9 @@ is the only terminal rule. No mixed LAN or unconditional GEOIP,CN tail is emitte
   scopes so the later DIRECT download.blizzard.com remains effective.
 - ProxyGFW precedes domestic and regional domain owners. ChinaTLD closes the
   domain stage, preserving prior proxy/Reject/regional .cn exceptions.
+- Academic follows PKU in the DIRECT block so campus IP access reaches
+  institutional subscriptions. Earlier proxy and regional owners keep their
+  academic domains until they are explicitly moved.
 - Regional IP calls use AND/NOT to subtract PrivateLANIP, PKUIP, AppleCNIP and
   ChinaIP. This is a boolean exclusion, not an early DIRECT rule. Japan's
   verified LINE/LY prefixes still precede the other regions.
@@ -44,11 +47,18 @@ manifest sections only control rendered comments.
 
 ## ProxyGFW contract
 
-ProxyGFW selects `Proxy`; unmatched traffic selects `Final`. Its rules require
-current evidence of blocking and no specific ecosystem, service, domestic or
-regional owner. It accepts no IP rules, PSL-boundary suffixes, or domains listed
-in `config/proxygfw-expired.txt`. Different-policy descendants require narrowing
-the GFW rule; shared-cloud CIDRs never establish service ownership.
+ProxyGFW selects `Proxy`; unmatched traffic selects `Final`. It holds domains
+with no specific ecosystem, service, domestic or regional owner that need a
+proxy: evidenced blocked domains and, since the 2026-09-26 user decision,
+identified overseas first-party services observed in FINAL traffic without
+blocking evidence. It accepts no IP rules, PSL-boundary suffixes, or domains
+listed in `config/proxygfw-expired.txt`. Different-policy descendants require
+narrowing the GFW rule; shared-cloud CIDRs never establish service ownership.
+
+Third-party SaaS components embedded in other sites (analytics, A/B testing,
+consent, support widgets, marketing automation, site builders) stay on the
+neutral FINAL exit. So do bot-defense, CAPTCHA, fingerprinting and IP
+geolocation components, which must share the calling page's exit.
 
 Registered blocked multitenant platforms may remain whole in this residual
 layer. This differs from assigning a tenant namespace to one service. Preserve

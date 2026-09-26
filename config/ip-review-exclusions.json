@@ -9854,11 +9854,6 @@
     },
     {
       "owner": "TelegramIP",
-      "rule": "IP-CIDR,95.161.64.0/20",
-      "reason": "Superseded by exact official address set; any extra backup/voice scope needs fresh service evidence."
-    },
-    {
-      "owner": "TelegramIP",
       "rule": "IP-CIDR,109.239.140.0/24",
       "reason": "Superseded by exact official address set; any extra backup/voice scope needs fresh service evidence."
     },
@@ -10196,6 +10191,14 @@
       "verified_at": "2026-09-13T07:39:22.597718+00:00",
       "registered_owner": "Netflix CDN Operations",
       "scope": "Full registered range or exact intersection with legacy prefix; no first-address extrapolation."
+    },
+    {
+      "owner": "TelegramIP",
+      "rule": "IP-CIDR,95.161.64.0/20",
+      "url": "https://rdap.db.ripe.net/ip/95.161.76.100",
+      "verified_at": "2026-09-26T13:15:06.457891+00:00",
+      "registered_owner": "Global Network Management Inc (TM-SUBNETS; abuse Telegram Messenger Inc; maintainer MNT-TELEGRAM)",
+      "scope": "Full registered RIPE range 95.161.64.0 - 95.161.79.255. Fresh service evidence: the Telegram client reached 95.161.76.100 on ports 80/443/5222 on 7 days (2026-09-15..26, FINAL monitor)."
     }
   ]
 }

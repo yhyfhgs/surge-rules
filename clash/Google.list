@@ -5,6 +5,8 @@
 # Topology and matching options: config/routing.json.
 # Sources and review decisions: SOURCES.md.
 
+DOMAIN,ohttp-relay-safebrowsing-chrome.google.fastly-edge.com
+
 DOMAIN-SUFFIX,0emm.com
 DOMAIN-SUFFIX,1e100.net
 DOMAIN-SUFFIX,1ucrs.com
@@ -159,6 +161,7 @@ DOMAIN-SUFFIX,cloudproxy.app
 DOMAIN-SUFFIX,cloudrobotics.com
 DOMAIN-SUFFIX,cobrasearch.com
 DOMAIN-SUFFIX,codespot.com
+DOMAIN-SUFFIX,colab.dev
 DOMAIN-SUFFIX,conscrypt.com
 DOMAIN-SUFFIX,conscrypt.org
 DOMAIN-SUFFIX,cookiechoices.org
@@ -217,6 +220,7 @@ DOMAIN-SUFFIX,g.dev
 DOMAIN-SUFFIX,g.page
 DOMAIN-SUFFIX,gateway.dev
 DOMAIN-SUFFIX,gcr.io
+DOMAIN-SUFFIX,gemini-api-docs-mcp.dev
 DOMAIN-SUFFIX,gerritcodereview.com
 DOMAIN-SUFFIX,get.app
 DOMAIN-SUFFIX,get.dev
