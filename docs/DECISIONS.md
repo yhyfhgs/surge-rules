@@ -189,16 +189,21 @@ The remaining FINAL traffic is intentional:
 
 ## Latest recorded release and open verification
 
-Routing commit `4632936d8ff6dab58f9b1f86279ab799d3ccba23` was recorded as
-**PUBLISHED_AND_VERIFIED** on 2026-09-26. It contained 52 lists and 140,674 source
-rules; 4,852 scenario assertions passed, including 2,135 DNS assertions. The
-full MMDB/static gates reported no P0/P1/P2 findings and three existing P3
-notices. A separate SHA-256 check matched 105/105 distribution files at both
-`@main` and the immutable commit. Both private profiles already use `@main` and
-needed no change. Clients load the lists at their next external-resource
-refresh; this release did not reload Surge or check a production Clash client.
+Routing commit `6cbd13c6a86ffefa4000d4e47e491cbb64ce1fc7` (FINAL monitor review)
+was recorded as **PUBLISHED_AND_VERIFIED** on 2026-09-26. It contained 53 lists
+and 140,748 source rules. The 5,058 scenario assertions passed, including 2,216
+DNS assertions, as did 84 adversarial assertions. The full MMDB/static gates
+reported no P0/P1/P2 findings and three existing P3 notices. `update.sh` matched
+all 25 changed distribution files on the CDN. The private Surge profile gained
+only the Academic rule and its DNS mapping. After it reloaded, all 53 rule sets
+refreshed, including the upstream-refresh lists below, and 47 native routing
+witnesses matched their new owners. The private Clash file gained the Academic
+provider and rule; no production Clash process was running.
 
-The previous routing release, `8c92cbbd70dd082df48f696751c5a30e120183f2`
+The previous routing release, `4632936d8ff6dab58f9b1f86279ab799d3ccba23`
+(2026-09-26 upstream refresh, 52 lists, 140,674 rules), passed 4,852 scenario
+assertions and matched 105/105 distribution files at both `@main` and its
+immutable commit. The release before it, `8c92cbbd70dd082df48f696751c5a30e120183f2`
 (2026-09-13, 140,282 rules), also passed 84 adversarial assertions.
 
 After the coordinated immutable-revision rollout, the user's final choice was
