@@ -10,6 +10,7 @@
 - ChinaDomain 中的出版商（Wiley、T&F、SAGE、OUP、Cambridge、JSTOR、APS、ACS、IOP、PNAS、Scopus 等）本就直连，不重复收录；地区表中的高校保持原归属。机构订阅只在校园网内生效，校外直连使用本地运营商地址。
 - 验证：规则 140,748 → 140,749（+14/−13）；真实 MMDB 关系分析无遮蔽和顺序不安全拆分；静态审计无 P0/P1/P2（3 个既有 P3）；场景 5,090 条（新增 32 条）和其中 2,232 条 DNS 断言全过；对抗测试 84/84；Clash 53 表 140,749 条，合同检查通过。学术场景放到迁移前的规则上有 15 条失败，说明断言覆盖了本次迁移。
 - 同批按用户要求发布仓库指令文件统一：删除只含 `@AGENTS.md` 一行的 CLAUDE.md，AGENTS.md 去掉对它的引用。
+- 发布：`f48f68a` **PUBLISHED_AND_VERIFIED**。update.sh 预检发现 6 个变更文件已是新内容，没有发出刷新，但 Surge 自己下载到的仍是旧的 ProxyGFW、Academic 和 DownloadCDN。补发这 6 个文件的 jsDelivr purge 后，Surge 缓存与发布文件逐字节一致；20 条原生见证全部通过，arXiv、OpenReview、Semantic Scholar、IEEE Xplore、Springer 和 Elsevier 在当前规则下都经 DIRECT 返回 200。
 
 ## [2026-09-26·FINAL 监控归类] 按 12 天 FINAL 实测归属 99 个目的地
 

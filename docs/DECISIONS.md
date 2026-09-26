@@ -200,8 +200,21 @@ The remaining FINAL traffic is intentional:
 
 ## Latest recorded release and open verification
 
-Routing commit `6cbd13c6a86ffefa4000d4e47e491cbb64ce1fc7` (FINAL monitor review)
-was recorded as **PUBLISHED_AND_VERIFIED** on 2026-09-26. It contained 53 lists
+Routing commit `f48f68aeee7e313fad298de2cee7191fd3839619` (academic publishers to
+Academic) was recorded as **PUBLISHED_AND_VERIFIED** on 2026-09-26. It contained
+53 lists and 140,749 source rules; 5,090 scenario assertions passed, including
+2,232 DNS assertions, as did 84 adversarial assertions. The static gates kept
+three existing P3 notices. Its pre-check found all six changed distribution
+files current, so it sent no purge. Surge's own download still returned the
+previous ProxyGFW, Academic and DownloadCDN content. An explicit purge of the
+six files fixed the lag, and Surge's cached copies then matched the published
+files byte for byte. All 20 native routing witnesses matched afterwards. The
+publishers answered through DIRECT under the active rules; `paperswithcode.com`
+stayed on Proxy. After a release, compare the client's cached copies with
+`lists/` before assuming it has loaded them.
+
+The previous routing release, `6cbd13c6a86ffefa4000d4e47e491cbb64ce1fc7`
+(FINAL monitor review), was recorded as **PUBLISHED_AND_VERIFIED** on 2026-09-26. It contained 53 lists
 and 140,748 source rules. The 5,058 scenario assertions passed, including 2,216
 DNS assertions, as did 84 adversarial assertions. The full MMDB/static gates
 reported no P0/P1/P2 findings and three existing P3 notices. `update.sh` matched
@@ -211,7 +224,7 @@ refreshed, including the upstream-refresh lists below, and 47 native routing
 witnesses matched their new owners. The private Clash file gained the Academic
 provider and rule; no production Clash process was running.
 
-The previous routing release, `4632936d8ff6dab58f9b1f86279ab799d3ccba23`
+Before it, `4632936d8ff6dab58f9b1f86279ab799d3ccba23`
 (2026-09-26 upstream refresh, 52 lists, 140,674 rules), passed 4,852 scenario
 assertions and matched 105/105 distribution files at both `@main` and its
 immutable commit. The release before it, `8c92cbbd70dd082df48f696751c5a30e120183f2`
