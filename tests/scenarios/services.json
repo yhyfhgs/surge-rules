@@ -1201,5 +1201,15 @@
       {"host": "stripe.global", "note": "跳转 stripe.com"}
     ],
     "assert": {"same_policy": true, "policy": "Payment", "no_dns_leak": true}
+  },
+  {
+    "name": "fhxgs_self_hosted_direct_20260928",
+    "desc": "2026-09-28 用户裁决：自有站点 fhxgs.cc 整域直连。confluo 与 film 两个子域托管在 Vercel 与 Cloudflare Workers，经 DIRECT 均返回 200；此前经代理出口时，出口侧解析器对新建子域持续返回 DNS Failed。",
+    "requests": [
+      {"host": "fhxgs.cc", "note": "主站顶点"},
+      {"host": "confluo.fhxgs.cc", "note": "交互样机（Vercel）"},
+      {"host": "film.confluo.fhxgs.cc", "note": "宣传片（Cloudflare Workers 自定义域）"}
+    ],
+    "assert": {"same_policy": true, "policy": "DIRECT"}
   }
 ]
