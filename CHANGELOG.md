@@ -8,6 +8,7 @@
 - 用户裁决：自有站点 `fhxgs.cc` 整域走直连，在 Domestic 新增 `DOMAIN-SUFFIX,fhxgs.cc`。此前它没有归属、落 FINAL。经代理出口访问新建子域 `film.confluo.fhxgs.cc` 时，出口侧解析器持续返回 DNS Failed；公共解析（Google、Cloudflare、AliDNS、DNSPod）均能正确解析，问题只在出口侧。
 - 迁前实测：`confluo.fhxgs.cc`（Vercel）与 `film.confluo.fhxgs.cc`（Cloudflare Workers 自定义域）经 Surge 的 DIRECT 策略均返回 200；国内 DoH 解析结果与权威一致。
 - 验证：规则 140,749 → 140,750（+1）；候选配置与现行配置一致（Domestic 已被引用，无 DNS 映射变化）；原生语法通过；真实 MMDB 关系分析无遮蔽和顺序不安全拆分；静态审计无 P0/P1/P2（3 个既有 P3）；场景 5,094 条（新增 1 组 3 条）和其中 2,232 条 DNS 断言全过；Clash 53 表 140,750 条，合同检查通过。
+- 发布：`457bdd9` **PUBLISHED_AND_VERIFIED**，2 个分发文件（lists 与 clash 的 Domestic）purge 后复验一致。本机 Surge 配置无需改动，单独刷新 Domestic 外部资源后，`fhxgs.cc`、`confluo.fhxgs.cc`、`film.confluo.fhxgs.cc` 原生匹配均落 Domestic → DIRECT；film 子域经当前规则返回 200，排障时添加的临时规则已清除。
 
 ## [2026-09-26·学术出版商直连] ProxyGFW 与 DownloadCDN 的学术出版/检索域迁入 Academic
 
